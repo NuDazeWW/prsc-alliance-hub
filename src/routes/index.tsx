@@ -1,6 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { motion } from "motion/react";
 import { LivingScoreDashboard } from "@/components/site/LivingScoreDashboard";
+import marketAnchor from "@/assets/prsc-market-anchor.jpg.asset.json";
 import { Building2, Briefcase, Landmark, ArrowRight, ShieldCheck, Scale, GraduationCap, LineChart } from "lucide-react";
 
 export const Route = createFileRoute("/")({
@@ -111,8 +112,23 @@ function HomePage() {
         </div>
       </section>
 
+      {/* EDITORIAL ANCHOR IMAGE */}
+      <section className="bg-ivory">
+        <div className="relative w-full overflow-hidden h-[380px] md:h-[480px] lg:h-[540px]">
+          <img
+            src={marketAnchor.url}
+            alt="Executives reviewing a partnership agreement in a stadium hospitality suite at dusk."
+            loading="lazy"
+            width={1920}
+            height={1088}
+            className="absolute inset-0 h-full w-full object-cover"
+          />
+          <div className="absolute inset-0 bg-navy/40" aria-hidden />
+        </div>
+      </section>
+
       {/* PATHWAY CARDS */}
-      <section className="bg-ivory pb-24 md:pb-32">
+      <section className="bg-ivory py-24 md:py-32">
         <div className="mx-auto max-w-7xl px-6 grid gap-8 md:grid-cols-3">
           <PathwayCard
             icon={Building2}
