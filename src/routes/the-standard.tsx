@@ -262,6 +262,14 @@ function TheStandardPage() {
           </div>
         </div>
       </section>
+
+      <ContinueReading
+        links={[
+          { to: "/governance", label: "Governance" },
+          { to: "/readiness-vanguard", label: "The Readiness Vanguard" },
+          { to: "/request-briefing", label: "Request a Briefing" },
+        ]}
+      />
     </>
   );
 }
