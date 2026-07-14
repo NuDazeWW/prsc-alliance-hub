@@ -169,6 +169,53 @@ function TheStandardPage() {
         </div>
       </section>
 
+      {/* THE SCORING PROCESS */}
+      <section className="bg-navy text-ivory py-24 md:py-32">
+        <div className="mx-auto max-w-6xl px-6">
+          <div className="max-w-3xl mb-14">
+            <p className="label-caps text-gold mb-4">The Scoring Process</p>
+            <h2 className="font-display text-4xl md:text-5xl leading-tight mb-6">
+              Governed at every step.
+            </h2>
+            <p className="text-lg text-ivory/75 leading-relaxed">
+              The Readiness Score is not self-reported. Every score is produced through a structured, peer-reviewed process governed by the PRSC Methodology Committee.
+            </p>
+          </div>
+
+          <ol className="grid gap-6 md:gap-0 md:grid-cols-6">
+            {[
+              "Evidence Submission",
+              "Independent Assessment",
+              "Peer Review",
+              "Calibration",
+              "Readiness Score Issued",
+              "Certification (where applicable)",
+            ].map((step, i, arr) => (
+              <li key={step} className="relative flex md:flex-col items-start md:items-center gap-4 md:gap-5">
+                <div className="flex-shrink-0 flex h-12 w-12 items-center justify-center rounded-full border border-gold bg-gold/10 text-gold font-display text-xl tabular-nums">
+                  {i + 1}
+                </div>
+                {i < arr.length - 1 && (
+                  <div
+                    aria-hidden
+                    className="hidden md:block absolute top-6 left-[calc(50%+1.75rem)] right-[calc(-50%+1.75rem)] h-px"
+                    style={{ background: "linear-gradient(90deg, rgba(212,175,55,0.6), rgba(212,175,55,0.15))" }}
+                  />
+                )}
+                <div className="md:text-center md:px-2">
+                  <p className="label-caps text-ivory/50 text-[0.6rem] mb-1">Step {i + 1}</p>
+                  <p className="text-ivory text-sm md:text-[0.95rem] leading-snug">{step}</p>
+                </div>
+              </li>
+            ))}
+          </ol>
+
+          <p className="mt-14 text-sm text-center" style={{ color: "#7A7F87" }}>
+            The scoring methodology is versioned, published, and subject to annual review. Current release: Version 1.0, 2026.
+          </p>
+        </div>
+      </section>
+
       {/* ACTIONABLE INTELLIGENCE */}
       <section className="bg-midnight text-ivory py-24 md:py-32">
         <div className="mx-auto max-w-7xl px-6 grid gap-16 lg:grid-cols-2 items-center">
