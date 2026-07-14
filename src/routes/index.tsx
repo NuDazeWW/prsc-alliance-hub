@@ -107,7 +107,7 @@ function HomePage() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.9, ease: "easeOut" }}
-            className="relative self-center"
+            className="relative h-full w-full flex flex-col justify-center items-center px-6"
           >
             <LivingScoreDashboard />
           </motion.div>
