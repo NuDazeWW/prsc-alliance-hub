@@ -185,22 +185,22 @@ export function ReadinessExplainer() {
   }, []);
 
   return (
-    <section ref={containerRef} className="bg-navy text-ivory relative overflow-hidden">
+    <section ref={containerRef} className="bg-navy text-ivory relative overflow-hidden isolate">
       <img
         src={marketAnchor.url}
         alt=""
         aria-hidden
-        className="absolute inset-0 h-full w-full object-cover opacity-100 pointer-events-none"
+        className="absolute inset-0 h-full w-full object-cover pointer-events-none -z-20"
       />
       <div
-        className="absolute inset-0 pointer-events-none"
+        className="absolute inset-0 pointer-events-none -z-10"
         aria-hidden
         style={{
           background:
             "linear-gradient(180deg, rgba(10,19,34,0.92) 0%, rgba(10,19,34,0.82) 50%, rgba(10,19,34,0.92) 100%)",
         }}
       />
-      <div className="relative">
+      <div className="relative z-10">
       <div className="mx-auto max-w-7xl px-6 pt-24 md:pt-32">
         <div className="text-center max-w-3xl mx-auto">
           <p className="label-caps text-gold mb-6">The Explainer</p>
