@@ -42,9 +42,9 @@ function HomePage() {
           className="absolute inset-0 pointer-events-none"
           style={{
             backgroundImage:
-              "radial-gradient(rgba(30,45,74,0.55) 1px, transparent 1px)",
+              "radial-gradient(rgba(212,175,55,0.28) 1px, transparent 1px)",
             backgroundSize: "22px 22px",
-            opacity: 0.55,
+            opacity: 0.9,
           }}
         />
         <div className="relative mx-auto max-w-7xl px-6 grid gap-14 lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)] items-center">
