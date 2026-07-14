@@ -108,12 +108,6 @@ function HomePage() {
             transition={{ duration: 0.9, ease: "easeOut" }}
             className="relative self-center"
           >
-            <p
-              className="mb-4 font-mono text-[9px] uppercase tracking-[0.18em] text-left"
-              style={{ color: "#7A7F87", opacity: 0.7 }}
-            >
-              PRSC Readiness Assessment · Illustrative Output
-            </p>
             <LivingScoreDashboard />
           </motion.div>
         </div>
