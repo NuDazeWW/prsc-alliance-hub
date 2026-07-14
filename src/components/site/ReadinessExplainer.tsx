@@ -13,16 +13,20 @@ const DIMENSIONS = [
 
 const STEPS = [
   {
-    body: "Sponsorship decisions are made on instinct. Brands buy before knowing if a property is ready to deliver.",
+    lead: "The market moves on instinct.",
+    body: "Brands make partnership decisions using their own processes—but without a shared, independent standard for measuring commercial readiness.",
   },
   {
-    body: "Commercial readiness is multidimensional. The PRSC standard measures six independent pillars of performance.",
+    lead: "Readiness is multidimensional.",
+    body: "The PRSC standard measures six independent pillars of commercial performance.",
   },
   {
-    body: "One number the whole market can trust. A 0–100 independent rating that makes properties comparable.",
+    lead: "One number the market can trust.",
+    body: "A 0–100 independent rating that makes properties directly comparable.",
   },
   {
-    body: "From Commercially Invisible to Commercially Undeniable. The credential that proves your value.",
+    lead: "From invisible to undeniable.",
+    body: "The credential that proves your commercial value to every buyer.",
   },
 ];
 
@@ -198,24 +202,62 @@ export function ReadinessExplainer() {
       <div className="mx-auto max-w-7xl px-6 grid gap-10 lg:grid-cols-2 relative">
         {/* LEFT: scrolling text steps */}
         <div>
-          {STEPS.map((s, i) => (
-            <div
-              key={i}
-              ref={(el) => { stepRefs.current[i] = el; }}
-              className="min-h-[55vh] flex items-center py-8"
-            >
-              <motion.div
-                initial={{ opacity: 0, y: 30 }}
-                animate={{ opacity: activeStep === i ? 1 : 0.25, y: activeStep === i ? 0 : 20 }}
-                transition={{ duration: 0.7, ease: "easeOut" }}
-                className="max-w-lg"
+          {STEPS.map((s, i) => {
+            const isActive = activeStep === i;
+            return (
+              <div
+                key={i}
+                ref={(el) => { stepRefs.current[i] = el; }}
+                className="min-h-[45vh] flex items-center py-6"
               >
-                <p className="font-display text-3xl md:text-4xl leading-[1.2] text-ivory">
-                  {s.body}
-                </p>
-              </motion.div>
-            </div>
-          ))}
+                <motion.div
+                  initial={false}
+                  animate={{
+                    opacity: isActive ? 1 : 0.4,
+                    filter: isActive ? "blur(0px)" : "blur(2px)",
+                    y: isActive ? 0 : 12,
+                  }}
+                  transition={{ duration: 0.7, ease: "easeOut" }}
+                  className="relative max-w-lg"
+                >
+                  {/* Ghost numeral anchor */}
+                  <span
+                    aria-hidden
+                    className="pointer-events-none absolute -top-10 -left-4 font-display leading-none select-none"
+                    style={{
+                      fontSize: "160px",
+                      color: "#D4AF37",
+                      opacity: isActive ? 0.08 : 0.04,
+                      letterSpacing: "-0.04em",
+                    }}
+                  >
+                    {String(i + 1).padStart(2, "0")}
+                  </span>
+
+                  <div className="relative">
+                    <motion.div
+                      initial={false}
+                      animate={{ opacity: isActive ? 1 : 0, scaleX: isActive ? 1 : 0.4 }}
+                      transition={{ duration: 0.6, ease: "easeOut" }}
+                      className="gold-rule w-16 mb-5 origin-left"
+                    />
+                    <p
+                      className="font-display text-2xl md:text-3xl leading-[1.2] mb-3"
+                      style={{ color: isActive ? "#F2EFE6" : "rgba(242,239,230,0.55)" }}
+                    >
+                      {s.lead}
+                    </p>
+                    <p
+                      className="text-base md:text-[17px] leading-relaxed"
+                      style={{ color: isActive ? "rgba(242,239,230,0.7)" : "rgba(242,239,230,0.4)" }}
+                    >
+                      {s.body}
+                    </p>
+                  </div>
+                </motion.div>
+              </div>
+            );
+          })}
         </div>
 
         {/* RIGHT: sticky visual */}
