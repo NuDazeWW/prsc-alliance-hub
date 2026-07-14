@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { motion, useMotionValue, useTransform, animate, AnimatePresence } from "motion/react";
 import { Radio, Users, Fingerprint, Zap, BarChart3, Handshake } from "lucide-react";
+import marketAnchor from "@/assets/prsc-market-anchor.jpg.asset.json";
 
 const DIMENSIONS = [
   { key: "signal", label: "Signal Strength™", icon: Radio, value: 91 },
@@ -184,7 +185,22 @@ export function ReadinessExplainer() {
   }, []);
 
   return (
-    <section ref={containerRef} className="bg-navy text-ivory relative">
+    <section ref={containerRef} className="bg-navy text-ivory relative overflow-hidden">
+      <img
+        src={marketAnchor.url}
+        alt=""
+        aria-hidden
+        className="absolute inset-0 h-full w-full object-cover opacity-100 pointer-events-none"
+      />
+      <div
+        className="absolute inset-0 pointer-events-none"
+        aria-hidden
+        style={{
+          background:
+            "linear-gradient(180deg, rgba(10,19,34,0.92) 0%, rgba(10,19,34,0.82) 50%, rgba(10,19,34,0.92) 100%)",
+        }}
+      />
+      <div className="relative">
       <div className="mx-auto max-w-7xl px-6 pt-24 md:pt-32">
         <div className="text-center max-w-3xl mx-auto">
           <p className="label-caps text-gold mb-6">The Explainer</p>
@@ -232,6 +248,7 @@ export function ReadinessExplainer() {
       {/* Mobile visual anchored at bottom */}
       <div className="lg:hidden pb-20">
         <StepVisual step={activeStep} />
+      </div>
       </div>
     </section>
   );
