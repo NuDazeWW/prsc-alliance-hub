@@ -128,3 +128,24 @@
   height: 1px;
   background: linear-gradient(90deg, transparent, var(--color-gold) 30%, var(--color-gold) 70%, transparent);
 }
+
+@utility shimmer-link {
+  background-image: linear-gradient(
+    100deg,
+    currentColor 0%,
+    currentColor 40%,
+    rgba(245, 230, 179, 1) 50%,
+    currentColor 60%,
+    currentColor 100%
+  );
+  background-size: 300% 100%;
+  background-position: 100% 0;
+  background-repeat: no-repeat;
+  -webkit-background-clip: text;
+  background-clip: text;
+  transition: background-position 1.1s ease;
+}
+.group:hover .shimmer-link,
+.shimmer-link:hover {
+  background-position: 0% 0;
+}
