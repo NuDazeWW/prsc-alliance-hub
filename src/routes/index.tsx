@@ -159,7 +159,7 @@ function HomePage() {
             icon={Building2}
             eyebrow="For Teams, Drivers & Rights Holders"
             title="Prove your value."
-            body="Receive a free, independent Readiness Score. Understand exactly where you stand — and where to invest to command premium partnerships."
+            body="Receive a free, independent Readiness Score™. Understand exactly where you stand — and where to invest to command premium partnerships."
             to="/readiness-vanguard"
             cta="Join the Readiness Vanguard"
           />

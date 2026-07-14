@@ -32,7 +32,7 @@ function TheStandardPage() {
         <div className="relative mx-auto max-w-5xl px-6 text-center">
           <p className="label-caps text-gold mb-6">The Standard</p>
           <h1 className="font-display text-5xl md:text-7xl leading-[1.05]">
-            The PRSC Readiness Score.
+            The PRSC Readiness Score™.
           </h1>
           <div className="gold-rule my-8 mx-auto w-24" />
           <p className="mt-4 text-xl text-ivory/75 max-w-3xl mx-auto leading-relaxed">
@@ -101,7 +101,7 @@ function TheStandardPage() {
               Commercial readiness cannot be measured by a single statistic. PRSC evaluates six independent dimensions that together provide a comprehensive view of an organization's ability to attract, activate, and sustain successful partnerships.
             </p>
             <p className="text-lg text-stone">
-              Every organization that carries a Readiness Score is evaluated across these six dimensions — no shortcuts, no self-assessment, no exceptions.
+              Every organization that carries a Readiness Score™ is evaluated across these six dimensions — no shortcuts, no self-assessment, no exceptions.
             </p>
           </div>
           <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
@@ -127,7 +127,7 @@ function TheStandardPage() {
               What the score means.
             </h2>
             <p className="text-lg text-stone leading-relaxed max-w-2xl mx-auto">
-              Every Readiness Score maps to a maturity level — a consistent, market-wide reference point for evaluating commercial readiness.
+              Every Readiness Score™ maps to a maturity level — a consistent, market-wide reference point for evaluating commercial readiness.
             </p>
           </div>
 
@@ -182,7 +182,7 @@ function TheStandardPage() {
               Governed at every step.
             </h2>
             <p className="text-lg text-ivory/75 leading-relaxed">
-              The Readiness Score is not self-reported. Every score is produced through a structured, peer-reviewed process governed by the PRSC Methodology Committee.
+              The Readiness Score™ is not self-reported. Every score is produced through a structured, peer-reviewed process governed by the PRSC Methodology Committee.
             </p>
           </div>
 
@@ -192,7 +192,7 @@ function TheStandardPage() {
               "Independent Assessment",
               "Peer Review",
               "Calibration",
-              "Readiness Score Issued",
+              "Readiness Score™ Issued",
               "Certification (where applicable)",
             ].map((step, i, arr) => (
               <li key={step} className="relative flex md:flex-col items-start md:items-center gap-4 md:gap-5">
@@ -230,7 +230,7 @@ function TheStandardPage() {
             </h2>
             <div className="space-y-4 text-lg text-ivory/75 leading-relaxed">
               <p>
-                The Readiness Score reveals not only where an organization stands, but where the highest-leverage investments lie. Every dimension is diagnostic. Every score is a plan.
+                The Readiness Score™ reveals not only where an organization stands, but where the highest-leverage investments lie. Every dimension is diagnostic. Every score is a plan.
               </p>
               <p>Benchmarks are peer-relative. Guidance is specific. The next step is always visible.</p>
             </div>

@@ -14,7 +14,7 @@ export function SiteFooter() {
         <div className="space-y-3">
           <p className="label-caps text-gold">The Standard</p>
           <ul className="space-y-2 text-sm">
-            <li><Link to="/the-standard" className="hover:text-gold">The PRSC Readiness Score</Link></li>
+            <li><Link to="/the-standard" className="hover:text-gold">The PRSC Readiness Score™</Link></li>
             <li><Link to="/governance" className="hover:text-gold">Governance</Link></li>
             <li><Link to="/readiness-vanguard" className="hover:text-gold">Readiness Vanguard</Link></li>
             <li><Link to="/request-briefing" className="hover:text-gold">Request a Briefing</Link></li>
@@ -23,13 +23,13 @@ export function SiteFooter() {
         <div className="space-y-3">
           <p className="label-caps text-gold">Council</p>
           <p className="text-sm text-ivory/60">
-            Partnership Readiness Standards Council is an independent standards body serving the global sponsorship and partnership industry.
+            Partnership Readiness Standards Council™ is an independent standards body serving the global sponsorship and partnership industry.
           </p>
         </div>
       </div>
       <div className="border-t border-ivory/10">
         <div className="mx-auto max-w-7xl px-6 py-6 flex flex-col md:flex-row justify-between gap-3 text-xs text-ivory/45">
-          <p>© {new Date().getFullYear()} Partnership Readiness Standards Council. All rights reserved.</p>
+          <p>© {new Date().getFullYear()} Partnership Readiness Standards Council™. All rights reserved.</p>
           <p className="label-caps">PRSC Readiness Standard · Version 1.0 · Published 2026</p>
         </div>
       </div>
