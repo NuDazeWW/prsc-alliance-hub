@@ -1,5 +1,6 @@
-import { Link } from "@tanstack/react-router";
+import { Link, useLocation } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
+
 import logo from "@/assets/prsc-logo-only.png.asset.json";
 import { cn } from "@/lib/utils";
 
@@ -12,6 +13,9 @@ const links = [
 export function SiteNav() {
   const [scrolled, setScrolled] = useState(false);
   const [open, setOpen] = useState(false);
+  const { pathname } = useLocation();
+  const showWordmark = pathname !== "/";
+
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 12);
     onScroll();
@@ -29,6 +33,15 @@ export function SiteNav() {
       <nav className="mx-auto flex max-w-7xl items-center justify-between px-6 py-3">
         <Link to="/" className="flex items-center">
           <img src={logo.url} alt="PRSC" className="h-8 w-auto md:hidden" />
+          {showWordmark && (
+            <span
+              className="hidden md:block uppercase text-gold font-medium"
+              style={{ fontSize: "11.5px", letterSpacing: "0.08em", lineHeight: 1.4 }}
+            >
+              <span className="block">Partnership Readiness</span>
+              <span className="block">Standards Council</span>
+            </span>
+          )}
         </Link>
         <div className="hidden md:flex items-center gap-8">
           {links.map((l) => (
