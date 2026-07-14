@@ -53,9 +53,11 @@ function HomePage() {
                 </span>
               ))}
             </div>
-            <h1 className="font-display text-[2.75rem] leading-[1.02] md:text-6xl">
-              The Independent Standard for<br />
-              <span className="text-gold">Partnership Readiness.</span>
+            <p className="label-caps text-gold text-[0.85rem] tracking-[0.18em] mb-4">
+              Partnership Readiness Standards Council
+            </p>
+            <h1 className="font-display text-[2.75rem] leading-[1.02] md:text-6xl text-ivory">
+              The independent body governing commercial readiness in sport
             </h1>
             <p className="mt-6 text-lg text-ivory/75 max-w-lg leading-relaxed">
               An authoritative, evidence-based framework that brings clarity, discipline, and trust to a $100B+ market — governed independently, adopted globally.
