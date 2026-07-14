@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { motion, useMotionValue, useTransform, animate, useReducedMotion } from "motion/react";
 import { Radio, Users, Fingerprint, Zap, BarChart3, Handshake } from "lucide-react";
 import heroState1 from "@/assets/prsc-hero-state1.jpg.asset.json";
-import logo from "@/assets/prsc-logo-tag.png.asset.json";
+
 
 /**
  * The Living Score dashboard. Six dimensions animate silver→gold as bars fill,
