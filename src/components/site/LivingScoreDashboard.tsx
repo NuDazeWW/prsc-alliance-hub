@@ -99,7 +99,7 @@ function CompositeGauge() {
         }}
         aria-hidden
       />
-      <div className="relative h-[220px] w-[220px] md:h-[240px] md:w-[240px]">
+      <div className="relative h-[240px] w-[240px] md:h-[260px] md:w-[260px] xl:h-[280px] xl:w-[280px]">
         <svg viewBox="0 0 200 200" className="h-full w-full -rotate-90">
           <circle cx="100" cy="100" r="90" fill="none" stroke="rgba(255,255,255,0.06)" strokeWidth="1.5" />
           <motion.circle
@@ -117,10 +117,10 @@ function CompositeGauge() {
           </defs>
         </svg>
         <div className="absolute inset-0 flex flex-col items-center justify-center">
-          <div className="font-display text-[5.5rem] md:text-[6.5rem] leading-none text-ivory tabular-nums">
+          <div className="font-display text-[80px] md:text-[88px] leading-none text-ivory tabular-nums">
             {display}
           </div>
-          <div className="label-caps text-gold text-[0.6rem] mt-1 text-center leading-tight">
+          <div className="text-gold text-[11px] mt-2 text-center leading-tight uppercase font-medium" style={{ letterSpacing: "0.12em" }}>
             Commercially<br />Undeniable
           </div>
         </div>
