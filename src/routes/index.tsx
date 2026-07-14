@@ -46,15 +46,7 @@ function HomePage() {
           }}
         />
         <div className="relative mx-auto max-w-7xl px-6 grid gap-14 lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)] items-center">
-          <div className="max-w-xl">
-            <div className="flex flex-wrap gap-2 mb-8">
-              {TRUST_BADGES.map((b) => (
-                <span key={b.label} className="inline-flex items-center gap-2 rounded-full border border-gold/30 bg-ivory/[0.04] px-3 py-1.5 label-caps text-[0.6rem] text-ivory/60">
-                  <b.icon size={12} className="text-gold" />
-                  {b.label}
-                </span>
-              ))}
-            </div>
+          <div className="max-w-xl lg:pr-24 xl:pr-28">
             <p className="label-caps text-gold text-[0.85rem] tracking-[0.18em] mb-4">
               Partnership Readiness Standards Council
             </p>
@@ -64,7 +56,15 @@ function HomePage() {
             <p className="mt-6 text-lg text-ivory/75 max-w-lg leading-relaxed">
               An authoritative, evidence-based framework that brings clarity, discipline, and trust to a $100B+ market — governed independently, adopted globally.
             </p>
-            <div className="mt-10 flex flex-wrap gap-3">
+            <div className="flex flex-wrap gap-2 mt-8">
+              {TRUST_BADGES.map((b) => (
+                <span key={b.label} className="inline-flex items-center gap-2 rounded-full border border-gold/30 bg-ivory/[0.04] px-3 py-1.5 label-caps text-[0.6rem] text-ivory/60">
+                  <b.icon size={12} className="text-gold" />
+                  {b.label}
+                </span>
+              ))}
+            </div>
+            <div className="mt-8 flex flex-wrap gap-3">
               <Link
                 to="/request-briefing"
                 className="inline-flex items-center gap-2 rounded-sm bg-gold px-6 py-3.5 label-caps text-[0.7rem] text-navy hover:bg-antique transition-colors"
@@ -83,8 +83,14 @@ function HomePage() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.9, ease: "easeOut" }}
-            className="relative"
+            className="relative self-center"
           >
+            <p
+              className="mb-4 font-mono text-[9px] uppercase tracking-[0.18em] text-left"
+              style={{ color: "#7A7F87", opacity: 0.7 }}
+            >
+              PRSC Readiness Assessment · Illustrative Output
+            </p>
             <LivingScoreDashboard />
           </motion.div>
         </div>
