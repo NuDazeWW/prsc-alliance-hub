@@ -8,7 +8,7 @@ export const Route = createFileRoute("/request-briefing")({
       { title: "Request a Briefing — PRSC" },
       { name: "description", content: "Request a private briefing on the PRSC Readiness Standard, methodology, and how it applies to your organization." },
       { property: "og:title", content: "Request a Briefing — PRSC" },
-      { property: "og:description", content: "Private briefings for properties, brands, investors, and industry leaders." },
+      { property: "og:description", content: "Private briefings for organizations, brands, investors, and industry leaders." },
     ],
   }),
   component: BriefingPage,
@@ -25,7 +25,7 @@ function BriefingPage() {
           </h1>
           <div className="gold-rule my-8 mx-auto w-24" />
           <p className="text-lg text-ivory/75 max-w-2xl mx-auto leading-relaxed">
-            Briefings are held with the Council on request — for properties evaluating readiness, for brands and investors evaluating partnership decisions, and for industry leaders shaping the market.
+            Briefings are held with the Council on request — for organizations evaluating readiness, for brands and investors evaluating partnership decisions, and for industry leaders shaping the market.
           </p>
         </div>
       </section>

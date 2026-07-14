@@ -119,10 +119,10 @@ function HomePage() {
           <div className="gold-rule my-10 mx-auto w-24" />
           <div className="space-y-5 text-lg leading-relaxed text-stone">
             <p>
-              The global sponsorship and partnership industry — worth more than $100 billion annually — operates without a shared definition of value. Properties self-assess. Brands guess. Measurement is inconsistent, opaque, and rarely comparable.
+              The global sponsorship and partnership industry — worth more than $100 billion annually — operates without a shared definition of value. Organizations self-assess. Brands guess. Measurement is inconsistent, opaque, and rarely comparable.
             </p>
             <p>
-              The result: capital is misallocated, credible properties are undervalued, and the market cannot function with the discipline it deserves.
+              The result: capital is misallocated, credible organizations are undervalued, and the market cannot function with the discipline it deserves.
             </p>
             <p className="text-navy font-medium">
               PRSC exists to fix that — with a single, independent, evidence-based standard.
@@ -184,7 +184,7 @@ function HomePage() {
             The Standard is here. The market is waiting.
           </h2>
           <p className="mt-4 text-ivory/70 max-w-2xl mx-auto">
-            The Readiness Vanguard is limited to the first properties who help define the era of professionalized sponsorship.
+            The Readiness Vanguard is limited to the first organizations who help define the era of professionalized sponsorship.
           </p>
           <div className="mt-8 flex flex-wrap justify-center gap-3">
             <Link to="/readiness-vanguard" className="inline-flex items-center gap-2 rounded-sm bg-gold px-6 py-3.5 label-caps text-[0.7rem] text-navy hover:bg-antique transition-colors">

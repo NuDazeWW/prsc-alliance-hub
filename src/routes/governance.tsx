@@ -17,7 +17,7 @@ export const Route = createFileRoute("/governance")({
 const LAYERS = [
   { name: "Governing Body", color: "#D4AF37", body: "The Council itself. Sets the constitution, approves methodology versions, and safeguards independence. Composed of senior industry leaders serving fixed terms." },
   { name: "Methodology Committee", color: "#8C6E3B", body: "Practitioners and researchers who develop, peer-review, and version the Standard. Publishes changes, rationale, and calibration data." },
-  { name: "Advisory Network", color: "#CBB89A", body: "Rotating advisors from properties, brands, media, academia, and government. Ensures the Standard evolves with the market it serves." },
+  { name: "Advisory Network", color: "#CBB89A", body: "Rotating advisors from organizations, brands, media, academia, and government. Ensures the Standard evolves with the market it serves." },
 ];
 
 function GovernancePage() {
@@ -31,7 +31,7 @@ function GovernancePage() {
           </h1>
           <div className="gold-rule my-8 mx-auto w-24" />
           <p className="text-xl text-ivory/75 max-w-3xl mx-auto leading-relaxed">
-            PRSC is a neutral standards body — independent of any single property, brand, agency, or platform. Its authority comes from the market it serves and the rigor of the Standard it maintains.
+            PRSC is a neutral standards body — independent of any single organization, brand, agency, or platform. Its authority comes from the market it serves and the rigor of the Standard it maintains.
           </p>
         </div>
       </section>
