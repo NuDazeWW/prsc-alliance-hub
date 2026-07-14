@@ -18,8 +18,8 @@ const DIMENSIONS = [
   { key: "relationship", label: "Relationship Strength™", icon: Handshake, start: 82, end: 86 },
 ] as const;
 
-function DimensionRow({ label, Icon, start, end, delay }: {
-  label: string; Icon: typeof Radio; start: number; end: number; delay: number;
+function DimensionRow({ label, Icon, start, end, delay, mirror = false }: {
+  label: string; Icon: typeof Radio; start: number; end: number; delay: number; mirror?: boolean;
 }) {
   const value = useMotionValue(start);
   const width = useTransform(value, (v) => `${v}%`);
@@ -37,25 +37,50 @@ function DimensionRow({ label, Icon, start, end, delay }: {
     return () => { controls.stop(); unsub(); };
   }, [value, start, end, delay]);
 
+  const iconEl = (
+    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-ivory/40 text-ivory" style={{ opacity: 0.85 }}>
+      <Icon size={17} strokeWidth={1.6} />
+    </div>
+  );
+  const valueEl = (
+    <div className="tabular-nums text-ivory text-sm font-medium w-11 shrink-0" style={{ textAlign: mirror ? "left" : "right" }}>
+      {display}%
+    </div>
+  );
+  const body = (
+    <div className={mirror ? "text-right" : ""}>
+      <p className="label-caps mb-2 text-[0.7rem] font-semibold" style={{ color: "#F2EFE6", opacity: 0.95 }}>{label}</p>
+      <div className="h-[7px] w-full rounded-full overflow-hidden" style={{ backgroundColor: "rgba(242,239,230,0.18)" }}>
+        <motion.div
+          className="h-full rounded-full"
+          style={{
+            width,
+            background: mirror
+              ? "linear-gradient(270deg, #F5E6B3 0%, #E6C56A 45%, #D4AF37 100%)"
+              : "linear-gradient(90deg, #F5E6B3 0%, #E6C56A 45%, #D4AF37 100%)",
+            boxShadow: "0 0 16px rgba(212,175,55,0.7)",
+            marginLeft: mirror ? "auto" : undefined,
+          }}
+        />
+      </div>
+    </div>
+  );
+
   return (
-    <div className="grid grid-cols-[auto_1fr_auto] items-center gap-4">
-      <div className="flex h-10 w-10 items-center justify-center rounded-full border border-ivory/40 text-ivory" style={{ opacity: 0.85 }}>
-        <Icon size={17} strokeWidth={1.6} />
-      </div>
-      <div>
-        <p className="label-caps mb-2 text-[0.7rem] font-semibold" style={{ color: "#F2EFE6", opacity: 0.95 }}>{label}</p>
-        <div className="h-[7px] w-full rounded-full overflow-hidden" style={{ backgroundColor: "rgba(242,239,230,0.18)" }}>
-          <motion.div
-            className="h-full rounded-full"
-            style={{
-              width,
-              background: "linear-gradient(90deg, #F5E6B3 0%, #E6C56A 45%, #D4AF37 100%)",
-              boxShadow: "0 0 16px rgba(212,175,55,0.7)",
-            }}
-          />
-        </div>
-      </div>
-      <div className="tabular-nums text-ivory text-sm font-medium w-11 text-right">{display}%</div>
+    <div className="flex items-center gap-4">
+      {mirror ? (
+        <>
+          {valueEl}
+          <div className="flex-1">{body}</div>
+          {iconEl}
+        </>
+      ) : (
+        <>
+          {iconEl}
+          <div className="flex-1">{body}</div>
+          {valueEl}
+        </>
+      )}
     </div>
   );
 }
@@ -136,12 +161,14 @@ export function LivingScoreDashboard() {
     );
   }
 
+  const leftDims = DIMENSIONS.slice(0, 3);
+  const rightDims = DIMENSIONS.slice(3, 6);
+
   return (
     <div ref={ref} className="relative w-full">
-      <div className="grid grid-cols-1 md:grid-cols-[1.4fr_1fr] items-center gap-6 md:gap-10">
+      <div className="grid grid-cols-1 md:grid-cols-[1fr_auto_1fr] items-center gap-6 md:gap-6">
         <div className="space-y-4 md:space-y-5 order-2 md:order-1">
-
-          {DIMENSIONS.map((d, i) => (
+          {leftDims.map((d, i) => (
             <DimensionRow
               key={d.key}
               label={d.label}
@@ -149,11 +176,24 @@ export function LivingScoreDashboard() {
               start={d.start}
               end={d.end}
               delay={i * 0.08}
+              mirror
             />
           ))}
         </div>
         <div className="order-1 md:order-2 flex justify-center">
           <CompositeGauge />
+        </div>
+        <div className="space-y-4 md:space-y-5 order-3">
+          {rightDims.map((d, i) => (
+            <DimensionRow
+              key={d.key}
+              label={d.label}
+              Icon={d.icon}
+              start={d.start}
+              end={d.end}
+              delay={(i + 3) * 0.08}
+            />
+          ))}
         </div>
       </div>
       {isMobile && (
