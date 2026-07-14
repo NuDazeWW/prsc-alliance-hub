@@ -210,9 +210,6 @@ export function ReadinessExplainer() {
                 transition={{ duration: 0.7, ease: "easeOut" }}
                 className="max-w-lg"
               >
-                <p className="label-caps text-gold text-[0.7rem] mb-4">
-                  Step {String(i + 1).padStart(2, "0")} / 04
-                </p>
                 <p className="font-display text-3xl md:text-4xl leading-[1.2] text-ivory">
                   {s.body}
                 </p>
