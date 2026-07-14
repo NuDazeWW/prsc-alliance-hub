@@ -78,6 +78,14 @@ function CompositeGauge() {
 
   return (
     <div className="relative flex flex-col items-center justify-center">
+      <div
+        className="pointer-events-none absolute inset-0 -z-0"
+        style={{
+          background:
+            "radial-gradient(circle at center, rgba(212,175,55,0.07) 0%, rgba(212,175,55,0.05) 40%, transparent 70%)",
+        }}
+        aria-hidden
+      />
       <div className="relative h-[220px] w-[220px] md:h-[260px] md:w-[260px]">
         <svg viewBox="0 0 200 200" className="h-full w-full -rotate-90">
           <circle cx="100" cy="100" r="90" fill="none" stroke="rgba(255,255,255,0.06)" strokeWidth="1.5" />
