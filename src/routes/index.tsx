@@ -66,8 +66,8 @@ function HomePage() {
               An authoritative, evidence-based framework that brings clarity, discipline, and trust to a $100B+ market — governed independently, adopted globally.
             </p>
             <p
-              className="mt-4 font-display italic text-[13.5px] leading-relaxed max-w-lg"
-              style={{ color: "#CBB89A", opacity: 0.85 }}
+              className="mt-4 font-display italic font-semibold text-[16px] md:text-[17px] leading-relaxed max-w-lg"
+              style={{ color: "#CBB89A" }}
             >
               The Standard is being established first within motorsport — a market where commercial relationships are highly visible, financially consequential, and historically unmeasured.
             </p>
