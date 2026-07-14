@@ -40,6 +40,14 @@ function BriefingPage() {
           </p>
         </div>
       </section>
+
+      <ContinueReading
+        links={[
+          { to: "/the-standard", label: "The Standard" },
+          { to: "/governance", label: "Governance" },
+          { to: "/readiness-vanguard", label: "The Readiness Vanguard" },
+        ]}
+      />
     </>
   );
 }
