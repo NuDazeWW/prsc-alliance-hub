@@ -199,9 +199,6 @@ function HomePage() {
             <Link to="/readiness-vanguard" className="inline-flex items-center gap-2 rounded-sm bg-gold px-6 py-3.5 label-caps text-[0.7rem] text-navy hover:bg-antique transition-colors">
               Join the Vanguard <ArrowRight size={14} />
             </Link>
-            <Link to="/request-briefing" className="inline-flex items-center rounded-sm border border-ivory/40 px-6 py-3.5 label-caps text-[0.7rem] text-ivory hover:border-gold hover:text-gold transition-colors">
-              Request a Briefing
-            </Link>
           </div>
         </div>
       </section>
