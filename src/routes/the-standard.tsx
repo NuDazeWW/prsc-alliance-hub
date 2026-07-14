@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { Radio, Users, Fingerprint, Zap, BarChart3, Handshake } from "lucide-react";
 import { ContinueReading } from "@/components/site/ContinueReading";
+import boardroom from "@/assets/prsc-boardroom.jpg.asset.json";
 
 export const Route = createFileRoute("/the-standard")({
   head: () => ({
@@ -26,7 +27,16 @@ const DIMENSIONS = [
 function TheStandardPage() {
   return (
     <>
-      <section className="relative bg-navy text-ivory pt-36 pb-20 md:pt-44 md:pb-28 overflow-hidden">
+      <section className="relative text-ivory pt-36 pb-20 md:pt-44 md:pb-28 overflow-hidden">
+        <img
+          src={boardroom.url}
+          alt=""
+          width={1920}
+          height={1088}
+          className="absolute inset-0 h-full w-full object-cover"
+          aria-hidden
+        />
+        <div className="absolute inset-0" style={{ backgroundColor: "rgba(10,19,34,0.7)" }} aria-hidden />
         <div className="absolute inset-0 opacity-[0.06] pointer-events-none"
           style={{ backgroundImage: "linear-gradient(rgba(212,175,55,0.6) 1px, transparent 1px), linear-gradient(90deg, rgba(212,175,55,0.6) 1px, transparent 1px)", backgroundSize: "60px 60px" }} />
         <div className="relative mx-auto max-w-5xl px-6 text-center">
