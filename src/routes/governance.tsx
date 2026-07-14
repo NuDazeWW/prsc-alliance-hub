@@ -1,5 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { BoardInterestForm } from "@/components/forms/PrscForms";
+import { ContinueReading } from "@/components/site/ContinueReading";
 
 export const Route = createFileRoute("/governance")({
   head: () => ({
