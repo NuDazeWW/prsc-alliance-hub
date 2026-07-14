@@ -103,6 +103,14 @@ function HomePage() {
             <LivingScoreDashboard />
           </motion.div>
         </div>
+        <div className="relative mx-auto max-w-7xl w-full px-6 mt-16">
+          <div className="flex flex-wrap items-center justify-between gap-y-3">
+            {TRUST_BADGES.map((b) => (
+              <span key={b.label} className="label-caps text-[0.7rem] tracking-wider text-pewter uppercase">
+                {b.label}
+              </span>
+            ))}
+          </div>
       </section>
 
       {/* THE MARKET IS BROKEN */}
