@@ -117,10 +117,10 @@ function CompositeGauge() {
           </defs>
         </svg>
         <div className="absolute inset-0 flex flex-col items-center justify-center">
-          <div className="font-display text-[80px] md:text-[88px] leading-none text-ivory tabular-nums">
+          <div className="font-display text-[52px] sm:text-[64px] md:text-[80px] xl:text-[88px] leading-none text-ivory tabular-nums">
             {display}
           </div>
-          <div className="text-gold text-[11px] mt-2 text-center leading-tight uppercase font-medium" style={{ letterSpacing: "0.12em" }}>
+          <div className="text-gold text-[9px] sm:text-[10px] md:text-[11px] mt-1 sm:mt-2 text-center leading-tight uppercase font-medium" style={{ letterSpacing: "0.12em" }}>
             Commercially<br />Undeniable
           </div>
         </div>
