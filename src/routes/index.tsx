@@ -47,36 +47,42 @@ function HomePage() {
         />
         <div className="relative mx-auto max-w-7xl px-6 grid gap-14 lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)] items-center">
           <div className="max-w-xl lg:pr-24 xl:pr-28">
-            <p className="label-caps text-gold text-[0.85rem] tracking-[0.18em] mb-4">
+            <div className="mb-4 h-px w-12 bg-gold" />
+            <p className="label-caps text-gold text-[0.65rem] tracking-[0.2em] font-semibold">
               Partnership Readiness Standards Council
             </p>
-            <h1 className="font-display text-[2.25rem] leading-[1.05] md:text-[2.75rem] lg:text-[3.25rem] text-ivory">
+            <h1 className="mt-6 font-display text-[2.25rem] leading-[1.05] md:text-[2.75rem] lg:text-[3.25rem] text-ivory font-medium">
               The independent body governing commercial readiness in sport
             </h1>
-            <p className="mt-6 text-lg text-ivory/75 max-w-lg leading-relaxed">
+            <p className="mt-8 text-lg text-ivory/60 max-w-lg leading-relaxed font-light">
               An authoritative, evidence-based framework that brings clarity, discipline, and trust to a $100B+ market — governed independently, adopted globally.
             </p>
-            <div className="flex flex-wrap gap-2 mt-8">
-              {TRUST_BADGES.map((b) => (
-                <span key={b.label} className="inline-flex items-center gap-2 rounded-full border border-gold/30 bg-ivory/[0.04] px-3 py-1.5 label-caps text-[0.6rem] text-ivory/60">
-                  <b.icon size={12} className="text-gold" />
-                  {b.label}
-                </span>
-              ))}
-            </div>
-            <div className="mt-8 flex flex-wrap gap-3">
-              <Link
-                to="/request-briefing"
-                className="inline-flex items-center gap-2 rounded-sm bg-gold px-6 py-3.5 label-caps text-[0.7rem] text-navy hover:bg-antique transition-colors"
-              >
-                Request a Briefing <ArrowRight size={14} />
-              </Link>
-              <Link
-                to="/the-standard"
-                className="inline-flex items-center gap-2 rounded-sm border border-ivory/40 px-6 py-3.5 label-caps text-[0.7rem] text-ivory hover:border-gold hover:text-gold transition-colors"
-              >
-                Learn About the Standard
-              </Link>
+            <div className="mt-12 flex flex-col gap-10">
+              <div className="flex flex-wrap items-center gap-x-8 gap-y-4">
+                <Link
+                  to="/request-briefing"
+                  className="inline-flex items-center rounded-none bg-gold px-8 py-4 label-caps text-[0.7rem] font-semibold tracking-wider text-navy hover:bg-antique transition-colors"
+                >
+                  Request a Briefing
+                </Link>
+                <Link
+                  to="/the-standard"
+                  className="group inline-flex items-center gap-2 label-caps text-[0.7rem] font-medium tracking-wider text-ivory border-b border-transparent hover:border-gold transition-all pb-1"
+                >
+                  Learn About the Standard
+                  <ArrowRight size={14} className="transition-transform group-hover:translate-x-1" />
+                </Link>
+              </div>
+              <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
+                {TRUST_BADGES.map((b, i) => (
+                  <span key={b.label} className="flex items-center gap-x-4">
+                    {i > 0 && <span className="h-3 w-px bg-pewter/40" aria-hidden />}
+                    <span className="label-caps text-[0.65rem] tracking-wider text-pewter uppercase">
+                      {b.label}
+                    </span>
+                  </span>
+                ))}
+              </div>
             </div>
           </div>
           <motion.div
