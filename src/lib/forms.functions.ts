@@ -28,9 +28,10 @@ const VanguardSchema = z.object({
   phone: z.string().max(40).optional().or(z.literal("")),
 });
 
-async function insertRow(table: string, row: Record<string, unknown>) {
+async function insertRow(table: "briefing_requests" | "board_interest" | "vanguard_interest", row: Record<string, unknown>) {
   const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-  const { error } = await supabaseAdmin.from(table).insert(row);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { error } = await (supabaseAdmin.from(table) as any).insert(row);
   if (error) throw new Error(`Submission failed: ${error.message}`);
   return { ok: true as const };
 }
