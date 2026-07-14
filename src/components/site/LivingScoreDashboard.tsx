@@ -18,8 +18,8 @@ const DIMENSIONS = [
   { key: "relationship", label: "Relationship Strength™", icon: Handshake, start: 82, end: 86 },
 ] as const;
 
-function DimensionRow({ label, Icon, start, end, delay, mirror = false }: {
-  label: string; Icon: typeof Radio; start: number; end: number; delay: number; mirror?: boolean;
+function DimensionRow({ label, Icon, start, end, delay }: {
+  label: string; Icon: typeof Radio; start: number; end: number; delay: number;
 }) {
   const value = useMotionValue(start);
   const width = useTransform(value, (v) => `${v}%`);
@@ -37,50 +37,38 @@ function DimensionRow({ label, Icon, start, end, delay, mirror = false }: {
     return () => { controls.stop(); unsub(); };
   }, [value, start, end, delay]);
 
-  const iconEl = (
-    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-ivory/40 text-ivory" style={{ opacity: 0.85 }}>
-      <Icon size={17} strokeWidth={1.6} />
-    </div>
-  );
-  const valueEl = (
-    <div className="tabular-nums text-ivory text-sm font-medium w-11 shrink-0" style={{ textAlign: mirror ? "left" : "right" }}>
-      {display}%
-    </div>
-  );
-  const body = (
-    <div className={mirror ? "text-right" : ""}>
-      <p className="label-caps mb-2 text-[0.7rem] font-semibold" style={{ color: "#F2EFE6", opacity: 0.95 }}>{label}</p>
-      <div className="h-[7px] w-full rounded-full overflow-hidden" style={{ backgroundColor: "rgba(242,239,230,0.18)" }}>
-        <motion.div
-          className="h-full rounded-full"
-          style={{
-            width,
-            background: mirror
-              ? "linear-gradient(270deg, #F5E6B3 0%, #E6C56A 45%, #D4AF37 100%)"
-              : "linear-gradient(90deg, #F5E6B3 0%, #E6C56A 45%, #D4AF37 100%)",
-            boxShadow: "0 0 16px rgba(212,175,55,0.7)",
-            marginLeft: mirror ? "auto" : undefined,
-          }}
-        />
-      </div>
-    </div>
-  );
-
   return (
-    <div className="flex items-center gap-4">
-      {mirror ? (
-        <>
-          {valueEl}
-          <div className="flex-1">{body}</div>
-          {iconEl}
-        </>
-      ) : (
-        <>
-          {iconEl}
-          <div className="flex-1">{body}</div>
-          {valueEl}
-        </>
-      )}
+    <div className="flex items-start gap-4">
+      <div
+        className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-ivory/40 text-ivory mt-1"
+        style={{ opacity: 0.85 }}
+      >
+        <Icon size={17} strokeWidth={1.6} />
+      </div>
+      <div className="flex-1 min-w-0">
+        <p
+          className="label-caps mb-2 text-[0.7rem] font-semibold leading-tight"
+          style={{ color: "#F2EFE6", opacity: 0.95 }}
+        >
+          {label}
+        </p>
+        <div
+          className="h-[7px] w-full rounded-full overflow-hidden"
+          style={{ backgroundColor: "rgba(242,239,230,0.18)" }}
+        >
+          <motion.div
+            className="h-full rounded-full"
+            style={{
+              width,
+              background: "linear-gradient(90deg, #F5E6B3 0%, #E6C56A 45%, #D4AF37 100%)",
+              boxShadow: "0 0 16px rgba(212,175,55,0.7)",
+            }}
+          />
+        </div>
+        <div className="mt-2 tabular-nums text-ivory/90 text-xs font-medium">
+          {display}%
+        </div>
+      </div>
     </div>
   );
 }
