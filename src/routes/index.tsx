@@ -111,6 +111,7 @@ function HomePage() {
               </span>
             ))}
           </div>
+        </div>
       </section>
 
       {/* THE MARKET IS BROKEN */}
