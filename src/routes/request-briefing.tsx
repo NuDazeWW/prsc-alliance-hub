@@ -17,14 +17,14 @@ export const Route = createFileRoute("/request-briefing")({
 function BriefingPage() {
   return (
     <>
-      <section className="bg-navy text-ivory pt-36 pb-16 md:pt-44 md:pb-20">
+      <section className="bg-ivory text-navy pt-36 pb-16 md:pt-44 md:pb-20">
         <div className="mx-auto max-w-4xl px-6 text-center">
-          <p className="label-caps text-gold mb-6">Request a Briefing</p>
-          <h1 className="font-display text-5xl md:text-6xl leading-[1.05]">
+          <p className="label-caps text-stone mb-6">Request a Briefing</p>
+          <h1 className="font-display text-5xl md:text-6xl leading-[1.05] text-navy">
             A private conversation<br />about the Standard.
           </h1>
-          <div className="gold-rule my-8 mx-auto w-24" />
-          <p className="text-lg text-ivory/75 max-w-2xl mx-auto leading-relaxed">
+          <div className="my-8 mx-auto w-24 h-px" style={{ background: "linear-gradient(90deg, transparent, #8C6E3B 30%, #8C6E3B 70%, transparent)" }} />
+          <p className="text-lg text-stone max-w-2xl mx-auto leading-relaxed">
             Briefings are held with the Council on request — for organizations evaluating readiness, for brands and investors evaluating partnership decisions, and for industry leaders shaping the market.
           </p>
         </div>
