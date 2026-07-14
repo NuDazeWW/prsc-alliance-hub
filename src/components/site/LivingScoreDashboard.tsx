@@ -150,6 +150,16 @@ export function LivingScoreDashboard() {
           <CompositeGauge />
         </div>
       </div>
+      <div
+        className="mt-8 md:mt-10 flex flex-col gap-0.5 font-mono text-[10px] leading-snug text-left"
+        style={{ color: "#7A7F87", opacity: 0.7 }}
+        aria-hidden
+      >
+        <span>PRSC Readiness Standard · Version 1.0</span>
+        <span>Benchmark Sample · 2026</span>
+        <span>Methodology Reference: RMI-6</span>
+        <span>Last Calibrated: Q2 2026</span>
+      </div>
       {isMobile && (
         <p className="mt-4 text-center label-caps text-ivory/40 text-[0.6rem]">
           PRSC Readiness Score™ · Live Demonstration
