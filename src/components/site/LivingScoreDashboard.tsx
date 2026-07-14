@@ -153,9 +153,12 @@ export function LivingScoreDashboard() {
   const rightDims = DIMENSIONS.slice(3, 6);
 
   return (
-    <div ref={ref} className="relative w-full">
-      <div className="grid grid-cols-1 md:grid-cols-[1fr_auto_1fr] items-stretch gap-8 md:gap-10 lg:gap-14">
-        <div className="flex flex-col justify-between order-2 md:order-1 gap-8 md:gap-10">
+    <div ref={ref} className="relative w-full h-full" style={{ minHeight: 480 }}>
+      <div
+        className="flex flex-col md:flex-row items-stretch w-full h-full"
+        style={{ gap: 24, minHeight: 480 }}
+      >
+        <div className="flex flex-col justify-between order-2 md:order-1 gap-8 md:gap-10 flex-1 h-full">
           {leftDims.map((d, i) => (
             <DimensionRow
               key={d.key}
@@ -168,10 +171,10 @@ export function LivingScoreDashboard() {
 
           ))}
         </div>
-        <div className="order-1 md:order-2 flex items-center justify-center">
+        <div className="order-1 md:order-2 flex flex-col items-center justify-center shrink-0" style={{ width: 260 }}>
           <CompositeGauge />
         </div>
-        <div className="flex flex-col justify-between order-3 gap-8 md:gap-10">
+        <div className="flex flex-col justify-between order-3 gap-8 md:gap-10 flex-1 h-full">
           {rightDims.map((d, i) => (
             <DimensionRow
               key={d.key}
