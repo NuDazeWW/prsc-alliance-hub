@@ -29,7 +29,7 @@ export const Route = createFileRoute("/")({
 const TRUST_BADGES = [
   { icon: ShieldCheck, label: "Independent Standards Body" },
   { icon: Scale, label: "Neutral Governance" },
-  { icon: GraduationCap, label: "Free Readiness Score" },
+  { icon: GraduationCap, label: "Free Readiness Score™" },
   { icon: LineChart, label: "Evidence-Based Methodology" },
 ];
 
@@ -60,7 +60,7 @@ function HomePage() {
                 className="h-[200px] md:h-[240px] w-auto mx-auto mb-4 block"
               />
               <p className="label-caps text-gold text-[11px] tracking-[0.1em] font-semibold uppercase text-center">
-                Partnership Readiness Standards Council
+                Partnership Readiness Standards Council™
               </p>
             </div>
             <h1 className="mt-6 font-display text-[1.85rem] leading-[1.08] md:text-[2.25rem] lg:text-[2.55rem] text-ivory font-medium">
@@ -159,7 +159,7 @@ function HomePage() {
             icon={Building2}
             eyebrow="For Teams, Drivers & Rights Holders"
             title="Prove your value."
-            body="Receive a free, independent Readiness Score. Understand exactly where you stand — and where to invest to command premium partnerships."
+            body="Receive a free, independent Readiness Score™. Understand exactly where you stand — and where to invest to command premium partnerships."
             to="/readiness-vanguard"
             cta="Join the Readiness Vanguard"
           />

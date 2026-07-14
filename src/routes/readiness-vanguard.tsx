@@ -17,7 +17,7 @@ export const Route = createFileRoute("/readiness-vanguard")({
 
 const FEATURES = [
   { icon: Award, title: "The Credential", body: "Vanguard members carry the PRSC founding-cohort designation — a permanent mark of leadership in a market moving toward disciplined, evidence-based partnership." },
-  { icon: TrendingUp, title: "The Benchmark", body: "Full Readiness Score assessment. Peer-relative benchmarks. Diagnostic guidance across all six dimensions — the fastest path to commercial clarity." },
+  { icon: TrendingUp, title: "The Benchmark", body: "Full Readiness Score™ assessment. Peer-relative benchmarks. Diagnostic guidance across all six dimensions — the fastest path to commercial clarity." },
   { icon: Landmark, title: "The Legacy", body: "Vanguard organizations shape the calibration data behind the Standard itself. Their partnership defines what the industry will call ready for a generation." },
 ];
 
@@ -34,7 +34,7 @@ function VanguardPage() {
           </h1>
           <div className="gold-rule my-8 mx-auto w-24" />
           <p className="text-xl text-ivory/75 max-w-3xl mx-auto leading-relaxed">
-            The Readiness Vanguard is the founding group of rights holders in sport to receive an independent PRSC Readiness Score. It costs nothing. The score is yours.
+            The Readiness Vanguard is the founding group of rights holders in sport to receive an independent PRSC Readiness Score™. It costs nothing. The score is yours.
           </p>
           <p className="mt-6 text-lg text-ivory/70 max-w-3xl mx-auto leading-relaxed">
             The Founding Vanguard is open to teams, drivers, series, and venues across motorsport and emerging competitive sports — the markets where the gap between commercial potential and commercial proof is widest, and where the Standard will have the most immediate impact.
