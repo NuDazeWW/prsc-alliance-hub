@@ -76,6 +76,16 @@ function HomePage() {
             >
               The Standard is being established first within motorsport — a market where commercial relationships are highly visible, financially consequential, and historically unmeasured.
             </p>
+            <div className="mt-8 flex flex-wrap items-center gap-x-4 gap-y-2">
+              {TRUST_BADGES.map((b, i) => (
+                <span key={b.label} className="flex items-center gap-x-4">
+                  {i > 0 && <span className="h-3 w-px bg-pewter/40" aria-hidden />}
+                  <span className="label-caps text-[0.65rem] tracking-wider text-pewter uppercase">
+                    {b.label}
+                  </span>
+                </span>
+              ))}
+            </div>
             <div className="mt-10 flex flex-wrap items-center gap-x-8 gap-y-4">
               <Link
                 to="/request-briefing"
@@ -102,15 +112,6 @@ function HomePage() {
           >
             <LivingScoreDashboard />
           </motion.div>
-        </div>
-        <div className="relative mx-auto max-w-7xl w-full px-6 mt-16">
-          <div className="flex flex-wrap items-center justify-between gap-y-3">
-            {TRUST_BADGES.map((b) => (
-              <span key={b.label} className="label-caps text-[0.7rem] tracking-wider text-pewter uppercase">
-                {b.label}
-              </span>
-            ))}
-          </div>
         </div>
       </section>
 
