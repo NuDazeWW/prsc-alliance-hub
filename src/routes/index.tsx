@@ -87,9 +87,11 @@ function HomePage() {
             <div className="mt-10 flex flex-wrap items-center gap-x-8 gap-y-4">
               <Link
                 to="/request-briefing"
-                className="inline-flex items-center rounded-none bg-gold px-8 py-4 label-caps text-[0.7rem] font-semibold tracking-wider text-navy hover:bg-antique transition-colors"
+                className="group inline-flex items-center gap-2 label-caps text-[0.75rem] font-semibold tracking-wider text-gold hover:text-antique transition-colors"
+                style={{ textShadow: "0 0 12px rgba(212,175,55,0.55), 0 0 24px rgba(212,175,55,0.25)" }}
               >
                 Request a Briefing
+                <ArrowRight size={14} className="transition-transform group-hover:translate-x-1" />
               </Link>
               <Link
                 to="/the-standard"

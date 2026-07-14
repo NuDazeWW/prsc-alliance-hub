@@ -41,12 +41,6 @@ export function SiteNav() {
               {l.label}
             </Link>
           ))}
-          <Link
-            to="/request-briefing"
-            className="inline-flex items-center rounded-sm border border-gold bg-gold/10 px-4 py-2 text-xs font-medium tracking-[0.18em] uppercase text-gold hover:bg-gold hover:text-navy transition-colors"
-          >
-            Request Briefing
-          </Link>
         </div>
         <button
           className="md:hidden text-ivory p-2"
