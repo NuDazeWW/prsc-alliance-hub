@@ -152,7 +152,7 @@ export function LivingScoreDashboard() {
       </div>
       <div
         className="mt-8 md:mt-10 flex flex-col gap-0.5 font-mono text-[10px] leading-snug text-left"
-        style={{ color: "#7A7F87", opacity: 0.7 }}
+        style={{ color: "#7A7F87", opacity: 0.45 }}
         aria-hidden
       >
         <span>PRSC Readiness Standard · Version 1.0</span>
