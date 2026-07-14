@@ -76,6 +76,14 @@ function VanguardPage() {
           <VanguardInterestForm />
         </div>
       </section>
+
+      <ContinueReading
+        links={[
+          { to: "/the-standard", label: "The Standard" },
+          { to: "/governance", label: "Governance" },
+          { to: "/request-briefing", label: "Request a Briefing" },
+        ]}
+      />
     </>
   );
 }
