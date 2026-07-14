@@ -4,6 +4,7 @@ import { LivingScoreDashboard } from "@/components/site/LivingScoreDashboard";
 import marketAnchor from "@/assets/prsc-market-anchor.jpg.asset.json";
 import { ContinueReading } from "@/components/site/ContinueReading";
 import { Building2, Briefcase, Landmark, ArrowRight, ShieldCheck, Scale, GraduationCap, LineChart } from "lucide-react";
+import prscCrest from "@/assets/prsc-logo-only.png.asset.json";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -38,21 +39,26 @@ function HomePage() {
       {/* HERO */}
       <section className="relative bg-navy text-ivory overflow-hidden pt-32 pb-20 md:pt-40 md:pb-28">
         <div
-          className="absolute inset-0 opacity-[0.05] pointer-events-none"
+          className="absolute inset-0 pointer-events-none"
           style={{
             backgroundImage:
-              "linear-gradient(rgba(212,175,55,0.5) 1px, transparent 1px), linear-gradient(90deg, rgba(212,175,55,0.5) 1px, transparent 1px)",
-            backgroundSize: "80px 80px",
+              "radial-gradient(rgba(30,45,74,0.55) 1px, transparent 1px)",
+            backgroundSize: "22px 22px",
+            opacity: 0.55,
           }}
         />
         <div className="relative mx-auto max-w-7xl px-6 grid gap-14 lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)] items-center">
           <div className="max-w-xl lg:pr-24 xl:pr-28">
-            <div className="mb-4 h-px w-12 bg-gold" />
-            <p className="label-caps text-gold text-[0.65rem] tracking-[0.2em] font-semibold">
+            <img
+              src={prscCrest.url}
+              alt="PRSC crest"
+              className="h-[72px] w-auto mb-3"
+            />
+            <p className="label-caps text-gold text-[11px] tracking-[0.1em] font-semibold uppercase">
               Partnership Readiness Standards Council
             </p>
-            <h1 className="mt-6 font-display text-[2.25rem] leading-[1.05] md:text-[2.75rem] lg:text-[3.25rem] text-ivory font-medium">
-              The independent body governing commercial readiness in sport
+            <h1 className="mt-6 font-display text-[1.85rem] leading-[1.08] md:text-[2.25rem] lg:text-[2.55rem] text-ivory font-medium">
+              The independent body governing commercial readiness in sport.
             </h1>
             <p className="mt-8 text-lg text-ivory/60 max-w-lg leading-relaxed font-light">
               An authoritative, evidence-based framework that brings clarity, discipline, and trust to a $100B+ market — governed independently, adopted globally.
@@ -63,32 +69,30 @@ function HomePage() {
             >
               The Standard is being established first within motorsport — a market where commercial relationships are highly visible, financially consequential, and historically unmeasured.
             </p>
-            <div className="mt-12 flex flex-col gap-10">
-              <div className="flex flex-wrap items-center gap-x-8 gap-y-4">
-                <Link
-                  to="/request-briefing"
-                  className="inline-flex items-center rounded-none bg-gold px-8 py-4 label-caps text-[0.7rem] font-semibold tracking-wider text-navy hover:bg-antique transition-colors"
-                >
-                  Request a Briefing
-                </Link>
-                <Link
-                  to="/the-standard"
-                  className="group inline-flex items-center gap-2 label-caps text-[0.7rem] font-medium tracking-wider text-ivory border-b border-transparent hover:border-gold transition-all pb-1"
-                >
-                  Learn About the Standard
-                  <ArrowRight size={14} className="transition-transform group-hover:translate-x-1" />
-                </Link>
-              </div>
-              <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
-                {TRUST_BADGES.map((b, i) => (
-                  <span key={b.label} className="flex items-center gap-x-4">
-                    {i > 0 && <span className="h-3 w-px bg-pewter/40" aria-hidden />}
-                    <span className="label-caps text-[0.65rem] tracking-wider text-pewter uppercase">
-                      {b.label}
-                    </span>
+            <div className="mt-8 flex flex-wrap items-center gap-x-4 gap-y-2">
+              {TRUST_BADGES.map((b, i) => (
+                <span key={b.label} className="flex items-center gap-x-4">
+                  {i > 0 && <span className="h-3 w-px bg-pewter/40" aria-hidden />}
+                  <span className="label-caps text-[0.65rem] tracking-wider text-pewter uppercase">
+                    {b.label}
                   </span>
-                ))}
-              </div>
+                </span>
+              ))}
+            </div>
+            <div className="mt-10 flex flex-wrap items-center gap-x-8 gap-y-4">
+              <Link
+                to="/request-briefing"
+                className="inline-flex items-center rounded-none bg-gold px-8 py-4 label-caps text-[0.7rem] font-semibold tracking-wider text-navy hover:bg-antique transition-colors"
+              >
+                Request a Briefing
+              </Link>
+              <Link
+                to="/the-standard"
+                className="group inline-flex items-center gap-2 label-caps text-[0.7rem] font-medium tracking-wider text-ivory border-b border-transparent hover:border-gold transition-all pb-1"
+              >
+                Learn About the Standard
+                <ArrowRight size={14} className="transition-transform group-hover:translate-x-1" />
+              </Link>
             </div>
           </div>
           <motion.div

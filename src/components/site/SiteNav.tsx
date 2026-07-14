@@ -1,6 +1,6 @@
 import { Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import logo from "@/assets/prsc-logo-tag.png.asset.json";
+import logo from "@/assets/prsc-logo-only.png.asset.json";
 import { cn } from "@/lib/utils";
 
 const links = [

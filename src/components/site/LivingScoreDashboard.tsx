@@ -44,7 +44,7 @@ function DimensionRow({ label, Icon, start, end, delay }: {
       </div>
       <div>
         <p className="label-caps mb-2 text-[0.65rem]" style={{ color: "#F2EFE6", opacity: 0.6 }}>{label}</p>
-        <div className="h-[6px] w-full rounded-full overflow-hidden" style={{ backgroundColor: "rgba(242,239,230,0.032)" }}>
+        <div className="h-[6px] w-full rounded-full overflow-hidden" style={{ backgroundColor: "rgba(242,239,230,0.4)" }}>
           <motion.div
             className="h-full rounded-full"
             style={{
@@ -78,6 +78,14 @@ function CompositeGauge() {
 
   return (
     <div className="relative flex flex-col items-center justify-center">
+      <div
+        className="pointer-events-none absolute inset-0 -z-0"
+        style={{
+          background:
+            "radial-gradient(circle at center, rgba(212,175,55,0.07) 0%, rgba(212,175,55,0.05) 40%, transparent 70%)",
+        }}
+        aria-hidden
+      />
       <div className="relative h-[220px] w-[220px] md:h-[260px] md:w-[260px]">
         <svg viewBox="0 0 200 200" className="h-full w-full -rotate-90">
           <circle cx="100" cy="100" r="90" fill="none" stroke="rgba(255,255,255,0.06)" strokeWidth="1.5" />
@@ -148,16 +156,19 @@ export function LivingScoreDashboard() {
           <CompositeGauge />
         </div>
       </div>
-      <div
+      <motion.div
         className="mt-8 md:mt-10 flex flex-col gap-0.5 font-mono text-[10px] leading-snug text-left"
-        style={{ color: "#7A7F87", opacity: 0.45 }}
+        style={{ color: "#7A7F87" }}
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 0.5 }}
+        transition={{ duration: 1.2, delay: 8.5, ease: "easeOut" }}
         aria-hidden
       >
         <span>PRSC Readiness Standard · Version 1.0</span>
         <span>Benchmark Sample · 2026</span>
         <span>Methodology Reference: RMI-6</span>
         <span>Last Calibrated: Q2 2026</span>
-      </div>
+      </motion.div>
       {isMobile && (
         <p className="mt-4 text-center label-caps text-ivory/40 text-[0.6rem]">
           PRSC Readiness Score™ · Live Demonstration
