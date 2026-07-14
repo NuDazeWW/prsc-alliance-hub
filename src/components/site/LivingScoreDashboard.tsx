@@ -132,9 +132,7 @@ export function LivingScoreDashboard() {
     <div ref={ref} className="relative w-full">
       <div className="grid grid-cols-1 md:grid-cols-[1.4fr_1fr] items-center gap-6 md:gap-10">
         <div className="space-y-4 md:space-y-5 order-2 md:order-1">
-          <div className="flex justify-center md:justify-start mb-2 md:mb-4">
-            <img src={logo.url} alt="" className="h-16 w-auto opacity-90" aria-hidden />
-          </div>
+
           {DIMENSIONS.map((d, i) => (
             <DimensionRow
               key={d.key}
