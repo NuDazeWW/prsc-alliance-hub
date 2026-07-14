@@ -29,18 +29,6 @@ export function SiteNav() {
       <nav className="mx-auto flex max-w-7xl items-center justify-between px-6 py-3">
         <Link to="/" className="flex items-center">
           <img src={logo.url} alt="PRSC" className="h-8 w-auto md:hidden" />
-          <span
-            className="hidden md:flex flex-col uppercase text-gold"
-            style={{
-              fontSize: "11.5px",
-              fontWeight: 500,
-              letterSpacing: "0.08em",
-              lineHeight: 1.4,
-            }}
-          >
-            <span>Partnership Readiness</span>
-            <span>Standards Council</span>
-          </span>
         </Link>
         <div className="hidden md:flex items-center gap-8">
           {links.map((l) => (
