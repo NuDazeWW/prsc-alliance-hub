@@ -40,7 +40,7 @@ function VanguardPage() {
         <div className="relative mx-auto max-w-5xl px-6 text-center">
           <p className="label-caps text-gold mb-6">The Readiness Vanguard</p>
           <h1 className="font-display text-5xl md:text-7xl leading-[1.02]">
-            The founding cohort of the<br /><span className="text-gold">Standard Era.</span>
+            Be among the first organizations ever issued an independent<br /><span className="text-gold">PRSC Readiness Score™.</span>
           </h1>
           <div className="gold-rule my-8 mx-auto w-24" />
           <p className="text-xl text-ivory/75 max-w-3xl mx-auto leading-relaxed">
