@@ -50,8 +50,9 @@ function HomePage() {
               "radial-gradient(ellipse 45% 60% at 75% 50%, rgba(0,0,0,1) 0%, rgba(0,0,0,0.6) 40%, rgba(0,0,0,0.15) 70%, transparent 100%)",
           }}
         />
-        <div className="relative mx-auto max-w-7xl px-6 grid gap-14 lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)] items-center">
-          <div className="max-w-xl lg:pr-24 xl:pr-28">
+        <div className="relative mx-auto max-w-7xl px-6 grid gap-14 lg:grid-cols-2 items-center">
+          <div className="max-w-xl">
+
             <div className="inline-block">
               <img
                 src={prscCrest.url}
