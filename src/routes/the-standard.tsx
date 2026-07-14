@@ -114,6 +114,61 @@ function TheStandardPage() {
         </div>
       </section>
 
+      {/* READINESS MATURITY INDEX */}
+      <section className="bg-ivory pb-24 md:pb-32">
+        <div className="mx-auto max-w-4xl px-6">
+          <div className="text-center mb-12">
+            <p className="label-caps text-gold mb-4">The Readiness Maturity Index™</p>
+            <h2 className="font-display text-4xl md:text-5xl text-navy leading-tight mb-6">
+              What the score means.
+            </h2>
+            <p className="text-lg text-stone leading-relaxed max-w-2xl mx-auto">
+              Every Readiness Score maps to a maturity level — a consistent, market-wide reference point for evaluating commercial readiness.
+            </p>
+          </div>
+
+          <div className="rounded-sm bg-navy text-ivory overflow-hidden">
+            <table className="w-full">
+              <thead>
+                <tr style={{ borderBottom: "1px solid #8C6E3B" }}>
+                  <th className="label-caps text-ivory/60 text-[0.7rem] text-left px-6 md:px-10 py-5 w-2/5">
+                    Score Range
+                  </th>
+                  <th className="label-caps text-ivory/60 text-[0.7rem] text-left px-6 md:px-10 py-5">
+                    Maturity Level
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                {[
+                  ["90–100", "Commercially Undeniable"],
+                  ["80–89", "Commercially Ready"],
+                  ["70–79", "Developing"],
+                  ["60–69", "Emerging"],
+                  ["Below 60", "Commercially Invisible"],
+                ].map(([range, level], i, arr) => (
+                  <tr
+                    key={range}
+                    style={i < arr.length - 1 ? { borderBottom: "1px solid rgba(140,110,59,0.35)" } : undefined}
+                  >
+                    <td className="font-display text-2xl md:text-3xl text-gold px-6 md:px-10 py-6 tabular-nums">
+                      {range}
+                    </td>
+                    <td className="text-ivory text-base md:text-lg px-6 md:px-10 py-6">
+                      {level}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+
+          <p className="mt-6 text-xs md:text-sm text-center" style={{ color: "#7A7F87" }}>
+            Scores are calibrated by the PRSC Methodology Committee and reviewed on a defined annual cycle.
+          </p>
+        </div>
+      </section>
+
       {/* ACTIONABLE INTELLIGENCE */}
       <section className="bg-midnight text-ivory py-24 md:py-32">
         <div className="mx-auto max-w-7xl px-6 grid gap-16 lg:grid-cols-2 items-center">
