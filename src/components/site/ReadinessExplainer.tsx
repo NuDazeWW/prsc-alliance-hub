@@ -223,7 +223,7 @@ export function ReadinessExplainer() {
 
         {/* RIGHT: sticky visual */}
         <div className="hidden lg:block">
-          <div className="sticky top-0 h-screen flex items-center justify-center">
+          <div className="sticky top-0 h-[85vh] flex items-center justify-center">
             <StepVisual step={activeStep} />
           </div>
         </div>
