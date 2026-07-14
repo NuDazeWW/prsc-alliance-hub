@@ -156,16 +156,19 @@ export function LivingScoreDashboard() {
           <CompositeGauge />
         </div>
       </div>
-      <div
+      <motion.div
         className="mt-8 md:mt-10 flex flex-col gap-0.5 font-mono text-[10px] leading-snug text-left"
-        style={{ color: "#7A7F87", opacity: 0.45 }}
+        style={{ color: "#7A7F87" }}
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 0.5 }}
+        transition={{ duration: 1.2, delay: 8.5, ease: "easeOut" }}
         aria-hidden
       >
         <span>PRSC Readiness Standard · Version 1.0</span>
         <span>Benchmark Sample · 2026</span>
         <span>Methodology Reference: RMI-6</span>
         <span>Last Calibrated: Q2 2026</span>
-      </div>
+      </motion.div>
       {isMobile && (
         <p className="mt-4 text-center label-caps text-ivory/40 text-[0.6rem]">
           PRSC Readiness Score™ · Live Demonstration
