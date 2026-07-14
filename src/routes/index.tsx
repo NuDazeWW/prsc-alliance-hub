@@ -42,9 +42,12 @@ function HomePage() {
           className="absolute inset-0 pointer-events-none"
           style={{
             backgroundImage:
-              "radial-gradient(rgba(212,175,55,0.28) 1px, transparent 1px)",
+              "radial-gradient(rgba(212,175,55,0.35) 1px, transparent 1px)",
             backgroundSize: "22px 22px",
-            opacity: 0.9,
+            WebkitMaskImage:
+              "radial-gradient(ellipse 45% 60% at 75% 50%, rgba(0,0,0,1) 0%, rgba(0,0,0,0.6) 40%, rgba(0,0,0,0.15) 70%, transparent 100%)",
+            maskImage:
+              "radial-gradient(ellipse 45% 60% at 75% 50%, rgba(0,0,0,1) 0%, rgba(0,0,0,0.6) 40%, rgba(0,0,0,0.15) 70%, transparent 100%)",
           }}
         />
         <div className="relative mx-auto max-w-7xl px-6 grid gap-14 lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)] items-center">
