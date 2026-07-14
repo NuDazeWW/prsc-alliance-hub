@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { motion, useMotionValue, useTransform, animate, AnimatePresence } from "motion/react";
 import { Radio, Users, Fingerprint, Zap, BarChart3, Handshake } from "lucide-react";
+import marketAnchor from "@/assets/prsc-market-anchor.jpg.asset.json";
 
 const DIMENSIONS = [
   { key: "signal", label: "Signal Strength™", icon: Radio, value: 91 },
