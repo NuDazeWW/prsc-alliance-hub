@@ -234,7 +234,6 @@ export function ReadinessExplainer() {
       <div className="lg:hidden pb-20">
         <StepVisual step={activeStep} />
       </div>
-      </div>
     </section>
   );
 }
