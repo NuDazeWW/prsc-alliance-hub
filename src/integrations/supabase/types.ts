@@ -14,7 +14,105 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      board_interest: {
+        Row: {
+          created_at: string
+          email: string
+          id: string
+          linkedin_url: string | null
+          name: string
+          organization: string
+          statement: string
+          title: string
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          id?: string
+          linkedin_url?: string | null
+          name: string
+          organization: string
+          statement: string
+          title: string
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          id?: string
+          linkedin_url?: string | null
+          name?: string
+          organization?: string
+          statement?: string
+          title?: string
+        }
+        Relationships: []
+      }
+      briefing_requests: {
+        Row: {
+          created_at: string
+          email: string
+          first_name: string
+          id: string
+          interaction: string
+          last_name: string
+          message: string | null
+          organization: string
+          role: string
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          first_name: string
+          id?: string
+          interaction: string
+          last_name: string
+          message?: string | null
+          organization: string
+          role: string
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          first_name?: string
+          id?: string
+          interaction?: string
+          last_name?: string
+          message?: string | null
+          organization?: string
+          role?: string
+        }
+        Relationships: []
+      }
+      vanguard_interest: {
+        Row: {
+          created_at: string
+          email: string
+          id: string
+          name: string
+          phone: string | null
+          property: string
+          role: string
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          id?: string
+          name: string
+          phone?: string | null
+          property: string
+          role: string
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          id?: string
+          name?: string
+          phone?: string | null
+          property?: string
+          role?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
