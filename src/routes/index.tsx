@@ -57,6 +57,12 @@ function HomePage() {
             <p className="mt-8 text-lg text-ivory/60 max-w-lg leading-relaxed font-light">
               An authoritative, evidence-based framework that brings clarity, discipline, and trust to a $100B+ market — governed independently, adopted globally.
             </p>
+            <p
+              className="mt-4 font-display italic text-[13.5px] leading-relaxed max-w-lg"
+              style={{ color: "#CBB89A", opacity: 0.85 }}
+            >
+              The Standard is being established first within motorsport — a market where commercial relationships are highly visible, financially consequential, and historically unmeasured.
+            </p>
             <div className="mt-12 flex flex-col gap-10">
               <div className="flex flex-wrap items-center gap-x-8 gap-y-4">
                 <Link
@@ -145,7 +151,7 @@ function HomePage() {
         <div className="mx-auto max-w-7xl px-6 grid gap-8 md:grid-cols-3">
           <PathwayCard
             icon={Building2}
-            eyebrow="For Properties"
+            eyebrow="For Teams, Drivers & Rights Holders"
             title="Prove your value."
             body="Receive a free, independent Readiness Score. Understand exactly where you stand — and where to invest to command premium partnerships."
             to="/readiness-vanguard"
@@ -153,7 +159,7 @@ function HomePage() {
           />
           <PathwayCard
             icon={Briefcase}
-            eyebrow="For Brands & Investors"
+            eyebrow="For Sponsors, Brands & Investors"
             title="Deploy capital with confidence."
             body="Evaluate partnerships against a single, independent benchmark. Reduce risk. Sharpen ROI. Move faster."
             to="/the-standard"
