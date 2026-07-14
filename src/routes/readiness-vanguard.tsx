@@ -7,9 +7,9 @@ export const Route = createFileRoute("/readiness-vanguard")({
   head: () => ({
     meta: [
       { title: "The Readiness Vanguard — PRSC" },
-      { name: "description", content: "The Readiness Vanguard is the founding cohort of properties helping define the era of professionalized sponsorship. Limited seats." },
+      { name: "description", content: "The Readiness Vanguard is the founding cohort of organizations helping define the era of professionalized sponsorship. Limited seats." },
       { property: "og:title", content: "The Readiness Vanguard — PRSC" },
-      { property: "og:description", content: "A limited founding cohort of properties. The credential, the benchmark, the legacy." },
+      { property: "og:description", content: "A limited founding cohort of organizations. The credential, the benchmark, the legacy." },
     ],
   }),
   component: VanguardPage,
@@ -18,7 +18,7 @@ export const Route = createFileRoute("/readiness-vanguard")({
 const FEATURES = [
   { icon: Award, title: "The Credential", body: "Vanguard members carry the PRSC founding-cohort designation — a permanent mark of leadership in a market moving toward disciplined, evidence-based partnership." },
   { icon: TrendingUp, title: "The Benchmark", body: "Full Readiness Score assessment. Peer-relative benchmarks. Diagnostic guidance across all six dimensions — the fastest path to commercial clarity." },
-  { icon: Landmark, title: "The Legacy", body: "Vanguard properties shape the calibration data behind the Standard itself. Their partnership defines what the industry will call ready for a generation." },
+  { icon: Landmark, title: "The Legacy", body: "Vanguard organizations shape the calibration data behind the Standard itself. Their partnership defines what the industry will call ready for a generation." },
 ];
 
 function VanguardPage() {
@@ -73,7 +73,7 @@ function VanguardPage() {
         <div className="mx-auto max-w-3xl px-6">
           <div className="text-center mb-12">
             <p className="label-caps text-gold mb-4">Apply</p>
-            <h2 className="font-display text-4xl md:text-5xl leading-tight">Register your property for consideration.</h2>
+            <h2 className="font-display text-4xl md:text-5xl leading-tight">Register your organization for consideration.</h2>
             <div className="gold-rule my-6 mx-auto w-24" />
           </div>
           <VanguardInterestForm />

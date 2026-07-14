@@ -37,7 +37,7 @@ export function BriefingForm() {
       <Field label="How do you interact with the sponsorship market?" htmlFor="interaction">
         <Select id="interaction" name="interaction" required defaultValue="">
           <option value="" disabled>Select one…</option>
-          <option value="property">Property (rights holder, team, league, event)</option>
+          <option value="property">Organization (rights holder, team, league, event)</option>
           <option value="demand">Demand (brand, agency, investor)</option>
           <option value="channel">Channel (media, platform, technology)</option>
           <option value="ecosystem">Ecosystem (advisor, academic, press)</option>
@@ -107,7 +107,7 @@ export function VanguardInterestForm() {
       className="grid gap-5 md:grid-cols-2"
     >
       <Field label="Your name" htmlFor="name"><Input id="name" name="name" required /></Field>
-      <Field label="Property / Team / Event" htmlFor="property"><Input id="property" name="property" required /></Field>
+      <Field label="Organization / Team / Event" htmlFor="property"><Input id="property" name="property" required /></Field>
       <Field label="Role" htmlFor="role"><Input id="role" name="role" required /></Field>
       <Field label="Email" htmlFor="email"><Input id="email" name="email" type="email" required /></Field>
       <div className="md:col-span-2">

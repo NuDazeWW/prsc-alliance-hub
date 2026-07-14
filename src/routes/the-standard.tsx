@@ -15,10 +15,10 @@ export const Route = createFileRoute("/the-standard")({
 });
 
 const DIMENSIONS = [
-  { icon: Radio, title: "Signal Strength™", body: "The clarity, consistency, and reach of a property's public presence — the raw broadcast footprint on which every partnership is built." },
+  { icon: Radio, title: "Signal Strength™", body: "The clarity, consistency, and reach of an organization's public presence — the raw broadcast footprint on which every partnership is built." },
   { icon: Users, title: "Audience Value™", body: "The quality, composition, and commercial relevance of the audience delivered — not just size, but purchasing power, loyalty, and cultural weight." },
-  { icon: Fingerprint, title: "Platform Identity™", body: "The distinctness of the brand a property carries — how sharply it stands apart in a crowded, undifferentiated market." },
-  { icon: Zap, title: "Activation Capability™", body: "The property's ability to execute — creative capacity, operational rigor, and speed from partnership idea to market." },
+  { icon: Fingerprint, title: "Platform Identity™", body: "The distinctness of the brand an organization carries — how sharply it stands apart in a crowded, undifferentiated market." },
+  { icon: Zap, title: "Activation Capability™", body: "The organization's ability to execute — creative capacity, operational rigor, and speed from partnership idea to market." },
   { icon: BarChart3, title: "Measurement Confidence™", body: "The reliability of the data, methodology, and reporting infrastructure a partner receives — the foundation of any credible ROI conversation." },
   { icon: Handshake, title: "Relationship Strength™", body: "The trust, retention, and depth of partner relationships — the leading indicator of long-term commercial value." },
 ];
@@ -36,7 +36,7 @@ function TheStandardPage() {
           </h1>
           <div className="gold-rule my-8 mx-auto w-24" />
           <p className="mt-4 text-xl text-ivory/75 max-w-3xl mx-auto leading-relaxed">
-            A single, independent measure of a property's commercial partnership readiness — built on six dimensions, governed by the market, evidence at every step.
+            A single, independent measure of an organization's commercial partnership readiness — built on six dimensions, governed by the market, evidence at every step.
           </p>
         </div>
       </section>
@@ -78,7 +78,7 @@ function TheStandardPage() {
             </h2>
             <div className="space-y-4 text-lg text-stone leading-relaxed">
               <p>
-                A standard is only as credible as the body that governs it. PRSC is structured to be non-commercial, methodologically transparent, and independent of any single property, brand, or platform.
+                A standard is only as credible as the body that governs it. PRSC is structured to be non-commercial, methodologically transparent, and independent of any single organization, brand, or platform.
               </p>
               <p>
                 Methodology is set by a peer-reviewed committee. Scoring is auditable. Version history is published. The Standard belongs to the market it serves.
@@ -98,7 +98,7 @@ function TheStandardPage() {
             </h2>
             <div className="gold-rule my-6 mx-auto w-24" />
             <p className="text-lg text-stone">
-              Every property that carries a Readiness Score is evaluated across these six dimensions — no shortcuts, no self-assessment, no exceptions.
+              Every organization that carries a Readiness Score is evaluated across these six dimensions — no shortcuts, no self-assessment, no exceptions.
             </p>
           </div>
           <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
@@ -227,7 +227,7 @@ function TheStandardPage() {
             </h2>
             <div className="space-y-4 text-lg text-ivory/75 leading-relaxed">
               <p>
-                The Readiness Score reveals not only where a property stands, but where the highest-leverage investments lie. Every dimension is diagnostic. Every score is a plan.
+                The Readiness Score reveals not only where an organization stands, but where the highest-leverage investments lie. Every dimension is diagnostic. Every score is a plan.
               </p>
               <p>Benchmarks are peer-relative. Guidance is specific. The next step is always visible.</p>
             </div>
@@ -248,7 +248,7 @@ function TheStandardPage() {
               <div className="space-y-3">
                 {[
                   { label: "Peer Benchmark (Top Quartile)", value: 78 },
-                  { label: "This Property", value: 82, gold: true },
+                  { label: "This Organization", value: 82, gold: true },
                   { label: "Category Median", value: 61 },
                 ].map((r) => (
                   <div key={r.label}>
