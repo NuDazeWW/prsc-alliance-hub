@@ -108,7 +108,7 @@ function TheStandardPage() {
             </h2>
             <div className="gold-rule my-6 mx-auto w-24" />
             <p className="text-lg text-navy leading-relaxed mb-4">
-              Commercial readiness cannot be measured by a single statistic. PRSC evaluates six independent dimensions that together provide a comprehensive view of an organization's ability to attract, activate, and sustain successful partnerships.
+              Commercial readiness cannot be measured by a single statistic — PRSC evaluates six independent dimensions that together reflect an organization's full capacity to attract, activate, and sustain successful partnerships.
             </p>
             <p className="text-lg text-stone">
               Every organization that carries a Readiness Score™ is evaluated across these six dimensions — no shortcuts, no self-assessment, no exceptions.
