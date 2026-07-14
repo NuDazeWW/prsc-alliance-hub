@@ -139,13 +139,14 @@
     currentColor 100%
   );
   background-size: 300% 100%;
-  background-position: 100% 0;
   background-repeat: no-repeat;
   -webkit-background-clip: text;
   background-clip: text;
-  transition: background-position 1.1s ease;
+  animation: shimmer-sweep 3.6s ease-in-out infinite;
 }
-.group:hover .shimmer-link,
-.shimmer-link:hover {
-  background-position: 0% 0;
+
+@keyframes shimmer-sweep {
+  0%   { background-position: 100% 0; }
+  60%  { background-position: 0% 0; }
+  100% { background-position: -50% 0; }
 }
