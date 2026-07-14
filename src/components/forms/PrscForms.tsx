@@ -50,7 +50,7 @@ export function BriefingForm() {
       </div>
       {s.error && <p className="md:col-span-2 text-sm text-destructive">{s.error}</p>}
       <div className="md:col-span-2 mt-2 flex justify-end">
-        <SubmitButton pending={s.pending}>Request Briefing</SubmitButton>
+        <SubmitButton pending={s.pending} className="bg-gold text-navy hover:bg-antique">Request Briefing</SubmitButton>
       </div>
     </form>
   );

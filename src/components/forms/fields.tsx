@@ -23,12 +23,15 @@ export function Select(props: SelectHTMLAttributes<HTMLSelectElement>) {
   return <select {...props} className={cn(base, "appearance-none", props.className)} />;
 }
 
-export function SubmitButton({ pending, children }: { pending: boolean; children: ReactNode }) {
+export function SubmitButton({ pending, children, className }: { pending: boolean; children: ReactNode; className?: string }) {
   return (
     <button
       type="submit"
       disabled={pending}
-      className="inline-flex items-center justify-center rounded-sm bg-navy px-8 py-3.5 label-caps text-[0.7rem] text-ivory hover:bg-midnight disabled:opacity-60 transition-colors"
+      className={cn(
+        "inline-flex items-center justify-center rounded-sm bg-navy px-8 py-3.5 label-caps text-[0.7rem] text-ivory hover:bg-midnight disabled:opacity-60 transition-colors",
+        className,
+      )}
     >
       {pending ? "Submitting…" : children}
     </button>
