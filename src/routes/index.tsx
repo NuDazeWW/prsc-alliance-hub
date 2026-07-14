@@ -37,7 +37,7 @@ function HomePage() {
   return (
     <>
       {/* HERO */}
-      <section className="relative bg-navy text-ivory overflow-hidden min-h-screen flex items-stretch pt-16 pb-20 md:pt-20 md:pb-28">
+      <section className="relative bg-navy text-ivory overflow-hidden flex items-center" style={{ paddingTop: 80, paddingBottom: 80 }}>
         <div
           className="absolute inset-0 pointer-events-none"
           style={{
@@ -50,7 +50,7 @@ function HomePage() {
               "radial-gradient(ellipse 45% 60% at 75% 50%, rgba(0,0,0,1) 0%, rgba(0,0,0,0.6) 40%, rgba(0,0,0,0.15) 70%, transparent 100%)",
           }}
         />
-        <div className="relative mx-auto max-w-7xl w-full px-6 grid gap-14 lg:grid-cols-2 items-stretch">
+        <div className="relative mx-auto max-w-7xl w-full px-6 grid gap-14 lg:grid-cols-2 items-center">
           <div className="max-w-xl">
 
             <div className="inline-block">
@@ -107,7 +107,7 @@ function HomePage() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.9, ease: "easeOut" }}
-            className="relative h-full w-full flex flex-col justify-center items-center px-6"
+            className="relative w-full flex items-center justify-center px-6"
           >
             <LivingScoreDashboard />
           </motion.div>
