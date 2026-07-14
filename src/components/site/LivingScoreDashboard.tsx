@@ -99,7 +99,7 @@ function CompositeGauge() {
         }}
         aria-hidden
       />
-      <div className="relative h-[220px] w-[220px] md:h-[260px] md:w-[260px]">
+      <div className="relative h-[260px] w-[260px] md:h-[320px] md:w-[320px]">
         <svg viewBox="0 0 200 200" className="h-full w-full -rotate-90">
           <circle cx="100" cy="100" r="90" fill="none" stroke="rgba(255,255,255,0.06)" strokeWidth="1.5" />
           <motion.circle
