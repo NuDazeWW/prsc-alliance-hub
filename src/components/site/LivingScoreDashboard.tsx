@@ -44,7 +44,7 @@ function DimensionRow({ label, Icon, start, end, delay }: {
       </div>
       <div>
         <p className="label-caps mb-2 text-[0.65rem]" style={{ color: "#F2EFE6", opacity: 0.6 }}>{label}</p>
-        <div className="h-[6px] w-full rounded-full overflow-hidden" style={{ backgroundColor: "rgba(242,239,230,0.032)" }}>
+        <div className="h-[6px] w-full rounded-full overflow-hidden" style={{ backgroundColor: "rgba(242,239,230,0.4)" }}>
           <motion.div
             className="h-full rounded-full"
             style={{
