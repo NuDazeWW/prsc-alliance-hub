@@ -9,8 +9,32 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as TheStandardRouteImport } from './routes/the-standard'
+import { Route as RequestBriefingRouteImport } from './routes/request-briefing'
+import { Route as ReadinessVanguardRouteImport } from './routes/readiness-vanguard'
+import { Route as GovernanceRouteImport } from './routes/governance'
 import { Route as IndexRouteImport } from './routes/index'
 
+const TheStandardRoute = TheStandardRouteImport.update({
+  id: '/the-standard',
+  path: '/the-standard',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const RequestBriefingRoute = RequestBriefingRouteImport.update({
+  id: '/request-briefing',
+  path: '/request-briefing',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ReadinessVanguardRoute = ReadinessVanguardRouteImport.update({
+  id: '/readiness-vanguard',
+  path: '/readiness-vanguard',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const GovernanceRoute = GovernanceRouteImport.update({
+  id: '/governance',
+  path: '/governance',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
@@ -19,28 +43,88 @@ const IndexRoute = IndexRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/governance': typeof GovernanceRoute
+  '/readiness-vanguard': typeof ReadinessVanguardRoute
+  '/request-briefing': typeof RequestBriefingRoute
+  '/the-standard': typeof TheStandardRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/governance': typeof GovernanceRoute
+  '/readiness-vanguard': typeof ReadinessVanguardRoute
+  '/request-briefing': typeof RequestBriefingRoute
+  '/the-standard': typeof TheStandardRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/governance': typeof GovernanceRoute
+  '/readiness-vanguard': typeof ReadinessVanguardRoute
+  '/request-briefing': typeof RequestBriefingRoute
+  '/the-standard': typeof TheStandardRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths:
+    | '/'
+    | '/governance'
+    | '/readiness-vanguard'
+    | '/request-briefing'
+    | '/the-standard'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to:
+    | '/'
+    | '/governance'
+    | '/readiness-vanguard'
+    | '/request-briefing'
+    | '/the-standard'
+  id:
+    | '__root__'
+    | '/'
+    | '/governance'
+    | '/readiness-vanguard'
+    | '/request-briefing'
+    | '/the-standard'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  GovernanceRoute: typeof GovernanceRoute
+  ReadinessVanguardRoute: typeof ReadinessVanguardRoute
+  RequestBriefingRoute: typeof RequestBriefingRoute
+  TheStandardRoute: typeof TheStandardRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/the-standard': {
+      id: '/the-standard'
+      path: '/the-standard'
+      fullPath: '/the-standard'
+      preLoaderRoute: typeof TheStandardRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/request-briefing': {
+      id: '/request-briefing'
+      path: '/request-briefing'
+      fullPath: '/request-briefing'
+      preLoaderRoute: typeof RequestBriefingRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/readiness-vanguard': {
+      id: '/readiness-vanguard'
+      path: '/readiness-vanguard'
+      fullPath: '/readiness-vanguard'
+      preLoaderRoute: typeof ReadinessVanguardRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/governance': {
+      id: '/governance'
+      path: '/governance'
+      fullPath: '/governance'
+      preLoaderRoute: typeof GovernanceRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -53,6 +137,10 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  GovernanceRoute: GovernanceRoute,
+  ReadinessVanguardRoute: ReadinessVanguardRoute,
+  RequestBriefingRoute: RequestBriefingRoute,
+  TheStandardRoute: TheStandardRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
