@@ -154,7 +154,7 @@ export function LivingScoreDashboard() {
 
   return (
     <div ref={ref} className="relative w-full">
-      <div className="grid grid-cols-1 md:grid-cols-[1fr_auto_1fr] items-center gap-6 md:gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-[1fr_auto_1fr] items-center gap-8 md:gap-10 lg:gap-14">
         <div className="space-y-4 md:space-y-5 order-2 md:order-1">
           {leftDims.map((d, i) => (
             <DimensionRow
@@ -164,8 +164,8 @@ export function LivingScoreDashboard() {
               start={d.start}
               end={d.end}
               delay={i * 0.08}
-              mirror
             />
+
           ))}
         </div>
         <div className="order-1 md:order-2 flex justify-center">
