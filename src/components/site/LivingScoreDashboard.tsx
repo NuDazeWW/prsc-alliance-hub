@@ -41,20 +41,20 @@ function DimensionRow({ label, Icon, start, end, delay }: {
     <div className="flex items-start gap-4">
       <div
         className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-ivory/40 text-ivory mt-1"
-        style={{ opacity: 0.85 }}
+        style={{ opacity: 0.55 }}
       >
         <Icon size={17} strokeWidth={1.6} />
       </div>
       <div className="flex-1 min-w-0">
         <p
-          className="label-caps mb-2 text-[0.7rem] font-semibold leading-tight"
-          style={{ color: "#F2EFE6", opacity: 0.95 }}
+          className="label-caps mb-2 text-[11px] font-semibold leading-tight"
+          style={{ color: "#F2EFE6", opacity: 0.6, letterSpacing: "0.16em" }}
         >
           {label}
         </p>
         <div
           className="h-[7px] w-full rounded-full overflow-hidden"
-          style={{ backgroundColor: "rgba(242,239,230,0.18)" }}
+          style={{ backgroundColor: "rgba(242,239,230,0.4)" }}
         >
           <motion.div
             className="h-full rounded-full"
@@ -99,7 +99,7 @@ function CompositeGauge() {
         }}
         aria-hidden
       />
-      <div className="relative h-[260px] w-[260px] md:h-[320px] md:w-[320px]">
+      <div className="relative h-[220px] w-[220px] md:h-[240px] md:w-[240px]">
         <svg viewBox="0 0 200 200" className="h-full w-full -rotate-90">
           <circle cx="100" cy="100" r="90" fill="none" stroke="rgba(255,255,255,0.06)" strokeWidth="1.5" />
           <motion.circle
@@ -154,8 +154,8 @@ export function LivingScoreDashboard() {
 
   return (
     <div ref={ref} className="relative w-full">
-      <div className="grid grid-cols-1 md:grid-cols-[1fr_auto_1fr] items-center gap-8 md:gap-10 lg:gap-14">
-        <div className="space-y-8 md:space-y-10 order-2 md:order-1">
+      <div className="grid grid-cols-1 md:grid-cols-[1fr_auto_1fr] items-stretch gap-8 md:gap-10 lg:gap-14">
+        <div className="flex flex-col justify-between order-2 md:order-1 gap-8 md:gap-10">
           {leftDims.map((d, i) => (
             <DimensionRow
               key={d.key}
@@ -168,10 +168,10 @@ export function LivingScoreDashboard() {
 
           ))}
         </div>
-        <div className="order-1 md:order-2 flex justify-center">
+        <div className="order-1 md:order-2 flex items-center justify-center">
           <CompositeGauge />
         </div>
-        <div className="space-y-8 md:space-y-10 order-3">
+        <div className="flex flex-col justify-between order-3 gap-8 md:gap-10">
           {rightDims.map((d, i) => (
             <DimensionRow
               key={d.key}
