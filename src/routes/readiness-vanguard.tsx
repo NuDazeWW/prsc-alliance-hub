@@ -25,7 +25,16 @@ const FEATURES = [
 function VanguardPage() {
   return (
     <>
-      <section className="relative bg-navy text-ivory pt-36 pb-24 md:pt-44 md:pb-32 overflow-hidden">
+      <section className="relative text-ivory pt-36 pb-24 md:pt-44 md:pb-32 overflow-hidden">
+        <img
+          src={paddock.url}
+          alt=""
+          width={1920}
+          height={1088}
+          className="absolute inset-0 h-full w-full object-cover"
+          aria-hidden
+        />
+        <div className="absolute inset-0" style={{ backgroundColor: "rgba(10,19,34,0.65)" }} aria-hidden />
         <div className="absolute inset-0 opacity-[0.05] pointer-events-none"
           style={{ backgroundImage: "radial-gradient(circle at 30% 40%, rgba(212,175,55,0.6), transparent 40%), radial-gradient(circle at 75% 60%, rgba(212,175,55,0.4), transparent 40%)" }} />
         <div className="relative mx-auto max-w-5xl px-6 text-center">
