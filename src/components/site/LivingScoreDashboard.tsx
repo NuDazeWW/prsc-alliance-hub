@@ -99,7 +99,7 @@ function CompositeGauge() {
         }}
         aria-hidden
       />
-      <div className="relative h-[220px] w-[220px] md:h-[260px] md:w-[260px]">
+      <div className="relative h-[260px] w-[260px] md:h-[320px] md:w-[320px]">
         <svg viewBox="0 0 200 200" className="h-full w-full -rotate-90">
           <circle cx="100" cy="100" r="90" fill="none" stroke="rgba(255,255,255,0.06)" strokeWidth="1.5" />
           <motion.circle
@@ -155,7 +155,7 @@ export function LivingScoreDashboard() {
   return (
     <div ref={ref} className="relative w-full">
       <div className="grid grid-cols-1 md:grid-cols-[1fr_auto_1fr] items-center gap-8 md:gap-10 lg:gap-14">
-        <div className="space-y-4 md:space-y-5 order-2 md:order-1">
+        <div className="space-y-8 md:space-y-10 order-2 md:order-1">
           {leftDims.map((d, i) => (
             <DimensionRow
               key={d.key}
@@ -171,7 +171,7 @@ export function LivingScoreDashboard() {
         <div className="order-1 md:order-2 flex justify-center">
           <CompositeGauge />
         </div>
-        <div className="space-y-4 md:space-y-5 order-3">
+        <div className="space-y-8 md:space-y-10 order-3">
           {rightDims.map((d, i) => (
             <DimensionRow
               key={d.key}
