@@ -87,17 +87,17 @@ function HomePage() {
             <div className="mt-10 flex flex-wrap items-center gap-x-8 gap-y-4">
               <Link
                 to="/request-briefing"
-                className="group inline-flex items-center gap-2 label-caps text-[0.75rem] font-semibold tracking-wider text-gold hover:text-antique transition-colors"
-                style={{ textShadow: "0 0 12px rgba(212,175,55,0.55), 0 0 24px rgba(212,175,55,0.25)" }}
+                className="group inline-flex items-center gap-2 label-caps text-[0.75rem] font-semibold tracking-wider text-gold border-b border-transparent hover:border-gold transition-all pb-1"
+                style={{ textShadow: "0 0 12px rgba(212,175,55,0.35)" }}
               >
-                Request a Briefing
+                <span className="shimmer-link">Request a Briefing</span>
                 <ArrowRight size={14} className="transition-transform group-hover:translate-x-1" />
               </Link>
               <Link
                 to="/the-standard"
                 className="group inline-flex items-center gap-2 label-caps text-[0.7rem] font-medium tracking-wider text-ivory border-b border-transparent hover:border-gold transition-all pb-1"
               >
-                Learn About the Standard
+                <span className="shimmer-link">Learn About the Standard</span>
                 <ArrowRight size={14} className="transition-transform group-hover:translate-x-1" />
               </Link>
             </div>
