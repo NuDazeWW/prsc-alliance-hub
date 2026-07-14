@@ -168,10 +168,10 @@ export function LivingScoreDashboard() {
 
           ))}
         </div>
-        <div className="order-1 md:order-2 flex justify-center">
+        <div className="order-1 md:order-2 flex items-center justify-center">
           <CompositeGauge />
         </div>
-        <div className="space-y-8 md:space-y-10 order-3">
+        <div className="flex flex-col justify-between order-3 gap-8 md:gap-10">
           {rightDims.map((d, i) => (
             <DimensionRow
               key={d.key}
