@@ -135,7 +135,7 @@ function HomePage() {
       </section>
 
       {/* PATHWAY CARDS */}
-      <section className="bg-ivory py-24 md:py-32">
+      <section className="bg-[#F2EFE6] py-24 md:py-32">
         <div className="mx-auto max-w-7xl px-6 grid gap-8 md:grid-cols-3">
           <PathwayCard
             icon={Building2}
