@@ -38,7 +38,7 @@ function DimensionRow({ label, Icon, start, end, delay }: {
   }, [value, start, end, delay]);
 
   return (
-    <div className="flex items-start gap-4 flex-1">
+    <div className="flex items-start gap-4">
       <div
         className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-ivory/40 text-ivory mt-1"
         style={{ opacity: 0.55 }}
