@@ -85,6 +85,14 @@ function GovernancePage() {
           <BoardInterestForm />
         </div>
       </section>
+
+      <ContinueReading
+        links={[
+          { to: "/the-standard", label: "The Standard" },
+          { to: "/readiness-vanguard", label: "The Readiness Vanguard" },
+          { to: "/request-briefing", label: "Request a Briefing" },
+        ]}
+      />
     </>
   );
 }
