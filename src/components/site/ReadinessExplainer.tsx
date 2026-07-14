@@ -175,7 +175,7 @@ export function ReadinessExplainer() {
             if (entry.isIntersecting) setActiveStep(idx);
           });
         },
-        { rootMargin: "-45% 0px -45% 0px", threshold: 0 }
+        { rootMargin: "-40% 0px -40% 0px", threshold: 0 }
       );
       io.observe(el);
       observers.push(io);
@@ -202,7 +202,7 @@ export function ReadinessExplainer() {
             <div
               key={i}
               ref={(el) => { stepRefs.current[i] = el; }}
-              className="min-h-[85vh] flex items-center"
+              className="min-h-[55vh] flex items-center py-8"
             >
               <motion.div
                 initial={{ opacity: 0, y: 30 }}
@@ -223,7 +223,7 @@ export function ReadinessExplainer() {
 
         {/* RIGHT: sticky visual */}
         <div className="hidden lg:block">
-          <div className="sticky top-0 h-screen flex items-center justify-center">
+          <div className="sticky top-0 h-[85vh] flex items-center justify-center">
             <StepVisual step={activeStep} />
           </div>
         </div>
