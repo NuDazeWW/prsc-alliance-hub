@@ -175,7 +175,7 @@ export function ReadinessExplainer() {
             if (entry.isIntersecting) setActiveStep(idx);
           });
         },
-        { rootMargin: "-45% 0px -45% 0px", threshold: 0 }
+        { rootMargin: "-40% 0px -40% 0px", threshold: 0 }
       );
       io.observe(el);
       observers.push(io);
