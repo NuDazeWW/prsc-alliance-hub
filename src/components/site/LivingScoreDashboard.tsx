@@ -39,18 +39,19 @@ function DimensionRow({ label, Icon, start, end, delay }: {
 
   return (
     <div className="grid grid-cols-[auto_1fr_auto] items-center gap-4">
-      <div className="flex h-10 w-10 items-center justify-center rounded-full border border-ivory/25 text-ivory/80">
+      <div className="flex h-10 w-10 items-center justify-center rounded-full border border-ivory/25 text-ivory" style={{ opacity: 0.55 }}>
         <Icon size={17} strokeWidth={1.4} />
       </div>
       <div>
-        <p className="label-caps text-ivory/85 mb-2 text-[0.65rem]">{label}</p>
-        <div className="h-[6px] w-full rounded-full bg-ivory/8 overflow-hidden">
+        <p className="label-caps mb-2 text-[0.65rem]" style={{ color: "#F2EFE6", opacity: 0.6 }}>{label}</p>
+        <div className="h-[6px] w-full rounded-full overflow-hidden" style={{ backgroundColor: "rgba(242,239,230,0.08)", opacity: 0.4 }}>
           <motion.div
             className="h-full rounded-full"
             style={{
               width,
               background: "linear-gradient(90deg, #C0C0C0 0%, #E6C56A 55%, #D4AF37 100%)",
               boxShadow: "0 0 12px rgba(212,175,55,0.4)",
+              opacity: 2.5,
             }}
           />
         </div>
