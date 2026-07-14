@@ -34,7 +34,7 @@ function VanguardPage() {
           </h1>
           <div className="gold-rule my-8 mx-auto w-24" />
           <p className="text-xl text-ivory/75 max-w-3xl mx-auto leading-relaxed">
-            A limited group of properties — teams, leagues, events, venues, media platforms — helping define what commercial readiness means for the next generation of the industry.
+            The Readiness Vanguard is the founding group of rights holders in sport to receive an independent PRSC Readiness Score. It costs nothing. The score is yours.
           </p>
         </div>
       </section>
