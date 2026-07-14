@@ -37,7 +37,7 @@ function HomePage() {
   return (
     <>
       {/* HERO */}
-      <section className="relative bg-navy text-ivory overflow-hidden pt-16 pb-20 md:pt-20 md:pb-28">
+      <section className="relative bg-navy text-ivory overflow-hidden min-h-screen flex items-center pt-16 pb-20 md:pt-20 md:pb-28">
         <div
           className="absolute inset-0 pointer-events-none"
           style={{
