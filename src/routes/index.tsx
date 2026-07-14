@@ -1,6 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { motion } from "motion/react";
 import { LivingScoreDashboard } from "@/components/site/LivingScoreDashboard";
+import marketAnchor from "@/assets/prsc-market-anchor.jpg.asset.json";
 import { Building2, Briefcase, Landmark, ArrowRight, ShieldCheck, Scale, GraduationCap, LineChart } from "lucide-react";
 
 export const Route = createFileRoute("/")({
