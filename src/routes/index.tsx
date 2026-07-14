@@ -2,7 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { motion } from "motion/react";
 import { LivingScoreDashboard } from "@/components/site/LivingScoreDashboard";
 import { ReadinessExplainer } from "@/components/site/ReadinessExplainer";
-import marketAnchor from "@/assets/prsc-market-anchor.jpg.asset.json";
+
 import { ContinueReading } from "@/components/site/ContinueReading";
 import { Building2, Briefcase, Landmark, ArrowRight, ShieldCheck, Scale, GraduationCap, LineChart } from "lucide-react";
 import prscCrest from "@/assets/prsc-logo-only.png.asset.json";
