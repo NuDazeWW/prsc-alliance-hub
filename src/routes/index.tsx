@@ -37,7 +37,7 @@ function HomePage() {
   return (
     <>
       {/* HERO */}
-      <section className="relative bg-navy text-ivory overflow-hidden pt-16 pb-20 md:pt-20 md:pb-28">
+      <section className="relative bg-navy text-ivory overflow-hidden min-h-screen flex items-center pt-16 pb-20 md:pt-20 md:pb-28">
         <div
           className="absolute inset-0 pointer-events-none"
           style={{
@@ -107,7 +107,7 @@ function HomePage() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.9, ease: "easeOut" }}
-            className="relative self-center"
+            className="relative h-full w-full flex flex-col justify-center items-center px-6"
           >
             <LivingScoreDashboard />
           </motion.div>
