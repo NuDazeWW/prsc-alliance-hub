@@ -2,6 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { Award, TrendingUp, Landmark } from "lucide-react";
 import { VanguardInterestForm } from "@/components/forms/PrscForms";
 import { ContinueReading } from "@/components/site/ContinueReading";
+import paddock from "@/assets/prsc-paddock.jpg.asset.json";
 
 export const Route = createFileRoute("/readiness-vanguard")({
   head: () => ({
