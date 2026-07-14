@@ -85,7 +85,7 @@ export function BoardInterestForm() {
       </div>
       {s.error && <p className="md:col-span-2 text-sm text-destructive">{s.error}</p>}
       <div className="md:col-span-2 mt-2 flex justify-end">
-        <SubmitButton pending={s.pending}>Submit Statement</SubmitButton>
+        <SubmitButton pending={s.pending}>Submit Interest</SubmitButton>
       </div>
     </form>
   );
