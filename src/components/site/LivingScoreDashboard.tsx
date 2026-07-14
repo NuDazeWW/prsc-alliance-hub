@@ -39,18 +39,18 @@ function DimensionRow({ label, Icon, start, end, delay }: {
 
   return (
     <div className="grid grid-cols-[auto_1fr_auto] items-center gap-4">
-      <div className="flex h-10 w-10 items-center justify-center rounded-full border border-ivory/25 text-ivory" style={{ opacity: 0.55 }}>
-        <Icon size={17} strokeWidth={1.4} />
+      <div className="flex h-10 w-10 items-center justify-center rounded-full border border-ivory/40 text-ivory" style={{ opacity: 0.85 }}>
+        <Icon size={17} strokeWidth={1.6} />
       </div>
       <div>
-        <p className="label-caps mb-2 text-[0.65rem]" style={{ color: "#F2EFE6", opacity: 0.6 }}>{label}</p>
-        <div className="h-[6px] w-full rounded-full overflow-hidden" style={{ backgroundColor: "rgba(242,239,230,0.4)" }}>
+        <p className="label-caps mb-2 text-[0.7rem] font-semibold" style={{ color: "#F2EFE6", opacity: 0.95 }}>{label}</p>
+        <div className="h-[7px] w-full rounded-full overflow-hidden" style={{ backgroundColor: "rgba(242,239,230,0.18)" }}>
           <motion.div
             className="h-full rounded-full"
             style={{
               width,
-              background: "linear-gradient(90deg, #C0C0C0 0%, #E6C56A 55%, #D4AF37 100%)",
-              boxShadow: "0 0 12px rgba(212,175,55,0.4)",
+              background: "linear-gradient(90deg, #F5E6B3 0%, #E6C56A 45%, #D4AF37 100%)",
+              boxShadow: "0 0 16px rgba(212,175,55,0.7)",
             }}
           />
         </div>
@@ -156,19 +156,6 @@ export function LivingScoreDashboard() {
           <CompositeGauge />
         </div>
       </div>
-      <motion.div
-        className="mt-8 md:mt-10 flex flex-col gap-0.5 font-mono text-[10px] leading-snug text-left"
-        style={{ color: "#7A7F87" }}
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 0.5 }}
-        transition={{ duration: 1.2, delay: 8.5, ease: "easeOut" }}
-        aria-hidden
-      >
-        <span>PRSC Readiness Standard · Version 1.0</span>
-        <span>Benchmark Sample · 2026</span>
-        <span>Methodology Reference: RMI-6</span>
-        <span>Last Calibrated: Q2 2026</span>
-      </motion.div>
       {isMobile && (
         <p className="mt-4 text-center label-caps text-ivory/40 text-[0.6rem]">
           PRSC Readiness Score™ · Live Demonstration
