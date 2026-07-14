@@ -1,5 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { BriefingForm } from "@/components/forms/PrscForms";
+import { ContinueReading } from "@/components/site/ContinueReading";
 
 export const Route = createFileRoute("/request-briefing")({
   head: () => ({
@@ -39,6 +40,14 @@ function BriefingPage() {
           </p>
         </div>
       </section>
+
+      <ContinueReading
+        links={[
+          { to: "/the-standard", label: "The Standard" },
+          { to: "/governance", label: "Governance" },
+          { to: "/readiness-vanguard", label: "The Readiness Vanguard" },
+        ]}
+      />
     </>
   );
 }

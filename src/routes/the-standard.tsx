@@ -1,5 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { Radio, Users, Fingerprint, Zap, BarChart3, Handshake } from "lucide-react";
+import { ContinueReading } from "@/components/site/ContinueReading";
 
 export const Route = createFileRoute("/the-standard")({
   head: () => ({
@@ -262,6 +263,14 @@ function TheStandardPage() {
           </div>
         </div>
       </section>
+
+      <ContinueReading
+        links={[
+          { to: "/governance", label: "Governance" },
+          { to: "/readiness-vanguard", label: "The Readiness Vanguard" },
+          { to: "/request-briefing", label: "Request a Briefing" },
+        ]}
+      />
     </>
   );
 }

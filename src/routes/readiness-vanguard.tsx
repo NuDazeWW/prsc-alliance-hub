@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { Award, TrendingUp, Landmark } from "lucide-react";
 import { VanguardInterestForm } from "@/components/forms/PrscForms";
+import { ContinueReading } from "@/components/site/ContinueReading";
 
 export const Route = createFileRoute("/readiness-vanguard")({
   head: () => ({
@@ -75,6 +76,14 @@ function VanguardPage() {
           <VanguardInterestForm />
         </div>
       </section>
+
+      <ContinueReading
+        links={[
+          { to: "/the-standard", label: "The Standard" },
+          { to: "/governance", label: "Governance" },
+          { to: "/request-briefing", label: "Request a Briefing" },
+        ]}
+      />
     </>
   );
 }
