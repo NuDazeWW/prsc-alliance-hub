@@ -28,7 +28,7 @@ export const Route = createFileRoute("/")({
 const TRUST_BADGES = [
   { icon: ShieldCheck, label: "Independent Standards Body" },
   { icon: Scale, label: "Neutral Governance" },
-  { icon: GraduationCap, label: "Free Property Assessment" },
+  { icon: GraduationCap, label: "Free Readiness Score" },
   { icon: LineChart, label: "Evidence-Based Methodology" },
 ];
 
@@ -141,7 +141,7 @@ function HomePage() {
             icon={Building2}
             eyebrow="For Properties"
             title="Prove your value."
-            body="Access a free Readiness Score assessment. Understand exactly where you stand — and where to invest to command premium partnerships."
+            body="Receive a free, independent Readiness Score. Understand exactly where you stand — and where to invest to command premium partnerships."
             to="/readiness-vanguard"
             cta="Join the Readiness Vanguard"
           />
