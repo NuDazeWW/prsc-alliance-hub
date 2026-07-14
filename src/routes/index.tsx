@@ -1,24 +1,185 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
+import { motion } from "motion/react";
+import { LivingScoreDashboard } from "@/components/site/LivingScoreDashboard";
+import { Building2, Briefcase, Landmark, ArrowRight, ShieldCheck, Scale, GraduationCap, LineChart } from "lucide-react";
 
-// No head() here: the home route inherits title/description/og/twitter from
-// __root.tsx, and ships no og:image so serve-time hosting can inject the
-// project's social preview (explicit og:image or latest screenshot).
 export const Route = createFileRoute("/")({
-  component: Index,
+  head: () => ({
+    meta: [
+      { title: "PRSC — The Independent Standard for Partnership Readiness" },
+      {
+        name: "description",
+        content:
+          "PRSC is the independent standards body for partnership readiness — an authoritative, evidence-based framework for the global sponsorship market. Request a briefing.",
+      },
+      { property: "og:title", content: "PRSC — The Independent Standard for Partnership Readiness" },
+      {
+        property: "og:description",
+        content:
+          "An authoritative, evidence-based framework that brings clarity, discipline, and trust to the $100B+ global sponsorship market.",
+      },
+    ],
+  }),
+  component: HomePage,
 });
 
-// IMPORTANT: Replace this placeholder. See ./README.md for routing conventions.
-function Index() {
+const TRUST_BADGES = [
+  { icon: ShieldCheck, label: "Independent Standards Body" },
+  { icon: Scale, label: "Neutral Governance" },
+  { icon: GraduationCap, label: "Free Property Assessment" },
+  { icon: LineChart, label: "Evidence-Based Methodology" },
+];
+
+function HomePage() {
   return (
-    <div
-      className="flex min-h-screen items-center justify-center"
-      style={{ backgroundColor: "#fcfbf8" }}
+    <>
+      {/* HERO */}
+      <section className="relative bg-navy text-ivory overflow-hidden pt-32 pb-20 md:pt-40 md:pb-28">
+        <div
+          className="absolute inset-0 opacity-[0.05] pointer-events-none"
+          style={{
+            backgroundImage:
+              "linear-gradient(rgba(212,175,55,0.5) 1px, transparent 1px), linear-gradient(90deg, rgba(212,175,55,0.5) 1px, transparent 1px)",
+            backgroundSize: "80px 80px",
+          }}
+        />
+        <div className="relative mx-auto max-w-7xl px-6 grid gap-14 lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)] items-center">
+          <div className="max-w-xl">
+            <div className="flex flex-wrap gap-2 mb-8">
+              {TRUST_BADGES.map((b) => (
+                <span key={b.label} className="inline-flex items-center gap-2 rounded-full border border-gold/30 bg-ivory/[0.04] px-3 py-1.5 label-caps text-[0.6rem] text-ivory/60">
+                  <b.icon size={12} className="text-gold" />
+                  {b.label}
+                </span>
+              ))}
+            </div>
+            <h1 className="font-display text-[2.75rem] leading-[1.02] md:text-6xl">
+              The Independent Standard for<br />
+              <span className="text-gold">Partnership Readiness.</span>
+            </h1>
+            <p className="mt-6 text-lg text-ivory/75 max-w-lg leading-relaxed">
+              An authoritative, evidence-based framework that brings clarity, discipline, and trust to a $100B+ market — governed independently, adopted globally.
+            </p>
+            <div className="mt-10 flex flex-wrap gap-3">
+              <Link
+                to="/request-briefing"
+                className="inline-flex items-center gap-2 rounded-sm bg-gold px-6 py-3.5 label-caps text-[0.7rem] text-navy hover:bg-antique transition-colors"
+              >
+                Request a Briefing <ArrowRight size={14} />
+              </Link>
+              <Link
+                to="/the-standard"
+                className="inline-flex items-center gap-2 rounded-sm border border-ivory/40 px-6 py-3.5 label-caps text-[0.7rem] text-ivory hover:border-gold hover:text-gold transition-colors"
+              >
+                Learn About the Standard
+              </Link>
+            </div>
+          </div>
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.9, ease: "easeOut" }}
+            className="relative"
+          >
+            <LivingScoreDashboard />
+          </motion.div>
+        </div>
+      </section>
+
+      {/* THE MARKET IS BROKEN */}
+      <section className="bg-ivory text-navy py-24 md:py-32">
+        <div className="mx-auto max-w-4xl px-6 text-center">
+          <p className="label-caps text-gold mb-6">The Case for a Standard</p>
+          <h2 className="font-display text-4xl md:text-5xl leading-tight">
+            The market is broken.<br />
+            <span className="text-stone/80">We built the standard to fix it.</span>
+          </h2>
+          <div className="gold-rule my-10 mx-auto w-24" />
+          <div className="space-y-5 text-lg leading-relaxed text-stone">
+            <p>
+              The global sponsorship and partnership industry — worth more than $100 billion annually — operates without a shared definition of value. Properties self-assess. Brands guess. Measurement is inconsistent, opaque, and rarely comparable.
+            </p>
+            <p>
+              The result: capital is misallocated, credible properties are undervalued, and the market cannot function with the discipline it deserves.
+            </p>
+            <p className="text-navy font-medium">
+              PRSC exists to fix that — with a single, independent, evidence-based standard.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      {/* PATHWAY CARDS */}
+      <section className="bg-ivory pb-24 md:pb-32">
+        <div className="mx-auto max-w-7xl px-6 grid gap-8 md:grid-cols-3">
+          <PathwayCard
+            icon={Building2}
+            eyebrow="For Properties"
+            title="Prove your value."
+            body="Access a free Readiness Score assessment. Understand exactly where you stand — and where to invest to command premium partnerships."
+            to="/readiness-vanguard"
+            cta="Join the Readiness Vanguard"
+          />
+          <PathwayCard
+            icon={Briefcase}
+            eyebrow="For Brands & Investors"
+            title="Deploy capital with confidence."
+            body="Evaluate partnerships against a single, independent benchmark. Reduce risk. Sharpen ROI. Move faster."
+            to="/the-standard"
+            cta="Explore the Standard"
+          />
+          <PathwayCard
+            icon={Landmark}
+            eyebrow="For Governance"
+            title="Shape the market."
+            body="A neutral, market-governed body building the durable infrastructure the industry has always lacked."
+            to="/governance"
+            cta="Read our Governance"
+          />
+        </div>
+      </section>
+
+      {/* CTA STRIP */}
+      <section className="bg-midnight text-ivory py-20 md:py-24">
+        <div className="mx-auto max-w-4xl px-6 text-center">
+          <p className="label-caps text-gold mb-4">Ready to Move</p>
+          <h2 className="font-display text-3xl md:text-4xl leading-tight">
+            The Standard is here. The market is waiting.
+          </h2>
+          <p className="mt-4 text-ivory/70 max-w-2xl mx-auto">
+            The Readiness Vanguard is limited to the first properties who help define the era of professionalized sponsorship.
+          </p>
+          <div className="mt-8 flex flex-wrap justify-center gap-3">
+            <Link to="/readiness-vanguard" className="inline-flex items-center gap-2 rounded-sm bg-gold px-6 py-3.5 label-caps text-[0.7rem] text-navy hover:bg-antique transition-colors">
+              Join the Vanguard <ArrowRight size={14} />
+            </Link>
+            <Link to="/request-briefing" className="inline-flex items-center rounded-sm border border-ivory/40 px-6 py-3.5 label-caps text-[0.7rem] text-ivory hover:border-gold hover:text-gold transition-colors">
+              Request a Briefing
+            </Link>
+          </div>
+        </div>
+      </section>
+    </>
+  );
+}
+
+function PathwayCard({ icon: Icon, eyebrow, title, body, to, cta }: {
+  icon: typeof Building2; eyebrow: string; title: string; body: string; to: string; cta: string;
+}) {
+  return (
+    <Link
+      to={to}
+      className="group relative flex flex-col rounded-sm border border-navy/10 bg-card p-8 transition-all hover:border-gold hover:shadow-[0_20px_50px_-25px_rgba(10,19,34,0.35)]"
     >
-      <img
-        data-lovable-blank-page-placeholder="REMOVE_THIS"
-        src="https://cdn.gpteng.co/blank-app-v1.svg"
-        alt="Your app will live here!"
-      />
-    </div>
+      <div className="flex h-14 w-14 items-center justify-center rounded-full border border-gold/40 bg-gold/5 text-gold mb-6">
+        <Icon size={22} strokeWidth={1.4} />
+      </div>
+      <p className="label-caps text-gold text-[0.65rem] mb-3">{eyebrow}</p>
+      <h3 className="font-display text-2xl text-navy mb-3">{title}</h3>
+      <p className="text-stone/80 text-sm leading-relaxed mb-6">{body}</p>
+      <span className="mt-auto label-caps text-[0.65rem] text-navy group-hover:text-gold inline-flex items-center gap-2">
+        {cta} <ArrowRight size={12} className="transition-transform group-hover:translate-x-1" />
+      </span>
+    </Link>
   );
 }
