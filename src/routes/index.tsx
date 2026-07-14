@@ -49,14 +49,16 @@ function HomePage() {
         />
         <div className="relative mx-auto max-w-7xl px-6 grid gap-14 lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)] items-center">
           <div className="max-w-xl lg:pr-24 xl:pr-28">
-            <img
-              src={prscCrest.url}
-              alt="PRSC crest"
-              className="h-[72px] w-auto mb-3"
-            />
-            <p className="label-caps text-gold text-[11px] tracking-[0.1em] font-semibold uppercase">
-              Partnership Readiness Standards Council
-            </p>
+            <div className="inline-block">
+              <img
+                src={prscCrest.url}
+                alt="PRSC crest"
+                className="h-[200px] md:h-[240px] w-auto mx-auto mb-4 block"
+              />
+              <p className="label-caps text-gold text-[11px] tracking-[0.1em] font-semibold uppercase text-center">
+                Partnership Readiness Standards Council
+              </p>
+            </div>
             <h1 className="mt-6 font-display text-[1.85rem] leading-[1.08] md:text-[2.25rem] lg:text-[2.55rem] text-ivory font-medium">
               The independent body governing commercial readiness in sport.
             </h1>
