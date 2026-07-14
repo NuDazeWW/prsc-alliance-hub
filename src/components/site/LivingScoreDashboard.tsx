@@ -174,8 +174,8 @@ export function LivingScoreDashboard() {
           ))}
         </div>
         <div
-          className="order-1 md:order-2 flex flex-col items-center justify-center shrink-0"
-          style={{ width: 240, height: 420 }}
+          className="order-1 md:order-2 flex flex-col items-center justify-center shrink-0 w-[160px] sm:w-[200px] md:w-[240px]"
+          style={{ height: 420 }}
         >
           <CompositeGauge />
         </div>
