@@ -1,5 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { Radio, Users, Fingerprint, Zap, BarChart3, Handshake } from "lucide-react";
+import { ContinueReading } from "@/components/site/ContinueReading";
 
 export const Route = createFileRoute("/the-standard")({
   head: () => ({
