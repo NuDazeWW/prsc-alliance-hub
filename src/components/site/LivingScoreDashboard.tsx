@@ -154,8 +154,8 @@ export function LivingScoreDashboard() {
 
   return (
     <div ref={ref} className="relative w-full">
-      <div className="grid grid-cols-1 md:grid-cols-[1fr_auto_1fr] items-center gap-8 md:gap-10 lg:gap-14">
-        <div className="space-y-8 md:space-y-10 order-2 md:order-1">
+      <div className="grid grid-cols-1 md:grid-cols-[1fr_auto_1fr] items-stretch gap-8 md:gap-10 lg:gap-14">
+        <div className="flex flex-col justify-between order-2 md:order-1 gap-8 md:gap-10">
           {leftDims.map((d, i) => (
             <DimensionRow
               key={d.key}
