@@ -1,9 +1,11 @@
 import { Link } from "@tanstack/react-router";
 import logo from "@/assets/prsc-logo-tag.png.asset.json";
+import crest from "@/assets/prsc-crest-full.png.asset.json";
+
 
 export function SiteFooter() {
   return (
-    <footer className="bg-navy text-ivory/80 border-t border-gold/20">
+    <footer style={{ backgroundColor: "#0A1322", color: "#F2EFE6" }} className="border-t border-gold/20">
       <div className="mx-auto max-w-7xl px-6 py-16 grid gap-12 md:grid-cols-3">
         <div className="space-y-4">
           <img src={logo.url} alt="PRSC" className="h-24 w-auto" />
@@ -28,11 +30,15 @@ export function SiteFooter() {
         </div>
       </div>
       <div className="border-t border-ivory/10">
-        <div className="mx-auto max-w-7xl px-6 py-6 flex flex-col md:flex-row justify-between gap-3 text-xs text-ivory/45">
-          <p>© {new Date().getFullYear()} Partnership Readiness Standards Council. All rights reserved.</p>
-          <p className="label-caps">PRSC Readiness Standard · Version 1.0 · Published 2026</p>
+        <div className="mx-auto max-w-7xl px-6 py-6 flex flex-col md:flex-row md:items-end justify-between gap-4 text-xs" style={{ color: "#F2EFE6" }}>
+          <div className="flex flex-col gap-3">
+            <img src={crest.url} alt="PRSC crest" className="h-16 w-auto" />
+            <p className="text-ivory/60">© {new Date().getFullYear()} Partnership Readiness Standards Council. All rights reserved.</p>
+          </div>
+          <p className="label-caps text-ivory/60">PRSC Readiness Standard · Version 1.0 · Published 2026</p>
         </div>
       </div>
     </footer>
   );
 }
+
