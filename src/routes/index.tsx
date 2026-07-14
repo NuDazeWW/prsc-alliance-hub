@@ -50,7 +50,7 @@ function HomePage() {
               "radial-gradient(ellipse 45% 60% at 75% 50%, rgba(0,0,0,1) 0%, rgba(0,0,0,0.6) 40%, rgba(0,0,0,0.15) 70%, transparent 100%)",
           }}
         />
-        <div className="relative mx-auto max-w-7xl w-full px-6 grid gap-14 lg:grid-cols-2 items-stretch">
+        <div className="relative mx-auto max-w-7xl w-full px-6 grid gap-14 lg:grid-cols-2 items-center">
           <div className="max-w-xl">
 
             <div className="inline-block">
