@@ -99,7 +99,7 @@ function CompositeGauge() {
         }}
         aria-hidden
       />
-      <div className="relative h-[240px] w-[240px] md:h-[260px] md:w-[260px] xl:h-[280px] xl:w-[280px]">
+      <div className="relative h-[160px] w-[160px] sm:h-[200px] sm:w-[200px] md:h-[240px] md:w-[240px] xl:h-[260px] xl:w-[260px]">
         <svg viewBox="0 0 200 200" className="h-full w-full -rotate-90">
           <circle cx="100" cy="100" r="90" fill="none" stroke="rgba(255,255,255,0.06)" strokeWidth="1.5" />
           <motion.circle
@@ -117,10 +117,10 @@ function CompositeGauge() {
           </defs>
         </svg>
         <div className="absolute inset-0 flex flex-col items-center justify-center">
-          <div className="font-display text-[80px] md:text-[88px] leading-none text-ivory tabular-nums">
+          <div className="font-display text-[52px] sm:text-[64px] md:text-[80px] xl:text-[88px] leading-none text-ivory tabular-nums">
             {display}
           </div>
-          <div className="text-gold text-[11px] mt-2 text-center leading-tight uppercase font-medium" style={{ letterSpacing: "0.12em" }}>
+          <div className="text-gold text-[9px] sm:text-[10px] md:text-[11px] mt-1 sm:mt-2 text-center leading-tight uppercase font-medium" style={{ letterSpacing: "0.12em" }}>
             Commercially<br />Undeniable
           </div>
         </div>
@@ -174,8 +174,8 @@ export function LivingScoreDashboard() {
           ))}
         </div>
         <div
-          className="order-1 md:order-2 flex flex-col items-center justify-center shrink-0"
-          style={{ width: 240, height: 420 }}
+          className="order-1 md:order-2 flex flex-col items-center justify-center shrink-0 w-[160px] sm:w-[200px] md:w-[240px]"
+          style={{ height: 420 }}
         >
           <CompositeGauge />
         </div>
