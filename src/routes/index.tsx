@@ -140,20 +140,6 @@ function HomePage() {
 
       <ReadinessExplainer />
 
-      {/* EDITORIAL ANCHOR IMAGE */}
-      <section className="bg-ivory">
-        <div className="relative w-full overflow-hidden h-[380px] md:h-[480px] lg:h-[540px]">
-          <img
-            src={marketAnchor.url}
-            alt="Executives reviewing a partnership agreement in a stadium hospitality suite at dusk."
-            loading="lazy"
-            width={1920}
-            height={1088}
-            className="absolute inset-0 h-full w-full object-cover"
-          />
-          <div className="absolute inset-0 bg-navy/40" aria-hidden />
-        </div>
-      </section>
 
       {/* PATHWAY CARDS */}
       <section className="bg-[#F2EFE6] py-24 md:py-32">
