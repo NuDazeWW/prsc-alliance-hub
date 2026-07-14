@@ -39,12 +39,12 @@ function DimensionRow({ label, Icon, start, end, delay }: {
 
   return (
     <div className="grid grid-cols-[auto_1fr_auto] items-center gap-4">
-      <div className="flex h-10 w-10 items-center justify-center rounded-full border border-ivory/25 text-ivory/80">
+      <div className="flex h-10 w-10 items-center justify-center rounded-full border border-ivory/25 text-ivory" style={{ opacity: 0.55 }}>
         <Icon size={17} strokeWidth={1.4} />
       </div>
       <div>
-        <p className="label-caps text-ivory/85 mb-2 text-[0.65rem]">{label}</p>
-        <div className="h-[6px] w-full rounded-full bg-ivory/8 overflow-hidden">
+        <p className="label-caps mb-2 text-[0.65rem]" style={{ color: "#F2EFE6", opacity: 0.6 }}>{label}</p>
+        <div className="h-[6px] w-full rounded-full overflow-hidden" style={{ backgroundColor: "rgba(242,239,230,0.032)" }}>
           <motion.div
             className="h-full rounded-full"
             style={{
@@ -152,7 +152,7 @@ export function LivingScoreDashboard() {
       </div>
       <div
         className="mt-8 md:mt-10 flex flex-col gap-0.5 font-mono text-[10px] leading-snug text-left"
-        style={{ color: "#7A7F87", opacity: 0.7 }}
+        style={{ color: "#7A7F87", opacity: 0.45 }}
         aria-hidden
       >
         <span>PRSC Readiness Standard · Version 1.0</span>
