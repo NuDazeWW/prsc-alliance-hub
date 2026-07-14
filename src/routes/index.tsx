@@ -50,7 +50,7 @@ function HomePage() {
             <p className="label-caps text-gold text-[0.85rem] tracking-[0.18em] mb-4">
               Partnership Readiness Standards Council
             </p>
-            <h1 className="font-display text-[2.75rem] leading-[1.02] md:text-6xl text-ivory">
+            <h1 className="font-display text-[2.25rem] leading-[1.05] md:text-[2.75rem] lg:text-[3.25rem] text-ivory">
               The independent body governing commercial readiness in sport
             </h1>
             <p className="mt-6 text-lg text-ivory/75 max-w-lg leading-relaxed">
