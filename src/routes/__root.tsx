@@ -14,6 +14,7 @@ import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 import { SiteNav } from "@/components/site/SiteNav";
 import { SiteFooter } from "@/components/site/SiteFooter";
+import { AnalyticsGate } from "@/components/site/AnalyticsGate";
 
 const FAVICON = "/__l5e/assets-v1/9aec8314-32e6-4d5a-9b1d-45a144e00723/prsc-seal-badge.png";
 
@@ -153,6 +154,7 @@ function RootComponent() {
         <Outlet />
       </main>
       {isChrome && <SiteFooter />}
+      <AnalyticsGate />
     </QueryClientProvider>
   );
 }
