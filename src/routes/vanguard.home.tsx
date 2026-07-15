@@ -649,12 +649,21 @@ function VanguardHome() {
             >
               Readiness Vanguard — Trans Am Series 2026
             </p>
-            <p
-              className="text-[13px] md:text-[14px] font-semibold"
+            <motion.p
+              className="inline-flex items-center gap-2 text-[13px] md:text-[14px] font-semibold"
               style={{ color: NAVY }}
+              animate={{ opacity: [1, 0.55, 1] }}
+              transition={{ duration: 2.2, repeat: Infinity, ease: "easeInOut" }}
             >
+              <motion.span
+                aria-hidden
+                className="inline-block h-2 w-2 rounded-full"
+                style={{ background: NAVY, boxShadow: `0 0 0 0 ${NAVY}` }}
+                animate={{ boxShadow: [`0 0 0 0 rgba(10,19,34,0.55)`, `0 0 0 8px rgba(10,19,34,0)`] }}
+                transition={{ duration: 1.8, repeat: Infinity, ease: "easeOut" }}
+              />
               {seatsFilled} of {seatsTotal} invitations remaining
-            </p>
+            </motion.p>
           </div>
 
           {/* progress bar */}
@@ -681,11 +690,11 @@ function VanguardHome() {
         </div>
       </section>
 
-      {/* darker gold strip */}
-      <section style={{ background: "#B8962B" }} className="px-6 py-4">
+      {/* dark strip */}
+      <section style={{ background: "#000000" }} className="px-6 py-4">
         <p
           className="mx-auto max-w-5xl text-center text-[13px] md:text-[14px]"
-          style={{ color: NAVY, letterSpacing: "0.02em" }}
+          style={{ color: IVORY, letterSpacing: "0.02em" }}
         >
           Twenty-five organizations will become the founding benchmark against which future teams are
           measured.
@@ -706,7 +715,9 @@ function VanguardHome() {
           >
             Reserve Your Spot.
             <br />
-            Request Consideration for the Readiness Vanguard.
+            <span className="whitespace-nowrap text-[22px] md:text-[28px]">
+              Request Consideration for the Readiness Vanguard.
+            </span>
           </h2>
           <p className="mx-auto mt-6 max-w-2xl text-[15px] leading-relaxed" style={{ color: STONE }}>
             The Readiness Vanguard is limited to 25 Trans Am teams and drivers. Participation is
