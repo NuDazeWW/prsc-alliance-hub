@@ -111,7 +111,7 @@ export function VanguardInterestForm() {
       <Field label="Role" htmlFor="role"><Input id="role" name="role" required /></Field>
       <Field label="Email" htmlFor="email"><Input id="email" name="email" type="email" required /></Field>
       <div className="md:col-span-2">
-        <Field label="Phone (optional)" htmlFor="phone"><Input id="phone" name="phone" type="tel" /></Field>
+        <Field label="Phone" htmlFor="phone"><Input id="phone" name="phone" type="tel" required /></Field>
       </div>
       {s.error && <p className="md:col-span-2 text-sm text-destructive">{s.error}</p>}
       <div className="md:col-span-2 mt-2 flex justify-end">
