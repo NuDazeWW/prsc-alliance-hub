@@ -253,18 +253,37 @@ function ReserveForm() {
           {error}
         </p>
       )}
-      <button
+      <motion.button
         type="submit"
         disabled={pending}
-        className="md:col-span-2 mt-2 inline-flex items-center justify-center gap-3 rounded-sm px-6 py-4 text-sm font-semibold uppercase tracking-[0.22em] transition-all hover:brightness-105 disabled:opacity-60"
-        style={{ background: GOLD, color: NAVY }}
+        whileHover={pending ? undefined : { scale: 1.02 }}
+        whileTap={pending ? undefined : { scale: 0.98 }}
+        transition={{ type: "spring", stiffness: 400, damping: 22 }}
+        className="group relative md:col-span-2 mt-2 inline-flex items-center justify-center gap-3 overflow-hidden rounded-sm px-6 py-4 text-sm font-semibold uppercase tracking-[0.22em] shadow-[0_6px_20px_-8px_rgba(212,175,55,0.55)] transition-[background,box-shadow,filter] duration-200 hover:brightness-110 hover:shadow-[0_10px_28px_-10px_rgba(212,175,55,0.9)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:brightness-100"
+        style={{
+          background: GOLD,
+          color: NAVY,
+          // @ts-expect-error CSS custom prop for focus ring color
+          "--tw-ring-color": IVORY,
+          "--tw-ring-offset-color": NAVY,
+        }}
       >
+        {/* subtle sheen sweep on hover */}
+        <span
+          aria-hidden
+          className="pointer-events-none absolute inset-y-0 -left-1/2 w-1/2 -skew-x-12 bg-white/30 opacity-0 transition-all duration-500 ease-out group-hover:left-[120%] group-hover:opacity-100"
+        />
         {pending ? "Submitting…" : (
           <>
-            Request Consideration <ArrowRight size={16} strokeWidth={2.25} />
+            Request Consideration
+            <ArrowRight
+              size={16}
+              strokeWidth={2.25}
+              className="transition-transform duration-200 group-hover:translate-x-1"
+            />
           </>
         )}
-      </button>
+      </motion.button>
     </form>
   );
 }
