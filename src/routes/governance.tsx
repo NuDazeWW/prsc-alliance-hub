@@ -144,21 +144,29 @@ function GovernancePage() {
                 {PRECEDENTS.map((p) => (
                   <li
                     key={p.market}
-                    className={`flex items-center justify-between px-6 py-4 border-b border-navy/5 last:border-b-0 ${
-                      p.ours ? "bg-gradient-to-r from-gold/10 to-transparent" : ""
+                    className={`relative flex items-center justify-between gap-4 px-6 border-b border-navy/5 last:border-b-0 ${
+                      p.ours
+                        ? "py-5 bg-gradient-to-r from-gold/15 via-gold/5 to-transparent"
+                        : "py-4"
                     }`}
                   >
+                    {p.ours && (
+                      <span
+                        aria-hidden
+                        className="absolute left-0 top-0 bottom-0 w-[3px] bg-gradient-to-b from-gold via-antique to-gold/40"
+                      />
+                    )}
                     <span className={`text-sm md:text-base ${p.ours ? "font-medium text-navy" : "text-stone"}`}>
                       {p.market}
                     </span>
                     <span
-                      className={`font-display text-lg md:text-xl tabular-nums tracking-wide flex items-baseline gap-2 ${
-                        p.ours ? "text-gold" : "text-navy/80"
+                      className={`flex items-baseline gap-2 sm:gap-3 flex-wrap justify-end font-display tracking-wide ${
+                        p.ours ? "text-gold text-xl md:text-2xl" : "text-navy/80 text-lg md:text-xl tabular-nums"
                       }`}
                     >
-                      {p.body}
+                      <span>{p.body}</span>
                       {p.note && (
-                        <span className="label-caps text-[0.6rem] tracking-[0.22em] text-gold/80 border border-gold/40 rounded-full px-2 py-0.5 font-sans">
+                        <span className="label-caps text-[0.58rem] sm:text-[0.62rem] tracking-[0.2em] text-navy bg-gold border border-gold rounded-full px-2 py-0.5 font-sans font-semibold whitespace-nowrap leading-none shadow-[0_2px_8px_-2px_rgba(212,175,55,0.6)]">
                           {p.note}
                         </span>
                       )}
