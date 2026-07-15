@@ -236,7 +236,7 @@ function TheStandardPage() {
               style={{ background: "linear-gradient(90deg, transparent, rgba(212,175,55,0.9), transparent)" }}
             />
 
-            <div className="grid grid-cols-[140px_minmax(220px,1fr)_minmax(0,2.4fr)] gap-8 px-8 md:px-12 py-5 border-b border-bronze/60">
+            <div className="hidden md:grid grid-cols-[140px_minmax(220px,1fr)_minmax(0,2.4fr)] gap-8 px-8 md:px-12 py-5 border-b border-bronze/60">
               <p className="label-caps text-ivory/60 text-[0.65rem]">Score Range</p>
               <p className="label-caps text-ivory/60 text-[0.65rem]">Maturity Level</p>
               <div className="flex justify-between label-caps text-ivory/40 text-[0.6rem] tabular-nums">
@@ -247,6 +247,7 @@ function TheStandardPage() {
                 <span>100</span>
               </div>
             </div>
+
 
             <ul className="divide-y divide-bronze/25">
               {[
@@ -259,19 +260,19 @@ function TheStandardPage() {
                 const leftPct = row.start;
                 const widthPct = Math.max(row.end - row.start, 6);
                 return (
-                  <li key={row.range} className="group relative px-8 md:px-12 py-7 transition-colors hover:bg-white/[0.03]">
-                    <div className="grid grid-cols-[140px_minmax(220px,1fr)_minmax(0,2.4fr)] gap-8 items-center">
-                      <div className="flex items-center gap-4">
+                  <li key={row.range} className="group relative px-5 sm:px-8 md:px-12 py-6 md:py-7 transition-colors hover:bg-white/[0.03]">
+                    <div className="grid grid-cols-1 md:grid-cols-[140px_minmax(220px,1fr)_minmax(0,2.4fr)] gap-4 md:gap-8 md:items-center">
+                      <div className="flex items-center gap-4 min-w-0">
                         <span
                           aria-hidden
-                          className="block h-10 w-[3px] rounded-full bg-gradient-to-b from-gold to-bronze opacity-80"
+                          className="block h-10 w-[3px] shrink-0 rounded-full bg-gradient-to-b from-gold to-bronze opacity-80"
                         />
                         <span className="font-display text-2xl md:text-3xl text-gold tabular-nums leading-none">
                           {row.range}
                         </span>
                       </div>
                       <p className="text-ivory text-base md:text-lg">{row.level}</p>
-                      <div className="relative">
+                      <div className="relative pt-2 md:pt-0">
                         <div className="relative h-2 rounded-full bg-ivory/[0.06] overflow-hidden">
                           <div className="absolute inset-0 flex justify-between pointer-events-none" aria-hidden>
                             {Array.from({ length: 11 }).map((_, i) => (
@@ -302,7 +303,7 @@ function TheStandardPage() {
                         </div>
                         <span
                           aria-hidden
-                          className="absolute -top-1 h-4 w-4 rounded-full border border-gold/70 bg-navy"
+                          className="absolute top-1 md:-top-1 h-4 w-4 rounded-full border border-gold/70 bg-navy"
                           style={{
                             left: `calc(${row.end}% - 8px)`,
                             boxShadow: `0 0 10px ${row.glow}`,
@@ -311,6 +312,7 @@ function TheStandardPage() {
                       </div>
                     </div>
                   </li>
+
                 );
               })}
             </ul>
