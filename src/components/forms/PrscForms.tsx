@@ -45,7 +45,7 @@ export function BriefingForm() {
       </Field>
       <div className="md:col-span-2">
         <Field label="Anything you'd like us to know" htmlFor="message">
-          <Textarea id="message" name="message" placeholder="Optional context or specific questions." />
+          <Textarea id="message" name="message" required placeholder="Context or specific questions." />
         </Field>
       </div>
       {s.error && <p className="md:col-span-2 text-sm text-destructive">{s.error}</p>}
