@@ -268,7 +268,7 @@ function TheStandardPage() {
               "Certification (where applicable)",
             ].map((step, i, arr) => (
               <li key={step} className="relative flex md:flex-col items-start md:items-center gap-4 md:gap-5">
-                <div className="flex-shrink-0 flex h-12 w-12 items-center justify-center rounded-full border border-gold bg-gold/10 text-gold font-display text-xl tabular-nums">
+                <div aria-hidden="true" className="flex-shrink-0 flex h-12 w-12 items-center justify-center rounded-full border border-gold bg-gold/10 text-gold font-display text-xl tabular-nums">
                   {i + 1}
                 </div>
                 {i < arr.length - 1 && (
@@ -279,18 +279,19 @@ function TheStandardPage() {
                   />
                 )}
                 <div className="md:text-center md:px-2">
-                  <p className="label-caps text-ivory/50 text-[0.6rem] mb-1">Step {i + 1}</p>
+                  <p className="label-caps text-ivory/70 text-[0.6rem] mb-1">Step {i + 1}</p>
                   <p className="text-ivory text-sm md:text-[0.95rem] leading-snug">{step}</p>
                 </div>
               </li>
             ))}
           </ol>
 
-          <p className="mt-14 text-sm text-center" style={{ color: "#7A7F87" }}>
+          <p className="mt-14 text-sm text-center text-pewter">
             The scoring methodology is versioned, published, and subject to annual review. Current release: Version 1.0, 2026.
           </p>
         </div>
       </section>
+
 
       {/* ACTIONABLE INTELLIGENCE */}
       <section className="bg-midnight text-ivory py-24 md:py-32">
