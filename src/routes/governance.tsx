@@ -29,7 +29,7 @@ const PRECEDENTS = [
   { market: "Credit", body: "FICO®" },
   { market: "Information Security", body: "ISO/IEC 27001" },
   { market: "Media Measurement", body: "MRC" },
-  { market: "Partnership Readiness", body: "PRSC", note: "Founding", ours: true },
+  { market: "Partnership Readiness", body: "PRSC", ours: true },
 ];
 
 const COMMITMENTS = [
