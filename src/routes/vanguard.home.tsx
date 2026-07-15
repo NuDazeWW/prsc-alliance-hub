@@ -487,7 +487,7 @@ function VanguardHome() {
       {/* ==================== BLOCK 6 — COMPARISON ==================== */}
       <section style={{ background: NAVY }} className="px-6 pb-24 md:pb-32">
         <div className="mx-auto max-w-5xl">
-          <div className="relative grid gap-12 md:grid-cols-2 md:gap-16">
+          <div className="relative grid justify-items-center gap-12 md:grid-cols-2 md:gap-16 text-center">
             {/* vertical divider */}
             <div
               aria-hidden
