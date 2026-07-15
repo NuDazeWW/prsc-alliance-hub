@@ -199,8 +199,8 @@ export function ReadinessExplainer() {
         </div>
       </div>
 
-      <div className="mx-auto max-w-7xl px-6 grid gap-10 lg:grid-cols-2 relative">
-        {/* LEFT: scrolling text steps */}
+      <div className="mx-auto max-w-7xl px-6 grid gap-6 lg:gap-4 lg:grid-cols-[minmax(0,0.85fr)_minmax(0,1.15fr)] relative">
+        {/* LEFT: scrolling text steps — right-anchored to hug the visual */}
         <div>
           {STEPS.map((s, i) => {
             const isActive = activeStep === i;
@@ -208,7 +208,7 @@ export function ReadinessExplainer() {
               <div
                 key={i}
                 ref={(el) => { stepRefs.current[i] = el; }}
-                className="min-h-[45vh] flex items-center py-6"
+                className="min-h-[34vh] lg:min-h-[36vh] flex items-center py-4 lg:justify-end"
               >
                 <motion.div
                   initial={false}
@@ -218,7 +218,7 @@ export function ReadinessExplainer() {
                     y: isActive ? 0 : 12,
                   }}
                   transition={{ duration: 0.7, ease: "easeOut" }}
-                  className="relative max-w-lg"
+                  className="relative max-w-lg lg:pr-8"
                 >
                   {/* Ghost numeral anchor */}
                   <span
