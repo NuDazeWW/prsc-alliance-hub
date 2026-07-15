@@ -1,5 +1,6 @@
-const FROM = { email: "vanguard@prscstandards.com", name: "PRSC" };
+const FROM = { email: "no-reply@prscstandards.com", name: "PRSC" };
 const TO = "info@prscstandards.com";
+const REPLY_TO_FALLBACK = "info@prscstandards.com";
 
 const FIELD_LABELS: Record<string, string> = {
   first_name: "First name",
