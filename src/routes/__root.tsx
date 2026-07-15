@@ -120,14 +120,6 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
             "The independent standards body governing partnership readiness — an authoritative, evidence-based rating for the $100B+ sponsorship market.",
         }),
       },
-      {
-        src: "https://www.googletagmanager.com/gtag/js?id=G-ZMZCN0S0RV",
-        async: true,
-      },
-      {
-        children:
-          "window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-ZMZCN0S0RV');",
-      },
     ],
   }),
   shellComponent: RootShell,
