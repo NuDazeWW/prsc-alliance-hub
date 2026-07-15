@@ -153,15 +153,9 @@ export function LivingScoreDashboard() {
   const rightDims = DIMENSIONS.slice(3, 6);
 
   return (
-    <div ref={ref} className="relative w-full" style={{ height: 420 }}>
-      <div
-        className="flex flex-col md:flex-row items-stretch w-full h-full"
-        style={{ gap: 32 }}
-      >
-        <div
-          className="flex flex-col justify-between order-2 md:order-1 flex-1"
-          style={{ height: 420 }}
-        >
+    <div ref={ref} className="relative w-full">
+      <div className="flex flex-col md:flex-row md:items-stretch w-full gap-8 md:gap-8 md:h-[420px]">
+        <div className="flex flex-col justify-between gap-6 md:gap-0 order-2 md:order-1 flex-1 md:h-[420px]">
           {leftDims.map((d, i) => (
             <DimensionRow
               key={d.key}
@@ -173,16 +167,10 @@ export function LivingScoreDashboard() {
             />
           ))}
         </div>
-        <div
-          className="order-1 md:order-2 flex flex-col items-center justify-center shrink-0 w-[160px] sm:w-[200px] md:w-[240px]"
-          style={{ height: 420 }}
-        >
+        <div className="order-1 md:order-2 flex flex-col items-center justify-center shrink-0 mx-auto md:mx-0 w-[160px] sm:w-[200px] md:w-[240px] md:h-[420px]">
           <CompositeGauge />
         </div>
-        <div
-          className="flex flex-col justify-between order-3 flex-1"
-          style={{ height: 420 }}
-        >
+        <div className="flex flex-col justify-between gap-6 md:gap-0 order-3 flex-1 md:h-[420px]">
           {rightDims.map((d, i) => (
             <DimensionRow
               key={d.key}
