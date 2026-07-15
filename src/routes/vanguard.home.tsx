@@ -425,8 +425,14 @@ function VanguardHome() {
           </p>
         </div>
 
+        {/* Divider between "A Better Way" and the illustrative Solution block */}
+        <div
+          className="mx-auto mt-16 h-px w-24"
+          style={{ background: `linear-gradient(90deg, transparent, ${GOLD}, transparent)` }}
+        />
+
         {/* Bottom: The Solution — two columns */}
-        <div className="mx-auto mt-20 grid max-w-6xl items-center gap-12 md:gap-16 lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)]">
+        <div className="mx-auto mt-12 grid max-w-6xl items-center gap-12 md:gap-16 lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)]">
           {/* Left: copy */}
           <div className="max-w-md">
             <p
