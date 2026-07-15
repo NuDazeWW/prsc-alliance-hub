@@ -1,5 +1,6 @@
-const FROM = { email: "vanguard@prscstandards.com", name: "PRSC" };
+const FROM = { email: "no-reply@prscstandards.com", name: "PRSC" };
 const TO = "info@prscstandards.com";
+const REPLY_TO_FALLBACK = "info@prscstandards.com";
 
 const FIELD_LABELS: Record<string, string> = {
   first_name: "First name",
@@ -106,7 +107,7 @@ export async function sendNotification(subject: string, fields: Record<string, u
     body: JSON.stringify({
       personalizations: [{ to: [{ email: TO }], subject }],
       from: FROM,
-      ...(replyEmail ? { reply_to: { email: replyEmail } } : {}),
+      reply_to: { email: replyEmail || REPLY_TO_FALLBACK },
       content: [
         { type: "text/plain", value: text },
         { type: "text/html", value: html },
