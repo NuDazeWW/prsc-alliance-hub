@@ -382,7 +382,7 @@ function VanguardHome() {
       </section>
 
       {/* ==================== BLOCK 2 — THE PROBLEM ==================== */}
-      <section style={{ background: IVORY }} className="px-6 pt-20 pb-8 md:pt-24 md:pb-10">
+      <section style={{ background: IVORY }} className="px-6 pt-16 pb-6 md:pt-20 md:pb-8">
         <div className="mx-auto max-w-[700px] text-center">
           <p
             className="font-display leading-snug text-[24px] md:text-[28px]"
@@ -402,7 +402,7 @@ function VanguardHome() {
       </section>
 
       {/* ==================== BLOCK 3 — WHY IT EXISTS ==================== */}
-      <section style={{ background: IVORY }} className="px-6 pt-4 pb-24 md:pt-6 md:pb-32">
+      <section style={{ background: IVORY }} className="px-6 pt-4 pb-16 md:pt-6 md:pb-20">
         <div className="mx-auto max-w-[640px] text-center">
           <p className="text-[18px] md:text-[20px] leading-relaxed" style={{ color: STONE }}>
             Sponsors invest in organizations that reduce risk. Without a shared standard for measuring
@@ -413,7 +413,7 @@ function VanguardHome() {
       </section>
 
       {/* ==================== BLOCK 4 — A BETTER WAY + THE SOLUTION ==================== */}
-      <section style={{ background: NAVY }} className="px-6 py-24 md:py-28">
+      <section style={{ background: NAVY }} className="px-6 py-16 md:py-20">
         {/* Top: A Better Way (centered) */}
         <div className="mx-auto max-w-5xl text-center">
           <p
@@ -496,7 +496,7 @@ function VanguardHome() {
 
 
       {/* ==================== BLOCK 6 — COMPARISON ==================== */}
-      <section style={{ background: NAVY }} className="px-6 pb-24 md:pb-32">
+      <section style={{ background: NAVY }} className="px-6 pb-16 md:pb-20">
         <div className="mx-auto max-w-5xl">
           <div
             className="mx-auto mb-16 h-px w-24"
@@ -574,7 +574,7 @@ function VanguardHome() {
       </section>
 
       {/* ==================== BLOCK 7 — VANGUARD + RECEIVE ==================== */}
-      <section style={{ background: IVORY }} className="px-6 py-24 md:py-32">
+      <section style={{ background: IVORY }} className="px-6 py-16 md:py-20">
         <div className="mx-auto max-w-6xl grid gap-14 md:grid-cols-2 md:gap-16">
           {/* Left */}
           <div>
@@ -627,7 +627,7 @@ function VanguardHome() {
       </section>
 
       {/* ==================== BLOCK 8 — WHAT WE PROMISE ==================== */}
-      <section style={{ background: MIDNIGHT }} className="px-6 py-20 md:py-24">
+      <section style={{ background: MIDNIGHT }} className="px-6 py-14 md:py-16">
         <div className="mx-auto max-w-6xl grid gap-10 md:grid-cols-[auto_auto_1fr] md:items-center">
           {/* crest */}
           <div className="flex justify-center md:justify-start">
@@ -727,7 +727,7 @@ function VanguardHome() {
       </span>
 
       {/* ==================== BLOCK 10 — FORM ==================== */}
-      <section style={{ background: IVORY }} className="px-6 py-20 md:py-24 lg:py-28">
+      <section style={{ background: IVORY }} className="px-6 py-16 md:py-18 lg:py-20">
         <div className="mx-auto max-w-3xl text-center">
           <h2
             className="font-display leading-tight tracking-tight text-balance text-[26px] sm:text-[32px] md:text-[36px] lg:text-[40px]"
