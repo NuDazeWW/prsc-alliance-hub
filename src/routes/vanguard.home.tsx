@@ -27,11 +27,11 @@ import { submitVanguardInterest } from "@/lib/forms.functions";
 export const Route = createFileRoute("/vanguard/home")({
   head: () => ({
     meta: [
-      { title: "Founding Vanguard — An Invitation | PRSC" },
+      { title: "Readiness Vanguard — An Invitation | PRSC" },
       {
         name: "description",
         content:
-          "An invitation to a select group of Trans Am drivers and teams to join the Founding Vanguard of the PRSC Readiness Standard.",
+          "An invitation to a select group of Trans Am drivers and teams to join the Readiness Vanguard of the PRSC Readiness Standard.",
       },
       { name: "robots", content: "noindex, nofollow" },
       { name: "viewport", content: "width=device-width, initial-scale=1, viewport-fit=cover" },
@@ -195,7 +195,7 @@ function ReserveForm() {
           Request received.
         </h3>
         <p style={{ color: STONE }}>
-          The Council will review your consideration for the Founding Vanguard. Selected organizations
+          The Council will review your consideration for the Readiness Vanguard. Selected organizations
           will receive an invitation directly.
         </p>
       </div>
@@ -343,7 +343,7 @@ function VanguardHome() {
               className="text-[12px] font-semibold uppercase mb-4"
               style={{ color: GOLD, letterSpacing: "0.12em" }}
             >
-              An Invitation to the Founding Vanguard
+              An Invitation to the Readiness Vanguard
             </p>
             <p className="font-display italic text-[15px] mb-8" style={{ color: SANDSTONE }}>
               For a select group of Trans Am drivers and teams.
@@ -563,11 +563,11 @@ function VanguardHome() {
           {/* Left */}
           <div>
             <h3 className="font-display text-[28px] md:text-[30px]" style={{ color: NAVY }}>
-              The Founding Vanguard
+              The Readiness Vanguard
             </h3>
             <div className="mt-3 h-[2px] w-16" style={{ background: GOLD }} />
             <p className="mt-6 text-[15px] leading-relaxed" style={{ color: STONE }}>
-              The Founding Vanguard is the first cohort of teams and drivers ever evaluated under the
+              The Readiness Vanguard is the first cohort of teams and drivers ever evaluated under the
               PRSC Readiness Standard. Their experience will shape the first commercial readiness
               benchmark in motorsport.
             </p>
@@ -583,7 +583,7 @@ function VanguardHome() {
           {/* Right */}
           <div>
             <h3 className="font-display text-[28px] md:text-[30px]" style={{ color: NAVY }}>
-              What Founding Vanguard Members Receive
+              What Readiness Vanguard Members Receive
             </h3>
             <div className="mt-3 h-[2px] w-16" style={{ background: GOLD }} />
             <ul className="mt-6 space-y-4">
@@ -591,7 +591,7 @@ function VanguardHome() {
                 "Your independent PRSC Readiness Score",
                 "A confidential Commercial Strength Report highlighting sponsor strengths and gaps",
                 "Benchmarking against the inaugural Trans Am cohort",
-                "Founding Vanguard designation — permanent",
+                "Readiness Vanguard designation — permanent",
                 "A direct role in shaping the industry's first commercial readiness standard",
               ].map((item) => (
                 <li key={item} className="flex gap-4">
@@ -638,7 +638,7 @@ function VanguardHome() {
               What we can offer is something motorsport has never had before: an independent way to
               understand, measure, and improve how sponsors evaluate your organization.
             </p>
-            <p>That&rsquo;s what the Founding Vanguard is helping build.</p>
+            <p>That&rsquo;s what the Readiness Vanguard is helping build.</p>
           </div>
         </div>
       </section>
@@ -651,7 +651,7 @@ function VanguardHome() {
               className="text-[13px] md:text-[14px] font-bold uppercase"
               style={{ color: NAVY, letterSpacing: "0.14em" }}
             >
-              Founding Vanguard — Trans Am Series 2026
+              Readiness Vanguard — Trans Am Series 2026
             </p>
             <p
               className="text-[13px] md:text-[14px] font-semibold"
@@ -708,10 +708,10 @@ function VanguardHome() {
             className="font-display leading-tight text-[32px] md:text-[40px]"
             style={{ color: NAVY }}
           >
-            Reserve Your Spot. Request Consideration for the Founding Vanguard.
+            Reserve Your Spot. Request Consideration for the Readiness Vanguard.
           </h2>
           <p className="mx-auto mt-6 max-w-2xl text-[15px] leading-relaxed" style={{ color: STONE }}>
-            The Founding Vanguard is limited to 25 Trans Am teams and drivers. Participation is
+            The Readiness Vanguard is limited to 25 Trans Am teams and drivers. Participation is
             complimentary. Selection is based on the Council&rsquo;s review and is not guaranteed.
           </p>
         </div>
@@ -725,7 +725,7 @@ function VanguardHome() {
             Every submission is reviewed by the Partnership Readiness Standards Council.
           </p>
           <p className="text-[11px]">
-            Selected organizations will receive an invitation to participate in the Founding Vanguard.
+            Selected organizations will receive an invitation to participate in the Readiness Vanguard.
           </p>
         </div>
       </section>
