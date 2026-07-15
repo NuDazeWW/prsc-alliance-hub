@@ -257,8 +257,9 @@ function GovernancePage() {
           <div>
             <p className="label-caps text-gold mb-4">Founding Board — Register Interest</p>
             <h2 className="font-display text-4xl md:text-5xl text-navy leading-tight mb-6">
-              Help shape the institution.
+              Shape the institution.
             </h2>
+
             <div className="gold-rule my-6 w-24" />
             <p className="text-lg text-stone leading-relaxed mb-8">
               PRSC is seating its founding governing body. Senior industry leaders may submit a statement of interest for the Council's consideration.
