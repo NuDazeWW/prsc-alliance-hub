@@ -166,7 +166,13 @@ function GovernancePage() {
                     >
                       <span>{p.body}</span>
                       {p.note && (
-                        <span className="label-caps text-[0.58rem] sm:text-[0.62rem] tracking-[0.2em] text-navy bg-gold border border-gold rounded-full px-2 py-0.5 font-sans font-semibold whitespace-nowrap leading-none shadow-[0_2px_8px_-2px_rgba(212,175,55,0.6)]">
+                        <span
+                          tabIndex={0}
+                          role="note"
+                          aria-label={`${p.body} — ${p.note} standards body`}
+                          title="PRSC is in its founding phase — constitution ratified, methodology in active development."
+                          className="label-caps text-[0.58rem] sm:text-[0.62rem] tracking-[0.2em] text-navy bg-gold border border-gold rounded-full px-2 py-0.5 font-sans font-semibold whitespace-nowrap leading-none shadow-[0_2px_8px_-2px_rgba(212,175,55,0.6)] cursor-help transition-all duration-200 hover:bg-antique hover:shadow-[0_4px_14px_-2px_rgba(212,175,55,0.8)] hover:-translate-y-px focus:outline-none focus-visible:ring-2 focus-visible:ring-gold focus-visible:ring-offset-2 focus-visible:ring-offset-ivory"
+                        >
                           {p.note}
                         </span>
                       )}
