@@ -1,6 +1,4 @@
 import { useEffect, useState } from "react";
-import { useServerFn } from "@tanstack/react-start";
-import { getVisitorRegion } from "@/lib/geo.functions";
 
 const GA_ID = "G-ZMZCN0S0RV";
 const CONSENT_KEY = "prsc-analytics-consent";
@@ -23,14 +21,14 @@ function loadGA() {
 }
 
 export function AnalyticsGate() {
-  const fetchRegion = useServerFn(getVisitorRegion);
   const [showBanner, setShowBanner] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
     (async () => {
       try {
-        const { consentRequired } = await fetchRegion();
+        const res = await fetch("/api/geo", { cache: "no-store" });
+        const { consentRequired } = (await res.json()) as { consentRequired: boolean };
         if (cancelled) return;
 
         if (!consentRequired) {
@@ -49,7 +47,8 @@ export function AnalyticsGate() {
       }
     })();
     return () => { cancelled = true; };
-  }, [fetchRegion]);
+  }, []);
+
 
   const accept = () => {
     localStorage.setItem(CONSENT_KEY, "accepted");
