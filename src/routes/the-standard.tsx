@@ -154,7 +154,7 @@ function TheStandardPage() {
       </section>
 
       {/* SIX DIMENSIONS */}
-      <section className="bg-ivory pb-24 md:pb-32">
+      <section id="the-six-dimensions" className="bg-ivory pb-24 md:pb-32 scroll-mt-24">
         <div className="mx-auto max-w-7xl px-6">
           <div className="text-center max-w-3xl mx-auto mb-16">
             <p className="label-caps text-gold mb-4">The Framework</p>
@@ -171,9 +171,13 @@ function TheStandardPage() {
           </div>
           <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
             {DIMENSIONS.map((d) => (
-              <div key={d.title} className="rounded-sm border border-navy/10 bg-card p-8 transition-all hover:border-gold hover:shadow-[0_20px_50px_-25px_rgba(10,19,34,0.35)]">
+              <div
+                key={d.title}
+                id={slugify(d.title)}
+                className="scroll-mt-24 rounded-sm border border-navy/10 bg-card p-8 transition-all hover:border-gold hover:shadow-[0_20px_50px_-25px_rgba(10,19,34,0.35)]"
+              >
                 <div className="flex h-12 w-12 items-center justify-center rounded-full border border-gold/40 bg-gold/5 text-gold mb-5">
-                  <d.icon size={20} strokeWidth={1.4} />
+                  <d.icon size={20} strokeWidth={1.4} aria-hidden="true" />
                 </div>
                 <h3 className="font-display text-2xl text-navy mb-3">{d.title}</h3>
                 <p className="text-sm text-stone leading-relaxed">{d.body}</p>
@@ -182,6 +186,7 @@ function TheStandardPage() {
           </div>
         </div>
       </section>
+
 
       {/* READINESS MATURITY INDEX */}
       <section className="bg-ivory pb-24 md:pb-32">
