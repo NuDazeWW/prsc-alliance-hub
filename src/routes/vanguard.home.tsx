@@ -134,8 +134,23 @@ function ScoreRing() {
 /* Dimension label pill (six around the ring)                          */
 /* ------------------------------------------------------------------ */
 
+function DimLabel({ label, align }: { label: string; align: "left" | "right" }) {
+  return (
+    <div className={align === "right" ? "text-right" : "text-left"}>
+      <p
+        className="text-[10px] md:text-[11px] font-semibold leading-tight"
+        style={{ color: IVORY, letterSpacing: "0.18em" }}
+      >
+        {label}
+      </p>
+      <div
+        className={`mt-2 h-px w-16 ${align === "right" ? "ml-auto" : ""}`}
+        style={{ background: `linear-gradient(90deg, transparent, ${GOLD}, transparent)` }}
+      />
+    </div>
+  );
+}
 
-/* ------------------------------------------------------------------ */
 /* Form                                                                */
 /* ------------------------------------------------------------------ */
 
