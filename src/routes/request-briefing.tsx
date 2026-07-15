@@ -2,6 +2,8 @@ import { createFileRoute } from "@tanstack/react-router";
 import { BriefingForm } from "@/components/forms/PrscForms";
 import { ContinueReading } from "@/components/site/ContinueReading";
 
+const CANONICAL = "https://prscstandards.com/request-briefing";
+
 export const Route = createFileRoute("/request-briefing")({
   head: () => ({
     meta: [
@@ -9,7 +11,9 @@ export const Route = createFileRoute("/request-briefing")({
       { name: "description", content: "Request a private briefing on the PRSC Readiness Standard, methodology, and how it applies to your organization." },
       { property: "og:title", content: "Request a Briefing — PRSC" },
       { property: "og:description", content: "Private briefings for organizations, brands, investors, and industry leaders." },
+      { property: "og:url", content: CANONICAL },
     ],
+    links: [{ rel: "canonical", href: CANONICAL }],
   }),
   component: BriefingPage,
 });
