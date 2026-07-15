@@ -309,8 +309,12 @@ function VanguardHome() {
         {/* right-side hero image */}
         <div className="pointer-events-none absolute inset-0">
           <img
-            src={heroImg}
+            src={heroImgFallback}
+            srcSet={heroImg}
+            sizes="(max-width: 767px) 100vw, (max-width: 1023px) 65vw, 62vw"
             alt=""
+            loading="lazy"
+            decoding="async"
             className="absolute right-0 top-0 h-full w-full object-cover object-right md:w-[65%] lg:w-[62%]"
             style={{ opacity: 0.9 }}
           />
