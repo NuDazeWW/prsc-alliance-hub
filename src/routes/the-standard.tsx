@@ -203,12 +203,13 @@ function TheStandardPage() {
 
           <div className="rounded-sm bg-navy text-ivory overflow-hidden">
             <table className="w-full">
+              <caption className="sr-only">Readiness Maturity Index scoring bands</caption>
               <thead>
-                <tr style={{ borderBottom: "1px solid #8C6E3B" }}>
-                  <th className="label-caps text-ivory/60 text-[0.7rem] text-left px-6 md:px-10 py-5 w-2/5">
+                <tr className="border-b border-bronze">
+                  <th className="label-caps text-ivory/70 text-[0.7rem] text-left px-6 md:px-10 py-5 w-2/5">
                     Score Range
                   </th>
-                  <th className="label-caps text-ivory/60 text-[0.7rem] text-left px-6 md:px-10 py-5">
+                  <th className="label-caps text-ivory/70 text-[0.7rem] text-left px-6 md:px-10 py-5">
                     Maturity Level
                   </th>
                 </tr>
@@ -223,7 +224,7 @@ function TheStandardPage() {
                 ].map(([range, level], i, arr) => (
                   <tr
                     key={range}
-                    style={i < arr.length - 1 ? { borderBottom: "1px solid rgba(140,110,59,0.35)" } : undefined}
+                    className={i < arr.length - 1 ? "border-b border-bronze/35" : undefined}
                   >
                     <td className="font-display text-2xl md:text-3xl text-gold px-6 md:px-10 py-6 tabular-nums">
                       {range}
@@ -237,11 +238,12 @@ function TheStandardPage() {
             </table>
           </div>
 
-          <p className="mt-6 text-xs md:text-sm text-center" style={{ color: "#7A7F87" }}>
+          <p className="mt-6 text-xs md:text-sm text-center text-pewter">
             Scores are calibrated by the PRSC Methodology Committee and reviewed on a defined annual cycle.
           </p>
         </div>
       </section>
+
 
       {/* THE SCORING PROCESS */}
       <section className="bg-navy text-ivory py-24 md:py-32">
