@@ -727,7 +727,7 @@ function VanguardHome() {
       </span>
 
       {/* ==================== BLOCK 10 — FORM ==================== */}
-      <section style={{ background: IVORY }} className="px-6 py-16 md:py-18 lg:py-20">
+      <section style={{ background: IVORY }} className="px-6 py-16 md:py-20 lg:py-20">
         <div className="mx-auto max-w-3xl text-center">
           <h2
             className="font-display leading-tight tracking-tight text-balance text-[26px] sm:text-[32px] md:text-[36px] lg:text-[40px]"
