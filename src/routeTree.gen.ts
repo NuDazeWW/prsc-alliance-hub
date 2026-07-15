@@ -14,6 +14,7 @@ import { Route as RequestBriefingRouteImport } from './routes/request-briefing'
 import { Route as ReadinessVanguardRouteImport } from './routes/readiness-vanguard'
 import { Route as GovernanceRouteImport } from './routes/governance'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as VanguardHomeRouteImport } from './routes/vanguard.home'
 
 const TheStandardRoute = TheStandardRouteImport.update({
   id: '/the-standard',
@@ -40,6 +41,11 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const VanguardHomeRoute = VanguardHomeRouteImport.update({
+  id: '/vanguard/home',
+  path: '/vanguard/home',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -47,6 +53,7 @@ export interface FileRoutesByFullPath {
   '/readiness-vanguard': typeof ReadinessVanguardRoute
   '/request-briefing': typeof RequestBriefingRoute
   '/the-standard': typeof TheStandardRoute
+  '/vanguard/home': typeof VanguardHomeRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -54,6 +61,7 @@ export interface FileRoutesByTo {
   '/readiness-vanguard': typeof ReadinessVanguardRoute
   '/request-briefing': typeof RequestBriefingRoute
   '/the-standard': typeof TheStandardRoute
+  '/vanguard/home': typeof VanguardHomeRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -62,6 +70,7 @@ export interface FileRoutesById {
   '/readiness-vanguard': typeof ReadinessVanguardRoute
   '/request-briefing': typeof RequestBriefingRoute
   '/the-standard': typeof TheStandardRoute
+  '/vanguard/home': typeof VanguardHomeRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -71,6 +80,7 @@ export interface FileRouteTypes {
     | '/readiness-vanguard'
     | '/request-briefing'
     | '/the-standard'
+    | '/vanguard/home'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -78,6 +88,7 @@ export interface FileRouteTypes {
     | '/readiness-vanguard'
     | '/request-briefing'
     | '/the-standard'
+    | '/vanguard/home'
   id:
     | '__root__'
     | '/'
@@ -85,6 +96,7 @@ export interface FileRouteTypes {
     | '/readiness-vanguard'
     | '/request-briefing'
     | '/the-standard'
+    | '/vanguard/home'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -93,6 +105,7 @@ export interface RootRouteChildren {
   ReadinessVanguardRoute: typeof ReadinessVanguardRoute
   RequestBriefingRoute: typeof RequestBriefingRoute
   TheStandardRoute: typeof TheStandardRoute
+  VanguardHomeRoute: typeof VanguardHomeRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -132,6 +145,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/vanguard/home': {
+      id: '/vanguard/home'
+      path: '/vanguard/home'
+      fullPath: '/vanguard/home'
+      preLoaderRoute: typeof VanguardHomeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -141,17 +161,8 @@ const rootRouteChildren: RootRouteChildren = {
   ReadinessVanguardRoute: ReadinessVanguardRoute,
   RequestBriefingRoute: RequestBriefingRoute,
   TheStandardRoute: TheStandardRoute,
+  VanguardHomeRoute: VanguardHomeRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
