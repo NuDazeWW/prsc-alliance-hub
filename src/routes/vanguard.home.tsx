@@ -590,7 +590,7 @@ function VanguardHome() {
               {[
                 "Your independent PRSC Readiness Score",
                 "A confidential Commercial Strength Report highlighting sponsor strengths and gaps",
-                "Benchmarking against the inaugural Trans Am cohort",
+                "Benchmarking against the inaugural Vanguard participants",
                 "Readiness Vanguard designation — permanent",
                 "A direct role in shaping the industry's first commercial readiness standard",
               ].map((item) => (
