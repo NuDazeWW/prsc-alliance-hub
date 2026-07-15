@@ -1,7 +1,10 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { Radio, Users, Fingerprint, Zap, BarChart3, Handshake } from "lucide-react";
 import { ContinueReading } from "@/components/site/ContinueReading";
 import boardroom from "@/assets/prsc-boardroom.jpg.asset.json";
+
+const slugify = (s: string) => s.toLowerCase().replace(/™/g, "").replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
+
 
 const CANONICAL = "https://prscstandards.com/the-standard";
 const OG_IMAGE = `https://prscstandards.com${boardroom.url}`;
