@@ -2,6 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { Radio, Users, Fingerprint, Zap, BarChart3, Handshake, ArrowRight } from "lucide-react";
 import { ContinueReading } from "@/components/site/ContinueReading";
 import boardroom from "@/assets/prsc-boardroom.jpg.asset.json";
+import sealBadge from "@/assets/prsc-seal-badge.png.asset.json";
 
 const slugify = (s: string) => s.toLowerCase().replace(/™/g, "").replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
 
