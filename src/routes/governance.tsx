@@ -89,7 +89,7 @@ function GovernancePage() {
           </h1>
           <div className="gold-rule my-8 mx-auto w-24" />
           <p className="text-lg md:text-xl text-ivory/75 max-w-3xl mx-auto leading-relaxed">
-            PRSC is a neutral standards body — independent of any single organization, brand, agency, or platform. Its authority comes from the market it serves and the rigor of the Standard it maintains.
+            PRSC™ is a neutral standards body — independent of any single organization, brand, agency, or platform. Its authority comes from the market it serves and the rigor of the Standard it maintains.
           </p>
         </div>
       </section>

@@ -132,7 +132,7 @@ function HomePage() {
               The result: capital is misallocated, credible organizations are undervalued, and the market cannot function with the discipline it deserves.
             </p>
             <p className="text-navy font-medium">
-              PRSC exists to fix that — with a single, independent, evidence-based standard.
+              PRSC™ exists to fix that — with a single, independent, evidence-based standard.
             </p>
           </div>
         </div>
