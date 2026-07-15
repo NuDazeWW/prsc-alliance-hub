@@ -181,8 +181,8 @@ function ReserveForm() {
           name: String(fd.get("name") || ""),
           property: String(fd.get("property") || ""),
           email: String(fd.get("email") || ""),
+          phone: String(fd.get("phone") || ""),
           role: "Trans Am Team / Driver",
-          phone: "",
         };
         try {
           await call({ data: data as never });
