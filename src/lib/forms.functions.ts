@@ -51,27 +51,24 @@ async function notify(subject: string, fields: Record<string, unknown>) {
 export const submitBriefing = createServerFn({ method: "POST" })
   .inputValidator((d: unknown) => BriefingSchema.parse(d))
   .handler(async ({ data }) => {
-    const row = { ...data, message: data.message || null };
-    const result = await insertRow("briefing_requests", row);
-    await notify("New Briefing Request — PRSC", row);
+    const result = await insertRow("briefing_requests", data);
+    await notify("New Briefing Request — PRSC", data);
     return result;
   });
 
 export const submitBoardInterest = createServerFn({ method: "POST" })
   .inputValidator((d: unknown) => BoardSchema.parse(d))
   .handler(async ({ data }) => {
-    const row = { ...data, linkedin_url: data.linkedin_url || null };
-    const result = await insertRow("board_interest", row);
-    await notify("New Board Interest — PRSC", row);
+    const result = await insertRow("board_interest", data);
+    await notify("New Board Interest — PRSC", data);
     return result;
   });
 
 export const submitVanguardInterest = createServerFn({ method: "POST" })
   .inputValidator((d: unknown) => VanguardSchema.parse(d))
   .handler(async ({ data }) => {
-    const row = { ...data, phone: data.phone || null };
-    const result = await insertRow("vanguard_interest", row);
-    await notify("New Vanguard Application — PRSC", row);
+    const result = await insertRow("vanguard_interest", data);
+    await notify("New Vanguard Application — PRSC", data);
     return result;
   });
 
