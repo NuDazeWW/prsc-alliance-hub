@@ -265,14 +265,14 @@ function TheStandardPage() {
           aria-hidden
           style={{ background: "radial-gradient(ellipse at top, rgba(212,175,55,0.10), transparent 70%)" }}
         />
-        <div className="relative mx-auto max-w-4xl px-6">
-          <div className="text-center mb-14">
+        <div className="relative mx-auto max-w-7xl px-6">
+          <div className="max-w-3xl mb-14">
             <p className="label-caps text-gold mb-4">The Readiness Maturity Index™</p>
             <h2 className="font-display text-4xl md:text-5xl text-navy leading-tight mb-6">
               What the score means.
             </h2>
-            <div className="gold-rule my-6 mx-auto w-24" />
-            <p className="text-lg text-stone leading-relaxed max-w-2xl mx-auto">
+            <div className="gold-rule my-6 w-24" />
+            <p className="text-lg text-stone leading-relaxed">
               Every Readiness Score™ maps to a maturity level — a consistent, market-wide reference point for evaluating commercial readiness.
             </p>
           </div>
@@ -284,7 +284,6 @@ function TheStandardPage() {
                 "linear-gradient(180deg, #0F1A2E 0%, #0A1322 100%)",
             }}
           >
-            {/* Gold rim */}
             <div className="absolute inset-0 pointer-events-none rounded-sm border border-gold/25" aria-hidden />
             <div
               className="absolute inset-x-0 top-0 h-px pointer-events-none"
@@ -292,46 +291,78 @@ function TheStandardPage() {
               style={{ background: "linear-gradient(90deg, transparent, rgba(212,175,55,0.9), transparent)" }}
             />
 
-            <div className="grid grid-cols-[minmax(0,1fr)_minmax(0,1.4fr)] gap-6 px-6 md:px-10 py-5 border-b border-bronze/60">
+            <div className="grid grid-cols-[140px_minmax(220px,1fr)_minmax(0,2.4fr)] gap-8 px-8 md:px-12 py-5 border-b border-bronze/60">
               <p className="label-caps text-ivory/60 text-[0.65rem]">Score Range</p>
               <p className="label-caps text-ivory/60 text-[0.65rem]">Maturity Level</p>
+              <div className="flex justify-between label-caps text-ivory/40 text-[0.6rem] tabular-nums">
+                <span>0</span>
+                <span>25</span>
+                <span>50</span>
+                <span>75</span>
+                <span>100</span>
+              </div>
             </div>
 
             <ul className="divide-y divide-bronze/25">
               {[
-                { range: "90–100", level: "Commercially Undeniable", start: 90, end: 100, tone: "from-gold to-gold-light" },
-                { range: "80–89", level: "Commercially Ready", start: 80, end: 89, tone: "from-gold to-bronze" },
-                { range: "70–79", level: "Developing", start: 70, end: 79, tone: "from-bronze to-sandstone" },
-                { range: "60–69", level: "Emerging", start: 60, end: 69, tone: "from-bronze/70 to-pewter" },
-                { range: "Below 60", level: "Commercially Invisible", start: 0, end: 59, tone: "from-pewter to-pewter/40" },
+                { range: "90–100", level: "Commercially Undeniable", start: 90, end: 100, tone: "from-gold-light via-gold to-antique", glow: "rgba(212,175,55,0.55)" },
+                { range: "80–89", level: "Commercially Ready", start: 80, end: 89, tone: "from-gold to-bronze", glow: "rgba(212,175,55,0.35)" },
+                { range: "70–79", level: "Developing", start: 70, end: 79, tone: "from-bronze to-sandstone", glow: "rgba(140,110,59,0.35)" },
+                { range: "60–69", level: "Emerging", start: 60, end: 69, tone: "from-bronze/70 to-pewter", glow: "rgba(122,127,135,0.25)" },
+                { range: "Below 60", level: "Commercially Invisible", start: 0, end: 59, tone: "from-pewter to-pewter/40", glow: "rgba(122,127,135,0.2)" },
               ].map((row) => {
                 const leftPct = row.start;
                 const widthPct = Math.max(row.end - row.start, 6);
                 return (
-                  <li key={row.range} className="group relative px-6 md:px-10 py-6 transition-colors hover:bg-white/[0.03]">
-                    <div className="grid grid-cols-[minmax(0,1fr)_minmax(0,1.4fr)] gap-6 items-center">
+                  <li key={row.range} className="group relative px-8 md:px-12 py-7 transition-colors hover:bg-white/[0.03]">
+                    <div className="grid grid-cols-[140px_minmax(220px,1fr)_minmax(0,2.4fr)] gap-8 items-center">
                       <div className="flex items-center gap-4">
                         <span
                           aria-hidden
-                          className="block h-8 w-[3px] rounded-full bg-gradient-to-b from-gold to-bronze opacity-80"
+                          className="block h-10 w-[3px] rounded-full bg-gradient-to-b from-gold to-bronze opacity-80"
                         />
-                        <span className="font-display text-2xl md:text-3xl text-gold tabular-nums">
+                        <span className="font-display text-2xl md:text-3xl text-gold tabular-nums leading-none">
                           {row.range}
                         </span>
                       </div>
-                      <div>
-                        <p className="text-ivory text-base md:text-lg mb-3">{row.level}</p>
-                        <div className="relative h-1.5 rounded-full bg-ivory/8 overflow-hidden">
+                      <p className="text-ivory text-base md:text-lg">{row.level}</p>
+                      <div className="relative">
+                        <div className="relative h-2 rounded-full bg-ivory/[0.06] overflow-hidden">
+                          <div className="absolute inset-0 flex justify-between pointer-events-none" aria-hidden>
+                            {Array.from({ length: 11 }).map((_, i) => (
+                              <span
+                                key={i}
+                                className="w-px h-full"
+                                style={{ background: i % 5 === 0 ? "rgba(242,239,230,0.18)" : "rgba(242,239,230,0.08)" }}
+                              />
+                            ))}
+                          </div>
                           <div
                             className={`absolute inset-y-0 rounded-full bg-gradient-to-r ${row.tone}`}
-                            style={{ left: `${leftPct}%`, width: `${widthPct}%` }}
+                            style={{
+                              left: `${leftPct}%`,
+                              width: `${widthPct}%`,
+                              boxShadow: `0 0 18px ${row.glow}, 0 0 2px ${row.glow}`,
+                            }}
+                          />
+                          <div
+                            aria-hidden
+                            className="absolute inset-y-0 -translate-x-full group-hover:translate-x-[400%] transition-transform duration-[1800ms] ease-out"
+                            style={{
+                              left: `${leftPct}%`,
+                              width: `${widthPct}%`,
+                              background: "linear-gradient(90deg, transparent, rgba(255,255,255,0.35), transparent)",
+                            }}
                           />
                         </div>
-                        <div className="mt-1.5 flex justify-between text-[0.6rem] text-ivory/35 tabular-nums">
-                          <span>0</span>
-                          <span>50</span>
-                          <span>100</span>
-                        </div>
+                        <span
+                          aria-hidden
+                          className="absolute -top-1 h-4 w-4 rounded-full border border-gold/70 bg-navy"
+                          style={{
+                            left: `calc(${row.end}% - 8px)`,
+                            boxShadow: `0 0 10px ${row.glow}`,
+                          }}
+                        />
                       </div>
                     </div>
                   </li>
@@ -340,7 +371,7 @@ function TheStandardPage() {
             </ul>
           </div>
 
-          <p className="mt-6 text-xs md:text-sm text-center text-pewter">
+          <p className="mt-6 text-xs md:text-sm text-pewter">
             Scores are calibrated by the PRSC Methodology Committee and reviewed on a defined annual cycle.
           </p>
         </div>
