@@ -89,20 +89,17 @@ function TheStandardPage() {
           <p className="mt-4 text-xl text-ivory/80 max-w-3xl mx-auto leading-relaxed">
             A single, independent measure of an organization's commercial partnership readiness — built on six dimensions, governed by the market, evidence at every step.
           </p>
-          <div className="mt-10 flex flex-wrap items-center justify-center gap-4">
+          <div className="mt-10 flex justify-center">
             <Link
               to="/request-briefing"
-              className="inline-flex items-center rounded-sm bg-gold px-6 py-3 text-navy font-medium tracking-wide hover:bg-gold-light transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold"
+              className="group inline-flex items-center gap-2 label-caps text-[0.75rem] font-semibold tracking-wider text-gold border-b border-transparent hover:border-gold transition-all pb-1"
+              style={{ textShadow: "0 0 12px rgba(212,175,55,0.35)" }}
             >
-              Request a Briefing
+              <span className="shimmer-link">Get Your Score</span>
+              <ArrowRight size={14} className="transition-transform group-hover:translate-x-1" />
             </Link>
-            <a
-              href="#the-six-dimensions"
-              className="inline-flex items-center rounded-sm border border-gold/50 px-6 py-3 text-ivory hover:border-gold hover:bg-gold/10 transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold"
-            >
-              Explore the Framework
-            </a>
           </div>
+
         </div>
       </section>
 
