@@ -14,7 +14,8 @@ import {
   Trophy,
   ShieldCheck,
 } from "lucide-react";
-import heroImg from "@/assets/vanguard-hero-watkins.jpg";
+import heroImg from "@/assets/vanguard-hero-watkins.jpg?w=640;960;1440;1920&format=webp&as=srcset";
+import heroImgFallback from "@/assets/vanguard-hero-watkins.jpg?w=1440&format=webp";
 import sealBadge from "@/assets/prsc-seal-badge.png.asset.json";
 import { submitVanguardInterest } from "@/lib/forms.functions";
 
@@ -308,8 +309,12 @@ function VanguardHome() {
         {/* right-side hero image */}
         <div className="pointer-events-none absolute inset-0">
           <img
-            src={heroImg}
+            src={heroImgFallback}
+            srcSet={heroImg}
+            sizes="(max-width: 767px) 100vw, (max-width: 1023px) 65vw, 62vw"
             alt=""
+            loading="lazy"
+            decoding="async"
             className="absolute right-0 top-0 h-full w-full object-cover object-right md:w-[65%] lg:w-[62%]"
             style={{ opacity: 0.9 }}
           />
@@ -366,13 +371,13 @@ function VanguardHome() {
               The best race programs don&rsquo;t always get sponsored.
             </h1>
             <p
-              className="mt-8 max-w-[420px] text-[16px] leading-relaxed"
+              className="mt-8 max-w-[440px] text-[18px] leading-relaxed"
               style={{ color: IVORY, opacity: 0.9 }}
             >
               We&rsquo;re building the first independent standard designed to help teams prove their
               value to sponsors — and we&rsquo;re inviting a select group to help shape it.
             </p>
-            <div className="mt-10">
+            <div className="mt-12">
               <ArrowDown size={26} strokeWidth={1.5} style={{ color: GOLD }} className="animate-bounce" />
             </div>
           </div>
