@@ -253,53 +253,91 @@ function TheStandardPage() {
 
 
       {/* READINESS MATURITY INDEX */}
-      <section className="bg-ivory pb-24 md:pb-32">
-        <div className="mx-auto max-w-4xl px-6">
-          <div className="text-center mb-12">
+      <section
+        className="relative py-24 md:py-32 overflow-hidden"
+        style={{
+          background:
+            "linear-gradient(180deg, #F2EFE6 0%, #EBE5D3 55%, #F2EFE6 100%)",
+        }}
+      >
+        <div
+          className="absolute inset-x-0 top-0 h-24 pointer-events-none"
+          aria-hidden
+          style={{ background: "radial-gradient(ellipse at top, rgba(212,175,55,0.10), transparent 70%)" }}
+        />
+        <div className="relative mx-auto max-w-4xl px-6">
+          <div className="text-center mb-14">
             <p className="label-caps text-gold mb-4">The Readiness Maturity Index™</p>
             <h2 className="font-display text-4xl md:text-5xl text-navy leading-tight mb-6">
               What the score means.
             </h2>
+            <div className="gold-rule my-6 mx-auto w-24" />
             <p className="text-lg text-stone leading-relaxed max-w-2xl mx-auto">
               Every Readiness Score™ maps to a maturity level — a consistent, market-wide reference point for evaluating commercial readiness.
             </p>
           </div>
 
-          <div className="rounded-sm bg-navy text-ivory overflow-hidden">
-            <table className="w-full">
-              <caption className="sr-only">Readiness Maturity Index scoring bands</caption>
-              <thead>
-                <tr className="border-b border-bronze">
-                  <th className="label-caps text-ivory/70 text-[0.7rem] text-left px-6 md:px-10 py-5 w-2/5">
-                    Score Range
-                  </th>
-                  <th className="label-caps text-ivory/70 text-[0.7rem] text-left px-6 md:px-10 py-5">
-                    Maturity Level
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
-                {[
-                  ["90–100", "Commercially Undeniable"],
-                  ["80–89", "Commercially Ready"],
-                  ["70–79", "Developing"],
-                  ["60–69", "Emerging"],
-                  ["Below 60", "Commercially Invisible"],
-                ].map(([range, level], i, arr) => (
-                  <tr
-                    key={range}
-                    className={i < arr.length - 1 ? "border-b border-bronze/35" : undefined}
-                  >
-                    <td className="font-display text-2xl md:text-3xl text-gold px-6 md:px-10 py-6 tabular-nums">
-                      {range}
-                    </td>
-                    <td className="text-ivory text-base md:text-lg px-6 md:px-10 py-6">
-                      {level}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+          <div
+            className="relative rounded-sm bg-navy text-ivory overflow-hidden shadow-[0_40px_80px_-30px_rgba(10,19,34,0.45)]"
+            style={{
+              backgroundImage:
+                "linear-gradient(180deg, #0F1A2E 0%, #0A1322 100%)",
+            }}
+          >
+            {/* Gold rim */}
+            <div className="absolute inset-0 pointer-events-none rounded-sm border border-gold/25" aria-hidden />
+            <div
+              className="absolute inset-x-0 top-0 h-px pointer-events-none"
+              aria-hidden
+              style={{ background: "linear-gradient(90deg, transparent, rgba(212,175,55,0.9), transparent)" }}
+            />
+
+            <div className="grid grid-cols-[minmax(0,1fr)_minmax(0,1.4fr)] gap-6 px-6 md:px-10 py-5 border-b border-bronze/60">
+              <p className="label-caps text-ivory/60 text-[0.65rem]">Score Range</p>
+              <p className="label-caps text-ivory/60 text-[0.65rem]">Maturity Level</p>
+            </div>
+
+            <ul className="divide-y divide-bronze/25">
+              {[
+                { range: "90–100", level: "Commercially Undeniable", start: 90, end: 100, tone: "from-gold to-gold-light" },
+                { range: "80–89", level: "Commercially Ready", start: 80, end: 89, tone: "from-gold to-bronze" },
+                { range: "70–79", level: "Developing", start: 70, end: 79, tone: "from-bronze to-sandstone" },
+                { range: "60–69", level: "Emerging", start: 60, end: 69, tone: "from-bronze/70 to-pewter" },
+                { range: "Below 60", level: "Commercially Invisible", start: 0, end: 59, tone: "from-pewter to-pewter/40" },
+              ].map((row) => {
+                const leftPct = row.start;
+                const widthPct = Math.max(row.end - row.start, 6);
+                return (
+                  <li key={row.range} className="group relative px-6 md:px-10 py-6 transition-colors hover:bg-white/[0.03]">
+                    <div className="grid grid-cols-[minmax(0,1fr)_minmax(0,1.4fr)] gap-6 items-center">
+                      <div className="flex items-center gap-4">
+                        <span
+                          aria-hidden
+                          className="block h-8 w-[3px] rounded-full bg-gradient-to-b from-gold to-bronze opacity-80"
+                        />
+                        <span className="font-display text-2xl md:text-3xl text-gold tabular-nums">
+                          {row.range}
+                        </span>
+                      </div>
+                      <div>
+                        <p className="text-ivory text-base md:text-lg mb-3">{row.level}</p>
+                        <div className="relative h-1.5 rounded-full bg-ivory/8 overflow-hidden">
+                          <div
+                            className={`absolute inset-y-0 rounded-full bg-gradient-to-r ${row.tone}`}
+                            style={{ left: `${leftPct}%`, width: `${widthPct}%` }}
+                          />
+                        </div>
+                        <div className="mt-1.5 flex justify-between text-[0.6rem] text-ivory/35 tabular-nums">
+                          <span>0</span>
+                          <span>50</span>
+                          <span>100</span>
+                        </div>
+                      </div>
+                    </div>
+                  </li>
+                );
+              })}
+            </ul>
           </div>
 
           <p className="mt-6 text-xs md:text-sm text-center text-pewter">
@@ -307,6 +345,7 @@ function TheStandardPage() {
           </p>
         </div>
       </section>
+
 
 
       {/* THE SCORING PROCESS */}
