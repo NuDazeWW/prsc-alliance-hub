@@ -45,7 +45,7 @@ export function BriefingForm() {
       </Field>
       <div className="md:col-span-2">
         <Field label="Anything you'd like us to know" htmlFor="message">
-          <Textarea id="message" name="message" placeholder="Optional context or specific questions." />
+          <Textarea id="message" name="message" required placeholder="Context or specific questions." />
         </Field>
       </div>
       {s.error && <p className="md:col-span-2 text-sm text-destructive">{s.error}</p>}
@@ -76,7 +76,7 @@ export function BoardInterestForm() {
       <Field label="Organization" htmlFor="organization"><Input id="organization" name="organization" required /></Field>
       <Field label="Email" htmlFor="email"><Input id="email" name="email" type="email" required /></Field>
       <div className="md:col-span-2">
-        <Field label="LinkedIn URL" htmlFor="linkedin_url"><Input id="linkedin_url" name="linkedin_url" type="url" placeholder="https://linkedin.com/in/…" /></Field>
+        <Field label="LinkedIn URL" htmlFor="linkedin_url"><Input id="linkedin_url" name="linkedin_url" type="url" required placeholder="https://linkedin.com/in/…" /></Field>
       </div>
       <div className="md:col-span-2">
         <Field label="Statement of interest" htmlFor="statement" hint="Briefly describe your perspective on partnership readiness and why you'd contribute to the governing body.">
@@ -111,7 +111,7 @@ export function VanguardInterestForm() {
       <Field label="Role" htmlFor="role"><Input id="role" name="role" required /></Field>
       <Field label="Email" htmlFor="email"><Input id="email" name="email" type="email" required /></Field>
       <div className="md:col-span-2">
-        <Field label="Phone (optional)" htmlFor="phone"><Input id="phone" name="phone" type="tel" /></Field>
+        <Field label="Phone" htmlFor="phone"><Input id="phone" name="phone" type="tel" required /></Field>
       </div>
       {s.error && <p className="md:col-span-2 text-sm text-destructive">{s.error}</p>}
       <div className="md:col-span-2 mt-2 flex justify-end">

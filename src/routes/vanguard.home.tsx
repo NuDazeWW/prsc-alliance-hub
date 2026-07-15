@@ -181,8 +181,8 @@ function ReserveForm() {
           name: String(fd.get("name") || ""),
           property: String(fd.get("property") || ""),
           email: String(fd.get("email") || ""),
+          phone: String(fd.get("phone") || ""),
           role: "Trans Am Team / Driver",
-          phone: "",
         };
         try {
           await call({ data: data as never });
@@ -193,7 +193,7 @@ function ReserveForm() {
           setPending(false);
         }
       }}
-      className="mx-auto grid max-w-4xl gap-3 md:grid-cols-3"
+      className="mx-auto grid max-w-4xl gap-3 md:grid-cols-2"
     >
       <input
         name="name"
@@ -224,15 +224,24 @@ function ReserveForm() {
         className="w-full rounded-sm border px-4 py-3 text-[15px] placeholder:italic focus:outline-none focus:ring-1"
         style={{ borderColor: "rgba(10,19,34,0.25)", background: "#fff", color: NAVY }}
       />
+      <input
+        name="phone"
+        type="tel"
+        required
+        placeholder="Phone"
+        maxLength={40}
+        className="w-full rounded-sm border px-4 py-3 text-[15px] placeholder:italic focus:outline-none focus:ring-1"
+        style={{ borderColor: "rgba(10,19,34,0.25)", background: "#fff", color: NAVY }}
+      />
       {error && (
-        <p className="md:col-span-3 text-sm" style={{ color: "#7A1F2B" }}>
+        <p className="md:col-span-2 text-sm" style={{ color: "#7A1F2B" }}>
           {error}
         </p>
       )}
       <button
         type="submit"
         disabled={pending}
-        className="md:col-span-3 mt-2 inline-flex items-center justify-center gap-3 rounded-sm px-6 py-4 text-sm font-semibold uppercase tracking-[0.22em] transition-all hover:brightness-105 disabled:opacity-60"
+        className="md:col-span-2 mt-2 inline-flex items-center justify-center gap-3 rounded-sm px-6 py-4 text-sm font-semibold uppercase tracking-[0.22em] transition-all hover:brightness-105 disabled:opacity-60"
         style={{ background: GOLD, color: NAVY }}
       >
         {pending ? "Submitting…" : (
