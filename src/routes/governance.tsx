@@ -152,11 +152,16 @@ function GovernancePage() {
                       {p.market}
                     </span>
                     <span
-                      className={`font-display text-lg md:text-xl tabular-nums tracking-wide ${
+                      className={`font-display text-lg md:text-xl tabular-nums tracking-wide flex items-baseline gap-2 ${
                         p.ours ? "text-gold" : "text-navy/80"
                       }`}
                     >
                       {p.body}
+                      {p.note && (
+                        <span className="label-caps text-[0.6rem] tracking-[0.22em] text-gold/80 border border-gold/40 rounded-full px-2 py-0.5 font-sans">
+                          {p.note}
+                        </span>
+                      )}
                     </span>
                   </li>
                 ))}
