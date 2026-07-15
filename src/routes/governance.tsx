@@ -28,8 +28,24 @@ const PRECEDENTS = [
   { market: "Accounting", body: "GAAP / IFRS" },
   { market: "Credit", body: "FICO®" },
   { market: "Information Security", body: "ISO/IEC 27001" },
-  { market: "Digital Measurement", body: "MRC" },
-  { market: "Partnership Readiness", body: "PRSC™", ours: true },
+  { market: "Media Measurement", body: "MRC" },
+  { market: "Partnership Readiness", body: "PRSC", note: "Founding", ours: true },
+];
+
+const COMMITMENTS = [
+  "No commercial revenue from scored organizations.",
+  "Published conflict-of-interest registers for every Council and Committee member.",
+  "Open-licensed methodology, versioned in public.",
+  "Term-limited Council seats with published rotation cadence.",
+  "Annual independent audit of governance and methodology adherence.",
+];
+
+const MILESTONES = [
+  { label: "Constitution Adopted" },
+  { label: "Founding Council Seated" },
+  { label: "Methodology Version 1 Published" },
+  { label: "First Readiness Scores Issued" },
+  { label: "Continuous Governance" },
 ];
 
 
