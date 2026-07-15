@@ -10,6 +10,7 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as TheStandardRouteImport } from './routes/the-standard'
+import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as RequestBriefingRouteImport } from './routes/request-briefing'
 import { Route as ReadinessVanguardRouteImport } from './routes/readiness-vanguard'
 import { Route as GovernanceRouteImport } from './routes/governance'
@@ -19,6 +20,11 @@ import { Route as VanguardHomeRouteImport } from './routes/vanguard.home'
 const TheStandardRoute = TheStandardRouteImport.update({
   id: '/the-standard',
   path: '/the-standard',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
+  id: '/sitemap.xml',
+  path: '/sitemap.xml',
   getParentRoute: () => rootRouteImport,
 } as any)
 const RequestBriefingRoute = RequestBriefingRouteImport.update({
@@ -52,6 +58,7 @@ export interface FileRoutesByFullPath {
   '/governance': typeof GovernanceRoute
   '/readiness-vanguard': typeof ReadinessVanguardRoute
   '/request-briefing': typeof RequestBriefingRoute
+  '/sitemap.xml': typeof SitemapDotxmlRoute
   '/the-standard': typeof TheStandardRoute
   '/vanguard/home': typeof VanguardHomeRoute
 }
@@ -60,6 +67,7 @@ export interface FileRoutesByTo {
   '/governance': typeof GovernanceRoute
   '/readiness-vanguard': typeof ReadinessVanguardRoute
   '/request-briefing': typeof RequestBriefingRoute
+  '/sitemap.xml': typeof SitemapDotxmlRoute
   '/the-standard': typeof TheStandardRoute
   '/vanguard/home': typeof VanguardHomeRoute
 }
@@ -69,6 +77,7 @@ export interface FileRoutesById {
   '/governance': typeof GovernanceRoute
   '/readiness-vanguard': typeof ReadinessVanguardRoute
   '/request-briefing': typeof RequestBriefingRoute
+  '/sitemap.xml': typeof SitemapDotxmlRoute
   '/the-standard': typeof TheStandardRoute
   '/vanguard/home': typeof VanguardHomeRoute
 }
@@ -79,6 +88,7 @@ export interface FileRouteTypes {
     | '/governance'
     | '/readiness-vanguard'
     | '/request-briefing'
+    | '/sitemap.xml'
     | '/the-standard'
     | '/vanguard/home'
   fileRoutesByTo: FileRoutesByTo
@@ -87,6 +97,7 @@ export interface FileRouteTypes {
     | '/governance'
     | '/readiness-vanguard'
     | '/request-briefing'
+    | '/sitemap.xml'
     | '/the-standard'
     | '/vanguard/home'
   id:
@@ -95,6 +106,7 @@ export interface FileRouteTypes {
     | '/governance'
     | '/readiness-vanguard'
     | '/request-briefing'
+    | '/sitemap.xml'
     | '/the-standard'
     | '/vanguard/home'
   fileRoutesById: FileRoutesById
@@ -104,6 +116,7 @@ export interface RootRouteChildren {
   GovernanceRoute: typeof GovernanceRoute
   ReadinessVanguardRoute: typeof ReadinessVanguardRoute
   RequestBriefingRoute: typeof RequestBriefingRoute
+  SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   TheStandardRoute: typeof TheStandardRoute
   VanguardHomeRoute: typeof VanguardHomeRoute
 }
@@ -115,6 +128,13 @@ declare module '@tanstack/react-router' {
       path: '/the-standard'
       fullPath: '/the-standard'
       preLoaderRoute: typeof TheStandardRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/sitemap.xml': {
+      id: '/sitemap.xml'
+      path: '/sitemap.xml'
+      fullPath: '/sitemap.xml'
+      preLoaderRoute: typeof SitemapDotxmlRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/request-briefing': {
@@ -160,6 +180,7 @@ const rootRouteChildren: RootRouteChildren = {
   GovernanceRoute: GovernanceRoute,
   ReadinessVanguardRoute: ReadinessVanguardRoute,
   RequestBriefingRoute: RequestBriefingRoute,
+  SitemapDotxmlRoute: SitemapDotxmlRoute,
   TheStandardRoute: TheStandardRoute,
   VanguardHomeRoute: VanguardHomeRoute,
 }
