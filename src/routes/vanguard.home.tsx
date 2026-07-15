@@ -378,8 +378,9 @@ function VanguardHome() {
         </div>
       </section>
 
-      {/* ==================== BLOCK 4 — CATEGORY DECLARATION ==================== */}
+      {/* ==================== BLOCK 4 — A BETTER WAY + THE SOLUTION ==================== */}
       <section style={{ background: NAVY }} className="px-6 py-24 md:py-28">
+        {/* Top: A Better Way (centered) */}
         <div className="mx-auto max-w-3xl text-center">
           <p
             className="text-[12px] font-semibold uppercase mb-5"
@@ -408,46 +409,56 @@ function VanguardHome() {
             Motorsport hasn&rsquo;t had one — until now.
           </p>
         </div>
-      </section>
 
-      {/* ==================== BLOCK 5 — THE SOLUTION ==================== */}
-      <section style={{ background: NAVY }} className="border-t px-6 py-24 md:py-32"
-        // subtle divider
-        // eslint-disable-next-line react/forbid-dom-props
-      >
-        <div className="mx-auto max-w-5xl flex flex-col items-center text-center">
-          {/* Heading */}
-          <p
-            className="text-[12px] font-semibold uppercase mb-5"
-            style={{ color: GOLD, letterSpacing: "0.24em" }}
-          >
-            The Solution
-          </p>
-          <div
-            className="mx-auto mb-8 h-px w-16"
-            style={{ background: `linear-gradient(90deg, transparent, ${GOLD}, transparent)` }}
-          />
-
-          {/* Copy */}
-          <div
-            className="max-w-2xl space-y-4 text-[15px] leading-relaxed mb-12"
-            style={{ color: IVORY, opacity: 0.9 }}
-          >
-            <p>
-              Commercial readiness — your organization&rsquo;s ability to attract, secure, and retain
-              sponsorship — is now measurable.
+        {/* Bottom: The Solution — two columns */}
+        <div className="mx-auto mt-20 grid max-w-6xl items-center gap-12 md:gap-16 lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)]">
+          {/* Left: copy */}
+          <div className="max-w-md">
+            <p
+              className="text-[12px] font-semibold uppercase mb-4"
+              style={{ color: GOLD, letterSpacing: "0.24em" }}
+            >
+              The Solution
             </p>
-            <p>
-              The PRSC Readiness Score is the first independent commercial rating for teams and
-              drivers in motorsport.
-            </p>
-            <p>A score that tells sponsors exactly what they need to know.</p>
+            <div className="mb-6 h-px w-12" style={{ background: GOLD }} />
+            <div className="space-y-4 text-[15px] leading-relaxed" style={{ color: IVORY, opacity: 0.9 }}>
+              <p>
+                Commercial readiness — your organization&rsquo;s ability to attract, secure, and retain
+                sponsorship — is now measurable.
+              </p>
+              <p>
+                The PRSC Readiness Score is the first independent commercial rating for teams and
+                drivers in motorsport.
+              </p>
+              <p>A score that tells sponsors exactly what they need to know.</p>
+            </div>
           </div>
 
-          {/* Ring */}
-          <ScoreRing />
+          {/* Right: ring with 6 dimension labels around it */}
+          <div className="flex flex-col items-center">
+            <div className="grid w-full grid-cols-[1fr_auto_1fr] items-center gap-6 md:gap-10">
+              <div className="flex flex-col gap-8">
+                <DimLabel label="SIGNAL STRENGTH" align="right" />
+                <DimLabel label="AUDIENCE VALUE" align="right" />
+                <DimLabel label="PLATFORM IDENTITY" align="right" />
+              </div>
+              <ScoreRing />
+              <div className="flex flex-col gap-8">
+                <DimLabel label="ACTIVATION CAPABILITY" align="left" />
+                <DimLabel label="MEASUREMENT CONFIDENCE" align="left" />
+                <DimLabel label="RELATIONSHIP STRENGTH" align="left" />
+              </div>
+            </div>
+            <p
+              className="mt-6 text-[11px] italic"
+              style={{ color: PEWTER, letterSpacing: "0.08em" }}
+            >
+              illustrative example
+            </p>
+          </div>
         </div>
       </section>
+
 
       {/* ==================== BLOCK 6 — COMPARISON ==================== */}
       <section style={{ background: NAVY }} className="px-6 pb-24 md:pb-32">
