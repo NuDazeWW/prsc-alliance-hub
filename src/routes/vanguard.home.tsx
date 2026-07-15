@@ -467,20 +467,8 @@ function VanguardHome() {
             <p>A score that tells sponsors exactly what they need to know.</p>
           </div>
 
-          {/* Ring with side labels */}
-          <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-6 md:gap-10">
-            <div className="flex flex-col gap-8">
-              <DimLabel Icon={Radio} label="SIGNAL STRENGTH" align="right" />
-              <DimLabel Icon={Users} label="AUDIENCE VALUE" align="right" />
-              <DimLabel Icon={Fingerprint} label="PLATFORM IDENTITY" align="right" />
-            </div>
-            <ScoreRing />
-            <div className="flex flex-col gap-8">
-              <DimLabel Icon={Zap} label="ACTIVATION CAPABILITY" align="left" />
-              <DimLabel Icon={BarChart3} label="MEASUREMENT CONFIDENCE" align="left" />
-              <DimLabel Icon={Handshake} label="RELATIONSHIP STRENGTH" align="left" />
-            </div>
-          </div>
+          {/* Ring */}
+          <ScoreRing />
         </div>
       </section>
 
