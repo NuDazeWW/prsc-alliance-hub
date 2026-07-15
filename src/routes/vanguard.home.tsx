@@ -706,7 +706,9 @@ function VanguardHome() {
           >
             Reserve Your Spot.
             <br />
-            Request Consideration for the Readiness Vanguard.
+            <span className="whitespace-nowrap text-[22px] md:text-[28px]">
+              Request Consideration for the Readiness Vanguard.
+            </span>
           </h2>
           <p className="mx-auto mt-6 max-w-2xl text-[15px] leading-relaxed" style={{ color: STONE }}>
             The Readiness Vanguard is limited to 25 Trans Am teams and drivers. Participation is
