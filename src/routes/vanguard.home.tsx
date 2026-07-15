@@ -14,7 +14,8 @@ import {
   Trophy,
   ShieldCheck,
 } from "lucide-react";
-import heroImg from "@/assets/vanguard-hero-watkins.jpg";
+import heroImg from "@/assets/vanguard-hero-watkins.jpg?w=640;960;1440;1920&format=webp&as=srcset";
+import heroImgFallback from "@/assets/vanguard-hero-watkins.jpg?w=1440&format=webp";
 import sealBadge from "@/assets/prsc-seal-badge.png.asset.json";
 import { submitVanguardInterest } from "@/lib/forms.functions";
 
