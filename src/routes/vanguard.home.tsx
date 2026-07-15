@@ -371,13 +371,13 @@ function VanguardHome() {
               The best race programs don&rsquo;t always get sponsored.
             </h1>
             <p
-              className="mt-8 max-w-[420px] text-[16px] leading-relaxed"
+              className="mt-8 max-w-[440px] text-[18px] leading-relaxed"
               style={{ color: IVORY, opacity: 0.9 }}
             >
               We&rsquo;re building the first independent standard designed to help teams prove their
               value to sponsors — and we&rsquo;re inviting a select group to help shape it.
             </p>
-            <div className="mt-10">
+            <div className="mt-12">
               <ArrowDown size={26} strokeWidth={1.5} style={{ color: GOLD }} className="animate-bounce" />
             </div>
           </div>
