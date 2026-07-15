@@ -5,12 +5,6 @@ import { useServerFn } from "@tanstack/react-start";
 import {
   ArrowDown,
   ArrowRight,
-  Radio,
-  Users,
-  Fingerprint,
-  Zap,
-  BarChart3,
-  Handshake,
   FileText,
   HelpCircle,
   UserRound,
