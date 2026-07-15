@@ -284,7 +284,7 @@ function VanguardHome() {
       {/* ==================== BLOCK 1 — HERO ==================== */}
       <section
         className="relative w-full overflow-hidden"
-        style={{ background: NAVY, minHeight: "100vh" }}
+        style={{ background: NAVY, minHeight: "calc(100vh - 96px)" }}
       >
         {/* right-side hero image */}
         <div className="pointer-events-none absolute inset-0">
