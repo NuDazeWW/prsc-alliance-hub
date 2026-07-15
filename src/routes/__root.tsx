@@ -15,7 +15,7 @@ import { reportLovableError } from "../lib/lovable-error-reporting";
 import { SiteNav } from "@/components/site/SiteNav";
 import { SiteFooter } from "@/components/site/SiteFooter";
 
-const FAVICON = "/__l5e/assets-v1/4109c1a3-ac79-4f8c-a59e-5b4c0669d25b/prsc-favicon.png";
+const FAVICON = "/__l5e/assets-v1/9aec8314-32e6-4d5a-9b1d-45a144e00723/prsc-seal-badge.png";
 
 function NotFoundComponent() {
   return (
