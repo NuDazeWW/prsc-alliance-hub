@@ -190,38 +190,66 @@ function TheStandardPage() {
       </section>
 
       {/* SIX DIMENSIONS */}
-      <section id="the-six-dimensions" className="bg-ivory pb-24 md:pb-32 scroll-mt-24">
-        <div className="mx-auto max-w-7xl px-6">
+      <section
+        id="the-six-dimensions"
+        className="relative bg-navy text-ivory py-24 md:py-32 scroll-mt-24 overflow-hidden"
+      >
+        <div
+          className="absolute inset-0 opacity-[0.05] pointer-events-none"
+          aria-hidden
+          style={{
+            backgroundImage:
+              "linear-gradient(rgba(212,175,55,0.6) 1px, transparent 1px), linear-gradient(90deg, rgba(212,175,55,0.6) 1px, transparent 1px)",
+            backgroundSize: "72px 72px",
+          }}
+        />
+        <div
+          className="absolute inset-x-0 top-0 h-px pointer-events-none"
+          aria-hidden
+          style={{ background: "linear-gradient(90deg, transparent, rgba(212,175,55,0.6), transparent)" }}
+        />
+        <div className="relative mx-auto max-w-7xl px-6">
           <div className="text-center max-w-3xl mx-auto mb-16">
             <p className="label-caps text-gold mb-4">The Framework</p>
-            <h2 className="font-display text-4xl md:text-5xl text-navy leading-tight">
+            <h2 className="font-display text-4xl md:text-5xl text-ivory leading-tight">
               The Six Readiness Dimensions™
             </h2>
             <div className="gold-rule my-6 mx-auto w-24" />
-            <p className="text-lg text-navy leading-relaxed mb-4">
+            <p className="text-lg text-ivory/80 leading-relaxed mb-4">
               Commercial readiness cannot be measured by a single statistic — PRSC evaluates six independent dimensions that together reflect an organization's full capacity to attract, activate, and sustain successful partnerships.
             </p>
-            <p className="text-lg text-stone">
+            <p className="text-base text-pewter">
               Every organization that carries a Readiness Score™ is evaluated across these six dimensions — no shortcuts, no self-assessment, no exceptions.
             </p>
           </div>
           <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-            {DIMENSIONS.map((d) => (
+            {DIMENSIONS.map((d, i) => (
               <div
                 key={d.title}
                 id={slugify(d.title)}
-                className="scroll-mt-24 rounded-sm border border-navy/10 bg-card p-8 transition-all hover:border-gold hover:shadow-[0_20px_50px_-25px_rgba(10,19,34,0.35)]"
+                className="group relative scroll-mt-24 rounded-sm border border-gold/20 bg-white/[0.03] p-8 pt-10 backdrop-blur-sm transition-all hover:border-gold/60 hover:bg-white/[0.05] hover:-translate-y-1 hover:shadow-[0_30px_60px_-25px_rgba(0,0,0,0.6)]"
               >
-                <div className="flex h-12 w-12 items-center justify-center rounded-full border border-gold/40 bg-gold/5 text-gold mb-5">
-                  <d.icon size={20} strokeWidth={1.4} aria-hidden="true" />
+                <div
+                  className="absolute inset-x-0 top-0 h-px"
+                  aria-hidden
+                  style={{ background: "linear-gradient(90deg, transparent, rgba(212,175,55,0.9), transparent)" }}
+                />
+                <div className="flex items-center justify-between mb-6">
+                  <div className="flex h-14 w-14 items-center justify-center rounded-full bg-gradient-to-br from-gold to-bronze text-navy shadow-[0_8px_24px_-8px_rgba(212,175,55,0.6)]">
+                    <d.icon size={22} strokeWidth={1.75} aria-hidden="true" />
+                  </div>
+                  <span className="font-display text-3xl text-gold/30 tabular-nums leading-none">
+                    0{i + 1}
+                  </span>
                 </div>
-                <h3 className="font-display text-2xl text-navy mb-3">{d.title}</h3>
-                <p className="text-sm text-stone leading-relaxed">{d.body}</p>
+                <h3 className="font-display text-2xl text-ivory mb-3">{d.title}</h3>
+                <p className="text-sm text-ivory/70 leading-relaxed">{d.body}</p>
               </div>
             ))}
           </div>
         </div>
       </section>
+
 
 
       {/* READINESS MATURITY INDEX */}
