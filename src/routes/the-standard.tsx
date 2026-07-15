@@ -2,6 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { Radio, Users, Fingerprint, Zap, BarChart3, Handshake, ArrowRight } from "lucide-react";
 import { ContinueReading } from "@/components/site/ContinueReading";
 import boardroom from "@/assets/prsc-boardroom.jpg.asset.json";
+import sealBadge from "@/assets/prsc-seal-badge.png.asset.json";
 
 const slugify = (s: string) => s.toLowerCase().replace(/™/g, "").replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
 
@@ -108,70 +109,14 @@ function TheStandardPage() {
       <section className="bg-ivory text-navy py-24 md:py-32">
         <div className="mx-auto max-w-7xl px-6 grid gap-16 lg:grid-cols-2 items-center">
           <div className="flex justify-center">
-            <svg viewBox="0 0 400 400" className="w-full h-auto max-w-sm" role="img" aria-label="PRSC governance seal">
-              <defs>
-                <linearGradient id="seal-gold" x1="0" y1="0" x2="1" y2="1">
-                  <stop offset="0%" stopColor="#F5E6B3" />
-                  <stop offset="60%" stopColor="#D4AF37" />
-                  <stop offset="100%" stopColor="#8C6E3B" />
-                </linearGradient>
-                <path id="seal-rim" d="M 200,200 m -150,0 a 150,150 0 1,1 300,0 a 150,150 0 1,1 -300,0" />
-              </defs>
-              {/* Outer engraved rings */}
-              <circle cx="200" cy="200" r="180" fill="none" stroke="url(#seal-gold)" strokeWidth="1.25" />
-              <circle cx="200" cy="200" r="172" fill="none" stroke="#0A1322" strokeOpacity="0.35" strokeWidth="0.5" />
-              <circle cx="200" cy="200" r="150" fill="#0A1322" />
-              <circle cx="200" cy="200" r="150" fill="none" stroke="url(#seal-gold)" strokeWidth="1" />
-              <circle cx="200" cy="200" r="140" fill="none" stroke="#D4AF37" strokeOpacity="0.35" strokeWidth="0.5" />
-
-              {/* Cardinal engraved marks */}
-              {[0, 90, 180, 270].map((deg) => {
-                const a = (deg * Math.PI) / 180;
-                const x1 = 200 + Math.cos(a) * 150;
-                const y1 = 200 + Math.sin(a) * 150;
-                const x2 = 200 + Math.cos(a) * 180;
-                const y2 = 200 + Math.sin(a) * 180;
-                return <line key={deg} x1={x1} y1={y1} x2={x2} y2={y2} stroke="#D4AF37" strokeWidth="1.25" />;
-              })}
-              {/* Minor ticks */}
-              {Array.from({ length: 48 }).map((_, i) => {
-                const a = (i * Math.PI * 2) / 48;
-                const inner = i % 4 === 0 ? 158 : 162;
-                const x1 = 200 + Math.cos(a) * inner;
-                const y1 = 200 + Math.sin(a) * inner;
-                const x2 = 200 + Math.cos(a) * 168;
-                const y2 = 200 + Math.sin(a) * 168;
-                return <line key={i} x1={x1} y1={y1} x2={x2} y2={y2} stroke="#D4AF37" strokeOpacity={i % 4 === 0 ? 0.9 : 0.3} strokeWidth="0.6" />;
-              })}
-
-              {/* Curved wordmark around the rim */}
-              <text fill="#D4AF37" fontSize="11" letterSpacing="6" fontFamily="ui-sans-serif, system-ui">
-                <textPath href="#seal-rim" startOffset="25%" textAnchor="middle">
-                  PARTNERSHIP READINESS · STANDARDS COUNCIL
-                </textPath>
-              </text>
-              <text fill="#D4AF37" fontSize="9" letterSpacing="5" fontFamily="ui-sans-serif, system-ui" opacity="0.75">
-                <textPath href="#seal-rim" startOffset="75%" textAnchor="middle">
-                  INDEPENDENT · EVIDENCE-BASED · MMXXVI
-                </textPath>
-              </text>
-
-              {/* Center emblem */}
-              <circle cx="200" cy="200" r="68" fill="none" stroke="#D4AF37" strokeOpacity="0.55" strokeWidth="0.75" />
-              <circle cx="200" cy="200" r="60" fill="none" stroke="#D4AF37" strokeWidth="1.25" />
-              <text x="200" y="196" textAnchor="middle" fill="#F5E6B3" fontFamily="Cormorant Garamond, serif" fontSize="46" fontWeight="500" letterSpacing="4">PRSC</text>
-              <line x1="160" y1="212" x2="240" y2="212" stroke="#D4AF37" strokeOpacity="0.6" strokeWidth="0.5" />
-              <text x="200" y="228" textAnchor="middle" fill="#D4AF37" fontSize="7" letterSpacing="3">EST · MMXXVI</text>
-
-              {/* Corner engraved fleurons */}
-              {[45, 135, 225, 315].map((deg) => {
-                const a = (deg * Math.PI) / 180;
-                const cx = 200 + Math.cos(a) * 120;
-                const cy = 200 + Math.sin(a) * 120;
-                return <circle key={deg} cx={cx} cy={cy} r="2" fill="#D4AF37" opacity="0.7" />;
-              })}
-            </svg>
+            <img
+              src={sealBadge.url}
+              alt="PRSC governance seal — Partnership Readiness Standards Council"
+              className="w-full h-auto max-w-sm"
+              loading="lazy"
+            />
           </div>
+
           <div>
             <p className="label-caps text-gold mb-4">Independence by Design</p>
             <h2 className="font-display text-4xl md:text-5xl leading-tight mb-6">
