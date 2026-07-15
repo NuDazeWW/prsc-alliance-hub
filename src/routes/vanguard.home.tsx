@@ -415,7 +415,7 @@ function VanguardHome() {
       {/* ==================== BLOCK 4 — A BETTER WAY + THE SOLUTION ==================== */}
       <section style={{ background: NAVY }} className="px-6 py-24 md:py-28">
         {/* Top: A Better Way (centered) */}
-        <div className="mx-auto max-w-3xl text-center">
+        <div className="mx-auto max-w-5xl text-center">
           <p
             className="text-[12px] font-semibold uppercase mb-5"
             style={{ color: GOLD, letterSpacing: "0.24em" }}
@@ -427,12 +427,13 @@ function VanguardHome() {
             style={{ background: `linear-gradient(90deg, transparent, ${GOLD}, transparent)` }}
           />
           <h2
-            className="font-display leading-tight text-[26px] md:text-[32px]"
+            className="font-display leading-tight text-[22px] sm:text-[24px] md:text-[28px]"
             style={{ color: IVORY }}
           >
-            This isn&rsquo;t another sponsorship program or agency.
-            <br />
-            It&rsquo;s the beginning of an independent commercial standard for motorsport.
+            <span className="block">This isn&rsquo;t another sponsorship program or agency.</span>
+            <span className="block md:whitespace-nowrap">
+              It&rsquo;s the beginning of an independent commercial standard for motorsport.
+            </span>
           </h2>
           <p
             className="mt-8 font-display italic text-[20px] md:text-[24px] leading-snug"
