@@ -3,17 +3,52 @@ import { Radio, Users, Fingerprint, Zap, BarChart3, Handshake } from "lucide-rea
 import { ContinueReading } from "@/components/site/ContinueReading";
 import boardroom from "@/assets/prsc-boardroom.jpg.asset.json";
 
+const CANONICAL = "https://prscstandards.com/the-standard";
+const OG_IMAGE = `https://prscstandards.com${boardroom.url}`;
+
 export const Route = createFileRoute("/the-standard")({
   head: () => ({
     meta: [
       { title: "The PRSC Readiness Score — The Standard" },
-      { name: "description", content: "The Six Readiness Dimensions™ that define partnership readiness. An independent, evidence-based methodology governed by the market." },
+      { name: "description", content: "The Six Readiness Dimensions™ — an independent, evidence-based methodology for commercial partnership readiness." },
       { property: "og:title", content: "The PRSC Readiness Score — The Standard" },
       { property: "og:description", content: "The independent methodology and Six Readiness Dimensions™ that define commercial partnership readiness." },
+      { property: "og:type", content: "article" },
+      { property: "og:url", content: CANONICAL },
+      { property: "og:image", content: OG_IMAGE },
+      { name: "twitter:card", content: "summary_large_image" },
+      { name: "twitter:title", content: "The PRSC Readiness Score — The Standard" },
+      { name: "twitter:description", content: "The Six Readiness Dimensions™ — an independent, evidence-based methodology for commercial partnership readiness." },
+      { name: "twitter:image", content: OG_IMAGE },
+    ],
+    links: [
+      { rel: "canonical", href: CANONICAL },
+      { rel: "preload", as: "image", href: boardroom.url, fetchpriority: "high" },
+    ],
+    scripts: [
+      {
+        type: "application/ld+json",
+        children: JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "DefinedTermSet",
+          name: "The Six Readiness Dimensions",
+          description: "The six independent dimensions of the PRSC Readiness Score™ methodology for measuring commercial partnership readiness.",
+          url: CANONICAL,
+          hasDefinedTerm: [
+            { "@type": "DefinedTerm", name: "Signal Strength", description: "The clarity, consistency, and reach of an organization's public presence — the raw broadcast footprint on which every partnership is built." },
+            { "@type": "DefinedTerm", name: "Audience Value", description: "The quality, composition, and commercial relevance of the audience delivered — not just size, but purchasing power, loyalty, and cultural weight." },
+            { "@type": "DefinedTerm", name: "Platform Identity", description: "The distinctness of the brand an organization carries — how sharply it stands apart in a crowded, undifferentiated market." },
+            { "@type": "DefinedTerm", name: "Activation Capability", description: "The organization's ability to execute — creative capacity, operational rigor, and speed from partnership idea to market." },
+            { "@type": "DefinedTerm", name: "Measurement Confidence", description: "The reliability of the data, methodology, and reporting infrastructure a partner receives — the foundation of any credible ROI conversation." },
+            { "@type": "DefinedTerm", name: "Relationship Strength", description: "The trust, retention, and depth of partner relationships — the leading indicator of long-term commercial value." },
+          ],
+        }),
+      },
     ],
   }),
   component: TheStandardPage,
 });
+
 
 const DIMENSIONS = [
   { icon: Radio, title: "Signal Strength™", body: "The clarity, consistency, and reach of an organization's public presence — the raw broadcast footprint on which every partnership is built." },
@@ -34,7 +69,9 @@ function TheStandardPage() {
           width={1920}
           height={1088}
           className="absolute inset-0 h-full w-full object-cover"
-          aria-hidden
+          fetchPriority="high"
+          decoding="async"
+          aria-hidden="true"
         />
         <div className="absolute inset-0" style={{ backgroundColor: "rgba(10,19,34,0.7)" }} aria-hidden />
         <div className="absolute inset-0 opacity-[0.06] pointer-events-none"
