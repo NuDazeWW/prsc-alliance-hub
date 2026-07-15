@@ -32,7 +32,10 @@ async function insertRow(table: "briefing_requests" | "board_interest" | "vangua
   const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { error } = await (supabaseAdmin.from(table) as any).insert(row);
-  if (error) throw new Error(`Submission failed: ${error.message}`);
+  if (error) {
+    console.error(`[insertRow] ${table} failed:`, error);
+    throw new Error("Something went wrong. Please try again.");
+  }
   return { ok: true as const };
 }
 
