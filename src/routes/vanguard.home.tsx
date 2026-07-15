@@ -681,11 +681,11 @@ function VanguardHome() {
         </div>
       </section>
 
-      {/* darker gold strip */}
-      <section style={{ background: "#B8962B" }} className="px-6 py-4">
+      {/* dark strip */}
+      <section style={{ background: "#000000" }} className="px-6 py-4">
         <p
           className="mx-auto max-w-5xl text-center text-[13px] md:text-[14px]"
-          style={{ color: NAVY, letterSpacing: "0.02em" }}
+          style={{ color: IVORY, letterSpacing: "0.02em" }}
         >
           Twenty-five organizations will become the founding benchmark against which future teams are
           measured.
