@@ -224,6 +224,15 @@ function ReserveForm() {
         className="w-full rounded-sm border px-4 py-3 text-[15px] placeholder:italic focus:outline-none focus:ring-1"
         style={{ borderColor: "rgba(10,19,34,0.25)", background: "#fff", color: NAVY }}
       />
+      <input
+        name="phone"
+        type="tel"
+        required
+        placeholder="Phone"
+        maxLength={40}
+        className="w-full rounded-sm border px-4 py-3 text-[15px] placeholder:italic focus:outline-none focus:ring-1"
+        style={{ borderColor: "rgba(10,19,34,0.25)", background: "#fff", color: NAVY }}
+      />
       {error && (
         <p className="md:col-span-3 text-sm" style={{ color: "#7A1F2B" }}>
           {error}
