@@ -36,14 +36,39 @@ async function insertRow(table: "briefing_requests" | "board_interest" | "vangua
   return { ok: true as const };
 }
 
+async function notify(subject: string, fields: Record<string, unknown>) {
+  try {
+    const { sendNotification } = await import("./sendgrid.server");
+    await sendNotification(subject, fields);
+  } catch (e) {
+    console.error("[notify] failed", e);
+  }
+}
+
 export const submitBriefing = createServerFn({ method: "POST" })
   .inputValidator((d: unknown) => BriefingSchema.parse(d))
-  .handler(async ({ data }) => insertRow("briefing_requests", { ...data, message: data.message || null }));
+  .handler(async ({ data }) => {
+    const row = { ...data, message: data.message || null };
+    const result = await insertRow("briefing_requests", row);
+    await notify("New Briefing Request — PRSC", row);
+    return result;
+  });
 
 export const submitBoardInterest = createServerFn({ method: "POST" })
   .inputValidator((d: unknown) => BoardSchema.parse(d))
-  .handler(async ({ data }) => insertRow("board_interest", { ...data, linkedin_url: data.linkedin_url || null }));
+  .handler(async ({ data }) => {
+    const row = { ...data, linkedin_url: data.linkedin_url || null };
+    const result = await insertRow("board_interest", row);
+    await notify("New Board Interest — PRSC", row);
+    return result;
+  });
 
 export const submitVanguardInterest = createServerFn({ method: "POST" })
   .inputValidator((d: unknown) => VanguardSchema.parse(d))
-  .handler(async ({ data }) => insertRow("vanguard_interest", { ...data, phone: data.phone || null }));
+  .handler(async ({ data }) => {
+    const row = { ...data, phone: data.phone || null };
+    const result = await insertRow("vanguard_interest", row);
+    await notify("New Vanguard Application — PRSC", row);
+    return result;
+  });
+
