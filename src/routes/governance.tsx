@@ -25,11 +25,12 @@ export const Route = createFileRoute("/governance")({
 
 const PRECEDENTS = [
   { market: "Accounting", body: "GAAP / IFRS" },
-  { market: "Credit", body: "FICO" },
-  { market: "Information Security", body: "ISO 27001" },
+  { market: "Credit", body: "FICO®" },
+  { market: "Information Security", body: "ISO/IEC 27001" },
   { market: "Digital Measurement", body: "MRC" },
-  { market: "Partnership Readiness", body: "PRSC", ours: true },
+  { market: "Partnership Readiness", body: "PRSC™", ours: true },
 ];
+
 
 const LAYERS = [
   {
