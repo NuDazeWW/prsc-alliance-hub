@@ -22,7 +22,7 @@ export const Route = createFileRoute("/")({
       {
         property: "og:description",
         content:
-          "An authoritative, evidence-based framework that brings clarity, discipline, and trust to the $100B+ global sponsorship market.",
+          "PRSC is the independent standards body for partnership readiness — an authoritative, evidence-based framework for the global sponsorship market. Request a briefing.",
       },
       { property: "og:url", content: CANONICAL },
     ],

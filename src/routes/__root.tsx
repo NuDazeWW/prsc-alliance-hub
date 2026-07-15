@@ -77,14 +77,14 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       {
         name: "description",
         content:
-          "PRSC is the independent standards body governing partnership readiness — an authoritative, evidence-based rating for the $100B+ sponsorship market.",
+          "PRSC is the independent standards body for partnership readiness — an authoritative, evidence-based framework for the global sponsorship market. Request a briefing.",
       },
       { name: "author", content: "Partnership Readiness Standards Council" },
       { property: "og:title", content: "PRSC — The Independent Standard for Partnership Readiness" },
       {
         property: "og:description",
         content:
-          "The independent standards body governing partnership readiness. Evidence-based. Neutrally governed. Built for the $100B+ sponsorship market.",
+          "PRSC is the independent standards body for partnership readiness — an authoritative, evidence-based framework for the global sponsorship market. Request a briefing.",
       },
       { property: "og:type", content: "website" },
       { property: "og:site_name", content: "PRSC" },
@@ -93,8 +93,10 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       {
         name: "twitter:description",
         content:
-          "The independent standards body governing partnership readiness — evidence-based, neutrally governed, adopted globally.",
+          "PRSC is the independent standards body for partnership readiness — an authoritative, evidence-based framework for the global sponsorship market. Request a briefing.",
       },
+      { property: "og:image", content: "https://storage.googleapis.com/gpt-engineer-file-uploads/0JafHcnQtudk7ficMoAl5tUjyy42/social-images/social-1784099576877-ChatGPT_Image_Jul_15,_2026,_12_43_53_AM.webp" },
+      { name: "twitter:image", content: "https://storage.googleapis.com/gpt-engineer-file-uploads/0JafHcnQtudk7ficMoAl5tUjyy42/social-images/social-1784099576877-ChatGPT_Image_Jul_15,_2026,_12_43_53_AM.webp" },
     ],
     links: [
       { rel: "stylesheet", href: appCss },
