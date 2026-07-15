@@ -1,7 +1,10 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { Radio, Users, Fingerprint, Zap, BarChart3, Handshake } from "lucide-react";
 import { ContinueReading } from "@/components/site/ContinueReading";
 import boardroom from "@/assets/prsc-boardroom.jpg.asset.json";
+
+const slugify = (s: string) => s.toLowerCase().replace(/™/g, "").replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
+
 
 const CANONICAL = "https://prscstandards.com/the-standard";
 const OG_IMAGE = `https://prscstandards.com${boardroom.url}`;
@@ -82,11 +85,26 @@ function TheStandardPage() {
             The PRSC Readiness Score™.
           </h1>
           <div className="gold-rule my-8 mx-auto w-24" />
-          <p className="mt-4 text-xl text-ivory/75 max-w-3xl mx-auto leading-relaxed">
+          <p className="mt-4 text-xl text-ivory/80 max-w-3xl mx-auto leading-relaxed">
             A single, independent measure of an organization's commercial partnership readiness — built on six dimensions, governed by the market, evidence at every step.
           </p>
+          <div className="mt-10 flex flex-wrap items-center justify-center gap-4">
+            <Link
+              to="/request-briefing"
+              className="inline-flex items-center rounded-sm bg-gold px-6 py-3 text-navy font-medium tracking-wide hover:bg-gold-light transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold"
+            >
+              Request a Briefing
+            </Link>
+            <a
+              href="#the-six-dimensions"
+              className="inline-flex items-center rounded-sm border border-gold/50 px-6 py-3 text-ivory hover:border-gold hover:bg-gold/10 transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold"
+            >
+              Explore the Framework
+            </a>
+          </div>
         </div>
       </section>
+
 
       {/* INDEPENDENCE BY DESIGN */}
       <section className="bg-ivory text-navy py-24 md:py-32">
@@ -136,7 +154,7 @@ function TheStandardPage() {
       </section>
 
       {/* SIX DIMENSIONS */}
-      <section className="bg-ivory pb-24 md:pb-32">
+      <section id="the-six-dimensions" className="bg-ivory pb-24 md:pb-32 scroll-mt-24">
         <div className="mx-auto max-w-7xl px-6">
           <div className="text-center max-w-3xl mx-auto mb-16">
             <p className="label-caps text-gold mb-4">The Framework</p>
@@ -153,9 +171,13 @@ function TheStandardPage() {
           </div>
           <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
             {DIMENSIONS.map((d) => (
-              <div key={d.title} className="rounded-sm border border-navy/10 bg-card p-8 transition-all hover:border-gold hover:shadow-[0_20px_50px_-25px_rgba(10,19,34,0.35)]">
+              <div
+                key={d.title}
+                id={slugify(d.title)}
+                className="scroll-mt-24 rounded-sm border border-navy/10 bg-card p-8 transition-all hover:border-gold hover:shadow-[0_20px_50px_-25px_rgba(10,19,34,0.35)]"
+              >
                 <div className="flex h-12 w-12 items-center justify-center rounded-full border border-gold/40 bg-gold/5 text-gold mb-5">
-                  <d.icon size={20} strokeWidth={1.4} />
+                  <d.icon size={20} strokeWidth={1.4} aria-hidden="true" />
                 </div>
                 <h3 className="font-display text-2xl text-navy mb-3">{d.title}</h3>
                 <p className="text-sm text-stone leading-relaxed">{d.body}</p>
@@ -164,6 +186,7 @@ function TheStandardPage() {
           </div>
         </div>
       </section>
+
 
       {/* READINESS MATURITY INDEX */}
       <section className="bg-ivory pb-24 md:pb-32">
@@ -180,12 +203,13 @@ function TheStandardPage() {
 
           <div className="rounded-sm bg-navy text-ivory overflow-hidden">
             <table className="w-full">
+              <caption className="sr-only">Readiness Maturity Index scoring bands</caption>
               <thead>
-                <tr style={{ borderBottom: "1px solid #8C6E3B" }}>
-                  <th className="label-caps text-ivory/60 text-[0.7rem] text-left px-6 md:px-10 py-5 w-2/5">
+                <tr className="border-b border-bronze">
+                  <th className="label-caps text-ivory/70 text-[0.7rem] text-left px-6 md:px-10 py-5 w-2/5">
                     Score Range
                   </th>
-                  <th className="label-caps text-ivory/60 text-[0.7rem] text-left px-6 md:px-10 py-5">
+                  <th className="label-caps text-ivory/70 text-[0.7rem] text-left px-6 md:px-10 py-5">
                     Maturity Level
                   </th>
                 </tr>
@@ -200,7 +224,7 @@ function TheStandardPage() {
                 ].map(([range, level], i, arr) => (
                   <tr
                     key={range}
-                    style={i < arr.length - 1 ? { borderBottom: "1px solid rgba(140,110,59,0.35)" } : undefined}
+                    className={i < arr.length - 1 ? "border-b border-bronze/35" : undefined}
                   >
                     <td className="font-display text-2xl md:text-3xl text-gold px-6 md:px-10 py-6 tabular-nums">
                       {range}
@@ -214,11 +238,12 @@ function TheStandardPage() {
             </table>
           </div>
 
-          <p className="mt-6 text-xs md:text-sm text-center" style={{ color: "#7A7F87" }}>
+          <p className="mt-6 text-xs md:text-sm text-center text-pewter">
             Scores are calibrated by the PRSC Methodology Committee and reviewed on a defined annual cycle.
           </p>
         </div>
       </section>
+
 
       {/* THE SCORING PROCESS */}
       <section className="bg-navy text-ivory py-24 md:py-32">
@@ -243,7 +268,7 @@ function TheStandardPage() {
               "Certification (where applicable)",
             ].map((step, i, arr) => (
               <li key={step} className="relative flex md:flex-col items-start md:items-center gap-4 md:gap-5">
-                <div className="flex-shrink-0 flex h-12 w-12 items-center justify-center rounded-full border border-gold bg-gold/10 text-gold font-display text-xl tabular-nums">
+                <div aria-hidden="true" className="flex-shrink-0 flex h-12 w-12 items-center justify-center rounded-full border border-gold bg-gold/10 text-gold font-display text-xl tabular-nums">
                   {i + 1}
                 </div>
                 {i < arr.length - 1 && (
@@ -254,18 +279,19 @@ function TheStandardPage() {
                   />
                 )}
                 <div className="md:text-center md:px-2">
-                  <p className="label-caps text-ivory/50 text-[0.6rem] mb-1">Step {i + 1}</p>
+                  <p className="label-caps text-ivory/70 text-[0.6rem] mb-1">Step {i + 1}</p>
                   <p className="text-ivory text-sm md:text-[0.95rem] leading-snug">{step}</p>
                 </div>
               </li>
             ))}
           </ol>
 
-          <p className="mt-14 text-sm text-center" style={{ color: "#7A7F87" }}>
+          <p className="mt-14 text-sm text-center text-pewter">
             The scoring methodology is versioned, published, and subject to annual review. Current release: Version 1.0, 2026.
           </p>
         </div>
       </section>
+
 
       {/* ACTIONABLE INTELLIGENCE */}
       <section className="bg-midnight text-ivory py-24 md:py-32">
