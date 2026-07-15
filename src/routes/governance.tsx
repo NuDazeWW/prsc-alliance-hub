@@ -1,7 +1,8 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { Landmark, ScrollText, Users, ChevronDown, ShieldCheck, Eye, GitBranch, BookOpenCheck } from "lucide-react";
+import { Landmark, ScrollText, Users, ChevronDown, ShieldCheck, Eye, GitBranch, BookOpenCheck, Check } from "lucide-react";
 import { BoardInterestForm } from "@/components/forms/PrscForms";
 import { ContinueReading } from "@/components/site/ContinueReading";
+import sealBadge from "@/assets/prsc-seal-badge.png.asset.json";
 
 const CANONICAL = "https://prsc-alliance-hub.lovable.app/governance";
 
@@ -27,8 +28,24 @@ const PRECEDENTS = [
   { market: "Accounting", body: "GAAP / IFRS" },
   { market: "Credit", body: "FICO®" },
   { market: "Information Security", body: "ISO/IEC 27001" },
-  { market: "Digital Measurement", body: "MRC" },
-  { market: "Partnership Readiness", body: "PRSC™", ours: true },
+  { market: "Media Measurement", body: "MRC" },
+  { market: "Partnership Readiness", body: "PRSC", note: "Founding", ours: true },
+];
+
+const COMMITMENTS = [
+  "No commercial revenue from scored organizations.",
+  "Published conflict-of-interest registers for every Council and Committee member.",
+  "Open-licensed methodology, versioned in public.",
+  "Term-limited Council seats with published rotation cadence.",
+  "Annual independent audit of governance and methodology adherence.",
+];
+
+const MILESTONES = [
+  { label: "Constitution Adopted" },
+  { label: "Founding Council Seated" },
+  { label: "Methodology Version 1 Published" },
+  { label: "First Readiness Scores Issued" },
+  { label: "Continuous Governance" },
 ];
 
 
@@ -83,6 +100,13 @@ function GovernancePage() {
           style={{ background: "linear-gradient(90deg, transparent, rgba(212,175,55,0.6), transparent)" }}
         />
         <div className="relative mx-auto max-w-5xl px-6 text-center">
+          <img
+            src={sealBadge.url}
+            alt=""
+            aria-hidden="true"
+            className="mx-auto mb-6 h-20 w-20 md:h-24 md:w-24 opacity-90"
+            loading="eager"
+          />
           <p className="label-caps text-gold mb-6">Governance</p>
           <h1 className="font-display text-4xl sm:text-5xl md:text-6xl leading-[1.05]">
             Governed by the Market.<br />Built for the Market.
@@ -128,11 +152,16 @@ function GovernancePage() {
                       {p.market}
                     </span>
                     <span
-                      className={`font-display text-lg md:text-xl tabular-nums tracking-wide ${
+                      className={`font-display text-lg md:text-xl tabular-nums tracking-wide flex items-baseline gap-2 ${
                         p.ours ? "text-gold" : "text-navy/80"
                       }`}
                     >
                       {p.body}
+                      {p.note && (
+                        <span className="label-caps text-[0.6rem] tracking-[0.22em] text-gold/80 border border-gold/40 rounded-full px-2 py-0.5 font-sans">
+                          {p.note}
+                        </span>
+                      )}
                     </span>
                   </li>
                 ))}
@@ -218,11 +247,102 @@ function GovernancePage() {
             ))}
           </div>
 
-          <p className="mt-12 text-center text-xs md:text-sm text-pewter">
+          {/* Constitutional statement */}
+          <div className="mt-20 md:mt-24 mx-auto max-w-3xl text-center">
+            <div className="gold-rule mx-auto w-16 mb-8" />
+            <p className="font-display text-2xl md:text-3xl leading-snug text-ivory">
+              Authority is earned through governance.
+            </p>
+            <div className="mt-8 space-y-4 text-base md:text-lg text-ivory/75 leading-relaxed">
+              <p>PRSC does not exist to represent any one organization.</p>
+              <p>It exists to protect the integrity of the Standard.</p>
+              <p>
+                Every governance layer exists for a single purpose: to ensure that a PRSC Readiness Score
+                means the same thing tomorrow as it does today.
+              </p>
+            </div>
+          </div>
+
+          <p className="mt-16 text-center text-xs md:text-sm text-pewter">
             Constitution v1.0 · 2026 · Reviewed annually by the Council.
           </p>
         </div>
       </section>
+
+      {/* INDEPENDENCE COMMITMENTS */}
+      <section className="bg-ivory text-navy py-24 md:py-32">
+        <div className="mx-auto max-w-6xl px-6 grid gap-14 lg:grid-cols-[1fr_1.1fr] lg:items-start">
+          <div>
+            <p className="label-caps text-gold mb-4">Independence Commitments</p>
+            <h2 className="font-display text-4xl md:text-5xl leading-tight mb-6">
+              The hard promises that keep the Standard credible.
+            </h2>
+            <div className="gold-rule my-6 w-24" />
+            <p className="text-lg text-stone leading-relaxed">
+              Independence is not a claim. It is a set of structural commitments — written into the constitution,
+              audited annually, and enforced by the Council.
+            </p>
+          </div>
+
+          <ul className="space-y-4">
+            {COMMITMENTS.map((c) => (
+              <li
+                key={c}
+                className="flex gap-4 items-start rounded-sm border border-navy/10 bg-white/70 backdrop-blur-sm px-6 py-5 shadow-[0_10px_30px_-20px_rgba(10,19,34,0.25)]"
+              >
+                <span className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-gold/15 text-gold">
+                  <Check size={14} strokeWidth={2.25} aria-hidden="true" />
+                </span>
+                <p className="text-base text-navy leading-relaxed">{c}</p>
+              </li>
+            ))}
+          </ul>
+        </div>
+      </section>
+
+      {/* ESTABLISHING THE STANDARD — MILESTONES */}
+      <section className="relative bg-midnight text-ivory py-24 md:py-32 overflow-hidden border-y border-gold/20">
+        <div
+          className="absolute inset-0 opacity-[0.04] pointer-events-none"
+          aria-hidden
+          style={{
+            backgroundImage:
+              "linear-gradient(rgba(212,175,55,0.6) 1px, transparent 1px), linear-gradient(90deg, rgba(212,175,55,0.6) 1px, transparent 1px)",
+            backgroundSize: "80px 80px",
+          }}
+        />
+        <div className="relative mx-auto max-w-6xl px-6">
+          <div className="text-center max-w-2xl mx-auto mb-16">
+            <p className="label-caps text-gold mb-4">Establishing the Standard</p>
+            <h2 className="font-display text-4xl md:text-5xl leading-tight">
+              Constitutional milestones, not a product roadmap.
+            </h2>
+            <div className="gold-rule my-6 mx-auto w-24" />
+            <p className="text-base md:text-lg text-ivory/70">
+              The chronology by which an institution comes into being.
+            </p>
+          </div>
+
+          <ol className="relative grid gap-10 md:gap-6 md:grid-cols-5">
+            <div
+              aria-hidden
+              className="hidden md:block absolute left-0 right-0 top-6 h-px"
+              style={{ background: "linear-gradient(90deg, transparent, rgba(212,175,55,0.5), rgba(212,175,55,0.5), transparent)" }}
+            />
+            {MILESTONES.map((m, i) => (
+              <li key={m.label} className="relative flex md:flex-col items-start md:items-center gap-4 md:gap-5 md:text-center">
+                <div className="relative flex h-12 w-12 shrink-0 items-center justify-center rounded-full border border-gold/50 bg-navy text-gold font-display text-lg tabular-nums">
+                  {String(i + 1).padStart(2, "0")}
+                </div>
+                <p className="text-sm md:text-[0.95rem] text-ivory/85 leading-snug md:max-w-[10rem]">
+                  {m.label}
+                </p>
+              </li>
+            ))}
+          </ol>
+        </div>
+      </section>
+
 
       {/* PRINCIPLES STRIP */}
       <section className="bg-midnight text-ivory py-14 border-y border-gold/20">
