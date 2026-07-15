@@ -47,7 +47,7 @@ function VanguardPage() {
             The Readiness Vanguard is the founding group of rights holders in sport to receive an independent PRSC Readiness Score™. It costs nothing. The score is yours.
           </p>
           <p className="mt-6 text-lg text-ivory/70 max-w-3xl mx-auto leading-relaxed">
-            The Founding Vanguard is open to teams, drivers, series, and venues across motorsport and emerging competitive sports — the markets where the gap between commercial potential and commercial proof is widest, and where the Standard will have the most immediate impact.
+            The Readiness Vanguard is open to teams, drivers, series, and venues across motorsport and emerging competitive sports — the markets where the gap between commercial potential and commercial proof is widest, and where the Standard will have the most immediate impact.
           </p>
         </div>
       </section>
