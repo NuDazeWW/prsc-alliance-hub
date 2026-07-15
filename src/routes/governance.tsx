@@ -100,6 +100,13 @@ function GovernancePage() {
           style={{ background: "linear-gradient(90deg, transparent, rgba(212,175,55,0.6), transparent)" }}
         />
         <div className="relative mx-auto max-w-5xl px-6 text-center">
+          <img
+            src={sealBadge.url}
+            alt=""
+            aria-hidden="true"
+            className="mx-auto mb-6 h-20 w-20 md:h-24 md:w-24 opacity-90"
+            loading="eager"
+          />
           <p className="label-caps text-gold mb-6">Governance</p>
           <h1 className="font-display text-4xl sm:text-5xl md:text-6xl leading-[1.05]">
             Governed by the Market.<br />Built for the Market.
