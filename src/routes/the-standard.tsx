@@ -124,7 +124,7 @@ function TheStandardPage() {
             </h2>
             <div className="space-y-4 text-lg text-stone leading-relaxed">
               <p>
-                A standard is only as credible as the body that governs it. PRSC is structured to be non-commercial, methodologically transparent, and independent of any single organization, brand, or platform.
+                A standard is only as credible as the body that governs it. PRSC™ is structured to be non-commercial, methodologically transparent, and independent of any single organization, brand, or platform.
               </p>
               <p>
                 Methodology is set by a peer-reviewed committee. Scoring is auditable. Version history is published. The Standard belongs to the market it serves.
