@@ -5,6 +5,12 @@ import { useServerFn } from "@tanstack/react-start";
 import {
   ArrowDown,
   ArrowRight,
+  Radio,
+  Users,
+  Fingerprint,
+  Zap,
+  BarChart3,
+  Handshake,
   FileText,
   HelpCircle,
   UserRound,
@@ -131,8 +137,35 @@ function ScoreRing() {
 }
 
 /* ------------------------------------------------------------------ */
-/* (DimLabel removed — no longer used) */
+/* Dimension label pill (six around the ring)                          */
+/* ------------------------------------------------------------------ */
 
+function DimLabel({ Icon, label, align }: { Icon: typeof Radio; label: string; align: "left" | "right" }) {
+  return (
+    <div
+      className={`flex items-center gap-3 ${align === "right" ? "flex-row-reverse text-right" : "text-left"}`}
+    >
+      <div
+        className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border"
+        style={{ borderColor: "rgba(212,175,55,0.45)", color: GOLD }}
+      >
+        <Icon size={15} strokeWidth={1.6} />
+      </div>
+      <div className={`flex-1 min-w-0 ${align === "right" ? "items-end" : ""}`}>
+        <p
+          className="text-[10px] md:text-[11px] font-semibold leading-tight"
+          style={{ color: IVORY, letterSpacing: "0.18em" }}
+        >
+          {label}
+        </p>
+        <div
+          className={`mt-2 h-px w-16 ${align === "right" ? "ml-auto" : ""}`}
+          style={{ background: `linear-gradient(90deg, transparent, ${GOLD}, transparent)` }}
+        />
+      </div>
+    </div>
+  );
+}
 
 /* ------------------------------------------------------------------ */
 /* Form                                                                */
@@ -434,8 +467,20 @@ function VanguardHome() {
             <p>A score that tells sponsors exactly what they need to know.</p>
           </div>
 
-          {/* Ring */}
-          <ScoreRing />
+          {/* Ring with side labels */}
+          <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-6 md:gap-10">
+            <div className="flex flex-col gap-8">
+              <DimLabel Icon={Radio} label="SIGNAL STRENGTH" align="right" />
+              <DimLabel Icon={Users} label="AUDIENCE VALUE" align="right" />
+              <DimLabel Icon={Fingerprint} label="PLATFORM IDENTITY" align="right" />
+            </div>
+            <ScoreRing />
+            <div className="flex flex-col gap-8">
+              <DimLabel Icon={Zap} label="ACTIVATION CAPABILITY" align="left" />
+              <DimLabel Icon={BarChart3} label="MEASUREMENT CONFIDENCE" align="left" />
+              <DimLabel Icon={Handshake} label="RELATIONSHIP STRENGTH" align="left" />
+            </div>
+          </div>
         </div>
       </section>
 
