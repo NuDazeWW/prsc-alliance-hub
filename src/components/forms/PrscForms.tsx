@@ -76,7 +76,7 @@ export function BoardInterestForm() {
       <Field label="Organization" htmlFor="organization"><Input id="organization" name="organization" required /></Field>
       <Field label="Email" htmlFor="email"><Input id="email" name="email" type="email" required /></Field>
       <div className="md:col-span-2">
-        <Field label="LinkedIn URL" htmlFor="linkedin_url"><Input id="linkedin_url" name="linkedin_url" type="url" placeholder="https://linkedin.com/in/…" /></Field>
+        <Field label="LinkedIn URL" htmlFor="linkedin_url"><Input id="linkedin_url" name="linkedin_url" type="url" required placeholder="https://linkedin.com/in/…" /></Field>
       </div>
       <div className="md:col-span-2">
         <Field label="Statement of interest" htmlFor="statement" hint="Briefly describe your perspective on partnership readiness and why you'd contribute to the governing body.">
