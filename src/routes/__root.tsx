@@ -126,13 +126,15 @@ function RootShell({ children }: { children: ReactNode }) {
 
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
+  const pathname = useRouterState({ select: (s) => s.location.pathname });
+  const isChrome = !pathname.startsWith("/vanguard/");
   return (
     <QueryClientProvider client={queryClient}>
-      <SiteNav />
+      {isChrome && <SiteNav />}
       <main className="min-h-screen">
         <Outlet />
       </main>
-      <SiteFooter />
+      {isChrome && <SiteFooter />}
     </QueryClientProvider>
   );
 }
