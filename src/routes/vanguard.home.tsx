@@ -726,19 +726,19 @@ function VanguardHome() {
       </span>
 
       {/* ==================== BLOCK 10 — FORM ==================== */}
-      <section style={{ background: IVORY }} className="px-6 py-24 md:py-28">
+      <section style={{ background: IVORY }} className="px-6 py-20 md:py-24 lg:py-28">
         <div className="mx-auto max-w-3xl text-center">
           <h2
-            className="font-display leading-tight text-[32px] md:text-[40px]"
+            className="font-display leading-tight tracking-tight text-balance text-[26px] sm:text-[32px] md:text-[36px] lg:text-[40px]"
             style={{ color: NAVY }}
           >
             Reserve Your Spot.
             <br />
-            <span className="whitespace-nowrap text-[22px] md:text-[28px]">
+            <span className="block text-[16px] sm:text-[20px] md:text-[24px] lg:text-[28px] leading-snug">
               Request Consideration for the Readiness Vanguard.
             </span>
           </h2>
-          <p className="mx-auto mt-6 max-w-2xl text-[15px] leading-relaxed" style={{ color: STONE }}>
+          <p className="mx-auto mt-5 md:mt-6 max-w-2xl text-[14px] md:text-[15px] leading-relaxed text-balance" style={{ color: STONE }}>
             The Readiness Vanguard is limited to 25 Trans Am teams and drivers. Participation is
             complimentary. Selection is based on the Council&rsquo;s review and is not guaranteed.
           </p>
