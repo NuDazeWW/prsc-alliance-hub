@@ -72,25 +72,27 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "PRSC — Partnership Readiness Standards Council" },
+      { title: "PRSC — The Independent Standard for Partnership Readiness" },
       {
         name: "description",
         content:
-          "The independent standards body for partnership readiness. Authoritative, evidence-based methodology for the global sponsorship and partnership industry.",
+          "PRSC is the independent standards body governing partnership readiness — an authoritative, evidence-based rating for the $100B+ sponsorship market.",
       },
       { name: "author", content: "Partnership Readiness Standards Council" },
-      { property: "og:title", content: "PRSC — Partnership Readiness Standards Council" },
+      { property: "og:title", content: "PRSC — The Independent Standard for Partnership Readiness" },
       {
         property: "og:description",
-        content: "The independent standard for partnership readiness. Authoritative. Timeless. Institutional.",
+        content:
+          "The independent standards body governing partnership readiness. Evidence-based. Neutrally governed. Built for the $100B+ sponsorship market.",
       },
       { property: "og:type", content: "website" },
       { property: "og:site_name", content: "PRSC" },
       { name: "twitter:card", content: "summary_large_image" },
-      { name: "twitter:title", content: "PRSC — Partnership Readiness Standards Council" },
+      { name: "twitter:title", content: "PRSC — The Independent Standard for Partnership Readiness" },
       {
         name: "twitter:description",
-        content: "The independent standard for partnership readiness.",
+        content:
+          "The independent standards body governing partnership readiness — evidence-based, neutrally governed, adopted globally.",
       },
     ],
     links: [
