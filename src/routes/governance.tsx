@@ -1,7 +1,8 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { Landmark, ScrollText, Users, ChevronDown, ShieldCheck, Eye, GitBranch, BookOpenCheck } from "lucide-react";
+import { Landmark, ScrollText, Users, ChevronDown, ShieldCheck, Eye, GitBranch, BookOpenCheck, Check } from "lucide-react";
 import { BoardInterestForm } from "@/components/forms/PrscForms";
 import { ContinueReading } from "@/components/site/ContinueReading";
+import sealBadge from "@/assets/prsc-seal-badge.png.asset.json";
 
 const CANONICAL = "https://prsc-alliance-hub.lovable.app/governance";
 
