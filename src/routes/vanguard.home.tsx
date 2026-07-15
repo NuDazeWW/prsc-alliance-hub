@@ -438,48 +438,49 @@ function VanguardHome() {
         // subtle divider
         // eslint-disable-next-line react/forbid-dom-props
       >
-        <div className="mx-auto max-w-7xl grid gap-12 lg:grid-cols-[1fr_1.1fr_1fr] lg:items-center">
-          {/* Left: text */}
-          <div className="max-w-md">
-            <p
-              className="text-[12px] font-semibold uppercase mb-4"
-              style={{ color: GOLD, letterSpacing: "0.24em" }}
-            >
-              The Solution
+        <div className="mx-auto max-w-5xl flex flex-col items-center text-center">
+          {/* Heading */}
+          <p
+            className="text-[12px] font-semibold uppercase mb-5"
+            style={{ color: GOLD, letterSpacing: "0.24em" }}
+          >
+            The Solution
+          </p>
+          <div
+            className="mx-auto mb-8 h-px w-16"
+            style={{ background: `linear-gradient(90deg, transparent, ${GOLD}, transparent)` }}
+          />
+
+          {/* Copy */}
+          <div
+            className="max-w-2xl space-y-4 text-[15px] leading-relaxed mb-12"
+            style={{ color: IVORY, opacity: 0.9 }}
+          >
+            <p>
+              Commercial readiness — your organization&rsquo;s ability to attract, secure, and retain
+              sponsorship — is now measurable.
             </p>
-            <div className="mb-6 h-px w-12" style={{ background: GOLD }} />
-            <div className="space-y-4 text-[15px] leading-relaxed" style={{ color: IVORY, opacity: 0.9 }}>
-              <p>
-                Commercial readiness — your organization&rsquo;s ability to attract, secure, and retain
-                sponsorship — is now measurable.
-              </p>
-              <p>
-                The PRSC Readiness Score is the first independent commercial rating for teams and
-                drivers in motorsport.
-              </p>
-              <p>A score that tells sponsors exactly what they need to know.</p>
-            </div>
+            <p>
+              The PRSC Readiness Score is the first independent commercial rating for teams and
+              drivers in motorsport.
+            </p>
+            <p>A score that tells sponsors exactly what they need to know.</p>
           </div>
 
-          {/* Center: ring with side labels */}
-          <div className="relative">
-            <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-6 md:gap-10">
-              <div className="flex flex-col gap-8">
-                <DimLabel Icon={Radio} label="SIGNAL STRENGTH" align="right" />
-                <DimLabel Icon={Users} label="AUDIENCE VALUE" align="right" />
-                <DimLabel Icon={Fingerprint} label="PLATFORM IDENTITY" align="right" />
-              </div>
-              <ScoreRing />
-              <div className="flex flex-col gap-8">
-                <DimLabel Icon={Zap} label="ACTIVATION CAPABILITY" align="left" />
-                <DimLabel Icon={BarChart3} label="MEASUREMENT CONFIDENCE" align="left" />
-                <DimLabel Icon={Handshake} label="RELATIONSHIP STRENGTH" align="left" />
-              </div>
+          {/* Ring with side labels */}
+          <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-6 md:gap-10">
+            <div className="flex flex-col gap-8">
+              <DimLabel Icon={Radio} label="SIGNAL STRENGTH" align="right" />
+              <DimLabel Icon={Users} label="AUDIENCE VALUE" align="right" />
+              <DimLabel Icon={Fingerprint} label="PLATFORM IDENTITY" align="right" />
+            </div>
+            <ScoreRing />
+            <div className="flex flex-col gap-8">
+              <DimLabel Icon={Zap} label="ACTIVATION CAPABILITY" align="left" />
+              <DimLabel Icon={BarChart3} label="MEASUREMENT CONFIDENCE" align="left" />
+              <DimLabel Icon={Handshake} label="RELATIONSHIP STRENGTH" align="left" />
             </div>
           </div>
-
-          {/* Right column reserved for balance on very wide screens (kept empty; center already spans) */}
-          <div className="hidden lg:block" aria-hidden />
         </div>
       </section>
 
