@@ -284,7 +284,7 @@ function VanguardHome() {
       {/* ==================== BLOCK 1 — HERO ==================== */}
       <section
         className="relative w-full overflow-hidden"
-        style={{ background: NAVY, minHeight: "100vh" }}
+        style={{ background: NAVY, minHeight: "calc(100vh - 96px)" }}
       >
         {/* right-side hero image */}
         <div className="pointer-events-none absolute inset-0">
@@ -310,7 +310,7 @@ function VanguardHome() {
           />
         </div>
 
-        <div className="relative mx-auto flex min-h-screen max-w-7xl flex-col px-6 py-10 md:py-14">
+        <div className="relative mx-auto flex max-w-7xl flex-col px-6 py-10 md:py-14" style={{ minHeight: "calc(100vh - 96px)" }}>
           {/* Top: seal centered */}
           <div className="flex justify-center">
             <img
@@ -363,7 +363,7 @@ function VanguardHome() {
       </section>
 
       {/* ==================== BLOCK 2 — THE PROBLEM ==================== */}
-      <section style={{ background: IVORY }} className="px-6 py-24 md:py-32">
+      <section style={{ background: IVORY }} className="px-6 pt-20 pb-8 md:pt-24 md:pb-10">
         <div className="mx-auto max-w-[700px] text-center">
           <p
             className="font-display leading-snug text-[24px] md:text-[28px]"
@@ -376,14 +376,14 @@ function VanguardHome() {
             </span>
           </p>
           <div
-            className="mx-auto mt-14 h-px w-40"
+            className="mx-auto mt-8 h-px w-40"
             style={{ background: `linear-gradient(90deg, transparent, ${GOLD}, transparent)` }}
           />
         </div>
       </section>
 
       {/* ==================== BLOCK 3 — WHY IT EXISTS ==================== */}
-      <section style={{ background: IVORY }} className="px-6 pb-24 md:pb-32">
+      <section style={{ background: IVORY }} className="px-6 pt-4 pb-24 md:pt-6 md:pb-32">
         <div className="mx-auto max-w-[640px] text-center">
           <p className="text-[18px] md:text-[20px] leading-relaxed" style={{ color: STONE }}>
             Sponsors invest in organizations that reduce risk. Without a shared standard for measuring
@@ -425,8 +425,14 @@ function VanguardHome() {
           </p>
         </div>
 
+        {/* Divider between "A Better Way" and the illustrative Solution block */}
+        <div
+          className="mx-auto mt-16 h-px w-24"
+          style={{ background: `linear-gradient(90deg, transparent, ${GOLD}, transparent)` }}
+        />
+
         {/* Bottom: The Solution — two columns */}
-        <div className="mx-auto mt-20 grid max-w-6xl items-center gap-12 md:gap-16 lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)]">
+        <div className="mx-auto mt-12 grid max-w-6xl items-center gap-12 md:gap-16 lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)]">
           {/* Left: copy */}
           <div className="max-w-md">
             <p
