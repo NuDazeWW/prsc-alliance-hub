@@ -363,7 +363,7 @@ function VanguardHome() {
       </section>
 
       {/* ==================== BLOCK 2 — THE PROBLEM ==================== */}
-      <section style={{ background: IVORY }} className="px-6 py-24 md:py-32">
+      <section style={{ background: IVORY }} className="px-6 pt-20 pb-8 md:pt-24 md:pb-10">
         <div className="mx-auto max-w-[700px] text-center">
           <p
             className="font-display leading-snug text-[24px] md:text-[28px]"
@@ -376,14 +376,14 @@ function VanguardHome() {
             </span>
           </p>
           <div
-            className="mx-auto mt-14 h-px w-40"
+            className="mx-auto mt-8 h-px w-40"
             style={{ background: `linear-gradient(90deg, transparent, ${GOLD}, transparent)` }}
           />
         </div>
       </section>
 
       {/* ==================== BLOCK 3 — WHY IT EXISTS ==================== */}
-      <section style={{ background: IVORY }} className="px-6 pb-24 md:pb-32">
+      <section style={{ background: IVORY }} className="px-6 pt-4 pb-24 md:pt-6 md:pb-32">
         <div className="mx-auto max-w-[640px] text-center">
           <p className="text-[18px] md:text-[20px] leading-relaxed" style={{ color: STONE }}>
             Sponsors invest in organizations that reduce risk. Without a shared standard for measuring
