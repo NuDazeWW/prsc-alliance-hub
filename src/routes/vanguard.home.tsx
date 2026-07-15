@@ -303,10 +303,10 @@ function VanguardHome() {
     <div style={{ background: NAVY, color: IVORY }} className="w-full overflow-x-hidden">
       {/* ==================== BLOCK 1 — HERO ==================== */}
       <section
-        className="relative w-full overflow-hidden"
-        style={{ background: NAVY, minHeight: "calc(100vh - 144px)" }}
+        className="relative w-full overflow-hidden min-h-[640px] md:min-h-[720px]"
+        style={{ background: NAVY }}
       >
-        {/* right-side hero image */}
+        {/* hero image — full-bleed on mobile, right side on md+ */}
         <div className="pointer-events-none absolute inset-0">
           <img
             src={heroImgFallback}
@@ -315,26 +315,29 @@ function VanguardHome() {
             alt=""
             loading="lazy"
             decoding="async"
-            className="absolute right-0 top-0 h-full w-full object-cover object-right md:w-[65%] lg:w-[62%]"
+            className="absolute right-0 top-0 h-full w-full object-cover object-center md:object-right md:w-[65%] lg:w-[62%]"
             style={{ opacity: 0.9 }}
           />
-          {/* gradient fade to navy on the left */}
+          {/* gradient — softer on mobile so the image reads */}
           <div
             aria-hidden
-            className="absolute inset-0"
+            className="absolute inset-0 hidden md:block"
             style={{
               background: `linear-gradient(90deg, ${NAVY} 0%, ${NAVY} 30%, rgba(10,19,34,0.85) 45%, rgba(10,19,34,0.35) 65%, rgba(10,19,34,0.15) 100%)`,
             }}
           />
-          {/* mobile: darken more */}
+          {/* mobile overlay: darken so copy is readable over full-bleed image */}
           <div
             aria-hidden
             className="absolute inset-0 md:hidden"
-            style={{ background: "rgba(10,19,34,0.55)" }}
+            style={{
+              background:
+                "linear-gradient(180deg, rgba(10,19,34,0.85) 0%, rgba(10,19,34,0.55) 40%, rgba(10,19,34,0.75) 100%)",
+            }}
           />
         </div>
 
-        <div className="relative mx-auto flex max-w-7xl flex-col px-6 py-10 md:py-14" style={{ minHeight: "calc(100vh - 144px)" }}>
+        <div className="relative mx-auto flex max-w-7xl flex-col px-6 py-10 md:py-14 min-h-[640px] md:min-h-[720px]">
           {/* Top: seal centered */}
           <div className="flex justify-center">
             <img
@@ -436,7 +439,7 @@ function VanguardHome() {
             style={{ color: IVORY }}
           >
             <span className="block">This isn&rsquo;t another sponsorship program or agency.</span>
-            <span className="block md:whitespace-nowrap">
+            <span className="block lg:whitespace-nowrap">
               It&rsquo;s the beginning of an independent commercial standard for motorsport.
             </span>
           </h2>
