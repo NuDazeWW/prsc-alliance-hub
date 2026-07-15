@@ -464,12 +464,6 @@ function VanguardHome() {
                 <DimLabel label="RELATIONSHIP STRENGTH" align="left" />
               </div>
             </div>
-            <p
-              className="mt-6 text-[11px] italic"
-              style={{ color: PEWTER, letterSpacing: "0.08em" }}
-            >
-              illustrative example
-            </p>
           </div>
         </div>
       </section>
