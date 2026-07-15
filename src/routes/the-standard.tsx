@@ -69,7 +69,9 @@ function TheStandardPage() {
           width={1920}
           height={1088}
           className="absolute inset-0 h-full w-full object-cover"
-          aria-hidden
+          fetchPriority="high"
+          decoding="async"
+          aria-hidden="true"
         />
         <div className="absolute inset-0" style={{ backgroundColor: "rgba(10,19,34,0.7)" }} aria-hidden />
         <div className="absolute inset-0 opacity-[0.06] pointer-events-none"
