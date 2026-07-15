@@ -1,0 +1,5 @@
+User-agent: *
+Allow: /
+Disallow: /vanguard/
+
+Sitemap: https://prscstandards.com/sitemap.xml

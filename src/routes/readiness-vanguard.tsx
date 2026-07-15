@@ -4,6 +4,9 @@ import { VanguardInterestForm } from "@/components/forms/PrscForms";
 import { ContinueReading } from "@/components/site/ContinueReading";
 import paddock from "@/assets/prsc-paddock.jpg.asset.json";
 
+const CANONICAL = "https://prscstandards.com/readiness-vanguard";
+const OG_IMAGE = `https://prscstandards.com${paddock.url}`;
+
 export const Route = createFileRoute("/readiness-vanguard")({
   head: () => ({
     meta: [
@@ -11,7 +14,13 @@ export const Route = createFileRoute("/readiness-vanguard")({
       { name: "description", content: "The Readiness Vanguard is the founding cohort of organizations helping define the era of professionalized sponsorship. Limited seats." },
       { property: "og:title", content: "The Readiness Vanguard — PRSC" },
       { property: "og:description", content: "A limited founding cohort of organizations. The credential, the benchmark, the legacy." },
+      { property: "og:type", content: "article" },
+      { property: "og:url", content: CANONICAL },
+      { property: "og:image", content: OG_IMAGE },
+      { name: "twitter:card", content: "summary_large_image" },
+      { name: "twitter:image", content: OG_IMAGE },
     ],
+    links: [{ rel: "canonical", href: CANONICAL }],
   }),
   component: VanguardPage,
 });

@@ -4,7 +4,7 @@ import { BoardInterestForm } from "@/components/forms/PrscForms";
 import { ContinueReading } from "@/components/site/ContinueReading";
 import sealBadge from "@/assets/prsc-seal-badge.png.asset.json";
 
-const CANONICAL = "https://prsc-alliance-hub.lovable.app/governance";
+const CANONICAL = "https://prscstandards.com/governance";
 
 export const Route = createFileRoute("/governance")({
   head: () => ({

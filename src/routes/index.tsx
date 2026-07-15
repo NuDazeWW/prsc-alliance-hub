@@ -7,6 +7,8 @@ import { ContinueReading } from "@/components/site/ContinueReading";
 import { Building2, Briefcase, Landmark, ArrowRight, ShieldCheck, Scale, GraduationCap, LineChart } from "lucide-react";
 import prscCrest from "@/assets/prsc-logo-only.png.asset.json";
 
+const CANONICAL = "https://prscstandards.com/";
+
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
@@ -22,6 +24,11 @@ export const Route = createFileRoute("/")({
         content:
           "An authoritative, evidence-based framework that brings clarity, discipline, and trust to the $100B+ global sponsorship market.",
       },
+      { property: "og:url", content: CANONICAL },
+    ],
+    links: [
+      { rel: "canonical", href: CANONICAL },
+      { rel: "preload", as: "image", href: prscCrest.url, fetchpriority: "high" },
     ],
   }),
   component: HomePage,
