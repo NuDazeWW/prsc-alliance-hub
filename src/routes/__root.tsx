@@ -14,6 +14,7 @@ import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 import { SiteNav } from "@/components/site/SiteNav";
 import { SiteFooter } from "@/components/site/SiteFooter";
+import { AnalyticsGate } from "@/components/site/AnalyticsGate";
 
 const FAVICON = "/__l5e/assets-v1/9aec8314-32e6-4d5a-9b1d-45a144e00723/prsc-seal-badge.png";
 
@@ -120,14 +121,6 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
             "The independent standards body governing partnership readiness — an authoritative, evidence-based rating for the $100B+ sponsorship market.",
         }),
       },
-      {
-        src: "https://www.googletagmanager.com/gtag/js?id=G-ZMZCN0S0RV",
-        async: true,
-      },
-      {
-        children:
-          "window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-ZMZCN0S0RV');",
-      },
     ],
   }),
   shellComponent: RootShell,
@@ -161,6 +154,7 @@ function RootComponent() {
         <Outlet />
       </main>
       {isChrome && <SiteFooter />}
+      <AnalyticsGate />
     </QueryClientProvider>
   );
 }

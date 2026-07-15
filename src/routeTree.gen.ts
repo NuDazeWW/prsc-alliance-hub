@@ -16,6 +16,7 @@ import { Route as ReadinessVanguardRouteImport } from './routes/readiness-vangua
 import { Route as GovernanceRouteImport } from './routes/governance'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as VanguardHomeRouteImport } from './routes/vanguard.home'
+import { Route as ApiGeoRouteImport } from './routes/api/geo'
 
 const TheStandardRoute = TheStandardRouteImport.update({
   id: '/the-standard',
@@ -52,6 +53,11 @@ const VanguardHomeRoute = VanguardHomeRouteImport.update({
   path: '/vanguard/home',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiGeoRoute = ApiGeoRouteImport.update({
+  id: '/api/geo',
+  path: '/api/geo',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -60,6 +66,7 @@ export interface FileRoutesByFullPath {
   '/request-briefing': typeof RequestBriefingRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/the-standard': typeof TheStandardRoute
+  '/api/geo': typeof ApiGeoRoute
   '/vanguard/home': typeof VanguardHomeRoute
 }
 export interface FileRoutesByTo {
@@ -69,6 +76,7 @@ export interface FileRoutesByTo {
   '/request-briefing': typeof RequestBriefingRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/the-standard': typeof TheStandardRoute
+  '/api/geo': typeof ApiGeoRoute
   '/vanguard/home': typeof VanguardHomeRoute
 }
 export interface FileRoutesById {
@@ -79,6 +87,7 @@ export interface FileRoutesById {
   '/request-briefing': typeof RequestBriefingRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/the-standard': typeof TheStandardRoute
+  '/api/geo': typeof ApiGeoRoute
   '/vanguard/home': typeof VanguardHomeRoute
 }
 export interface FileRouteTypes {
@@ -90,6 +99,7 @@ export interface FileRouteTypes {
     | '/request-briefing'
     | '/sitemap.xml'
     | '/the-standard'
+    | '/api/geo'
     | '/vanguard/home'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -99,6 +109,7 @@ export interface FileRouteTypes {
     | '/request-briefing'
     | '/sitemap.xml'
     | '/the-standard'
+    | '/api/geo'
     | '/vanguard/home'
   id:
     | '__root__'
@@ -108,6 +119,7 @@ export interface FileRouteTypes {
     | '/request-briefing'
     | '/sitemap.xml'
     | '/the-standard'
+    | '/api/geo'
     | '/vanguard/home'
   fileRoutesById: FileRoutesById
 }
@@ -118,6 +130,7 @@ export interface RootRouteChildren {
   RequestBriefingRoute: typeof RequestBriefingRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   TheStandardRoute: typeof TheStandardRoute
+  ApiGeoRoute: typeof ApiGeoRoute
   VanguardHomeRoute: typeof VanguardHomeRoute
 }
 
@@ -172,6 +185,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof VanguardHomeRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/geo': {
+      id: '/api/geo'
+      path: '/api/geo'
+      fullPath: '/api/geo'
+      preLoaderRoute: typeof ApiGeoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -182,6 +202,7 @@ const rootRouteChildren: RootRouteChildren = {
   RequestBriefingRoute: RequestBriefingRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   TheStandardRoute: TheStandardRoute,
+  ApiGeoRoute: ApiGeoRoute,
   VanguardHomeRoute: VanguardHomeRoute,
 }
 export const routeTree = rootRouteImport
