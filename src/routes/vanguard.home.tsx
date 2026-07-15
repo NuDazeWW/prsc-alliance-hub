@@ -193,7 +193,7 @@ function ReserveForm() {
           setPending(false);
         }
       }}
-      className="mx-auto grid max-w-4xl gap-3 md:grid-cols-3"
+      className="mx-auto grid max-w-4xl gap-3 md:grid-cols-2"
     >
       <input
         name="name"
