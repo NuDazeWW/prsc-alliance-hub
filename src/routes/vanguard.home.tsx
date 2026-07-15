@@ -140,32 +140,6 @@ function ScoreRing() {
 /* Dimension label pill (six around the ring)                          */
 /* ------------------------------------------------------------------ */
 
-function DimLabel({ Icon, label, align }: { Icon: typeof Radio; label: string; align: "left" | "right" }) {
-  return (
-    <div
-      className={`flex items-center gap-3 ${align === "right" ? "flex-row-reverse text-right" : "text-left"}`}
-    >
-      <div
-        className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border"
-        style={{ borderColor: "rgba(212,175,55,0.45)", color: GOLD }}
-      >
-        <Icon size={15} strokeWidth={1.6} />
-      </div>
-      <div className={`flex-1 min-w-0 ${align === "right" ? "items-end" : ""}`}>
-        <p
-          className="text-[10px] md:text-[11px] font-semibold leading-tight"
-          style={{ color: IVORY, letterSpacing: "0.18em" }}
-        >
-          {label}
-        </p>
-        <div
-          className={`mt-2 h-px w-16 ${align === "right" ? "ml-auto" : ""}`}
-          style={{ background: `linear-gradient(90deg, transparent, ${GOLD}, transparent)` }}
-        />
-      </div>
-    </div>
-  );
-}
 
 /* ------------------------------------------------------------------ */
 /* Form                                                                */
