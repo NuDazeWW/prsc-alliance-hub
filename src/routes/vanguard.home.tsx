@@ -310,7 +310,7 @@ function VanguardHome() {
           />
         </div>
 
-        <div className="relative mx-auto flex min-h-screen max-w-7xl flex-col px-6 py-10 md:py-14">
+        <div className="relative mx-auto flex max-w-7xl flex-col px-6 py-10 md:py-14" style={{ minHeight: "calc(100vh - 96px)" }}>
           {/* Top: seal centered */}
           <div className="flex justify-center">
             <img
