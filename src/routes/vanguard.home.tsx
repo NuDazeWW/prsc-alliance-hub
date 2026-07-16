@@ -403,7 +403,7 @@ function VanguardHome() {
             style={{ color: NAVY }}
           >
             Sponsors don&rsquo;t buy space on race cars and drivers. They invest in organizations they believe can deliver
-            business results.{" "}
+            results that drive their business goals.{" "}
             <span style={{ color: NAVY, opacity: 0.75 }}>
               Most teams have never been able to prove that.
             </span>
