@@ -610,7 +610,7 @@ function VanguardHome() {
             <div className="mt-3 h-[2px] w-16" style={{ background: GOLD }} />
             <ul className="mt-6 space-y-4">
               {[
-                "Your independent PRSC Readiness Score",
+                "Your independent PRSC Readiness Score\u2122",
                 "A confidential Commercial Strength Report highlighting sponsor strengths and gaps",
                 "Benchmarking against the inaugural Vanguard participants",
                 "Readiness Vanguard designation — permanent",
