@@ -405,7 +405,7 @@ function VanguardHome() {
       {/* ==================== BLOCK 3 — WHY IT EXISTS ==================== */}
       <section style={{ background: IVORY }} className="px-6 pt-4 pb-16 md:pt-6 md:pb-20">
         <div className="mx-auto max-w-[640px] text-center">
-          <p className="font-display text-[18px] md:text-[20px] leading-relaxed" style={{ color: STONE }}>
+          <p className="font-display leading-snug text-[24px] md:text-[28px]" style={{ color: STONE }}>
             Without a standard for commercial readiness, every brand decision is a guess.
             <br />
             Brands hate to guess.
