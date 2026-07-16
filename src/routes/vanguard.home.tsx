@@ -364,13 +364,13 @@ function VanguardHome() {
               className="font-display leading-[1.05] text-[44px] sm:text-[52px] md:text-[58px]"
               style={{ color: IVORY, letterSpacing: "-0.01em" }}
             >
-              The best race programs don&rsquo;t always get sponsored.
+              There&rsquo;s a reason why even the best race programs don&rsquo;t always get sponsored.
             </h1>
             <p
               className="mt-8 max-w-[440px] text-[18px] leading-relaxed"
               style={{ color: IVORY, opacity: 0.9 }}
             >
-              We&rsquo;re building the first independent standard designed to help teams prove their
+              We&rsquo;re building the first true standard designed to help teams prove their
               value to sponsors — and we&rsquo;re inviting a select group to help shape it.
             </p>
             <div className="mt-12">
