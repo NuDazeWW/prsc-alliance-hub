@@ -260,7 +260,7 @@ function GovernancePage() {
               <p>PRSC does not exist to represent any one organization.</p>
               <p>It exists to protect the integrity of the Standard.</p>
               <p>
-                Every governance layer exists for a single purpose: to ensure that a PRSC Readiness Score
+                Every governance layer exists for a single purpose: to ensure that a PRSC Readiness Score&trade;
                 means the same thing tomorrow as it does today.
               </p>
             </div>
