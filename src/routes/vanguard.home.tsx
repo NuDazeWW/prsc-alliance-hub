@@ -640,22 +640,16 @@ function VanguardHome() {
                   body: "Permanent recognition as a Founding Member of the Readiness Vanguard. The group that set the benchmark for commercial readiness in motorsport. This designation compounds in value as the Standard grows.",
                 },
               ].map((item) => (
-                <li key={item.title} className="flex gap-4">
-                  <span
-                    className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full"
-                    style={{ background: GOLD }}
-                    aria-hidden
-                  />
-                  <div>
-                    <p className="font-display text-[16px] font-semibold" style={{ color: NAVY }}>
-                      {item.title}
-                    </p>
-                    <p className="mt-1 text-[15px] leading-relaxed" style={{ color: STONE }}>
-                      {item.body}
-                    </p>
-                  </div>
+                <li key={item.title}>
+                  <p className="font-display text-[17px] font-bold" style={{ color: NAVY }}>
+                    {item.title}
+                  </p>
+                  <p className="mt-1 text-[15px] leading-relaxed" style={{ color: STONE }}>
+                    {item.body}
+                  </p>
                 </li>
               ))}
+
             </ul>
           </div>
 
