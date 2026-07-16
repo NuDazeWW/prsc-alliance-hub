@@ -757,7 +757,7 @@ function VanguardHome() {
                 animate={{ boxShadow: [`0 0 0 0 rgba(10,19,34,0.55)`, `0 0 0 8px rgba(10,19,34,0)`] }}
                 transition={{ duration: 1.8, repeat: Infinity, ease: "easeOut" }}
               />
-              {seatsFilled} of {seatsTotal} invitations remaining
+              {seatsRemaining} of {seatsTotal} invitations remaining
             </motion.p>
           </div>
 
