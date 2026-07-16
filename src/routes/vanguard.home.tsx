@@ -406,11 +406,11 @@ function VanguardHome() {
       <section style={{ background: IVORY }} className="px-6 pt-4 pb-16 md:pt-6 md:pb-20">
         <div className="mx-auto max-w-[640px] text-center">
           <p className="font-display leading-snug text-[24px] md:text-[28px]" style={{ color: STONE }}>
-            Without a standard for commercial readiness, every brand decision is a guess.
+            Without a standard for commercial readiness, every sponsorship decision is an educated guess.
             <br />
-            Brands hate to guess.
+            Brands don&rsquo;t want to guess.
             <br />
-            Teams lose deals they could win.
+            And teams lose opportunities they should have won.
           </p>
         </div>
       </section>
