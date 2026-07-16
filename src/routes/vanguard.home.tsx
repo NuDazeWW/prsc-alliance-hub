@@ -589,46 +589,76 @@ function VanguardHome() {
             </h3>
             <div className="mt-3 h-[2px] w-16" style={{ background: GOLD }} />
             <p className="mt-6 text-[15px] leading-relaxed" style={{ color: STONE }}>
-              The Readiness Vanguard is the first cohort of teams and drivers ever evaluated under the
-              PRSC Readiness Standard&trade;. Their experience will shape the first commercial readiness
-              benchmark in motorsport.
+              The Readiness Vanguard is not a pilot program. It is the part of the foundation of the
+              Standard.
+            </p>
+            <p className="mt-4 text-[15px] leading-relaxed" style={{ color: STONE }}>
+              Twenty-five teams, drivers, and rights holders will be independently scored under the
+              PRSC Readiness Standard&trade; — creating the first commercial readiness benchmark in
+              motorsport history. The organizations in this group are not joining something that
+              already exists. They are building the reference point every future score in this
+              industry will be measured against.
+            </p>
+            <p className="mt-4 text-[15px] leading-relaxed" style={{ color: STONE }}>
+              The score is always free. That is a design principle, not a promotion. The Vanguard
+              is the first expression of that principle in practice.
             </p>
             <p
               className="mt-6 font-display italic text-[17px] leading-snug"
               style={{ color: GOLD }}
             >
-              Watkins Glen marks the beginning. The inaugural cohort will be selected from
-              organizations that request consideration during race weekend.
+              The Readiness Vanguard program closes when the 25 team/driver slots are filled.
             </p>
           </div>
 
           {/* Right */}
           <div>
             <h3 className="font-display text-[28px] md:text-[30px]" style={{ color: NAVY }}>
-              What Readiness Vanguard Members Receive
+              What Vanguard Members Receive
             </h3>
             <div className="mt-3 h-[2px] w-16" style={{ background: GOLD }} />
-            <ul className="mt-6 space-y-4">
+            <ul className="mt-6 space-y-5">
               {[
-                "Your independent PRSC Readiness Score\u2122",
-                "A confidential Commercial Strength Report highlighting sponsor strengths and gaps",
-                "Benchmarking against the inaugural Vanguard participants",
-                "Readiness Vanguard designation — permanent",
-                "A direct role in shaping the industry's first commercial readiness standard",
+                {
+                  title: "The PRSC Readiness Score\u2122",
+                  body: "An independent, certified 0–100 composite rating across six dimensions of commercial readiness — the number you put in every sponsor conversation going forward. Not your number. An independent, third-party certified number.",
+                },
+                {
+                  title: "The Commercial Strength Report",
+                  body: "A full diagnostic breakdown of all six dimensions — what is strong, what is a gap, and where the highest-leverage investment is to move your commercial position. A roadmap, not just a rating.",
+                },
+                {
+                  title: "The Founding Benchmark",
+                  body: "Access to cohort benchmark data showing exactly where you sit relative to the founding group. This data has never existed before. Your score is yours alone — the benchmark shows you the market context without exposing any individual organization's number.",
+                },
+                {
+                  title: "The Media Measurement Baseline",
+                  body: "A calibrated baseline of your broadcast exposure, digital reach, audience composition, and earned media value — measured against the cohort.",
+                },
+                {
+                  title: "Lifetime Founding Member Designation",
+                  body: "Permanent recognition as a Founding Member of the Readiness Vanguard. The group that set the benchmark for commercial readiness in motorsport. This designation compounds in value as the Standard grows.",
+                },
               ].map((item) => (
-                <li key={item} className="flex gap-4">
+                <li key={item.title} className="flex gap-4">
                   <span
                     className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full"
                     style={{ background: GOLD }}
                     aria-hidden
                   />
-                  <span className="text-[15px] leading-relaxed" style={{ color: STONE }}>
-                    {item}
-                  </span>
+                  <div>
+                    <p className="font-display text-[16px] font-semibold" style={{ color: NAVY }}>
+                      {item.title}
+                    </p>
+                    <p className="mt-1 text-[15px] leading-relaxed" style={{ color: STONE }}>
+                      {item.body}
+                    </p>
+                  </div>
                 </li>
               ))}
             </ul>
           </div>
+
         </div>
       </section>
 
