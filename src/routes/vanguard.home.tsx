@@ -641,12 +641,26 @@ function VanguardHome() {
               <div className="mt-4 h-[2px] w-12" style={{ background: GOLD }} />
             </figure>
 
+            <div className="mt-10">
+              <div
+                className="h-px w-16"
+                style={{ background: `linear-gradient(90deg, ${GOLD}, transparent)` }}
+              />
+              <p
+                className="mt-3 text-[11px] font-medium tracking-[0.22em] uppercase"
+                style={{ color: GOLD }}
+              >
+                Scores delivered before the 2027 season
+              </p>
+            </div>
+
             <p
-              className="mt-8 font-display italic text-[17px] leading-snug"
+              className="mt-4 font-display italic text-[17px] leading-snug"
               style={{ color: NAVY }}
             >
               The Readiness Vanguard program closes when the 25 team/driver slots are filled.
             </p>
+
           </div>
 
           {/* Right */}
