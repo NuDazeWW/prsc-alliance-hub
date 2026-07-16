@@ -626,7 +626,7 @@ function VanguardHome() {
 
             <p
               className="mt-8 font-display italic text-[17px] leading-snug"
-              style={{ color: GOLD }}
+              style={{ color: NAVY }}
             >
               The Readiness Vanguard program closes when the 25 team/driver slots are filled.
             </p>
