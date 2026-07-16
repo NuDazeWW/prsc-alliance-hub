@@ -468,13 +468,16 @@ function VanguardHome() {
             <div className="space-y-4 text-[15px] leading-relaxed" style={{ color: IVORY, opacity: 0.9 }}>
               <p>
                 Commercial readiness score — your organization&rsquo;s ability to attract, secure, and retain
-                sponsorship — is now measurable.
+                sponsorship.
               </p>
               <p>
                 The PRSC Readiness Score is the first independent commercial rating for teams and
                 drivers in motorsport.
               </p>
-              <p>A score that tells sponsors exactly what they need to know.</p>
+              <p>
+                A score that tells teams, drivers, sponsors, manufacturers and series — exactly what
+                they need to know to make clear sponsorship and partnership decisions.
+              </p>
             </div>
           </div>
 
