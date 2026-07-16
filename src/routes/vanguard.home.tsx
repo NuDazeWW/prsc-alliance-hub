@@ -389,11 +389,11 @@ function VanguardHome() {
             className="font-display leading-snug text-[24px] md:text-[28px]"
             style={{ color: NAVY }}
           >
-            Sponsors don&rsquo;t buy race cars. They invest in organizations they believe can deliver
-            business results.{" "}
+            Sponsors invest in organizations they believe can deliver their business goals.{" "}
             <span style={{ color: NAVY, opacity: 0.75 }}>
               Most teams have never been able to prove that.
             </span>
+
           </p>
           <div
             className="mx-auto mt-8 h-px w-40"
@@ -406,9 +406,12 @@ function VanguardHome() {
       <section style={{ background: IVORY }} className="px-6 pt-4 pb-16 md:pt-6 md:pb-20">
         <div className="mx-auto max-w-[640px] text-center">
           <p className="text-[18px] md:text-[20px] leading-relaxed" style={{ color: STONE }}>
-            Sponsors invest in organizations that reduce risk. Without a shared standard for measuring
-            commercial readiness, every decision is a guess. Brands guess. Teams lose deals they should
-            win.
+            Without a standard for commercial readiness, every brand decision is a guess.
+            <br />
+            Brands hate to guess.
+            <br />
+            Teams lose deals they could win.
+
           </p>
         </div>
       </section>
