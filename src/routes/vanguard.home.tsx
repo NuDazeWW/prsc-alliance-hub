@@ -659,8 +659,16 @@ function VanguardHome() {
             </ul>
           </div>
 
+          <p
+            className="md:col-span-2 mt-4 text-center italic text-[15px] leading-relaxed"
+            style={{ color: STONE }}
+          >
+            *Your score is confidential by default. You control what you share and with whom. The
+            Standard never publishes individual scores without explicit consent.
+          </p>
         </div>
       </section>
+
 
       {/* ==================== BLOCK 8 — WHAT WE PROMISE ==================== */}
       <section style={{ background: MIDNIGHT }} className="px-6 py-14 md:py-16">
