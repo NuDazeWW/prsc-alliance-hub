@@ -588,8 +588,9 @@ function VanguardHome() {
               The Readiness Vanguard
             </h3>
             <div className="mt-3 h-[2px] w-16" style={{ background: GOLD }} />
+
             <p className="mt-6 text-[15px] leading-relaxed" style={{ color: STONE }}>
-              The Readiness Vanguard is not a pilot program. It is the part of the foundation of the
+              The Readiness Vanguard is not a pilot program. It is part of the foundation of the
               Standard.
             </p>
             <p className="mt-4 text-[15px] leading-relaxed" style={{ color: STONE }}>
@@ -603,8 +604,28 @@ function VanguardHome() {
               The score is always free. That is a design principle, not a promotion. The Vanguard
               is the first expression of that principle in practice.
             </p>
+
+            <div className="mt-8 border-l-2 pl-5" style={{ borderColor: GOLD }}>
+              <p className="text-[15px] leading-relaxed" style={{ color: STONE }}>
+                Your score is yours before anyone else sees it. Brands and sponsors only access the
+                benchmark data after the full cohort has been scored and you have received your
+                results. You are never exposed before you are ready.
+              </p>
+            </div>
+
+            <figure className="mt-10">
+              <blockquote
+                className="font-display italic text-[22px] md:text-[24px] leading-snug"
+                style={{ color: NAVY }}
+              >
+                &ldquo;Every sponsor conversation starts differently, when you can prove measurable
+                worth.&rdquo;
+              </blockquote>
+              <div className="mt-4 h-[2px] w-12" style={{ background: GOLD }} />
+            </figure>
+
             <p
-              className="mt-6 font-display italic text-[17px] leading-snug"
+              className="mt-8 font-display italic text-[17px] leading-snug"
               style={{ color: GOLD }}
             >
               The Readiness Vanguard program closes when the 25 team/driver slots are filled.
