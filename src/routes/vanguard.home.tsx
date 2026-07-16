@@ -348,13 +348,6 @@ function VanguardHome() {
             />
           </div>
 
-          {/* Watkins Glen label upper-right */}
-          <p
-            className="absolute right-6 top-10 md:top-14 text-[11px] font-semibold tracking-[0.28em] uppercase"
-            style={{ color: IVORY, opacity: 0.85 }}
-          >
-            Watkins Glen
-          </p>
 
           {/* Left content block */}
           <div className="mt-14 md:mt-20 max-w-[560px]">
