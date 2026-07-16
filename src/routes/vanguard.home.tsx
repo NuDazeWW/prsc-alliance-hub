@@ -655,12 +655,15 @@ function VanguardHome() {
 
           {/* body */}
           <div className="space-y-3 text-[15px] leading-relaxed md:pl-4 md:border-l" style={{ color: IVORY, borderColor: "rgba(212,175,55,0.25)" }}>
-            <p>We can&rsquo;t promise you sponsorship.</p>
             <p>
-              What we can offer is something motorsport has never had before: an independent way to
-              understand, measure, and improve how sponsors evaluate your organization.
+              The Readiness Vanguard is the founding cohort of teams, drivers, series, venues, and
+              organizations helping establish the first independent standard for partnership readiness.
             </p>
-            <p>That&rsquo;s what the Readiness Vanguard is helping build.</p>
+            <p>
+              Your participation helps calibrate the Standard, strengthen the benchmark, and shape how
+              commercial readiness will be measured across the industry.
+            </p>
+            <p>Your Readiness Score is free. The insight is yours to keep.</p>
           </div>
         </div>
       </section>
