@@ -467,7 +467,7 @@ function VanguardHome() {
             <div className="mb-6 h-px w-12" style={{ background: GOLD }} />
             <div className="space-y-4 text-[15px] leading-relaxed" style={{ color: IVORY, opacity: 0.9 }}>
               <p>
-                Commercial readiness — your organization&rsquo;s ability to attract, secure, and retain
+                Commercial readiness score — your organization&rsquo;s ability to attract, secure, and retain
                 sponsorship — is now measurable.
               </p>
               <p>
