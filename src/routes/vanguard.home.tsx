@@ -590,7 +590,7 @@ function VanguardHome() {
             <div className="mt-3 h-[2px] w-16" style={{ background: GOLD }} />
             <p className="mt-6 text-[15px] leading-relaxed" style={{ color: STONE }}>
               The Readiness Vanguard is the first cohort of teams and drivers ever evaluated under the
-              PRSC Readiness Standard. Their experience will shape the first commercial readiness
+              PRSC Readiness Standard&trade;. Their experience will shape the first commercial readiness
               benchmark in motorsport.
             </p>
             <p
