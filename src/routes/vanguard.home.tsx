@@ -389,11 +389,11 @@ function VanguardHome() {
             className="font-display leading-snug text-[24px] md:text-[28px]"
             style={{ color: NAVY }}
           >
-            Sponsors don&rsquo;t buy race cars. They invest in organizations they believe can deliver
-            business results.{" "}
+            Sponsors invest in organizations they believe can deliver their business goals.{" "}
             <span style={{ color: NAVY, opacity: 0.75 }}>
               Most teams have never been able to prove that.
             </span>
+
           </p>
           <div
             className="mx-auto mt-8 h-px w-40"
