@@ -442,9 +442,9 @@ function VanguardHome() {
             className="mt-8 font-display italic text-[20px] md:text-[24px] leading-snug"
             style={{ color: GOLD }}
           >
-            Every major market eventually adopts a trusted standard.
+            Every major market runs on a trusted standard.
             <br />
-            Motorsport hasn&rsquo;t had one — until now.
+            Motorsport doesn&rsquo;t have one – until now.
           </p>
         </div>
 
