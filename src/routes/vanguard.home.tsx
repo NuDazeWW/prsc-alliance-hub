@@ -294,8 +294,8 @@ function ReserveForm() {
 /* ------------------------------------------------------------------ */
 
 function VanguardHome() {
-  const seatsFilled = 11;
-  const seatsTotal = 25;
+  const seatsFilled = 1;
+  const seatsTotal = 19;
   const seatsRemaining = seatsTotal - seatsFilled;
   const pct = Math.round((seatsFilled / seatsTotal) * 100);
 
@@ -467,11 +467,11 @@ function VanguardHome() {
             <div className="mb-6 h-px w-12" style={{ background: GOLD }} />
             <div className="space-y-4 text-[15px] leading-relaxed" style={{ color: IVORY, opacity: 0.9 }}>
               <p>
-                Commercial readiness score — your organization&rsquo;s ability to attract, secure, and retain
-                sponsorship.
+                Commercial readiness score reflects your organization&rsquo;s ability to attract, secure,
+                and retain sponsorship.
               </p>
               <p>
-                The PRSC Readiness Score is the first independent commercial rating for teams and
+                The PRSC Readiness Score&trade; is the first independent commercial rating for teams and
                 drivers in motorsport.
               </p>
               <p>
@@ -520,7 +520,7 @@ function VanguardHome() {
             <div>
               <p
                 className="mb-8 text-[12px] font-semibold uppercase"
-                style={{ color: STONE, letterSpacing: "0.28em", opacity: 0.9 }}
+                style={{ color: IVORY, letterSpacing: "0.28em", opacity: 0.9 }}
               >
                 Today
               </p>
@@ -590,7 +590,7 @@ function VanguardHome() {
             <div className="mt-3 h-[2px] w-16" style={{ background: GOLD }} />
             <p className="mt-6 text-[15px] leading-relaxed" style={{ color: STONE }}>
               The Readiness Vanguard is the first cohort of teams and drivers ever evaluated under the
-              PRSC Readiness Standard. Their experience will shape the first commercial readiness
+              PRSC Readiness Standard&trade;. Their experience will shape the first commercial readiness
               benchmark in motorsport.
             </p>
             <p
@@ -610,7 +610,7 @@ function VanguardHome() {
             <div className="mt-3 h-[2px] w-16" style={{ background: GOLD }} />
             <ul className="mt-6 space-y-4">
               {[
-                "Your independent PRSC Readiness Score",
+                "Your independent PRSC Readiness Score\u2122",
                 "A confidential Commercial Strength Report highlighting sponsor strengths and gaps",
                 "Benchmarking against the inaugural Vanguard participants",
                 "Readiness Vanguard designation — permanent",
@@ -655,12 +655,15 @@ function VanguardHome() {
 
           {/* body */}
           <div className="space-y-3 text-[15px] leading-relaxed md:pl-4 md:border-l" style={{ color: IVORY, borderColor: "rgba(212,175,55,0.25)" }}>
-            <p>We can&rsquo;t promise you sponsorship.</p>
             <p>
-              What we can offer is something motorsport has never had before: an independent way to
-              understand, measure, and improve how sponsors evaluate your organization.
+              The Readiness Vanguard is the founding cohort of teams, drivers, series, venues, and
+              organizations helping establish the first independent standard for partnership readiness.
             </p>
-            <p>That&rsquo;s what the Readiness Vanguard is helping build.</p>
+            <p>
+              Your participation helps calibrate the Standard, strengthen the benchmark, and shape how
+              commercial readiness will be measured across the industry.
+            </p>
+            <p>Your Readiness Score is free. The insight is yours to keep.</p>
           </div>
         </div>
       </section>

@@ -30,7 +30,7 @@ export function SiteFooter() {
       <div className="border-t border-ivory/10">
         <div className="mx-auto max-w-7xl px-6 py-6 flex flex-col md:flex-row justify-between gap-3 text-xs text-ivory/45">
           <p>© {new Date().getFullYear()} Partnership Readiness Standards Council™. All rights reserved.</p>
-          <p className="label-caps">PRSC Readiness Standard · Version 1.0 · Published 2026</p>
+          <p className="label-caps">PRSC Readiness Standard&trade; · Version 1.0 · Published 2026</p>
         </div>
       </div>
     </footer>
