@@ -358,7 +358,7 @@ function VanguardHome() {
               An Invitation to the Readiness Vanguard
             </p>
             <p className="font-display italic text-[15px] mb-8" style={{ color: SANDSTONE }}>
-              For a select group of Trans Am drivers and teams.
+              For a select group of drivers and teams.
             </p>
             <h1
               className="font-display leading-[1.05] text-[44px] sm:text-[52px] md:text-[58px]"
