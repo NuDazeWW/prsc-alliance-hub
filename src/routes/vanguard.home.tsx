@@ -520,7 +520,7 @@ function VanguardHome() {
             <div>
               <p
                 className="mb-8 text-[12px] font-semibold uppercase"
-                style={{ color: STONE, letterSpacing: "0.28em", opacity: 0.9 }}
+                style={{ color: IVORY, letterSpacing: "0.28em", opacity: 0.9 }}
               >
                 Today
               </p>
