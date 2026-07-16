@@ -118,7 +118,13 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      get_vanguard_seats: {
+        Args: never
+        Returns: {
+          filled: number
+          total: number
+        }[]
+      }
     }
     Enums: {
       [_ in never]: never

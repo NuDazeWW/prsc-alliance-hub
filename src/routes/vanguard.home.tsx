@@ -2,6 +2,8 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useRef, useState, type FormEvent } from "react";
 import { motion, useMotionValue, useTransform, animate, useReducedMotion, useInView } from "motion/react";
 import { useServerFn } from "@tanstack/react-start";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
 import {
   ArrowDown,
   ArrowRight,
@@ -294,8 +296,19 @@ function ReserveForm() {
 /* ------------------------------------------------------------------ */
 
 function VanguardHome() {
-  const seatsFilled = 1;
-  const seatsTotal = 19;
+  const { data: seats } = useQuery({
+    queryKey: ["vanguard-seats"],
+    queryFn: async () => {
+      const { data, error } = await supabase.rpc("get_vanguard_seats");
+      if (error) throw error;
+      const row = Array.isArray(data) ? data[0] : data;
+      return { total: row?.total ?? 25, filled: row?.filled ?? 0 };
+    },
+    staleTime: 30_000,
+    refetchOnWindowFocus: true,
+  });
+  const seatsTotal = seats?.total ?? 25;
+  const seatsFilled = seats?.filled ?? 0;
   const seatsRemaining = seatsTotal - seatsFilled;
   const pct = Math.round((seatsFilled / seatsTotal) * 100);
 
@@ -744,7 +757,7 @@ function VanguardHome() {
                 animate={{ boxShadow: [`0 0 0 0 rgba(10,19,34,0.55)`, `0 0 0 8px rgba(10,19,34,0)`] }}
                 transition={{ duration: 1.8, repeat: Infinity, ease: "easeOut" }}
               />
-              {seatsFilled} of {seatsTotal} invitations remaining
+              {seatsRemaining} of {seatsTotal} invitations remaining
             </motion.p>
           </div>
 
