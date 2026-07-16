@@ -294,8 +294,8 @@ function ReserveForm() {
 /* ------------------------------------------------------------------ */
 
 function VanguardHome() {
-  const seatsFilled = 11;
-  const seatsTotal = 25;
+  const seatsFilled = 1;
+  const seatsTotal = 19;
   const seatsRemaining = seatsTotal - seatsFilled;
   const pct = Math.round((seatsFilled / seatsTotal) * 100);
 
