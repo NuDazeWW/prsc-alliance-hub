@@ -602,6 +602,23 @@ function VanguardHome() {
             </h3>
             <div className="mt-3 h-[2px] w-16" style={{ background: GOLD }} />
 
+            <div
+              className="mt-6 inline-flex items-center gap-3 rounded-sm border px-4 py-2"
+              style={{ borderColor: GOLD, background: NAVY }}
+            >
+              <span
+                className="inline-block h-1.5 w-1.5 rounded-full"
+                style={{ background: GOLD }}
+              />
+              <span
+                className="text-[11px] font-medium tracking-[0.22em] uppercase"
+                style={{ color: GOLD }}
+              >
+                Scores delivered before the 2027 season
+              </span>
+            </div>
+
+
             <p className="mt-6 text-[15px] leading-relaxed" style={{ color: STONE }}>
               The Readiness Vanguard is not a pilot program. It is part of the foundation of the
               Standard.
