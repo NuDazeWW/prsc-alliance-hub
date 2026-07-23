@@ -23,14 +23,30 @@ export const Route = createFileRoute("/governance")({
     scripts: [
       {
         type: "application/ld+json",
-        children: JSON.stringify({
-          "@context": "https://schema.org",
-          "@type": "BreadcrumbList",
-          itemListElement: [
-            { "@type": "ListItem", position: 1, name: "PRSC", item: "https://prscstandards.com/" },
-            { "@type": "ListItem", position: 2, name: "Governance", item: CANONICAL },
-          ],
-        }),
+        children: JSON.stringify([
+          {
+            "@context": "https://schema.org",
+            "@type": "WebPage",
+            "@id": CANONICAL + "#webpage",
+            url: CANONICAL,
+            name: "Governance — Partnership Readiness Standards Council",
+            description:
+              "PRSC governance architecture, independence commitments, and founding roadmap for the market-governed standards body.",
+            isPartOf: { "@id": "https://prscstandards.com/#website" },
+            about: { "@id": "https://prscstandards.com/#organization" },
+            inLanguage: "en-US",
+            breadcrumb: { "@id": CANONICAL + "#breadcrumb" },
+          },
+          {
+            "@context": "https://schema.org",
+            "@type": "BreadcrumbList",
+            "@id": CANONICAL + "#breadcrumb",
+            itemListElement: [
+              { "@type": "ListItem", position: 1, name: "PRSC", item: "https://prscstandards.com/" },
+              { "@type": "ListItem", position: 2, name: "Governance", item: CANONICAL },
+            ],
+          },
+        ]),
       },
     ],
   }),

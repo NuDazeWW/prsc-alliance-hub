@@ -24,14 +24,31 @@ export const Route = createFileRoute("/readiness-vanguard")({
     scripts: [
       {
         type: "application/ld+json",
-        children: JSON.stringify({
-          "@context": "https://schema.org",
-          "@type": "BreadcrumbList",
-          itemListElement: [
-            { "@type": "ListItem", position: 1, name: "PRSC", item: "https://prscstandards.com/" },
-            { "@type": "ListItem", position: 2, name: "The Readiness Vanguard", item: CANONICAL },
-          ],
-        }),
+        children: JSON.stringify([
+          {
+            "@context": "https://schema.org",
+            "@type": "WebPage",
+            "@id": CANONICAL + "#webpage",
+            url: CANONICAL,
+            name: "The Readiness Vanguard — PRSC",
+            description:
+              "The Readiness Vanguard is the founding cohort of organizations helping define the era of professionalized sponsorship.",
+            isPartOf: { "@id": "https://prscstandards.com/#website" },
+            about: { "@id": "https://prscstandards.com/#organization" },
+            primaryImageOfPage: { "@type": "ImageObject", url: OG_IMAGE },
+            inLanguage: "en-US",
+            breadcrumb: { "@id": CANONICAL + "#breadcrumb" },
+          },
+          {
+            "@context": "https://schema.org",
+            "@type": "BreadcrumbList",
+            "@id": CANONICAL + "#breadcrumb",
+            itemListElement: [
+              { "@type": "ListItem", position: 1, name: "PRSC", item: "https://prscstandards.com/" },
+              { "@type": "ListItem", position: 2, name: "The Readiness Vanguard", item: CANONICAL },
+            ],
+          },
+        ]),
       },
     ],
   }),
