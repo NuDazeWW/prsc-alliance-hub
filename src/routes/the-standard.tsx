@@ -269,6 +269,17 @@ function TheStandardPage() {
               </div>
             ))}
           </div>
+          <div className="mt-10 flex justify-end">
+            <Link
+              to="/standard-v1"
+              className="group inline-flex items-center gap-2 text-sm tracking-[0.14em] uppercase text-gold hover:text-antique transition-colors"
+            >
+              <span className="border-b border-gold/40 group-hover:border-antique pb-0.5">
+                Read the Full Standard
+              </span>
+              <span aria-hidden>→</span>
+            </Link>
+          </div>
         </div>
       </section>
 
