@@ -14,7 +14,7 @@ export function SiteFooter() {
         <div className="space-y-3">
           <p className="label-caps text-gold">The Standard</p>
           <ul className="space-y-2 text-sm">
-            <li><Link to="/the-standard" className="hover:text-gold">The PRSC Readiness Score™</Link></li>
+            <li><Link to="/the-standard" className="hover:text-gold">PRSC Readiness Score</Link></li>
             <li><Link to="/governance" className="hover:text-gold">Governance</Link></li>
             <li><Link to="/readiness-vanguard" className="hover:text-gold">Readiness Vanguard</Link></li>
             <li><Link to="/request-briefing" className="hover:text-gold">Request a Briefing</Link></li>
