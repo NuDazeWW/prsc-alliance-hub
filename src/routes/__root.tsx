@@ -74,6 +74,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
       { name: "google-site-verification", content: "e0IaWo7Z6cwjlkdMVIsvWX5cYfTFV4u-dxhc-HnwysU" },
+      { name: "google-site-verification", content: "ynsYtB7C7c6aH2BN4QjSuV52n640eSm0_MfWL1-m9QI" },
       { title: "PRSC — The Independent Standard for Partnership Readiness" },
       {
         name: "description",
