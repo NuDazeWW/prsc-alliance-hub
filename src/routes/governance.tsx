@@ -20,6 +20,19 @@ export const Route = createFileRoute("/governance")({
       { name: "twitter:description", content: "A neutral, non-commercial, market-governed standards body for the global partnership industry." },
     ],
     links: [{ rel: "canonical", href: CANONICAL }],
+    scripts: [
+      {
+        type: "application/ld+json",
+        children: JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "BreadcrumbList",
+          itemListElement: [
+            { "@type": "ListItem", position: 1, name: "PRSC", item: "https://prscstandards.com/" },
+            { "@type": "ListItem", position: 2, name: "Governance", item: CANONICAL },
+          ],
+        }),
+      },
+    ],
   }),
   component: GovernancePage,
 });

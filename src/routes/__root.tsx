@@ -73,6 +73,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
+      { name: "google-site-verification", content: "e0IaWo7Z6cwjlkdMVIsvWX5cYfTFV4u-dxhc-HnwysU" },
       { title: "PRSC — The Independent Standard for Partnership Readiness" },
       {
         name: "description",

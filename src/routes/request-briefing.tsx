@@ -14,6 +14,19 @@ export const Route = createFileRoute("/request-briefing")({
       { property: "og:url", content: CANONICAL },
     ],
     links: [{ rel: "canonical", href: CANONICAL }],
+    scripts: [
+      {
+        type: "application/ld+json",
+        children: JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "BreadcrumbList",
+          itemListElement: [
+            { "@type": "ListItem", position: 1, name: "PRSC", item: "https://prscstandards.com/" },
+            { "@type": "ListItem", position: 2, name: "Request a Briefing", item: CANONICAL },
+          ],
+        }),
+      },
+    ],
   }),
   component: BriefingPage,
 });
