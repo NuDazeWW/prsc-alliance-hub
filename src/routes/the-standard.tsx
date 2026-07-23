@@ -14,16 +14,17 @@ const OG_IMAGE = `https://prscstandards.com${boardroom.url}`;
 export const Route = createFileRoute("/the-standard")({
   head: () => ({
     meta: [
-      { title: "The PRSC Readiness Score — The Standard" },
-      { name: "description", content: "The Six Readiness Dimensions™ — an independent, evidence-based methodology for commercial partnership readiness." },
-      { property: "og:title", content: "The PRSC Readiness Score — The Standard" },
-      { property: "og:description", content: "The independent methodology and Six Readiness Dimensions™ that define commercial partnership readiness." },
+      { title: "PRSC Readiness Score™ — The Independent Standard for Partnership Readiness" },
+      { name: "description", content: "The PRSC Readiness Score™ is the independent, evidence-based measure of commercial partnership readiness — built on the Six Readiness Dimensions™ and governed by the Partnership Readiness Standards Council." },
+      { name: "keywords", content: "PRSC Readiness Score, PRSC Readiness Standard, Partnership Readiness Standards Council, Six Readiness Dimensions, commercial readiness score, sponsorship readiness" },
+      { property: "og:title", content: "PRSC Readiness Score™ — The Independent Standard for Partnership Readiness" },
+      { property: "og:description", content: "The PRSC Readiness Score™ — the independent, evidence-based measure of commercial partnership readiness, governed by the Partnership Readiness Standards Council." },
       { property: "og:type", content: "article" },
       { property: "og:url", content: CANONICAL },
       { property: "og:image", content: OG_IMAGE },
       { name: "twitter:card", content: "summary_large_image" },
-      { name: "twitter:title", content: "The PRSC Readiness Score — The Standard" },
-      { name: "twitter:description", content: "The Six Readiness Dimensions™ — an independent, evidence-based methodology for commercial partnership readiness." },
+      { name: "twitter:title", content: "PRSC Readiness Score™ — The Independent Standard" },
+      { name: "twitter:description", content: "The independent, evidence-based measure of commercial partnership readiness — built on the Six Readiness Dimensions™." },
       { name: "twitter:image", content: OG_IMAGE },
     ],
     links: [
@@ -33,21 +34,59 @@ export const Route = createFileRoute("/the-standard")({
     scripts: [
       {
         type: "application/ld+json",
-        children: JSON.stringify({
-          "@context": "https://schema.org",
-          "@type": "DefinedTermSet",
-          name: "The Six Readiness Dimensions",
-          description: "The six independent dimensions of the PRSC Readiness Score™ methodology for measuring commercial partnership readiness.",
-          url: CANONICAL,
-          hasDefinedTerm: [
-            { "@type": "DefinedTerm", name: "Signal Strength", description: "The clarity, consistency, and reach of an organization's public presence — the raw broadcast footprint on which every partnership is built." },
-            { "@type": "DefinedTerm", name: "Audience Value", description: "The quality, composition, and commercial relevance of the audience delivered — not just size, but purchasing power, loyalty, and cultural weight." },
-            { "@type": "DefinedTerm", name: "Platform Identity", description: "The distinctness of the brand an organization carries — how sharply it stands apart in a crowded, undifferentiated market." },
-            { "@type": "DefinedTerm", name: "Activation Capability", description: "The organization's ability to execute — creative capacity, operational rigor, and speed from partnership idea to market." },
-            { "@type": "DefinedTerm", name: "Measurement Confidence", description: "The reliability of the data, methodology, and reporting infrastructure a partner receives — the foundation of any credible ROI conversation." },
-            { "@type": "DefinedTerm", name: "Relationship Strength", description: "The trust, retention, and depth of partner relationships — the leading indicator of long-term commercial value." },
-          ],
-        }),
+        children: JSON.stringify([
+          {
+            "@context": "https://schema.org",
+            "@type": "DefinedTerm",
+            "@id": CANONICAL + "#prsc-readiness-score",
+            name: "PRSC Readiness Score",
+            alternateName: ["PRSC Readiness Score™", "Readiness Score"],
+            description: "The PRSC Readiness Score is the independent, evidence-based measure of an organization's commercial partnership readiness, calculated across the Six Readiness Dimensions and governed by the Partnership Readiness Standards Council (PRSC).",
+            url: CANONICAL,
+            inDefinedTermSet: {
+              "@type": "DefinedTermSet",
+              name: "PRSC Readiness Standard",
+              url: CANONICAL,
+            },
+          },
+          {
+            "@context": "https://schema.org",
+            "@type": "DefinedTermSet",
+            name: "The Six Readiness Dimensions",
+            description: "The six independent dimensions of the PRSC Readiness Score methodology for measuring commercial partnership readiness.",
+            url: CANONICAL,
+            hasDefinedTerm: [
+              { "@type": "DefinedTerm", name: "Signal Strength", description: "The clarity, consistency, and reach of an organization's public presence — the raw broadcast footprint on which every partnership is built." },
+              { "@type": "DefinedTerm", name: "Audience Value", description: "The quality, composition, and commercial relevance of the audience delivered — not just size, but purchasing power, loyalty, and cultural weight." },
+              { "@type": "DefinedTerm", name: "Platform Identity", description: "The distinctness of the brand an organization carries — how sharply it stands apart in a crowded, undifferentiated market." },
+              { "@type": "DefinedTerm", name: "Activation Capability", description: "The organization's ability to execute — creative capacity, operational rigor, and speed from partnership idea to market." },
+              { "@type": "DefinedTerm", name: "Measurement Confidence", description: "The reliability of the data, methodology, and reporting infrastructure a partner receives — the foundation of any credible ROI conversation." },
+              { "@type": "DefinedTerm", name: "Relationship Strength", description: "The trust, retention, and depth of partner relationships — the leading indicator of long-term commercial value." },
+            ],
+          },
+          {
+            "@context": "https://schema.org",
+            "@type": "FAQPage",
+            mainEntity: [
+              {
+                "@type": "Question",
+                name: "What is the PRSC Readiness Score?",
+                acceptedAnswer: {
+                  "@type": "Answer",
+                  text: "The PRSC Readiness Score is a single, independent measure of an organization's commercial partnership readiness. It is produced through a structured, peer-reviewed process governed by the Partnership Readiness Standards Council and calculated across the Six Readiness Dimensions.",
+                },
+              },
+              {
+                "@type": "Question",
+                name: "Who governs the PRSC Readiness Score?",
+                acceptedAnswer: {
+                  "@type": "Answer",
+                  text: "The PRSC Readiness Score is governed by the Partnership Readiness Standards Council (PRSC) — an independent, non-commercial standards body with a peer-reviewed methodology committee.",
+                },
+              },
+            ],
+          },
+        ]),
       },
     ],
   }),
