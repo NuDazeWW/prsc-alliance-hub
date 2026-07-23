@@ -15,6 +15,7 @@ const ENTRIES: SitemapEntry[] = [
   { path: "/standard-v1", changefreq: "monthly", priority: "0.9" },
   { path: "/governance", changefreq: "monthly", priority: "0.8" },
   { path: "/governance/charter", changefreq: "monthly", priority: "0.7" },
+  { path: "/governance/written-standards", changefreq: "monthly", priority: "0.7" },
   { path: "/certification", changefreq: "monthly", priority: "0.6" },
   { path: "/readiness-vanguard", changefreq: "monthly", priority: "0.8" },
   { path: "/request-briefing", changefreq: "monthly", priority: "0.7" },

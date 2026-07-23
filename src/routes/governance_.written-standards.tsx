@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 
 const CANONICAL = "https://prscstandards.com/governance/written-standards";
 
@@ -37,7 +37,7 @@ type Section = {
   id: string;
   num: string;
   title: string;
-  body: JSX.Element;
+  body: ReactNode;
 };
 
 const SECTIONS: Section[] = [
