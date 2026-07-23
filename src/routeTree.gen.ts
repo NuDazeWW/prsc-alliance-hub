@@ -18,6 +18,7 @@ import { Route as GovernanceRouteImport } from './routes/governance'
 import { Route as CertificationRouteImport } from './routes/certification'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as VanguardHomeRouteImport } from './routes/vanguard.home'
+import { Route as GovernanceCharterRouteImport } from './routes/governance_.charter'
 import { Route as ApiGeoRouteImport } from './routes/api/geo'
 
 const TheStandardRoute = TheStandardRouteImport.update({
@@ -65,6 +66,11 @@ const VanguardHomeRoute = VanguardHomeRouteImport.update({
   path: '/vanguard/home',
   getParentRoute: () => rootRouteImport,
 } as any)
+const GovernanceCharterRoute = GovernanceCharterRouteImport.update({
+  id: '/governance_/charter',
+  path: '/governance/charter',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiGeoRoute = ApiGeoRouteImport.update({
   id: '/api/geo',
   path: '/api/geo',
@@ -81,6 +87,7 @@ export interface FileRoutesByFullPath {
   '/standard-v1': typeof StandardV1Route
   '/the-standard': typeof TheStandardRoute
   '/api/geo': typeof ApiGeoRoute
+  '/governance/charter': typeof GovernanceCharterRoute
   '/vanguard/home': typeof VanguardHomeRoute
 }
 export interface FileRoutesByTo {
@@ -93,6 +100,7 @@ export interface FileRoutesByTo {
   '/standard-v1': typeof StandardV1Route
   '/the-standard': typeof TheStandardRoute
   '/api/geo': typeof ApiGeoRoute
+  '/governance/charter': typeof GovernanceCharterRoute
   '/vanguard/home': typeof VanguardHomeRoute
 }
 export interface FileRoutesById {
@@ -106,6 +114,7 @@ export interface FileRoutesById {
   '/standard-v1': typeof StandardV1Route
   '/the-standard': typeof TheStandardRoute
   '/api/geo': typeof ApiGeoRoute
+  '/governance_/charter': typeof GovernanceCharterRoute
   '/vanguard/home': typeof VanguardHomeRoute
 }
 export interface FileRouteTypes {
@@ -120,6 +129,7 @@ export interface FileRouteTypes {
     | '/standard-v1'
     | '/the-standard'
     | '/api/geo'
+    | '/governance/charter'
     | '/vanguard/home'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -132,6 +142,7 @@ export interface FileRouteTypes {
     | '/standard-v1'
     | '/the-standard'
     | '/api/geo'
+    | '/governance/charter'
     | '/vanguard/home'
   id:
     | '__root__'
@@ -144,6 +155,7 @@ export interface FileRouteTypes {
     | '/standard-v1'
     | '/the-standard'
     | '/api/geo'
+    | '/governance_/charter'
     | '/vanguard/home'
   fileRoutesById: FileRoutesById
 }
@@ -157,6 +169,7 @@ export interface RootRouteChildren {
   StandardV1Route: typeof StandardV1Route
   TheStandardRoute: typeof TheStandardRoute
   ApiGeoRoute: typeof ApiGeoRoute
+  GovernanceCharterRoute: typeof GovernanceCharterRoute
   VanguardHomeRoute: typeof VanguardHomeRoute
 }
 
@@ -225,6 +238,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof VanguardHomeRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/governance_/charter': {
+      id: '/governance_/charter'
+      path: '/governance/charter'
+      fullPath: '/governance/charter'
+      preLoaderRoute: typeof GovernanceCharterRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/geo': {
       id: '/api/geo'
       path: '/api/geo'
@@ -245,6 +265,7 @@ const rootRouteChildren: RootRouteChildren = {
   StandardV1Route: StandardV1Route,
   TheStandardRoute: TheStandardRoute,
   ApiGeoRoute: ApiGeoRoute,
+  GovernanceCharterRoute: GovernanceCharterRoute,
   VanguardHomeRoute: VanguardHomeRoute,
 }
 export const routeTree = rootRouteImport
