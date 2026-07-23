@@ -198,7 +198,7 @@ function HomePage() {
 
       <ContinueReading
         links={[
-          { to: "/the-standard", label: "The Standard" },
+          { to: "/the-standard", label: "PRSC Readiness Score" },
           { to: "/governance", label: "Governance" },
           { to: "/readiness-vanguard", label: "The Readiness Vanguard" },
         ]}
