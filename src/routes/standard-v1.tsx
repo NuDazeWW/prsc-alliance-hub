@@ -593,7 +593,7 @@ function StandardV1Page() {
             Questions about the Standard, the scoring process, or the Readiness Vanguard™ program
             may be directed to the Council through the contact information published on the
             Council's website at{" "}
-            <a href="#" className="text-navy underline decoration-gold/60 hover:decoration-gold">
+            <a href="/" className="text-navy underline decoration-gold/60 hover:decoration-gold">
               prscstandards.com
             </a>
             . To request a scored Readiness Assessment, visit the Evidence Portal™ at{" "}
