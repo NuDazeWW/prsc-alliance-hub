@@ -1,4 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { trackDownload } from "@/lib/track-download";
 
 const CANONICAL = "https://prscstandards.com/standard-v1";
 
@@ -240,6 +241,13 @@ function StandardV1Page() {
                 href="/downloads/prsc-readiness-standard-v1.pdf"
                 target="_blank"
                 rel="noopener noreferrer"
+                onClick={() =>
+                  trackDownload(
+                    "prsc-readiness-standard-v1.pdf",
+                    "/downloads/prsc-readiness-standard-v1.pdf",
+                    "Readiness Standard v1 — Download PDF",
+                  )
+                }
                 className="inline-flex items-center gap-2 rounded-sm border border-gold bg-transparent px-5 py-3 text-xs tracking-[0.18em] uppercase text-gold hover:bg-gold hover:text-navy transition-colors"
               >
                 Download PDF

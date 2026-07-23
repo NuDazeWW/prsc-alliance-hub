@@ -1,5 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
+import { trackDownload } from "@/lib/track-download";
 
 const CANONICAL = "https://prscstandards.com/governance/charter";
 
@@ -225,6 +226,13 @@ function CharterPage() {
               href="/downloads/prsc-governance-charter-v1.pdf"
               target="_blank"
               rel="noopener noreferrer"
+              onClick={() =>
+                trackDownload(
+                  "prsc-governance-charter-v1.pdf",
+                  "/downloads/prsc-governance-charter-v1.pdf",
+                  "Governance Charter — Download PDF",
+                )
+              }
               className="shrink-0 inline-flex items-center rounded-sm border border-gold px-5 py-2.5 text-xs tracking-[0.18em] uppercase text-gold hover:bg-gold hover:text-navy transition-colors self-start"
             >
               Download PDF
