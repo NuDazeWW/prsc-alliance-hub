@@ -208,7 +208,7 @@ export function ReadinessExplainer() {
               <div
                 key={i}
                 ref={(el) => { stepRefs.current[i] = el; }}
-                className="min-h-[34vh] lg:min-h-[36vh] flex items-center py-4 lg:justify-end"
+                className="min-h-[24vh] lg:min-h-[36vh] flex items-center py-6 lg:py-4 lg:justify-end"
               >
                 <motion.div
                   initial={false}
