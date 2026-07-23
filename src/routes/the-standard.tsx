@@ -86,6 +86,14 @@ export const Route = createFileRoute("/the-standard")({
               },
             ],
           },
+          {
+            "@context": "https://schema.org",
+            "@type": "BreadcrumbList",
+            itemListElement: [
+              { "@type": "ListItem", position: 1, name: "PRSC", item: "https://prscstandards.com/" },
+              { "@type": "ListItem", position: 2, name: "PRSC Readiness Score", item: CANONICAL },
+            ],
+          },
         ]),
       },
     ],
