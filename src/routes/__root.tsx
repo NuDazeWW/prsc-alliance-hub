@@ -118,16 +118,39 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       },
       {
         type: "application/ld+json",
-        children: JSON.stringify({
-          "@context": "https://schema.org",
-          "@type": "Organization",
-          name: "Partnership Readiness Standards Council",
-          alternateName: "PRSC",
-          url: "https://prscstandards.com",
-          logo: `https://prscstandards.com${FAVICON}`,
-          description:
-            "The independent standards body governing partnership readiness — an authoritative, evidence-based rating for the $100B+ sponsorship market.",
-        }),
+        children: JSON.stringify([
+          {
+            "@context": "https://schema.org",
+            "@type": "Organization",
+            "@id": "https://prscstandards.com/#organization",
+            name: "Partnership Readiness Standards Council",
+            alternateName: ["PRSC", "PRSC Standards Council"],
+            url: "https://prscstandards.com/",
+            logo: {
+              "@type": "ImageObject",
+              url: `https://prscstandards.com${FAVICON}`,
+            },
+            description:
+              "The independent standards body governing partnership readiness — an authoritative, evidence-based rating for the $100B+ sponsorship market.",
+            knowsAbout: [
+              "PRSC Readiness Score",
+              "PRSC Readiness Standard",
+              "Partnership Readiness",
+              "Sponsorship Standards",
+              "Six Readiness Dimensions",
+            ],
+          },
+          {
+            "@context": "https://schema.org",
+            "@type": "WebSite",
+            "@id": "https://prscstandards.com/#website",
+            name: "Partnership Readiness Standards Council",
+            alternateName: "PRSC",
+            url: "https://prscstandards.com/",
+            publisher: { "@id": "https://prscstandards.com/#organization" },
+            inLanguage: "en-US",
+          },
+        ]),
       },
     ],
 

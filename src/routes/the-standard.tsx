@@ -37,6 +37,35 @@ export const Route = createFileRoute("/the-standard")({
         children: JSON.stringify([
           {
             "@context": "https://schema.org",
+            "@type": "WebPage",
+            "@id": CANONICAL + "#webpage",
+            url: CANONICAL,
+            name: "PRSC Readiness Score™ — The Independent Standard for Partnership Readiness",
+            description:
+              "The PRSC Readiness Score™ is the independent, evidence-based measure of commercial partnership readiness — built on the Six Readiness Dimensions™.",
+            isPartOf: { "@id": "https://prscstandards.com/#website" },
+            about: { "@id": "https://prscstandards.com/#organization" },
+            primaryImageOfPage: { "@type": "ImageObject", url: OG_IMAGE },
+            inLanguage: "en-US",
+            breadcrumb: { "@id": CANONICAL + "#breadcrumb" },
+          },
+          {
+            "@context": "https://schema.org",
+            "@type": "Article",
+            "@id": CANONICAL + "#article",
+            headline: "The PRSC Readiness Score — The Independent Standard for Partnership Readiness",
+            description:
+              "An overview of the PRSC Readiness Score methodology, the Six Readiness Dimensions, and the governance of the Partnership Readiness Standards Council.",
+            mainEntityOfPage: { "@id": CANONICAL + "#webpage" },
+            image: OG_IMAGE,
+            author: { "@id": "https://prscstandards.com/#organization" },
+            publisher: { "@id": "https://prscstandards.com/#organization" },
+            inLanguage: "en-US",
+            isPartOf: { "@id": "https://prscstandards.com/#website" },
+            about: [{ "@id": CANONICAL + "#prsc-readiness-score" }],
+          },
+          {
+            "@context": "https://schema.org",
             "@type": "DefinedTerm",
             "@id": CANONICAL + "#prsc-readiness-score",
             name: "PRSC Readiness Score",
@@ -89,6 +118,7 @@ export const Route = createFileRoute("/the-standard")({
           {
             "@context": "https://schema.org",
             "@type": "BreadcrumbList",
+            "@id": CANONICAL + "#breadcrumb",
             itemListElement: [
               { "@type": "ListItem", position: 1, name: "PRSC", item: "https://prscstandards.com/" },
               { "@type": "ListItem", position: 2, name: "PRSC Readiness Score", item: CANONICAL },
