@@ -96,7 +96,7 @@ function HomePage() {
                 to="/the-standard"
                 className="group inline-flex items-center gap-2 label-caps text-[0.7rem] font-medium tracking-wider text-ivory border-b border-transparent hover:border-gold transition-all pb-1"
               >
-                <span className="shimmer-link">Learn About the Standard</span>
+                <span className="shimmer-link">PRSC Readiness Score</span>
                 <ArrowRight size={14} className="transition-transform group-hover:translate-x-1" />
               </Link>
             </div>
