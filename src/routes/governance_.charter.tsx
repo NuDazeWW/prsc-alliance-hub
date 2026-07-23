@@ -222,8 +222,10 @@ function CharterPage() {
               </p>
             </div>
             <a
-              href="#download"
-              className="hidden shrink-0 inline-flex items-center rounded-sm border border-gold px-5 py-2.5 text-xs tracking-[0.18em] uppercase text-gold hover:bg-gold hover:text-navy transition-colors self-start"
+              href="/downloads/prsc-governance-charter-v1.pdf"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="shrink-0 inline-flex items-center rounded-sm border border-gold px-5 py-2.5 text-xs tracking-[0.18em] uppercase text-gold hover:bg-gold hover:text-navy transition-colors self-start"
             >
               Download PDF
             </a>

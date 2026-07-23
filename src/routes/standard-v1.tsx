@@ -235,9 +235,11 @@ function StandardV1Page() {
                 Version 1.0 · Effective July 22, 2026 · Public Document
               </p>
             </div>
-            <div className="shrink-0 md:pt-2 hidden">
+            <div className="shrink-0 md:pt-2">
               <a
-                href="#download"
+                href="/downloads/prsc-readiness-standard-v1.pdf"
+                target="_blank"
+                rel="noopener noreferrer"
                 className="inline-flex items-center gap-2 rounded-sm border border-gold bg-transparent px-5 py-3 text-xs tracking-[0.18em] uppercase text-gold hover:bg-gold hover:text-navy transition-colors"
               >
                 Download PDF
