@@ -3,6 +3,7 @@ import { Landmark, ScrollText, Users, ChevronDown, ShieldCheck, Eye, GitBranch, 
 import { BoardInterestForm } from "@/components/forms/PrscForms";
 import { ContinueReading } from "@/components/site/ContinueReading";
 import sealBadge from "@/assets/prsc-seal-badge.png.asset.json";
+import governanceDiagram from "@/assets/prsc-governance-diagram.png.asset.json";
 
 const CANONICAL = "https://prscstandards.com/governance";
 
@@ -435,6 +436,43 @@ function GovernancePage() {
 
           <div className="rounded-sm border border-navy/10 bg-white/80 backdrop-blur-sm p-6 md:p-10 shadow-[0_30px_80px_-40px_rgba(10,19,34,0.35)]">
             <BoardInterestForm />
+          </div>
+        </div>
+      </section>
+
+      {/* GOVERNANCE & AFFILIATION DISCLOSURE */}
+      <section
+        className="py-12 md:py-20"
+        style={{ backgroundColor: "#0A1322" }}
+        aria-labelledby="governance-affiliation-disclosure"
+      >
+        <div className="mx-auto max-w-5xl px-6">
+          <p className="label-caps text-gold mb-4 text-center">Transparency Statement</p>
+          <h2
+            id="governance-affiliation-disclosure"
+            className="font-display text-3xl md:text-5xl leading-tight text-white text-center mb-8"
+          >
+            Governance &amp; Affiliation Disclosure
+          </h2>
+          <p
+            className="max-w-3xl mx-auto text-center leading-relaxed mb-12"
+            style={{ color: "#D0D5DD", fontSize: "16px" }}
+          >
+            The Partnership Readiness Standards Council and Decision Intelligence Systems, Inc. are affiliated organizations under common ownership. PRSC governs the PRSC Readiness Standard&trade; independently. DIS operates the Readiness Terminal&trade; and Evidence Portal&trade; under an arm&rsquo;s-length license agreement. The Council retains full authority to terminate that license for breach of independence requirements. The three Independence Safeguards that enforce this separation are published in the PRSC Governance &amp; Market-Trust Charter.
+          </p>
+          <img
+            src={governanceDiagram.url}
+            alt="PRSC Governance and Affiliation Disclosure diagram: PRSC LLC (Independent Standards Body) and Decision Intelligence Systems, Inc. (Technology Operator) linked by an arm's-length license agreement, with Independence Safeguards."
+            className="block mx-auto w-full h-auto max-w-[960px]"
+            loading="lazy"
+          />
+          <div className="mt-8 text-center">
+            <a
+              href="/governance/charter"
+              className="text-gold hover:text-antique underline underline-offset-4 text-sm tracking-wide"
+            >
+              Read the full PRSC Governance &amp; Market-Trust Charter &rarr;
+            </a>
           </div>
         </div>
       </section>
