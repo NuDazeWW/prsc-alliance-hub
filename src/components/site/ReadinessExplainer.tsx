@@ -120,44 +120,70 @@ function StepVisual({ step }: { step: number }) {
   const labelLocked = step >= 3;
 
   return (
-    <div className="relative w-full max-w-xl mx-auto">
+    <div className="relative w-full max-w-xl mx-auto px-2">
       <motion.div
         animate={{ filter: step === 0 ? "blur(10px)" : "blur(0px)", opacity: step === 0 ? 0.55 : 1 }}
         transition={{ duration: 0.9, ease: "easeOut" }}
-        className="flex items-center gap-4 md:gap-6"
       >
-        <div className="flex-1 flex flex-col justify-between gap-5" style={{ minHeight: 340 }}>
-          {leftDims.map((d, i) => (
-            <StaticBar key={d.key} value={d.value} visible={i < barsVisibleUpTo} Icon={d.icon} label={d.label} />
-          ))}
-        </div>
-        <div className="shrink-0 flex flex-col items-center justify-center">
-          <StepGauge target={84} active={gaugeActive} />
-          <div className="h-6 mt-2 flex items-center justify-center">
-            <AnimatePresence>
-              {labelLocked && (
-                <motion.div
-                  initial={{ opacity: 0, scale: 0.9 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  exit={{ opacity: 0 }}
-                  transition={{ duration: 0.6, ease: "easeOut" }}
-                  className="text-[11px] md:text-[12px] uppercase font-medium text-center leading-tight"
-                  style={{
-                    color: "#D4AF37",
-                    letterSpacing: "0.14em",
-                    textShadow: "0 0 14px rgba(212,175,55,0.55)",
-                  }}
-                >
-                  Commercially Undeniable
-                </motion.div>
-              )}
-            </AnimatePresence>
+        {/* Mobile: gauge on top, bars stacked below */}
+        <div className="flex flex-col items-center gap-6 lg:hidden">
+          <div className="flex flex-col items-center">
+            <StepGauge target={84} active={gaugeActive} />
+            <div className="h-6 mt-2 flex items-center justify-center">
+              <AnimatePresence>
+                {labelLocked && (
+                  <motion.div
+                    initial={{ opacity: 0, scale: 0.9 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    exit={{ opacity: 0 }}
+                    transition={{ duration: 0.6, ease: "easeOut" }}
+                    className="text-[11px] uppercase font-medium text-center leading-tight"
+                    style={{ color: "#D4AF37", letterSpacing: "0.14em", textShadow: "0 0 14px rgba(212,175,55,0.55)" }}
+                  >
+                    Commercially Undeniable
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
+          </div>
+          <div className="grid grid-cols-1 gap-4 w-full max-w-sm">
+            {DIMENSIONS.map((d, i) => (
+              <StaticBar key={d.key} value={d.value} visible={i < barsVisibleUpTo} Icon={d.icon} label={d.label} />
+            ))}
           </div>
         </div>
-        <div className="flex-1 flex flex-col justify-between gap-5" style={{ minHeight: 340 }}>
-          {rightDims.map((d, i) => (
-            <StaticBar key={d.key} value={d.value} visible={i + 3 < barsVisibleUpTo} Icon={d.icon} label={d.label} />
-          ))}
+
+        {/* Desktop: three-column layout */}
+        <div className="hidden lg:flex items-center gap-6">
+          <div className="flex-1 flex flex-col justify-between gap-5" style={{ minHeight: 340 }}>
+            {leftDims.map((d, i) => (
+              <StaticBar key={d.key} value={d.value} visible={i < barsVisibleUpTo} Icon={d.icon} label={d.label} />
+            ))}
+          </div>
+          <div className="shrink-0 flex flex-col items-center justify-center">
+            <StepGauge target={84} active={gaugeActive} />
+            <div className="h-6 mt-2 flex items-center justify-center">
+              <AnimatePresence>
+                {labelLocked && (
+                  <motion.div
+                    initial={{ opacity: 0, scale: 0.9 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    exit={{ opacity: 0 }}
+                    transition={{ duration: 0.6, ease: "easeOut" }}
+                    className="text-[12px] uppercase font-medium text-center leading-tight"
+                    style={{ color: "#D4AF37", letterSpacing: "0.14em", textShadow: "0 0 14px rgba(212,175,55,0.55)" }}
+                  >
+                    Commercially Undeniable
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
+          </div>
+          <div className="flex-1 flex flex-col justify-between gap-5" style={{ minHeight: 340 }}>
+            {rightDims.map((d, i) => (
+              <StaticBar key={d.key} value={d.value} visible={i + 3 < barsVisibleUpTo} Icon={d.icon} label={d.label} />
+            ))}
+          </div>
         </div>
       </motion.div>
     </div>
