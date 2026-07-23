@@ -143,11 +143,11 @@ function HomePage() {
           >
             <LivingScoreDashboard />
           </motion.div>
-          <div className="lg:col-span-2 flex items-center justify-between gap-x-4 gap-y-3 flex-wrap w-full">
+          <div className="lg:col-span-2 grid grid-cols-2 md:flex md:items-center md:justify-between gap-x-4 gap-y-3 w-full">
             {TRUST_BADGES.map((b) => (
-              <span key={b.label} className="flex items-center gap-x-2">
-                <b.icon size={14} strokeWidth={1.5} className="text-emerald" aria-hidden />
-                <span className="label-caps text-[0.65rem] tracking-wider text-pewter uppercase">
+              <span key={b.label} className="flex items-center gap-x-2 min-w-0">
+                <b.icon size={14} strokeWidth={1.5} className="text-emerald shrink-0" aria-hidden />
+                <span className="label-caps text-[0.6rem] md:text-[0.65rem] tracking-wider text-pewter uppercase truncate">
                   {b.label}
                 </span>
               </span>
