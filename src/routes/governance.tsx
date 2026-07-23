@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { Landmark, ScrollText, Users, ChevronDown, ShieldCheck, Eye, GitBranch, BookOpenCheck, Check } from "lucide-react";
 import { BoardInterestForm } from "@/components/forms/PrscForms";
 import { ContinueReading } from "@/components/site/ContinueReading";
