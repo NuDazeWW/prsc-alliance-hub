@@ -5,7 +5,7 @@ import logo from "@/assets/prsc-logo-only.png.asset.json";
 import { cn } from "@/lib/utils";
 
 const links = [
-  { to: "/the-standard", label: "The Standard" },
+  { to: "/the-standard", label: "PRSC Readiness Score" },
   { to: "/governance", label: "Governance" },
   { to: "/readiness-vanguard", label: "Readiness Vanguard" },
 ];
