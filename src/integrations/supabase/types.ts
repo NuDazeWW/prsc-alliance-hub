@@ -83,6 +83,24 @@ export type Database = {
         }
         Relationships: []
       }
+      certification_interest: {
+        Row: {
+          created_at: string
+          email: string
+          id: string
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          id?: string
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          id?: string
+        }
+        Relationships: []
+      }
       vanguard_interest: {
         Row: {
           created_at: string

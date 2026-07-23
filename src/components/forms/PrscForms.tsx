@@ -1,6 +1,6 @@
 import { useState, type FormEvent } from "react";
 import { useServerFn } from "@tanstack/react-start";
-import { submitBriefing, submitBoardInterest, submitVanguardInterest } from "@/lib/forms.functions";
+import { submitBriefing, submitBoardInterest, submitVanguardInterest, submitCertificationInterest } from "@/lib/forms.functions";
 import { Field, Input, Textarea, Select, SubmitButton, SuccessPanel } from "./fields";
 
 function useFormState() {
@@ -117,6 +117,50 @@ export function VanguardInterestForm() {
       <div className="md:col-span-2 mt-2 flex justify-end">
         <SubmitButton pending={s.pending}>Apply to the Vanguard</SubmitButton>
       </div>
+    </form>
+  );
+}
+
+export function CertificationNotifyForm() {
+  const call = useServerFn(submitCertificationInterest);
+  const s = useFormState();
+  if (s.done)
+    return (
+      <SuccessPanel
+        title="You're on the list."
+        body="We'll email you once when Readiness Certified™ applications open."
+      />
+    );
+  return (
+    <form
+      onSubmit={async (e) => {
+        e.preventDefault();
+        s.setError(null);
+        s.setPending(true);
+        try {
+          await call({ data: getData(e) as never });
+          s.setDone(true);
+        } catch (err) {
+          s.setError((err as Error).message || "Something went wrong.");
+        } finally {
+          s.setPending(false);
+        }
+      }}
+      className="flex flex-col sm:flex-row gap-3 max-w-xl mx-auto"
+    >
+      <Input
+        id="email"
+        name="email"
+        type="email"
+        required
+        placeholder="you@organization.com"
+        aria-label="Email address"
+        className="flex-1"
+      />
+      <SubmitButton pending={s.pending} className="bg-gold text-navy hover:bg-antique whitespace-nowrap">
+        Notify Me
+      </SubmitButton>
+      {s.error && <p className="sm:w-full text-sm text-destructive">{s.error}</p>}
     </form>
   );
 }
