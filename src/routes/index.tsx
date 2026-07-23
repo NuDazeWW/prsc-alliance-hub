@@ -96,7 +96,7 @@ function HomePage() {
                 to="/the-standard"
                 className="group inline-flex items-center gap-2 label-caps text-[0.7rem] font-medium tracking-wider text-ivory border-b border-transparent hover:border-gold transition-all pb-1"
               >
-                <span className="shimmer-link">Learn About the Standard</span>
+                <span className="shimmer-link">PRSC Readiness Score</span>
                 <ArrowRight size={14} className="transition-transform group-hover:translate-x-1" />
               </Link>
             </div>
@@ -165,7 +165,7 @@ function HomePage() {
             title="Deploy capital with confidence."
             body="Evaluate partnerships against a single, independent benchmark. Reduce risk. Sharpen ROI. Move faster."
             to="/the-standard"
-            cta="Explore the Standard"
+            cta="PRSC Readiness Score"
           />
           <PathwayCard
             icon={Landmark}
@@ -198,7 +198,7 @@ function HomePage() {
 
       <ContinueReading
         links={[
-          { to: "/the-standard", label: "The Standard" },
+          { to: "/the-standard", label: "PRSC Readiness Score" },
           { to: "/governance", label: "Governance" },
           { to: "/readiness-vanguard", label: "The Readiness Vanguard" },
         ]}
