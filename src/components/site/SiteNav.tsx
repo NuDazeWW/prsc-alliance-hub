@@ -5,10 +5,12 @@ import logo from "@/assets/prsc-logo-only.png.asset.json";
 import { cn } from "@/lib/utils";
 
 const links = [
-  { to: "/the-standard", label: "PRSC Readiness Score" },
+  { to: "/the-standard", label: "The Standard" },
   { to: "/governance", label: "Governance" },
-  { to: "/readiness-vanguard", label: "Readiness Vanguard" },
-];
+  { to: "/certification", label: "Certification" },
+  { to: "/readiness-vanguard", label: "Vanguard" },
+  { to: "/request-briefing", label: "Request a Briefing" },
+] as const;
 
 export function SiteNav() {
   const [scrolled, setScrolled] = useState(false);

@@ -10,10 +10,12 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as TheStandardRouteImport } from './routes/the-standard'
+import { Route as StandardV1RouteImport } from './routes/standard-v1'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as RequestBriefingRouteImport } from './routes/request-briefing'
 import { Route as ReadinessVanguardRouteImport } from './routes/readiness-vanguard'
 import { Route as GovernanceRouteImport } from './routes/governance'
+import { Route as CertificationRouteImport } from './routes/certification'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as VanguardHomeRouteImport } from './routes/vanguard.home'
 import { Route as ApiGeoRouteImport } from './routes/api/geo'
@@ -21,6 +23,11 @@ import { Route as ApiGeoRouteImport } from './routes/api/geo'
 const TheStandardRoute = TheStandardRouteImport.update({
   id: '/the-standard',
   path: '/the-standard',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const StandardV1Route = StandardV1RouteImport.update({
+  id: '/standard-v1',
+  path: '/standard-v1',
   getParentRoute: () => rootRouteImport,
 } as any)
 const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
@@ -43,6 +50,11 @@ const GovernanceRoute = GovernanceRouteImport.update({
   path: '/governance',
   getParentRoute: () => rootRouteImport,
 } as any)
+const CertificationRoute = CertificationRouteImport.update({
+  id: '/certification',
+  path: '/certification',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
@@ -61,20 +73,24 @@ const ApiGeoRoute = ApiGeoRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/certification': typeof CertificationRoute
   '/governance': typeof GovernanceRoute
   '/readiness-vanguard': typeof ReadinessVanguardRoute
   '/request-briefing': typeof RequestBriefingRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/standard-v1': typeof StandardV1Route
   '/the-standard': typeof TheStandardRoute
   '/api/geo': typeof ApiGeoRoute
   '/vanguard/home': typeof VanguardHomeRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/certification': typeof CertificationRoute
   '/governance': typeof GovernanceRoute
   '/readiness-vanguard': typeof ReadinessVanguardRoute
   '/request-briefing': typeof RequestBriefingRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/standard-v1': typeof StandardV1Route
   '/the-standard': typeof TheStandardRoute
   '/api/geo': typeof ApiGeoRoute
   '/vanguard/home': typeof VanguardHomeRoute
@@ -82,10 +98,12 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/certification': typeof CertificationRoute
   '/governance': typeof GovernanceRoute
   '/readiness-vanguard': typeof ReadinessVanguardRoute
   '/request-briefing': typeof RequestBriefingRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/standard-v1': typeof StandardV1Route
   '/the-standard': typeof TheStandardRoute
   '/api/geo': typeof ApiGeoRoute
   '/vanguard/home': typeof VanguardHomeRoute
@@ -94,30 +112,36 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/certification'
     | '/governance'
     | '/readiness-vanguard'
     | '/request-briefing'
     | '/sitemap.xml'
+    | '/standard-v1'
     | '/the-standard'
     | '/api/geo'
     | '/vanguard/home'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/certification'
     | '/governance'
     | '/readiness-vanguard'
     | '/request-briefing'
     | '/sitemap.xml'
+    | '/standard-v1'
     | '/the-standard'
     | '/api/geo'
     | '/vanguard/home'
   id:
     | '__root__'
     | '/'
+    | '/certification'
     | '/governance'
     | '/readiness-vanguard'
     | '/request-briefing'
     | '/sitemap.xml'
+    | '/standard-v1'
     | '/the-standard'
     | '/api/geo'
     | '/vanguard/home'
@@ -125,10 +149,12 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  CertificationRoute: typeof CertificationRoute
   GovernanceRoute: typeof GovernanceRoute
   ReadinessVanguardRoute: typeof ReadinessVanguardRoute
   RequestBriefingRoute: typeof RequestBriefingRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
+  StandardV1Route: typeof StandardV1Route
   TheStandardRoute: typeof TheStandardRoute
   ApiGeoRoute: typeof ApiGeoRoute
   VanguardHomeRoute: typeof VanguardHomeRoute
@@ -141,6 +167,13 @@ declare module '@tanstack/react-router' {
       path: '/the-standard'
       fullPath: '/the-standard'
       preLoaderRoute: typeof TheStandardRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/standard-v1': {
+      id: '/standard-v1'
+      path: '/standard-v1'
+      fullPath: '/standard-v1'
+      preLoaderRoute: typeof StandardV1RouteImport
       parentRoute: typeof rootRouteImport
     }
     '/sitemap.xml': {
@@ -171,6 +204,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof GovernanceRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/certification': {
+      id: '/certification'
+      path: '/certification'
+      fullPath: '/certification'
+      preLoaderRoute: typeof CertificationRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -197,10 +237,12 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  CertificationRoute: CertificationRoute,
   GovernanceRoute: GovernanceRoute,
   ReadinessVanguardRoute: ReadinessVanguardRoute,
   RequestBriefingRoute: RequestBriefingRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
+  StandardV1Route: StandardV1Route,
   TheStandardRoute: TheStandardRoute,
   ApiGeoRoute: ApiGeoRoute,
   VanguardHomeRoute: VanguardHomeRoute,
@@ -208,13 +250,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
