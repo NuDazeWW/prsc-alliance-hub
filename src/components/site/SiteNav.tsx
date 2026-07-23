@@ -75,12 +75,13 @@ export function SiteNav() {
               <Link
                 key={l.to}
                 to={l.to}
-                className="text-sm text-ivory/85 hover:text-gold transition-colors tracking-wide"
-                activeProps={{ className: "text-gold" }}
+                className="text-sm text-ivory/85 hover:text-gold transition-colors tracking-wide pb-1 border-b-2 border-transparent"
+                activeProps={{ className: "text-gold border-gold" }}
               >
                 {l.label}
               </Link>
             ))}
+
           </div>
           <button
             className="md:hidden text-ivory p-2 -mr-2 rounded-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold"

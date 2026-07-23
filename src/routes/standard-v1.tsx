@@ -235,7 +235,7 @@ function StandardV1Page() {
                 Version 1.0 · Effective July 22, 2026 · Public Document
               </p>
             </div>
-            <div className="shrink-0 md:pt-2">
+            <div className="shrink-0 md:pt-2 hidden">
               <a
                 href="#download"
                 className="inline-flex items-center gap-2 rounded-sm border border-gold bg-transparent px-5 py-3 text-xs tracking-[0.18em] uppercase text-gold hover:bg-gold hover:text-navy transition-colors"
@@ -243,6 +243,7 @@ function StandardV1Page() {
                 Download PDF
               </a>
             </div>
+
           </div>
         </div>
       </header>

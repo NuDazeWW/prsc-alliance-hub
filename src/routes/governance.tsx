@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { Landmark, ScrollText, Users, ChevronDown, ShieldCheck, Eye, GitBranch, BookOpenCheck, Check } from "lucide-react";
 import { BoardInterestForm } from "@/components/forms/PrscForms";
 import { ContinueReading } from "@/components/site/ContinueReading";
@@ -467,12 +467,13 @@ function GovernancePage() {
             loading="lazy"
           />
           <div className="mt-8 text-center">
-            <a
-              href="/governance/charter"
+            <Link
+              to="/governance/charter"
               className="text-gold hover:text-antique underline underline-offset-4 text-sm tracking-wide"
             >
               Read the full PRSC Governance &amp; Market-Trust Charter &rarr;
-            </a>
+            </Link>
+
           </div>
         </div>
       </section>
