@@ -165,7 +165,7 @@ function HomePage() {
             title="Deploy capital with confidence."
             body="Evaluate partnerships against a single, independent benchmark. Reduce risk. Sharpen ROI. Move faster."
             to="/the-standard"
-            cta="Explore the Standard"
+            cta="PRSC Readiness Score"
           />
           <PathwayCard
             icon={Landmark}
