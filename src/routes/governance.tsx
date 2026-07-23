@@ -466,12 +466,18 @@ function GovernancePage() {
             className="block mx-auto w-full h-auto max-w-[960px]"
             loading="lazy"
           />
-          <div className="mt-8 text-center">
+          <div className="mt-8 text-center flex flex-col sm:flex-row gap-4 sm:gap-8 justify-center">
             <Link
               to="/governance/charter"
               className="text-gold hover:text-antique underline underline-offset-4 text-sm tracking-wide"
             >
               Read the full PRSC Governance &amp; Market-Trust Charter &rarr;
+            </Link>
+            <Link
+              to="/governance/written-standards"
+              className="text-gold hover:text-antique underline underline-offset-4 text-sm tracking-wide"
+            >
+              Written Standards Document &rarr;
             </Link>
 
           </div>
