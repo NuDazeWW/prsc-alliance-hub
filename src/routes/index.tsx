@@ -12,23 +12,66 @@ const CANONICAL = "https://prscstandards.com/";
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "PRSC — The Independent Standard for Partnership Readiness" },
+      { title: "Partnership Readiness Standards Council (PRSC) | Readiness Score" },
       {
         name: "description",
         content:
-          "PRSC is the independent standards body for partnership readiness — an authoritative, evidence-based framework for the global sponsorship market. Request a briefing.",
+          "Partnership Readiness Standards Council (PRSC) is the independent standards body behind the PRSC Readiness Score — an authoritative, evidence-based framework for the global sponsorship market.",
       },
-      { property: "og:title", content: "PRSC — The Independent Standard for Partnership Readiness" },
+      {
+        name: "keywords",
+        content:
+          "Partnership Readiness Standards Council, PRSC, PRSC Readiness Score, Readiness Score, partnership readiness, sponsorship standard, independent standards body",
+      },
+      { property: "og:title", content: "Partnership Readiness Standards Council (PRSC) | Readiness Score" },
       {
         property: "og:description",
         content:
-          "PRSC is the independent standards body for partnership readiness — an authoritative, evidence-based framework for the global sponsorship market. Request a briefing.",
+          "Partnership Readiness Standards Council (PRSC) is the independent standards body behind the PRSC Readiness Score — an authoritative, evidence-based framework for the global sponsorship market.",
       },
       { property: "og:url", content: CANONICAL },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
+      { name: "twitter:title", content: "Partnership Readiness Standards Council (PRSC) | Readiness Score" },
+      {
+        name: "twitter:description",
+        content:
+          "The independent standards body behind the PRSC Readiness Score for the global sponsorship market.",
+      },
     ],
     links: [
       { rel: "canonical", href: CANONICAL },
       { rel: "preload", as: "image", href: prscCrest.url, fetchpriority: "high" },
+    ],
+    scripts: [
+      {
+        type: "application/ld+json",
+        children: JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "Organization",
+          name: "Partnership Readiness Standards Council",
+          alternateName: ["PRSC", "PRSC Standards Council"],
+          url: "https://prscstandards.com/",
+          logo: "https://prscstandards.com/prsc-seal.png",
+          description:
+            "Independent standards body behind the PRSC Readiness Score — an evidence-based framework for partnership readiness in the global sponsorship market.",
+          knowsAbout: [
+            "PRSC Readiness Score",
+            "Partnership Readiness",
+            "Sponsorship Standards",
+          ],
+        }),
+      },
+      {
+        type: "application/ld+json",
+        children: JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "WebSite",
+          name: "Partnership Readiness Standards Council",
+          alternateName: "PRSC",
+          url: "https://prscstandards.com/",
+        }),
+      },
     ],
   }),
   component: HomePage,
