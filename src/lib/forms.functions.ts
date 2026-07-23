@@ -26,6 +26,8 @@ const VanguardSchema = z.object({
   role: z.string().trim().min(1).max(120),
   email: z.string().trim().email().max(200),
   phone: z.string().trim().min(1).max(40),
+});
+
 const CertificationSchema = z.object({
   email: z.string().trim().email().max(200),
 });
