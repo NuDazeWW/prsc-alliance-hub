@@ -121,8 +121,8 @@ function VanguardPage() {
       <section className="bg-ivory text-navy py-24 md:py-32">
         <div className="mx-auto max-w-3xl px-6">
           <div className="text-center mb-12">
-            <p className="label-caps text-gold mb-4">Apply</p>
-            <h2 className="font-display text-4xl md:text-5xl leading-tight">Register your organization for consideration.</h2>
+            <p className="label-caps text-gold mb-4">Learn More</p>
+            <h2 className="font-display text-4xl md:text-5xl leading-tight">Submit your organization for consideration.</h2>
             <div className="gold-rule my-6 mx-auto w-24" />
           </div>
           <VanguardInterestForm />
