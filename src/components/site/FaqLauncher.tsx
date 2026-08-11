@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { MessageCircleQuestion, X } from "lucide-react";
 import { Link } from "@tanstack/react-router";
 import { FaqSearch } from "./FaqSearch";
+import { trackEvent } from "@/lib/track-event";
 
 export function FaqLauncher() {
   const [open, setOpen] = useState(false);
@@ -44,7 +45,13 @@ export function FaqLauncher() {
         <button
           ref={pillRef}
           type="button"
-          onClick={() => setOpen(true)}
+          onClick={() => {
+            setOpen(true);
+            trackEvent("faq_open", {
+              faq_source: "pill",
+              page_path: typeof window !== "undefined" ? window.location.pathname : "",
+            });
+          }}
           aria-label="Open frequently asked questions"
           className="fixed z-50 right-5 bottom-5 inline-flex items-center gap-2 rounded-full border border-gold bg-navy/95 px-5 py-3 text-[0.72rem] uppercase tracking-[0.16em] text-gold shadow-lg backdrop-blur transition-all hover:-translate-y-0.5 hover:bg-gold hover:text-navy"
           style={{
