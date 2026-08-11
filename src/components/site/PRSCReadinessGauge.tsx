@@ -23,10 +23,11 @@ function GaugeScale() {
     const isMajor = i % 5 === 0;
     const a = ((angleFor(value) - 90) * Math.PI) / 180;
     const len = isMajor ? MAJOR_LEN : MINOR_LEN;
-    const x1 = 200 + Math.cos(a) * R_TICK;
-    const y1 = 200 + Math.sin(a) * R_TICK;
-    const x2 = 200 + Math.cos(a) * (R_TICK - len);
-    const y2 = 200 + Math.sin(a) * (R_TICK - len);
+    const r3 = (n: number) => Math.round(n * 1000) / 1000;
+    const x1 = r3(200 + Math.cos(a) * R_TICK);
+    const y1 = r3(200 + Math.sin(a) * R_TICK);
+    const x2 = r3(200 + Math.cos(a) * (R_TICK - len));
+    const y2 = r3(200 + Math.sin(a) * (R_TICK - len));
     ticks.push(
       <line
         key={i}
@@ -46,10 +47,10 @@ function GaugeScale() {
   ticks.push(
     <line
       key="reg"
-      x1={200 + Math.cos(ac) * (R_TICK + 6)}
-      y1={200 + Math.sin(ac) * (R_TICK + 6)}
-      x2={200 + Math.cos(ac) * (R_TICK - MAJOR_LEN - 7)}
-      y2={200 + Math.sin(ac) * (R_TICK - MAJOR_LEN - 7)}
+      x1={Math.round((200 + Math.cos(ac) * (R_TICK + 6)) * 1000) / 1000}
+      y1={Math.round((200 + Math.sin(ac) * (R_TICK + 6)) * 1000) / 1000}
+      x2={Math.round((200 + Math.cos(ac) * (R_TICK - MAJOR_LEN - 7)) * 1000) / 1000}
+      y2={Math.round((200 + Math.sin(ac) * (R_TICK - MAJOR_LEN - 7)) * 1000) / 1000}
       stroke="#F5E6B3"
       strokeWidth={3.2}
       strokeLinecap="round"

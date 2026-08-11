@@ -190,9 +190,6 @@
   inset: 0;
   background:
     conic-gradient(from 210deg,
-      #6b5228 0deg, #d8bb६6 0deg);
-  background:
-    conic-gradient(from 210deg,
       #5c4720 0deg, #c9a94f 40deg, #f3e3ad 70deg, #a8873c 110deg,
       #4b3a1a 165deg, #8f7331 210deg, #e6d29a 250deg, #b7973f 300deg, #5c4720 360deg);
   box-shadow:
