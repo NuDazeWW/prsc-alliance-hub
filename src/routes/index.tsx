@@ -143,7 +143,7 @@ function HomePage() {
           >
             <PRSCReadinessGauge />
             <p className="mt-6 mb-8 lg:mb-14 max-w-[22rem] text-center font-semibold text-ivory text-base md:text-lg lg:-translate-x-2">
-              The PRSC Readiness Score™ is always free.
+              The PRSC Readiness Score™ is always free and independently verified.
             </p>
           </motion.div>
           <div className="lg:col-span-2 grid grid-cols-2 md:flex md:items-center md:justify-between gap-x-4 gap-y-3 w-full">
