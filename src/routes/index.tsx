@@ -139,9 +139,12 @@ function HomePage() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.9, ease: "easeOut" }}
-            className="relative w-full flex items-center justify-center px-6"
+            className="relative w-full flex flex-col items-center justify-center px-6"
           >
             <LivingScoreDashboard />
+            <p className="mt-6 text-center font-semibold text-ivory text-base md:text-lg">
+              The PRSC Readiness Score™ is always free.
+            </p>
           </motion.div>
           <div className="lg:col-span-2 grid grid-cols-2 md:flex md:items-center md:justify-between gap-x-4 gap-y-3 w-full">
             {TRUST_BADGES.map((b) => (
