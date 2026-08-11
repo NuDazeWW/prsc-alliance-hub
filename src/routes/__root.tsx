@@ -15,6 +15,7 @@ import { reportLovableError } from "../lib/lovable-error-reporting";
 import { SiteNav } from "@/components/site/SiteNav";
 import { SiteFooter } from "@/components/site/SiteFooter";
 import { AnalyticsGate } from "@/components/site/AnalyticsGate";
+import { FaqLauncher } from "@/components/site/FaqLauncher";
 
 const FAVICON = "/favicon.png";
 
