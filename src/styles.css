@@ -281,8 +281,8 @@
   white-space: nowrap;
   color: rgba(242,239,230,0.72);
 }
-.prsc-gauge__label--min { left: 19%; }
-.prsc-gauge__label--max { right: 15%; }
+.prsc-gauge__label--min { left: 21.5%; }
+.prsc-gauge__label--max { right: 17.5%; }
 
 .prsc-gauge__type {
   display: flex; flex-direction: column; align-items: center; justify-content: center;
