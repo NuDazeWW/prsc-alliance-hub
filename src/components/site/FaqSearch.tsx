@@ -1,6 +1,7 @@
-import { useMemo, useState, type ReactNode } from "react";
+import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { Search, ChevronDown } from "lucide-react";
 import { FAQ_CATEGORIES, FAQ_ITEMS, type FaqItem } from "@/data/faq";
+import { trackEvent } from "@/lib/track-event";
 
 function normalize(s: string) {
   return s
