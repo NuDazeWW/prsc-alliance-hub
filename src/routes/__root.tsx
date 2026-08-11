@@ -195,6 +195,7 @@ function RootComponent() {
         <Outlet />
       </main>
       {isChrome && <SiteFooter />}
+      <FaqLauncher />
       <AnalyticsGate />
     </QueryClientProvider>
   );
