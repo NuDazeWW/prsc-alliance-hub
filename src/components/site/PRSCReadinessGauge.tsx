@@ -74,7 +74,7 @@ function GaugeNeedle() {
   return (
     <svg viewBox="0 0 400 400" className="prsc-gauge__needle" aria-hidden focusable="false">
       <defs>
-        <linearGradient id="prscNeedleTop" x1="0" y1="0" x2="0" y2="1">
+        <linearGradient id="prscNeedleTop" x1="0" y1="0" x2="1" y2="0">
           <stop offset="0%" stopColor="#F7EBC2" />
           <stop offset="48%" stopColor="#D9B854" />
           <stop offset="52%" stopColor="#7A5F30" />
@@ -83,17 +83,11 @@ function GaugeNeedle() {
       </defs>
       <g className="prsc-gauge__needle-rotor">
         {/* tapered blade */}
-        <path
-          d="M 200 196.5 L 60 199.4 L 60 200.6 L 200 203.5 Z"
-          fill="url(#prscNeedleTop)"
-        />
+        <path d="M 196.5 200 L 199.4 62 L 200.6 62 L 203.5 200 Z" fill="url(#prscNeedleTop)" />
         {/* edge highlight */}
-        <path d="M 200 197.2 L 62 199.6 L 62 200.05 L 200 198.6 Z" fill="rgba(255,246,214,0.75)" />
+        <path d="M 197.6 200 L 199.5 64 L 199.95 64 L 199.2 200 Z" fill="rgba(255,246,214,0.7)" />
         {/* counterweight */}
-        <path
-          d="M 200 194 L 232 197 A 4 4 0 0 1 232 203 L 200 206 Z"
-          fill="url(#prscNeedleTop)"
-        />
+        <path d="M 194 200 L 197 232 A 4 4 0 0 0 203 232 L 206 200 Z" fill="url(#prscNeedleTop)" />
       </g>
     </svg>
   );

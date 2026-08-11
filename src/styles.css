@@ -263,7 +263,7 @@
 }
 
 .prsc-gauge__hub {
-  left: 50%; top: 50%; inset: auto;
+  inset: auto; left: 50%; top: 50%;
   width: 13%; height: 13%; transform: translate(-50%, -50%);
   border-radius: 50%;
   background: conic-gradient(from 200deg, #2b3038, #7d838d, #c3c8d0, #3a3f49, #2b3038);
