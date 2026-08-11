@@ -101,7 +101,7 @@ function FaqPage() {
 
       <section className="mx-auto max-w-5xl px-6 py-14 md:py-20">
         <div className="mb-14 rounded-sm border border-navy/10 bg-ivory h-[70vh] overflow-hidden">
-          <FaqSearch />
+          <FaqSearch source="page" />
         </div>
 
         {FAQ_CATEGORIES.map((c) => (
