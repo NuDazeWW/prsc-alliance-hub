@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { motion } from "motion/react";
-import { ScoreGauge } from "@/components/site/ScoreGauge";
+import { PRSCReadinessGauge } from "@/components/site/PRSCReadinessGauge";
 import { ReadinessExplainer } from "@/components/site/ReadinessExplainer";
 
 import { ContinueReading } from "@/components/site/ContinueReading";
@@ -141,7 +141,7 @@ function HomePage() {
             transition={{ duration: 0.9, ease: "easeOut" }}
             className="relative w-full flex flex-col items-center justify-center px-6"
           >
-            <ScoreGauge />
+            <PRSCReadinessGauge />
             <p className="mt-6 text-center font-semibold text-ivory text-base md:text-lg">
               The PRSC Readiness Score™ is always free.
             </p>
