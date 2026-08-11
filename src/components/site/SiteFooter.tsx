@@ -19,6 +19,7 @@ export function SiteFooter() {
             <li><Link to="/certification" className="hover:text-gold">Certification</Link></li>
             <li><Link to="/readiness-vanguard" className="hover:text-gold">Vanguard</Link></li>
             <li><Link to="/request-briefing" className="hover:text-gold">Request a Briefing</Link></li>
+            <li><Link to="/faq" className="hover:text-gold">FAQ</Link></li>
           </ul>
         </div>
         <div className="space-y-3">

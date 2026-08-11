@@ -15,6 +15,7 @@ import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as RequestBriefingRouteImport } from './routes/request-briefing'
 import { Route as ReadinessVanguardRouteImport } from './routes/readiness-vanguard'
 import { Route as GovernanceRouteImport } from './routes/governance'
+import { Route as FaqRouteImport } from './routes/faq'
 import { Route as CertificationRouteImport } from './routes/certification'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as VanguardHomeRouteImport } from './routes/vanguard.home'
@@ -52,6 +53,11 @@ const GovernanceRoute = GovernanceRouteImport.update({
   path: '/governance',
   getParentRoute: () => rootRouteImport,
 } as any)
+const FaqRoute = FaqRouteImport.update({
+  id: '/faq',
+  path: '/faq',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const CertificationRoute = CertificationRouteImport.update({
   id: '/certification',
   path: '/certification',
@@ -87,6 +93,7 @@ const ApiGeoRoute = ApiGeoRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/certification': typeof CertificationRoute
+  '/faq': typeof FaqRoute
   '/governance': typeof GovernanceRoute
   '/readiness-vanguard': typeof ReadinessVanguardRoute
   '/request-briefing': typeof RequestBriefingRoute
@@ -101,6 +108,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/certification': typeof CertificationRoute
+  '/faq': typeof FaqRoute
   '/governance': typeof GovernanceRoute
   '/readiness-vanguard': typeof ReadinessVanguardRoute
   '/request-briefing': typeof RequestBriefingRoute
@@ -116,6 +124,7 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/certification': typeof CertificationRoute
+  '/faq': typeof FaqRoute
   '/governance': typeof GovernanceRoute
   '/readiness-vanguard': typeof ReadinessVanguardRoute
   '/request-briefing': typeof RequestBriefingRoute
@@ -132,6 +141,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/certification'
+    | '/faq'
     | '/governance'
     | '/readiness-vanguard'
     | '/request-briefing'
@@ -146,6 +156,7 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/certification'
+    | '/faq'
     | '/governance'
     | '/readiness-vanguard'
     | '/request-briefing'
@@ -160,6 +171,7 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/certification'
+    | '/faq'
     | '/governance'
     | '/readiness-vanguard'
     | '/request-briefing'
@@ -175,6 +187,7 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   CertificationRoute: typeof CertificationRoute
+  FaqRoute: typeof FaqRoute
   GovernanceRoute: typeof GovernanceRoute
   ReadinessVanguardRoute: typeof ReadinessVanguardRoute
   RequestBriefingRoute: typeof RequestBriefingRoute
@@ -231,6 +244,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof GovernanceRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/faq': {
+      id: '/faq'
+      path: '/faq'
+      fullPath: '/faq'
+      preLoaderRoute: typeof FaqRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/certification': {
       id: '/certification'
       path: '/certification'
@@ -279,6 +299,7 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   CertificationRoute: CertificationRoute,
+  FaqRoute: FaqRoute,
   GovernanceRoute: GovernanceRoute,
   ReadinessVanguardRoute: ReadinessVanguardRoute,
   RequestBriefingRoute: RequestBriefingRoute,
@@ -293,13 +314,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
