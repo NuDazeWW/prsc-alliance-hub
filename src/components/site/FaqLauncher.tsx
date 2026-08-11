@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { MessageCircleQuestion, X } from "lucide-react";
 import { Link } from "@tanstack/react-router";
 import { FaqSearch } from "./FaqSearch";
+import { trackEvent } from "@/lib/track-event";
 
 export function FaqLauncher() {
   const [open, setOpen] = useState(false);
