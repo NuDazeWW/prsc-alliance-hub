@@ -139,10 +139,10 @@ function HomePage() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.9, ease: "easeOut" }}
-            className="relative w-full flex flex-col items-center justify-center px-6"
+            className="relative w-full flex flex-col items-center justify-center px-6 lg:-translate-x-4 lg:-translate-y-6"
           >
             <PRSCReadinessGauge />
-            <p className="mt-6 text-center font-semibold text-ivory text-base md:text-lg">
+            <p className="mt-6 mb-8 lg:mb-14 max-w-[22rem] text-center font-semibold text-ivory text-base md:text-lg lg:-translate-x-2">
               The PRSC Readiness Score™ is always free.
             </p>
           </motion.div>
