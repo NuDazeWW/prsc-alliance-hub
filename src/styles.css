@@ -312,7 +312,6 @@
 /* --- entrance sequence --- */
 .prsc-gauge__needle-rotor {
   transform-box: fill-box;
-  transform-origin: 200px 200px;
   transform-origin: center;
 }
 .prsc-gauge__needle {
