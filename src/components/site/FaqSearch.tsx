@@ -184,7 +184,19 @@ export function FaqSearch({ footer, source = "overlay" }: { footer?: ReactNode; 
                 item={item}
                 query={query}
                 open={openId === item.id}
-                onToggle={() => setOpenId(openId === item.id ? null : item.id)}
+                onToggle={() => {
+                  const next = openId === item.id ? null : item.id;
+                  setOpenId(next);
+                  if (next !== null) {
+                    trackEvent("faq_question_open", {
+                      faq_question: item.question,
+                      faq_question_id: item.id,
+                      faq_category: item.category,
+                      faq_source: source,
+                      search_term: query.trim().toLowerCase(),
+                    });
+                  }
+                }}
               />
             ))}
           </div>
