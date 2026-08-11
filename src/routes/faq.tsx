@@ -18,7 +18,7 @@ export const Route = createFileRoute("/faq")({
       {
         name: "description",
         content:
-          "100 answers about the PRSC Readiness Score™: how it is calculated, what it means for sponsorship, data privacy, governance, cost, and how to get started.",
+          "Answers about the PRSC Readiness Score™: how it is calculated, what it means for sponsorship, data privacy, governance, cost, and how to get started.",
       },
       { property: "og:title", content: "PRSC Readiness Score™ — Frequently Asked Questions" },
       {
@@ -32,7 +32,7 @@ export const Route = createFileRoute("/faq")({
       { name: "twitter:title", content: "PRSC Readiness Score™ — FAQ" },
       {
         name: "twitter:description",
-        content: "100 answers about the PRSC Readiness Score™ and the PRSC Readiness Standard™.",
+        content: "Answers about the PRSC Readiness Score™ and the PRSC Readiness Standard™.",
       },
     ],
     links: [{ rel: "canonical", href: CANONICAL }],
@@ -82,7 +82,7 @@ function FaqPage() {
           </h1>
           <div className="gold-rule my-7 w-24" />
           <p className="text-lg text-white/70 max-w-3xl leading-relaxed">
-            One hundred answers covering how the Score is built, what it measures, how your data is
+            Answers covering how the Score is built, what it measures, how your data is
             handled, who governs the Standard, and what it costs.
           </p>
           <nav aria-label="FAQ categories" className="mt-8 flex flex-wrap gap-2">
