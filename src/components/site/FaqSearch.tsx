@@ -90,12 +90,30 @@ function AccordionRow({
 }
 
 /** Search + category chips + accordion list, shared by the overlay and /faq. */
-export function FaqSearch({ footer }: { footer?: ReactNode }) {
+export function FaqSearch({ footer, source = "overlay" }: { footer?: ReactNode; source?: string }) {
   const [query, setQuery] = useState("");
   const [category, setCategory] = useState<string | null>(null);
   const [openId, setOpenId] = useState<number | null>(null);
 
   const results = useMemo(() => filterFaq(FAQ_ITEMS, query, category), [query, category]);
+
+  // Fire one search event per settled query (debounced).
+  const lastTracked = useRef("");
+  useEffect(() => {
+    const q = query.trim();
+    if (q.length < 3 || q === lastTracked.current) return;
+    const t = setTimeout(() => {
+      lastTracked.current = q;
+      trackEvent("faq_search", {
+        search_term: q.toLowerCase(),
+        faq_source: source,
+        faq_category: category ?? "all",
+        result_count: results.length,
+      });
+    }, 800);
+    return () => clearTimeout(t);
+  }, [query, category, results.length, source]);
+
 
   return (
     <div className="flex h-full flex-col">
