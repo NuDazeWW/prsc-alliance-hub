@@ -499,7 +499,7 @@ export const FAQ_ITEMS: FaqItem[] = [
     category: "Independence & Governance",
     question: "Who oversees the methodology?",
     answer:
-      "PRSC's Methodology Committee oversees the integrity of the scoring model. Its responsibilities include expert validation of key dimensions, mathematical integrity, calibration, and ensuring the model remains statistically and commercially defensible.",
+      "PRSC's Methodology Committee oversees the integrity of the scoring model. Its responsibilities include expert validation of key dimensions, mathematical integrity, calibration, and ensuring the model remains statistically and commercially defensible. Before any scores are published, the first cohort of scores undergoes a full quality assurance review by the Methodology Committee to validate accuracy and calibration.",
   },
   {
     id: 70,
@@ -520,7 +520,7 @@ export const FAQ_ITEMS: FaqItem[] = [
     category: "Why Trust PRSC?",
     question: "Who created the methodology?",
     answer:
-      "The PRSC Readiness Standard™ has been developed through PRSC's commercial, measurement, data, and motorsport work and is governed through the PRSC methodology structure. The Methodology Committee exists to validate and protect the model before real scores are issued.",
+      "The PRSC Readiness Standard™ was developed by PRSC's founding team, drawing on expertise in commercial measurement, audience intelligence, motorsport partnerships, and composite scoring methodology. It is governed and validated through the PRSC Methodology Committee, which exists to protect the model's integrity before real scores are issued.",
   },
   {
     id: 73,
@@ -530,25 +530,11 @@ export const FAQ_ITEMS: FaqItem[] = [
       "PRSC doesn't believe authority comes from simply calling something a standard. It comes from building a rigorous methodology, applying it consistently, protecting its independence, testing it against real evidence, and earning market trust over time.",
   },
   {
-    id: 74,
-    category: "Why Trust PRSC?",
-    question: "Who is on the Methodology Committee?",
-    answer:
-      "The Committee is structured to include expertise in commercial measurement, audience intelligence, motorsport partnerships, and the mathematical integrity of composite scoring. Current appointments can be published by PRSC as those seats are formally constituted.",
-  },
-  {
-    id: 75,
-    category: "Why Trust PRSC?",
-    question: "Have brands and agencies helped inform the Standard?",
-    answer:
-      "PRSC's work has been informed by the way brands, agencies, measurement professionals, and motorsport organizations evaluate partnerships. PRSC will only describe a specific company as a formal validator or partner when that relationship is confirmed and authorized.",
-  },
-  {
     id: 76,
     category: "Why Trust PRSC?",
     question: "Has the methodology been independently tested?",
     answer:
-      "The Standard is in its founding validation phase. The Readiness Vanguard™ is designed to create the first real benchmark and evidence base needed to test, calibrate, and strengthen it.",
+      "The Standard is in its founding validation phase. The Readiness Vanguard™ — a curated cohort of 25 teams, drivers, brands, and agencies — is the designed validation environment. It will produce the first real benchmark dataset and the first evidence base needed to test, calibrate, and strengthen the methodology against real commercial outcomes.",
   },
   {
     id: 77,
@@ -563,13 +549,6 @@ export const FAQ_ITEMS: FaqItem[] = [
     question: "Will the methodology change as you get more data?",
     answer:
       "It can evolve as the evidence base grows. Any changes are governed through PRSC's methodology process. The goal is to improve the Standard while preserving consistency, integrity, and comparability.",
-  },
-  {
-    id: 79,
-    category: "Why Trust PRSC?",
-    question: "Are measurement companies formally involved?",
-    answer:
-      "PRSC is building expertise and relationships across audience and media measurement. Specific companies will only be described as formal participants or partners when those relationships have been finalized and approved for public disclosure.",
   },
   {
     id: 80,
@@ -661,13 +640,6 @@ export const FAQ_ITEMS: FaqItem[] = [
     question: "I don't understand audience analytics. Can I still participate?",
     answer:
       "Yes. You are not expected to become a measurement expert before being scored. The process is designed to ask for understandable evidence and use reliable independent information where available.",
-  },
-  {
-    id: 93,
-    category: "Getting Started",
-    question: "I only race part of the season. Can I participate?",
-    answer:
-      "Potentially, yes. The Score is designed to account for competitive context rather than assuming every participant races the same schedule or operates at the same level.",
   },
   {
     id: 94,
