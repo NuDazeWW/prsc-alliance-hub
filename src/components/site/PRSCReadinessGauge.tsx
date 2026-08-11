@@ -35,10 +35,10 @@ function GaugeScale() {
         y1={y1}
         x2={x2}
         y2={y2}
-        stroke={isMajor ? "#E3C46A" : "#8C6E3B"}
-        strokeWidth={isMajor ? 2.2 : 1}
+        stroke={isMajor ? "#F0DC9C" : "#6E5628"}
+        strokeWidth={isMajor ? 2.6 : 0.9}
         strokeLinecap="butt"
-        opacity={isMajor ? 0.95 : 0.6}
+        opacity={isMajor ? 1 : 0.5}
       />,
     );
   }
