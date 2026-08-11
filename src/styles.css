@@ -242,10 +242,10 @@
 
 .prsc-gauge__type {
   display: flex; flex-direction: column; align-items: center; justify-content: center;
-  gap: 0.35em; text-align: center; padding-top: 6%;
+  gap: 0.35em; text-align: center; padding-top: 30%;
 }
 .prsc-gauge__value {
-  font-size: clamp(2.6rem, 7.5vw, 4.6rem);
+  font-size: clamp(2.2rem, 6.2vw, 3.8rem);
   line-height: 1; color: #F2EFE6;
   text-shadow: 0 2px 18px rgba(0,0,0,0.6);
 }
@@ -264,7 +264,7 @@
 
 .prsc-gauge__hub {
   inset: auto; left: 50%; top: 50%;
-  width: 13%; height: 13%; transform: translate(-50%, -50%);
+  width: 9.5%; height: 9.5%; transform: translate(-50%, -50%);
   border-radius: 50%;
   background: conic-gradient(from 200deg, #2b3038, #7d838d, #c3c8d0, #3a3f49, #2b3038);
   box-shadow: 0 6px 16px rgba(0,0,0,0.7), inset 0 0 6px rgba(0,0,0,0.6);
