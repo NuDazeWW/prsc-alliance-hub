@@ -141,7 +141,7 @@ function HomePage() {
             transition={{ duration: 0.9, ease: "easeOut" }}
             className="relative w-full flex flex-col items-center justify-center px-6"
           >
-            <LivingScoreDashboard />
+            <ScoreGauge />
             <p className="mt-6 text-center font-semibold text-ivory text-base md:text-lg">
               The PRSC Readiness Score™ is always free.
             </p>
