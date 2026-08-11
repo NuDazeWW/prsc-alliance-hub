@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, type ReactElement } from "react";
 
 /**
  * PRSCReadinessGauge — a live, dimensional instrument built from layered
@@ -16,7 +16,7 @@ const MINOR_LEN = 7;
 const MAJOR_LEN = 15;
 
 function GaugeScale() {
-  const ticks: JSX.Element[] = [];
+  const ticks: ReactElement[] = [];
   const total = 50; // minor ticks every 2 units
   for (let i = 0; i <= total; i++) {
     const value = (i / total) * 100;
