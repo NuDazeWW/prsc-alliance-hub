@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { motion } from "motion/react";
-import { LivingScoreDashboard } from "@/components/site/LivingScoreDashboard";
+import { ScoreGauge } from "@/components/site/ScoreGauge";
 import { ReadinessExplainer } from "@/components/site/ReadinessExplainer";
 
 import { ContinueReading } from "@/components/site/ContinueReading";
