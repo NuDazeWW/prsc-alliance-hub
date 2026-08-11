@@ -12,8 +12,8 @@ const SWEEP = 180;
 const angleFor = (v: number) => START_ANGLE + (v / 100) * SWEEP;
 
 const R_TICK = 148;
-const MINOR_LEN = 7;
-const MAJOR_LEN = 15;
+const MINOR_LEN = 6;
+const MAJOR_LEN = 17;
 
 function GaugeScale() {
   const ticks: ReactElement[] = [];
