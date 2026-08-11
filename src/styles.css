@@ -235,10 +235,11 @@
   font-family: var(--font-sans);
   font-size: clamp(0.6rem, 1.5vw, 0.8rem);
   letter-spacing: 0.14em;
+  white-space: nowrap;
   color: rgba(242,239,230,0.75);
 }
 .prsc-gauge__label--min { left: 20%; }
-.prsc-gauge__label--max { right: 17%; }
+.prsc-gauge__label--max { right: 16%; }
 
 .prsc-gauge__type {
   display: flex; flex-direction: column; align-items: center; justify-content: center;
