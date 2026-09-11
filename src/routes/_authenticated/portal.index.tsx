@@ -266,7 +266,7 @@ function PortalHome() {
                 >
                   Complete Your Profile <ArrowRight className="h-4 w-4" />
                 </Link>
-                <p className="mt-5 text-[12px] text-ivory/52">
+                <p className="mt-5 text-[17px] text-ivory/52">
                   5 – 7 minutes &nbsp;•&nbsp; Needed to prepare your individualized advisor package
                 </p>
               </div>
