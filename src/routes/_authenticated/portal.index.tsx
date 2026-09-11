@@ -198,7 +198,8 @@ function PortalHome() {
           </nav>
 
           <div className="lg:px-[12.5%]">
-            <div className="my-9 h-px bg-gold/20" />
+            <div className="my-6 h-px bg-gold/20" />
+
             <div className="border border-gold/20 bg-[linear-gradient(145deg,var(--color-midnight),var(--color-navy))] p-[clamp(1.15rem,1.5vw,1.75rem)]">
               <p className="text-[10px] uppercase tracking-[0.22em] text-gold">Your Next Step</p>
               <h3 className="mt-3 font-display text-[clamp(1.15rem,1.3vw,1.5rem)] leading-snug">Board/Advisor Package</h3>
