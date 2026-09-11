@@ -153,3 +153,14 @@ export const getAdminOverview = createServerFn({ method: "GET" })
     ]);
     return { members: (members ?? []) as PortalMember[], inquiries: inquiries ?? [], activity: activity ?? [] };
   });
+
+import { getRequest } from "@tanstack/react-start/server";
+
+const PORTAL_HOSTS = new Set(["access.prscstandards.org", "access.prscstandards.com"]);
+
+export const getRequestHost = createServerFn({ method: "GET" })
+  .handler(async () => {
+    const request = getRequest();
+    const host = request?.headers.get("host") ?? "";
+    return { host, isPortalDomain: PORTAL_HOSTS.has(host.split(":")[0]) };
+  });
