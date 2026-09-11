@@ -224,7 +224,9 @@ function PortalHome() {
                   to="/portal/profile"
                   className="cta-glow mt-4 flex min-h-12 w-full items-center justify-between gap-3 rounded-full px-4 py-3 text-[18px] font-semibold whitespace-nowrap transition-all"
                 >
-                  {profileComplete ? "Review Your Profile" : "Complete Your Profile"} <ArrowRight className="h-4 w-4 shrink-0" />
+                  <span className="relative z-10 flex w-full items-center justify-between gap-3">
+                    {profileComplete ? "Review Your Profile" : "Complete Your Profile"} <ArrowRight className="h-4 w-4 shrink-0" />
+                  </span>
                 </Link>
               )}
               {!profileComplete && (
@@ -280,7 +282,9 @@ function PortalHome() {
                   to="/portal/profile"
                   className="cta-glow mt-[22px] inline-flex min-h-14 w-full max-w-[300px] items-center justify-between gap-6 rounded-full px-7 py-4 text-[19px] font-semibold transition-all"
                 >
-                  {profileComplete ? "Review Your Profile" : "Complete Your Profile"} <ArrowRight className="h-4 w-4" />
+                  <span className="relative z-10 flex w-full items-center justify-between gap-6">
+                    {profileComplete ? "Review Your Profile" : "Complete Your Profile"} <ArrowRight className="h-4 w-4" />
+                  </span>
                 </Link>
                 <p className="mt-3 text-[17px] text-ivory/52">
                   {profileComplete
@@ -429,7 +433,9 @@ function PortalHome() {
                 to="/portal/questions"
                 className="cta-glow-outline inline-flex shrink-0 items-center gap-3 rounded-full px-7 py-4 text-[15px] transition-all"
               >
-                Open a private inquiry <ArrowRight className="h-4 w-4" />
+                <span className="relative z-10 flex items-center gap-3">
+                  Open a private inquiry <ArrowRight className="h-4 w-4" />
+                </span>
               </Link>
             </div>
           </section>
