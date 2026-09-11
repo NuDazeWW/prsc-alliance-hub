@@ -154,18 +154,19 @@ function PortalHome() {
     <PortalShell nav={topNav} memberName={name}>
       <div className="grid w-full lg:grid-cols-[20%_80%]">
         {/* Sidebar */}
-        <aside className="border-b border-gold/15 px-7 py-9 lg:border-b-0 lg:border-r lg:px-0 lg:pb-20 lg:pt-0">
-          <div className="lg:px-[12.5%] lg:pt-[clamp(2.5rem,4vw,4.75rem)]">
+        <aside className="border-b border-gold/15 px-7 py-7 lg:border-b-0 lg:border-r lg:px-0 lg:pb-14 lg:pt-0">
+          <div className="lg:px-[12.5%] lg:pt-[clamp(1.5rem,2vw,2.25rem)]">
             <p className="text-[11px] uppercase tracking-[0.22em] text-gold/80">Your Welcome Center</p>
-            <div className="mt-6 flex items-center gap-5 lg:mt-0 lg:block">
+            <div className="mt-5 flex items-center gap-5 lg:mt-0 lg:block">
               {headshot.data?.url ? (
                 <img
                   src={headshot.data.url}
                   alt={`${name} ${m.last_name}`}
-                  className="aspect-square w-[clamp(64px,5vw,88px)] rounded-full border border-gold/55 object-cover lg:mt-7"
+                  className="aspect-square w-[clamp(64px,5vw,88px)] rounded-full border border-gold/55 object-cover lg:mt-4"
                 />
               ) : (
-                <span className="grid aspect-square w-[clamp(64px,5vw,88px)] shrink-0 place-items-center rounded-full border border-gold/55 font-display text-xl text-gold lg:mt-7">
+                <span className="grid aspect-square w-[clamp(64px,5vw,88px)] shrink-0 place-items-center rounded-full border border-gold/55 font-display text-xl text-gold lg:mt-4">
+
                   {initials}
                 </span>
               )}
