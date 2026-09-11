@@ -172,7 +172,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient; host
             },
           ],
     };
-  }),
+  },
   shellComponent: RootShell,
   component: RootComponent,
   notFoundComponent: NotFoundComponent,
