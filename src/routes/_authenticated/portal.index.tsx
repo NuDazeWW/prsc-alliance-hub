@@ -239,7 +239,7 @@ function PortalHome() {
         {/* Main */}
         <main className="min-w-0 pb-5">
           {/* Hero */}
-          <section id="overview" className="relative min-h-[clamp(540px,40vw,720px)] overflow-hidden px-7 pb-14 pt-14 sm:px-10 lg:px-[3.5%] lg:pb-14 lg:pt-[clamp(2.75rem,4vw,5rem)]">
+          <section id="overview" className="relative overflow-hidden px-7 pb-7 pt-9 sm:px-10 lg:px-[3.5%] lg:pb-8 lg:pt-[clamp(1.75rem,2.4vw,3rem)]">
             <img
               src={heroRoad}
               alt=""
