@@ -180,7 +180,7 @@ function PortalHome() {
             </div>
           </div>
 
-          <nav className="mt-8 grid grid-cols-2 lg:block">
+          <nav className="mt-5 grid grid-cols-2 lg:block">
             {sideNav.map((item) => (
               <a
                 key={item.label}
