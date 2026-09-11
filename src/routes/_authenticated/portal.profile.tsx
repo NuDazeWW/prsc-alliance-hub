@@ -17,7 +17,7 @@ const permissions = ["Use my name in company materials","Use my title and organi
 type FormState = { current_stage:number; preferred_name:string; professional_role:string; current_organization:string; preferred_email:string; preferred_phone:string; experience_answers:Record<string,string>; visibility_instructions:Record<string,"yes"|"discuss"|"no">; restriction_status:"no"|"yes"|"unsure"|null; restriction_details:string; final_notes:string; questions:string; contact_requested:boolean; submit:boolean };
 const empty: FormState = { current_stage:1, preferred_name:"", professional_role:"", current_organization:"", preferred_email:"", preferred_phone:"", experience_answers:{}, visibility_instructions:{}, restriction_status:null, restriction_details:"", final_notes:"", questions:"", contact_requested:false, submit:false };
 function ProfilePage(){
- const session=useQuery({queryKey:["portal-session"],queryFn:()=>getPortalSession()}); const profile=useQuery({queryKey:["portal-profile"],queryFn:()=>getMyProfile()});
+ const session=useQuery({queryKey:["portal-session"],queryFn:()=>getPortalSession(),retry:false}); const profile=useQuery({queryKey:["portal-profile"],queryFn:()=>getMyProfile(),retry:false});
  const [form,setForm]=useState(empty); const [status,setStatus]=useState("");
  useEffect(()=>{const p=profile.data;const m=session.data?.member;if(p)setForm({...empty,current_stage:p.current_stage,preferred_name:p.preferred_name??"",professional_role:p.professional_role??"",current_organization:p.current_organization??"",preferred_email:p.preferred_email??"",preferred_phone:p.preferred_phone??"",experience_answers:(p.experience_answers??{}) as Record<string,string>,visibility_instructions:(p.visibility_instructions??{}) as FormState["visibility_instructions"],restriction_status:(p.restriction_status as FormState["restriction_status"])??null,restriction_details:p.restriction_details??"",final_notes:p.final_notes??"",questions:p.questions??"",contact_requested:p.contact_requested,submit:false});else if(m)setForm(f=>({...f,preferred_name:m.professional_name||m.first_name,professional_role:m.title||"",current_organization:m.organization,preferred_email:m.email}));},[profile.data,session.data]);
  async function save(submit=false){setStatus("Saving…");try{await saveMyProfile({data:{...form,submit,current_stage:submit?5:form.current_stage}});setStatus(submit?"Profile received. Your individualized package is now being prepared.":"Progress saved.");if(submit)setForm(f=>({...f,current_stage:5}));}catch(e){setStatus(e instanceof Error?e.message:"Unable to save.");}}
@@ -37,7 +37,7 @@ function ProfilePage(){
 function StepTitle({n,title,copy}:{n:string;title:string;copy:string}){return <div><p className="text-xs uppercase text-gold">Stage {n}</p><h2 className="mt-3 font-display text-4xl sm:text-5xl">{title}</h2><p className="mt-4 text-sm text-ivory/55">{copy}</p></div>}
 function HeadshotField(){
  const fileRef=useRef<HTMLInputElement>(null); const[busy,setBusy]=useState(false); const[msg,setMsg]=useState("");
- const url=useQuery({queryKey:["my-headshot"],queryFn:()=>getMyHeadshotUrl()});
+ const url=useQuery({queryKey:["my-headshot"],queryFn:()=>getMyHeadshotUrl(),retry:false});
  async function upload(file:File){
   if(!file.type.startsWith("image/")){setMsg("Please choose an image file.");return;}
   if(file.size>5*1024*1024){setMsg("Please choose an image under 5 MB.");return;}
