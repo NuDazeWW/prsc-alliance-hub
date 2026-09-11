@@ -184,7 +184,7 @@ function PortalHome() {
               <a
                 key={item.label}
                 href={item.href}
-                className={`grid min-h-14 grid-cols-[20px_minmax(0,1fr)] items-center gap-3 py-3 pr-2 text-[24px] transition-colors sm:text-[28px] lg:grid-cols-[24px_minmax(0,1fr)] lg:gap-4 lg:px-[12.5%] ${
+                className={`grid min-h-14 grid-cols-[20px_minmax(0,1fr)] items-center gap-3 py-3 pr-2 text-[12px] transition-colors sm:text-[14px] lg:grid-cols-[24px_minmax(0,1fr)] lg:gap-4 lg:px-[12.5%] ${
                   item.active
                     ? "border-l-2 border-gold bg-ivory/[.055] text-gold"
                     : "border-l-2 border-transparent text-ivory/60 hover:bg-ivory/[.025] hover:text-gold"
