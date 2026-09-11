@@ -359,12 +359,18 @@ function Admin() {
           <Stat icon={Activity} label="Recent events" value={d.activity.length} />
         </section>
 
-        <div className="mt-10 grid gap-10 xl:grid-cols-[.9fr_1.1fr]">
+        <div className="mt-10 grid items-start gap-6 xl:grid-cols-3">
           <div className="flex flex-col gap-8">
             <section className="border border-gold/20 p-6 sm:p-8">
-              <div className="flex items-center gap-3">
-                <MailPlus className="h-5 w-5 text-gold" />
-                <h2 className="font-display text-3xl">Invite a member</h2>
+              <div className="flex items-start justify-between gap-3">
+                <div className="flex items-center gap-3">
+                  <MailPlus className="h-5 w-5 text-gold" />
+                  <h2 className="font-display text-3xl">Invite a member</h2>
+                </div>
+                <InfoTip
+                  title="Invite a member"
+                  body="Add a board member or advisor here. They receive a branded welcome email with a link to set their password and enter the private center. The “Why You” statement appears in their welcome center, so write it personally. Choose PRSC, DIS, or Both — their portal language adapts to the designation."
+                />
               </div>
               <form onSubmit={invite} className="mt-7 grid gap-4 sm:grid-cols-2">
                 <Input name="first_name" placeholder="First name" required />
@@ -394,7 +400,13 @@ function Admin() {
                   <FileText className="h-4 w-4 shrink-0 text-gold" />
                   <h3 className="truncate text-[13px] uppercase tracking-[0.16em] text-gold">Email templates</h3>
                 </div>
-                <span className="shrink-0 rounded-full border border-gold/40 px-2.5 py-0.5 text-xs text-gold">{templates.length}</span>
+                <div className="flex shrink-0 items-center gap-2">
+                  <span className="rounded-full border border-gold/40 px-2.5 py-0.5 text-xs text-gold">{templates.length}</span>
+                  <InfoTip
+                    title="Email templates"
+                    body="Every saved template lives here — the badge shows how many exist. Click a template to load it into Compose & Send for editing or sending. “Sent ×” shows how many members have received it. The trash icon deletes a template; sent history is kept. Use New Template to start from scratch."
+                  />
+                </div>
               </div>
               <ul className="max-h-[320px] overflow-y-auto">
                 {templates.length === 0 && <li className="px-5 py-5 text-sm text-ivory/45">No templates yet. Upload or write one.</li>}
