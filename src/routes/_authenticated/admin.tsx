@@ -25,7 +25,7 @@ import {
   type EmailSend,
   type EmailTemplate,
 } from "@/lib/portal-email.functions";
-import { applyTokens, renderBrandedEmail } from "@/lib/branded-email";
+import { applyTokens, buildMemberTokens, parseSignatures, renderBrandedEmail } from "@/lib/branded-email";
 import { PortalShell, type PortalNotification } from "@/components/portal/PortalShell";
 import { isPreviewHost } from "@/routes/_authenticated/route";
 import { Button } from "@/components/ui/button";
@@ -84,14 +84,16 @@ const demoEmailCenter: { templates: EmailTemplate[]; sends: EmailSend[] } = {
   templates: [
     {
       id: "33333333-3333-4333-8333-333333333333",
-      name: "Welcome & access",
-      subject: "Your private PRSC welcome center is open, {{first_name}}",
-      description: "Sent with the first invitation",
-      eyebrow: "Private Communication",
-      heading: "Welcome, {{first_name}}",
-      body: "Your private welcome center is now open.\n\nInside you will find an overview of the Council, your role, and the short private profile used to prepare your individualized package.",
-      cta_label: "Open your welcome center",
+      name: "Welcome & Access",
+      subject: "Welcome to the future of Partnership Readiness, {{first_name}}",
+      description: "Sent with the first invitation to the Private Board & Advisor Center",
+      eyebrow: "Welcome & Access",
+      heading: "Welcome, {{first_name}}.",
+      body: "Welcome to the future of Partnership Readiness.\n\nWe’re building something special at {{entity_full}}, and we’re thrilled to have you as part of what comes next.\n\nWe’re pleased to share an important milestone: DIS has officially moved into investor prospecting.\n\nAs a {{role_label}}, your experience, perspective, and guidance will play an important role in our future success. Within the next 8–10 business days, you’ll receive your {{package_label}} package outlining your role, commitment, opportunity, and other key details for your review and alignment.\n\nWe know—it’s been a while since we’ve connected! Click below for a quick update on where we are, why we’re excited to partner with you, and to submit a few pre-package details or any questions you may have.\n\nIt’s been an exciting—and at times challenging—journey to get here. We’re looking forward to this next chapter and to disrupting the brand partnership industry together.",
+      cta_label: "Welcome aboard",
       cta_url: "https://access.prscstandards.org/portal",
+      cta_subtext: "Your password will be sent to this same email upon entry.",
+      signatures: "Shirley Johnson, Founder & CEO\nBobbie Laurel, Co-Founder & Chief Operations Officer\nDave Nussbaum, Chief Information Officer",
       created_at: new Date().toISOString(),
       updated_at: new Date().toISOString(),
     },
@@ -101,7 +103,7 @@ const demoEmailCenter: { templates: EmailTemplate[]; sends: EmailSend[] } = {
       id: "s1",
       member_id: "11111111-1111-4111-8111-111111111111",
       template_id: "33333333-3333-4333-8333-333333333333",
-      template_name: "Welcome & access",
+      template_name: "Welcome & Access",
       subject: "Your private PRSC welcome center is open, Alex",
       recipient_email: "alex.morgan@example.com",
       status: "sent",
@@ -120,6 +122,8 @@ const emptyDraft = {
   body: "",
   cta_label: "",
   cta_url: "",
+  cta_subtext: "",
+  signatures: "",
 };
 
 type Draft = typeof emptyDraft;
@@ -291,6 +295,8 @@ function Admin() {
           body: draft.body,
           cta_label: draft.cta_label,
           cta_url: draft.cta_url,
+          cta_subtext: draft.cta_subtext,
+          signatures: draft.signatures,
         },
       });
       const failed = res.results.filter((r) => r.status !== "sent").length;
@@ -305,18 +311,7 @@ function Admin() {
   }
 
   const previewMember = members.find((m) => m.id === recipients[0]) ?? members[0];
-  const tokens = previewMember
-    ? {
-        first_name: previewMember.first_name,
-        last_name: previewMember.last_name,
-        full_name: `${previewMember.first_name} ${previewMember.last_name}`,
-        organization: previewMember.organization ?? "",
-        title: previewMember.title ?? "",
-        entity: String(previewMember.entity ?? "").toUpperCase(),
-        role: String(previewMember.role ?? "").replace("_", " "),
-        email: previewMember.email,
-      }
-    : {};
+  const tokens = previewMember ? buildMemberTokens(previewMember) : {};
   const previewHtml = renderBrandedEmail({
     subject: applyTokens(draft.subject || "Subject line", tokens),
     eyebrow: applyTokens(draft.eyebrow, tokens),
@@ -324,6 +319,8 @@ function Admin() {
     body: applyTokens(draft.body || "Your email content will appear here.", tokens),
     ctaLabel: draft.cta_label || null,
     ctaUrl: draft.cta_url || null,
+    ctaSubtext: applyTokens(draft.cta_subtext, tokens) || null,
+    signatures: parseSignatures(draft.signatures),
   });
 
   if (overview.isLoading)
@@ -415,6 +412,8 @@ function Admin() {
                           body: t.body,
                           cta_label: t.cta_label ?? "",
                           cta_url: t.cta_url ?? "",
+                          cta_subtext: t.cta_subtext ?? "",
+                          signatures: t.signatures ?? "",
                         });
                         setEmailStatus(`Editing “${t.name}”.`);
                       }}
@@ -501,10 +500,22 @@ function Admin() {
                 />
                 <Input value={draft.cta_label} onChange={(e) => setDraft({ ...draft, cta_label: e.target.value })} placeholder="Button label (optional)" />
                 <Input value={draft.cta_url} onChange={(e) => setDraft({ ...draft, cta_url: e.target.value })} placeholder="Button link (optional)" />
+                <Input
+                  value={draft.cta_subtext}
+                  onChange={(e) => setDraft({ ...draft, cta_subtext: e.target.value })}
+                  placeholder="Note under the button (optional)"
+                  className="sm:col-span-2"
+                />
+                <Textarea
+                  value={draft.signatures}
+                  onChange={(e) => setDraft({ ...draft, signatures: e.target.value })}
+                  placeholder={"Signatures — one per line: Name, Title (rendered in cursive)"}
+                  className="min-h-20 sm:col-span-2"
+                />
               </div>
 
               <p className="mt-3 text-xs text-ivory/40">
-                Personalize with {"{{first_name}}"}, {"{{last_name}}"}, {"{{full_name}}"}, {"{{organization}}"}, {"{{title}}"}, {"{{entity}}"}, {"{{role}}"}.
+                Personalize with {"{{first_name}}"}, {"{{last_name}}"}, {"{{full_name}}"}, {"{{organization}}"}, {"{{title}}"}, {"{{entity}}"}, {"{{entity_full}}"}, {"{{role}}"}, {"{{role_label}}"}, {"{{package_label}}"}.
               </p>
 
               <div className="mt-6 border-t border-gold/15 pt-5">
