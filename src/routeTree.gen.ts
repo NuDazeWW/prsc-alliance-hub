@@ -25,6 +25,7 @@ import { Route as GovernanceWrittenStandardsRouteImport } from './routes/governa
 import { Route as GovernanceCharterRouteImport } from './routes/governance_.charter'
 import { Route as ApiGeoRouteImport } from './routes/api/geo'
 import { Route as AuthenticatedPortalRouteImport } from './routes/_authenticated/portal'
+import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/admin'
 import { Route as AuthenticatedPortalQuestionsRouteImport } from './routes/_authenticated/portal.questions'
 import { Route as AuthenticatedPortalProfileRouteImport } from './routes/_authenticated/portal.profile'
 
@@ -108,6 +109,11 @@ const AuthenticatedPortalRoute = AuthenticatedPortalRouteImport.update({
   path: '/portal',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedAdminRoute = AuthenticatedAdminRouteImport.update({
+  id: '/admin',
+  path: '/admin',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedPortalQuestionsRoute =
   AuthenticatedPortalQuestionsRouteImport.update({
     id: '/questions',
@@ -132,6 +138,7 @@ export interface FileRoutesByFullPath {
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/standard-v1': typeof StandardV1Route
   '/the-standard': typeof TheStandardRoute
+  '/admin': typeof AuthenticatedAdminRoute
   '/portal': typeof AuthenticatedPortalRouteWithChildren
   '/api/geo': typeof ApiGeoRoute
   '/governance/charter': typeof GovernanceCharterRoute
@@ -151,6 +158,7 @@ export interface FileRoutesByTo {
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/standard-v1': typeof StandardV1Route
   '/the-standard': typeof TheStandardRoute
+  '/admin': typeof AuthenticatedAdminRoute
   '/portal': typeof AuthenticatedPortalRouteWithChildren
   '/api/geo': typeof ApiGeoRoute
   '/governance/charter': typeof GovernanceCharterRoute
@@ -172,6 +180,7 @@ export interface FileRoutesById {
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/standard-v1': typeof StandardV1Route
   '/the-standard': typeof TheStandardRoute
+  '/_authenticated/admin': typeof AuthenticatedAdminRoute
   '/_authenticated/portal': typeof AuthenticatedPortalRouteWithChildren
   '/api/geo': typeof ApiGeoRoute
   '/governance_/charter': typeof GovernanceCharterRoute
@@ -193,6 +202,7 @@ export interface FileRouteTypes {
     | '/sitemap.xml'
     | '/standard-v1'
     | '/the-standard'
+    | '/admin'
     | '/portal'
     | '/api/geo'
     | '/governance/charter'
@@ -212,6 +222,7 @@ export interface FileRouteTypes {
     | '/sitemap.xml'
     | '/standard-v1'
     | '/the-standard'
+    | '/admin'
     | '/portal'
     | '/api/geo'
     | '/governance/charter'
@@ -232,6 +243,7 @@ export interface FileRouteTypes {
     | '/sitemap.xml'
     | '/standard-v1'
     | '/the-standard'
+    | '/_authenticated/admin'
     | '/_authenticated/portal'
     | '/api/geo'
     | '/governance_/charter'
@@ -373,6 +385,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedPortalRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/admin': {
+      id: '/_authenticated/admin'
+      path: '/admin'
+      fullPath: '/admin'
+      preLoaderRoute: typeof AuthenticatedAdminRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/portal/questions': {
       id: '/_authenticated/portal/questions'
       path: '/questions'
@@ -404,10 +423,12 @@ const AuthenticatedPortalRouteWithChildren =
   AuthenticatedPortalRoute._addFileChildren(AuthenticatedPortalRouteChildren)
 
 interface AuthenticatedRouteRouteChildren {
+  AuthenticatedAdminRoute: typeof AuthenticatedAdminRoute
   AuthenticatedPortalRoute: typeof AuthenticatedPortalRouteWithChildren
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
+  AuthenticatedAdminRoute: AuthenticatedAdminRoute,
   AuthenticatedPortalRoute: AuthenticatedPortalRouteWithChildren,
 }
 
