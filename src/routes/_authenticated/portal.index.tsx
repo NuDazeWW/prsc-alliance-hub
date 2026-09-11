@@ -427,7 +427,7 @@ function PortalHome() {
               </div>
               <Link
                 to="/portal/questions"
-                className="inline-flex shrink-0 items-center gap-3 border border-gold px-7 py-4 text-[15px] text-gold transition-colors hover:bg-gold hover:text-navy"
+                className="inline-flex shrink-0 items-center gap-3 rounded-full border border-gold px-7 py-4 text-[15px] text-gold shadow-[0_0_18px_rgba(255,255,255,0.07)] ring-1 ring-ivory/20 transition-all hover:bg-gold hover:text-navy hover:ring-ivory/45"
               >
                 Open a private inquiry <ArrowRight className="h-4 w-4" />
               </Link>
