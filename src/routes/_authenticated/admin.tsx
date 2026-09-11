@@ -585,12 +585,21 @@ function Admin() {
                 {emailStatus && <p className="text-sm text-ivory/60">{emailStatus}</p>}
               </div>
             </section>
+          </div>
 
-            <h2 id="tracker" className="mt-10 font-display text-3xl">
-              Members &amp; email history
-            </h2>
-            <div className="mt-5 overflow-x-auto border border-gold/20">
-              <table className="w-full min-w-[760px] text-left text-sm">
+          <div className="flex flex-col gap-8">
+            <section className="border border-gold/20 p-6 sm:p-8">
+              <div className="flex items-start justify-between gap-3">
+                <h2 id="tracker" className="font-display text-3xl">
+                  Members &amp; email history
+                </h2>
+                <InfoTip
+                  title="Members & email history"
+                  body="Every member with their designation, package status, the templates they have received, and the date of the last send. Check this before sending so no one gets the same email twice. A member showing “None yet” has never been emailed from this center."
+                />
+              </div>
+              <div className="mt-5 overflow-x-auto border border-gold/20">
+                <table className="w-full min-w-[560px] text-left text-sm">
                 <thead className="bg-ivory/5 text-[10px] uppercase text-gold">
                   <tr>
                     <th className="p-4">Member</th>
