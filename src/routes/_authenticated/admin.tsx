@@ -468,6 +468,10 @@ function Admin() {
                 <div className="flex items-center gap-3">
                   <Send className="h-5 w-5 text-gold" />
                   <h2 className="font-display text-3xl">Compose &amp; send</h2>
+                  <InfoTip
+                    title="Compose & send"
+                    body="Write or edit an email here. Upload Content loads a .txt, .md, or .html file into the body. Use {{first_name}}, {{full_name}}, {{entity}}, {{role}}, and similar tokens — they personalize automatically per recipient. View in Template shows the exact branded email before anything is sent. Select recipients below, then Save Template to keep it or Send to deliver it. Members who already received the loaded template are flagged to prevent duplicates."
+                  />
                 </div>
                 <div className="flex items-center gap-2">
                   <input
