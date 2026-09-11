@@ -37,7 +37,7 @@ function ProfilePage(){
 function StepTitle({n,title,copy}:{n:string;title:string;copy:string}){return <div><p className="text-xs uppercase text-gold">Stage {n}</p><h2 className="mt-3 font-display text-4xl sm:text-5xl">{title}</h2><p className="mt-4 text-sm text-ivory/55">{copy}</p></div>}
 function HeadshotField(){
  const fileRef=useRef<HTMLInputElement>(null); const[busy,setBusy]=useState(false); const[msg,setMsg]=useState("");
- const url=useQuery({queryKey:["my-headshot"],queryFn:()=>getMyHeadshotUrl(),retry:false});
+ const url=useQuery({queryKey:["my-headshot"],queryFn:()=>getMyHeadshotUrl().catch(()=>null),retry:false});
  async function upload(file:File){
   if(!file.type.startsWith("image/")){setMsg("Please choose an image file.");return;}
   if(file.size>5*1024*1024){setMsg("Please choose an image under 5 MB.");return;}
