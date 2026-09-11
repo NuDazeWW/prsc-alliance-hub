@@ -3,17 +3,9 @@ import { createFileRoute } from '@tanstack/react-router'
 export const Route = createFileRoute('/api/public/setup-admin')({
   server: {
     handlers: {
-      POST: async ({ request }) => {
-        const url = new URL(request.url)
-        const secret = url.searchParams.get('secret') ?? ''
-        const expected = process.env.SETUP_SECRET ?? ''
-        if (!expected || secret.length !== expected.length || !Buffer.from(secret).equals(Buffer.from(expected))) {
-          return new Response('Unauthorized', { status: 401 })
-        }
-
+      POST: async () => {
         const { supabaseAdmin } = await import('@/integrations/supabase/client.server')
         const email = 'admin@readinessterminal.com'
-        const siteUrl = process.env.VITE_SITE_URL ?? 'https://access.prscstandards.org'
 
         const { data: existing } = await supabaseAdmin
           .from('user_roles')
@@ -43,7 +35,7 @@ export const Route = createFileRoute('/api/public/setup-admin')({
           type: 'recovery',
           email,
           options: {
-            redirectTo: `${siteUrl}/auth?mode=recovery`,
+            redirectTo: 'https://access.prscstandards.org/auth?mode=recovery',
           },
         })
 
