@@ -7,6 +7,7 @@ import {
   CheckCircle2,
   Eye,
   FileText,
+  Info,
   MailPlus,
   MessageSquare,
   Plus,
@@ -342,7 +343,7 @@ function Admin() {
 
   return (
     <PortalShell admin notifications={notifications}>
-      <main className="mx-auto max-w-[1440px] px-5 py-10 lg:px-10">
+      <main className="px-4 py-10 sm:px-6 lg:px-8">
         <div className="flex flex-col justify-between gap-6 border-b border-gold/20 pb-8 md:flex-row md:items-end">
           <div>
             <p className="text-xs uppercase text-gold">Administration</p>
@@ -358,12 +359,18 @@ function Admin() {
           <Stat icon={Activity} label="Recent events" value={d.activity.length} />
         </section>
 
-        <div className="mt-10 grid gap-10 xl:grid-cols-[.9fr_1.1fr]">
+        <div className="mt-10 grid items-start gap-6 xl:grid-cols-3">
           <div className="flex flex-col gap-8">
             <section className="border border-gold/20 p-6 sm:p-8">
-              <div className="flex items-center gap-3">
-                <MailPlus className="h-5 w-5 text-gold" />
-                <h2 className="font-display text-3xl">Invite a member</h2>
+              <div className="flex items-start justify-between gap-3">
+                <div className="flex items-center gap-3">
+                  <MailPlus className="h-5 w-5 text-gold" />
+                  <h2 className="font-display text-3xl">Invite a member</h2>
+                </div>
+                <InfoTip
+                  title="Invite a member"
+                  body="Add a board member or advisor here. They receive a branded welcome email with a link to set their password and enter the private center. The “Why You” statement appears in their welcome center, so write it personally. Choose PRSC, DIS, or Both — their portal language adapts to the designation."
+                />
               </div>
               <form onSubmit={invite} className="mt-7 grid gap-4 sm:grid-cols-2">
                 <Input name="first_name" placeholder="First name" required />
@@ -393,7 +400,13 @@ function Admin() {
                   <FileText className="h-4 w-4 shrink-0 text-gold" />
                   <h3 className="truncate text-[13px] uppercase tracking-[0.16em] text-gold">Email templates</h3>
                 </div>
-                <span className="shrink-0 rounded-full border border-gold/40 px-2.5 py-0.5 text-xs text-gold">{templates.length}</span>
+                <div className="flex shrink-0 items-center gap-2">
+                  <span className="rounded-full border border-gold/40 px-2.5 py-0.5 text-xs text-gold">{templates.length}</span>
+                  <InfoTip
+                    title="Email templates"
+                    body="Every saved template lives here — the badge shows how many exist. Click a template to load it into Compose & Send for editing or sending. “Sent ×” shows how many members have received it. The trash icon deletes a template; sent history is kept. Use New Template to start from scratch."
+                  />
+                </div>
               </div>
               <ul className="max-h-[320px] overflow-y-auto">
                 {templates.length === 0 && <li className="px-5 py-5 text-sm text-ivory/45">No templates yet. Upload or write one.</li>}
@@ -455,6 +468,10 @@ function Admin() {
                 <div className="flex items-center gap-3">
                   <Send className="h-5 w-5 text-gold" />
                   <h2 className="font-display text-3xl">Compose &amp; send</h2>
+                  <InfoTip
+                    title="Compose & send"
+                    body="Write or edit an email here. Upload Content loads a .txt, .md, or .html file into the body. Use {{first_name}}, {{full_name}}, {{entity}}, {{role}}, and similar tokens — they personalize automatically per recipient. View in Template shows the exact branded email before anything is sent. Select recipients below, then Save Template to keep it or Send to deliver it. Members who already received the loaded template are flagged to prevent duplicates."
+                  />
                 </div>
                 <div className="flex items-center gap-2">
                   <input
@@ -568,12 +585,21 @@ function Admin() {
                 {emailStatus && <p className="text-sm text-ivory/60">{emailStatus}</p>}
               </div>
             </section>
+          </div>
 
-            <h2 id="tracker" className="mt-10 font-display text-3xl">
-              Members &amp; email history
-            </h2>
-            <div className="mt-5 overflow-x-auto border border-gold/20">
-              <table className="w-full min-w-[760px] text-left text-sm">
+          <div className="flex flex-col gap-8">
+            <section className="border border-gold/20 p-6 sm:p-8">
+              <div className="flex items-start justify-between gap-3">
+                <h2 id="tracker" className="font-display text-3xl">
+                  Members &amp; email history
+                </h2>
+                <InfoTip
+                  title="Members & email history"
+                  body="Every member with their designation, package status, the templates they have received, and the date of the last send. Check this before sending so no one gets the same email twice. A member showing “None yet” has never been emailed from this center."
+                />
+              </div>
+              <div className="mt-5 overflow-x-auto border border-gold/20">
+                <table className="w-full min-w-[560px] text-left text-sm">
                 <thead className="bg-ivory/5 text-[10px] uppercase text-gold">
                   <tr>
                     <th className="p-4">Member</th>
@@ -615,12 +641,20 @@ function Admin() {
                   })}
                 </tbody>
               </table>
-            </div>
+              </div>
+            </section>
 
-            <h2 id="inquiries" className="mt-10 font-display text-3xl">
-              Recent inquiries
-            </h2>
-            <div className="mt-5 space-y-3">
+            <section className="border border-gold/20 p-6 sm:p-8">
+              <div className="flex items-start justify-between gap-3">
+                <h2 id="inquiries" className="font-display text-3xl">
+                  Recent inquiries
+                </h2>
+                <InfoTip
+                  title="Recent inquiries"
+                  body="Private questions members submit from their portal. New submissions also appear in the notification bell at the top of the page, so you can see at a glance when someone is waiting on a reply."
+                />
+              </div>
+              <div className="mt-5 space-y-3">
               {d.inquiries.length === 0 ? (
                 <p className="text-sm text-ivory/45">No inquiries yet.</p>
               ) : (
@@ -631,7 +665,8 @@ function Admin() {
                   </article>
                 ))
               )}
-            </div>
+              </div>
+            </section>
           </div>
         </div>
       </main>
@@ -661,6 +696,30 @@ function Admin() {
         </div>
       )}
     </PortalShell>
+  );
+}
+
+function InfoTip({ title, body }: { title: string; body: string }) {
+  const [open, setOpen] = useState(false);
+  return (
+    <div className="relative shrink-0">
+      <button
+        type="button"
+        aria-label={`About: ${title}`}
+        aria-expanded={open}
+        onClick={() => setOpen((v) => !v)}
+        onBlur={() => setTimeout(() => setOpen(false), 150)}
+        className="grid h-7 w-7 place-items-center rounded-full border border-gold/40 text-gold transition-colors hover:bg-gold/10"
+      >
+        <Info className="h-3.5 w-3.5" />
+      </button>
+      {open && (
+        <div className="absolute right-0 top-9 z-40 w-72 border border-gold/30 bg-navy-deep p-4 shadow-xl shadow-black/40">
+          <p className="text-[10px] uppercase tracking-[0.18em] text-gold">{title}</p>
+          <p className="mt-2 text-[13px] leading-relaxed text-ivory/70">{body}</p>
+        </div>
+      )}
+    </div>
   );
 }
 
