@@ -151,6 +151,117 @@
   100% { background-position: -50% 0; }
 }
 
+/* ===== PRSC premium CTAs — ombre light treatment ===== */
+@utility cta-glow {
+  background-image: linear-gradient(
+    180deg,
+    color-mix(in oklab, var(--color-gold-light) 58%, var(--color-gold)) 0%,
+    var(--color-gold) 100%
+  );
+  color: var(--color-navy);
+  box-shadow:
+    inset 0 1px 1px color-mix(in oklab, var(--color-ivory) 50%, transparent),
+    0 0 28px color-mix(in oklab, var(--color-gold) 26%, transparent),
+    0 6px 18px color-mix(in oklab, var(--color-navy-deep) 55%, transparent);
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+  transition: filter 250ms ease, box-shadow 250ms ease;
+
+  &:hover {
+    filter: brightness(1.06);
+    box-shadow:
+      inset 0 1px 1px color-mix(in oklab, var(--color-ivory) 62%, transparent),
+      0 0 38px color-mix(in oklab, var(--color-gold) 36%, transparent),
+      0 8px 22px color-mix(in oklab, var(--color-navy-deep) 62%, transparent);
+  }
+
+  &::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+      105deg,
+      transparent 30%,
+      color-mix(in oklab, var(--color-ivory) 26%, transparent) 48%,
+      color-mix(in oklab, var(--color-ivory) 7%, transparent) 52%,
+      transparent 70%
+    );
+    transform: translateX(-100%);
+    transition: transform 650ms ease;
+    pointer-events: none;
+  }
+
+  &:hover::after {
+    transform: translateX(100%);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    &::after {
+      transition: none;
+      transform: none;
+      opacity: 0;
+    }
+  }
+}
+
+@utility cta-glow-outline {
+  background-image: linear-gradient(
+    180deg,
+    color-mix(in oklab, var(--color-ivory) 7%, transparent) 0%,
+    color-mix(in oklab, var(--color-ivory) 2%, transparent) 100%
+  );
+  color: var(--color-gold);
+  border: 1px solid color-mix(in oklab, var(--color-gold) 55%, transparent);
+  box-shadow:
+    inset 0 1px 1px color-mix(in oklab, var(--color-ivory) 14%, transparent),
+    0 0 24px color-mix(in oklab, var(--color-gold) 18%, transparent);
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+  transition: background-image 250ms ease, box-shadow 250ms ease, color 250ms ease;
+
+  &:hover {
+    background-image: linear-gradient(
+      180deg,
+      color-mix(in oklab, var(--color-gold-light) 35%, var(--color-gold)) 0%,
+      var(--color-gold) 100%
+    );
+    color: var(--color-navy);
+    box-shadow:
+      inset 0 1px 1px color-mix(in oklab, var(--color-ivory) 55%, transparent),
+      0 0 34px color-mix(in oklab, var(--color-gold) 30%, transparent);
+  }
+
+  &::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+      105deg,
+      transparent 30%,
+      color-mix(in oklab, var(--color-ivory) 18%, transparent) 48%,
+      color-mix(in oklab, var(--color-ivory) 4%, transparent) 52%,
+      transparent 70%
+    );
+    transform: translateX(-100%);
+    transition: transform 650ms ease;
+    pointer-events: none;
+  }
+
+  &:hover::after {
+    transform: translateX(100%);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    &::after {
+      transition: none;
+      transform: none;
+      opacity: 0;
+    }
+  }
+}
+
 /* ===== PRSC Readiness Gauge — live instrument ===== */
 .prsc-gauge-figure {
   margin: 0;
