@@ -1,10 +1,11 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { KeyRound, Mail, ShieldCheck } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { PrscMark } from "@/components/site/PrscMark";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { getPortalSession } from "@/lib/portal.functions";
 
 export const Route = createFileRoute("/auth")({
   validateSearch: (search: Record<string, unknown>) => ({ redirect: typeof search.redirect === "string" && search.redirect.startsWith("/") ? search.redirect : "/portal", mode: search.mode === "setup" ? "setup" : undefined }),
@@ -21,6 +22,12 @@ function AuthPage() {
   const navigate = useNavigate();
   const [mode, setMode] = useState<"signin" | "reset" | "setup">(search.mode === "setup" ? "setup" : "signin");
   const [email, setEmail] = useState(""); const [password, setPassword] = useState(""); const [message, setMessage] = useState(""); const [busy, setBusy] = useState(false);
+  useEffect(() => {
+    supabase.auth.getUser().then(({ data }) => {
+      if (!data.user) return;
+      getPortalSession().then((s) => navigate({ to: s.isAdmin ? "/admin" : search.redirect, replace: true })).catch(() => navigate({ to: search.redirect, replace: true }));
+    });
+  }, []);
   async function submit(event: React.FormEvent) {
     event.preventDefault(); setBusy(true); setMessage("");
     try {

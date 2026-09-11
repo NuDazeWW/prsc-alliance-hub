@@ -16,8 +16,10 @@ import { SiteNav } from "@/components/site/SiteNav";
 import { SiteFooter } from "@/components/site/SiteFooter";
 import { AnalyticsGate } from "@/components/site/AnalyticsGate";
 import { FaqLauncher } from "@/components/site/FaqLauncher";
+import { getRequestHost } from "@/lib/portal.functions";
 
 const FAVICON = "/favicon.png";
+const PORTAL_HOSTS = new Set(["access.prscstandards.org", "access.prscstandards.com"]);
 
 function NotFoundComponent() {
   return (
@@ -69,7 +71,11 @@ function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
   );
 }
 
-export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()({
+export const Route = createRootRouteWithContext<{ queryClient: QueryClient; host: string }>()({
+  beforeLoad: async () => {
+    const { host } = await getRequestHost();
+    return { host };
+  },
   head: () => ({
     meta: [
       { charSet: "utf-8" },
@@ -115,7 +121,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     scripts: [
       {
         children:
-          "(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);})(window,document,'script','dataLayer','GTM-KPL6XBTW');",
+          "(function(){var h=typeof window!=='undefined'?window.location.hostname:'';if(h==='access.prscstandards.org'||h==='access.prscstandards.com')return;(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);})(window,document,'script','dataLayer','GTM-KPL6XBTW');})();",
       },
       {
         type: "application/ld+json",
@@ -154,7 +160,6 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
         ]),
       },
     ],
-
   }),
   shellComponent: RootShell,
   component: RootComponent,
@@ -163,32 +168,36 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
 });
 
 function RootShell({ children }: { children: ReactNode }) {
+  const host = Route.useRouteContext({ select: (s) => s.host }) ?? "";
+  const isPortalHost = PORTAL_HOSTS.has(host);
   return (
     <html lang="en">
       <head>
         <HeadContent />
       </head>
       <body className="bg-navy">
-        <noscript>
-          <iframe
-            src="https://www.googletagmanager.com/ns.html?id=GTM-KPL6XBTW"
-            height="0"
-            width="0"
-            style={{ display: "none", visibility: "hidden" }}
-          />
-        </noscript>
+        {!isPortalHost && (
+          <noscript>
+            <iframe
+              src="https://www.googletagmanager.com/ns.html?id=GTM-KPL6XBTW"
+              height="0"
+              width="0"
+              style={{ display: "none", visibility: "hidden" }}
+            />
+          </noscript>
+        )}
         {children}
         <Scripts />
       </body>
-
     </html>
   );
 }
 
 function RootComponent() {
-  const { queryClient } = Route.useRouteContext();
+  const { queryClient, host } = Route.useRouteContext();
   const pathname = useRouterState({ select: (s) => s.location.pathname });
-  const isPrivate = pathname.startsWith("/portal") || pathname.startsWith("/admin") || pathname.startsWith("/auth");
+  const isPortalHost = PORTAL_HOSTS.has(host);
+  const isPrivate = isPortalHost || pathname.startsWith("/portal") || pathname.startsWith("/admin") || pathname.startsWith("/auth");
   const isChrome = !pathname.startsWith("/vanguard/") && !isPrivate;
   return (
     <QueryClientProvider client={queryClient}>

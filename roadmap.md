@@ -7,5 +7,5 @@
 - [x] Build premium member portal with PRSC/DIS/Both personalization
 - [x] Build save-and-return private profile and inquiries
 - [x] Build administrator center and alerts
-- [ ] Connect access.prscstandards.org (subdomain chosen)
+- [ ] Connect access.prscstandards.org — /portal, /admin, /auth (confirmed)
 - [ ] Verify security isolation, email flows, responsive layouts, metadata, and public-site separation

@@ -1,4 +1,4 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, redirect } from "@tanstack/react-router";
 import { motion } from "motion/react";
 import { PRSCReadinessGauge } from "@/components/site/PRSCReadinessGauge";
 import { ReadinessExplainer } from "@/components/site/ReadinessExplainer";
@@ -6,10 +6,15 @@ import { ReadinessExplainer } from "@/components/site/ReadinessExplainer";
 import { ContinueReading } from "@/components/site/ContinueReading";
 import { Building2, Briefcase, Landmark, ArrowRight, ShieldCheck, Scale, GraduationCap, LineChart } from "lucide-react";
 import prscCrest from "@/assets/prsc-logo-only.png.asset.json";
+import { getRequestHost } from "@/lib/portal.functions";
 
 const CANONICAL = "https://prscstandards.com/";
 
 export const Route = createFileRoute("/")({
+  beforeLoad: async () => {
+    const { isPortalDomain } = await getRequestHost();
+    if (isPortalDomain) throw redirect({ to: "/auth", search: { redirect: "/portal", mode: undefined } });
+  },
   head: () => ({
     meta: [
       { title: "Partnership Readiness Standards Council (PRSC) | Readiness Score" },

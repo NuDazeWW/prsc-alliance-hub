@@ -127,7 +127,7 @@ export const invitePortalMember = createServerFn({ method: "POST" })
     await assertAdmin(context);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { data: invitation, error: inviteError } = await supabaseAdmin.auth.admin.inviteUserByEmail(data.email, {
-      redirectTo: "https://access.prscstandards.com/auth?mode=setup",
+      redirectTo: "https://access.prscstandards.org/auth?mode=setup",
       data: { first_name: data.first_name, last_name: data.last_name },
     });
     if (inviteError || !invitation.user) throw inviteError ?? new Error("Invitation could not be created");
@@ -152,4 +152,15 @@ export const getAdminOverview = createServerFn({ method: "GET" })
       context.supabase.from("portal_activity").select("*").order("created_at", { ascending: false }).limit(50),
     ]);
     return { members: (members ?? []) as PortalMember[], inquiries: inquiries ?? [], activity: activity ?? [] };
+  });
+
+import { getRequest } from "@tanstack/react-start/server";
+
+const PORTAL_HOSTS = new Set(["access.prscstandards.org", "access.prscstandards.com"]);
+
+export const getRequestHost = createServerFn({ method: "GET" })
+  .handler(async () => {
+    const request = getRequest();
+    const host = request?.headers.get("host") ?? "";
+    return { host, isPortalDomain: PORTAL_HOSTS.has(host.split(":")[0]) };
   });
