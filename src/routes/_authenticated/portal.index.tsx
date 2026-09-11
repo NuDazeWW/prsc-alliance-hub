@@ -5,16 +5,21 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import {
   ArrowRight,
   BarChart3,
+  Cog,
   FileText,
   Flag,
+  Globe,
   Home,
   LockKeyhole,
   Mail,
   MessageSquare,
   ScrollText,
+  Share2,
+  Shield,
   Target,
   Users,
 } from "lucide-react";
+
 import { getMyHeadshotUrl, getPortalSession } from "@/lib/portal.functions";
 import { PortalShell } from "@/components/portal/PortalShell";
 import { isPreviewHost } from "@/routes/_authenticated/route";
