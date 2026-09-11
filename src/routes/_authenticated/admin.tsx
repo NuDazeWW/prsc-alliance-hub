@@ -25,7 +25,7 @@ import {
   type EmailSend,
   type EmailTemplate,
 } from "@/lib/portal-email.functions";
-import { applyTokens, renderBrandedEmail } from "@/lib/branded-email";
+import { applyTokens, buildMemberTokens, parseSignatures, renderBrandedEmail } from "@/lib/branded-email";
 import { PortalShell, type PortalNotification } from "@/components/portal/PortalShell";
 import { isPreviewHost } from "@/routes/_authenticated/route";
 import { Button } from "@/components/ui/button";
