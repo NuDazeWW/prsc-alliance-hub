@@ -24,34 +24,37 @@ export function PortalShell({
     await navigate({ to: "/auth", search: { redirect: "/portal", mode: undefined }, replace: true });
   }
   return (
-    <div className="flex min-h-screen flex-col bg-navy text-ivory">
+    <div className="flex min-h-screen w-full flex-col overflow-x-hidden bg-[linear-gradient(135deg,var(--color-navy-deep),var(--color-navy)_52%,var(--color-midnight))] text-ivory">
       <header className="sticky top-0 z-40 border-b border-gold/15 bg-navy/95 backdrop-blur">
-        <div className="mx-auto flex h-[86px] max-w-[1440px] items-center gap-6 px-5 lg:px-10">
-          <a href={admin ? "/admin" : "/portal"} aria-label="Private center home" className="shrink-0">
-            <PrscMark className="h-11 w-auto object-contain" />
+        <div className="grid h-[82px] w-full grid-cols-[minmax(0,1fr)_auto] items-center gap-4 px-5 sm:h-[92px] sm:px-7 lg:h-[clamp(96px,6vw,116px)] lg:grid-cols-[20%_1fr_auto] lg:gap-8 lg:px-0">
+          <a
+            href={admin ? "/admin" : "/portal"}
+            aria-label="Private center home"
+            className="flex h-full min-w-0 items-center lg:border-r lg:border-gold/15 lg:px-[12.5%]"
+          >
+            <PrscMark variant="horizontal" className="h-auto w-[190px] max-w-full object-contain sm:w-[230px] lg:w-[min(88%,270px)]" />
           </a>
-          <nav className="hidden flex-1 items-center justify-center gap-9 lg:flex">
+          <nav className="hidden h-full min-w-0 items-center justify-center gap-[clamp(2rem,3.3vw,4.5rem)] lg:flex">
             {nav.map((item, i) => (
               <a
                 key={item.href}
                 href={item.href}
-                className={`relative py-2 text-[15px] transition-colors hover:text-gold ${i === 0 ? "text-gold" : "text-ivory/75"}`}
+                className={`relative flex h-full items-center text-[14px] transition-colors hover:text-gold ${i === 0 ? "text-gold" : "text-ivory/65"}`}
               >
                 {item.label}
-                {i === 0 && <span className="absolute -bottom-[9px] left-0 h-px w-full bg-gold" />}
+                {i === 0 && <span className="absolute inset-x-0 bottom-0 h-px bg-gold" />}
               </a>
             ))}
           </nav>
-          <div className="ml-auto flex items-center gap-4 lg:ml-0">
-            <span className="hidden h-8 w-px bg-gold/20 lg:block" />
+          <div className="ml-auto flex h-10 items-center gap-5 pr-1 sm:pr-2 lg:ml-0 lg:border-l lg:border-gold/20 lg:pl-7 lg:pr-[clamp(1.5rem,2.5vw,3.5rem)]">
             <div className="relative">
               <button
                 type="button"
                 onClick={() => setOpen((v) => !v)}
-                className="flex items-center gap-3 text-[15px] text-ivory/85 transition-colors hover:text-gold"
+                className="flex min-h-11 items-center gap-3 text-[14px] text-ivory/80 transition-colors hover:text-gold"
               >
-                <span className="grid h-9 w-9 place-items-center rounded-full border border-gold/40">
-                  <User className="h-4 w-4 text-gold" />
+                <span className="grid h-10 w-10 shrink-0 place-items-center rounded-full border border-gold/55">
+                  <User className="h-[18px] w-[18px] text-gold" />
                 </span>
                 <span className="hidden sm:inline">Welcome{memberName ? `, ${memberName}` : ""}</span>
                 <ChevronDown className="h-4 w-4" />
@@ -100,9 +103,9 @@ const footerLinks = [
 function PortalFooter() {
   return (
     <footer className="border-t border-gold/15 bg-navy-deep">
-      <div className="mx-auto max-w-[1440px] px-5 py-14 lg:px-10">
-        <div className="grid gap-12 md:grid-cols-3">
-          <PrscMark className="h-12 w-auto object-contain" />
+      <div className="w-full px-6 py-12 sm:px-10 lg:px-[4vw] lg:py-16">
+        <div className="grid items-start gap-12 md:grid-cols-[1.2fr_1fr_1fr] lg:gap-20">
+          <PrscMark variant="horizontal" className="h-auto w-[260px] max-w-full object-contain lg:w-[310px]" />
           <div>
             <p className="text-[10px] uppercase tracking-[0.22em] text-gold">Explore the council</p>
             <ul className="mt-5 space-y-3">
@@ -121,13 +124,13 @@ function PortalFooter() {
               ))}
             </ul>
           </div>
-          <p className="font-display text-lg italic leading-8 text-ivory/60 md:text-right">
+          <p className="font-display text-xl italic leading-8 text-ivory/55 md:text-right">
             A more transparent,
             <br />
             more valuable partnership industry.
           </p>
         </div>
-        <div className="mt-12 flex flex-col gap-4 border-t border-gold/15 pt-6 text-xs text-ivory/45 sm:flex-row sm:items-center sm:justify-between">
+        <div className="mt-14 flex flex-col gap-4 border-t border-gold/15 pt-7 text-xs text-ivory/45 sm:flex-row sm:items-center sm:justify-between">
           <p>© {new Date().getFullYear()} Partnership Readiness Standards Council™. All rights reserved.</p>
           <p className="flex items-center gap-4">
             <span>Private &amp; confidential</span>

@@ -152,63 +152,67 @@ function PortalHome() {
 
   return (
     <PortalShell nav={topNav} memberName={name}>
-      <div className="mx-auto grid max-w-[1440px] lg:grid-cols-[248px_1fr]">
+      <div className="grid w-full lg:grid-cols-[20%_80%]">
         {/* Sidebar */}
-        <aside className="border-b border-gold/15 px-7 py-9 lg:border-b-0 lg:border-r lg:px-0 lg:pb-16">
-          <div className="lg:px-7">
-            <p className="text-[10px] uppercase tracking-[0.22em] text-ivory/45">Your Welcome Center</p>
-            {headshot.data?.url ? (
-              <img
-                src={headshot.data.url}
-                alt={`${name} ${m.last_name}`}
-                className="mt-7 h-14 w-14 rounded-full border border-gold/40 object-cover"
-              />
-            ) : (
-              <span className="mt-7 grid h-14 w-14 place-items-center rounded-full border border-gold/40 font-display text-lg text-gold">
-                {initials}
-              </span>
-            )}
-            <h2 className="mt-4 font-display text-xl">
-              {name} {m.last_name}
-            </h2>
-            <p className="mt-1 text-sm text-ivory/55">{m.title || (m.role === "advisor" ? "Selected Advisor" : "Board Member")}</p>
-            <p className="text-sm text-ivory/55">{entityWord}</p>
+        <aside className="border-b border-gold/15 px-7 py-9 lg:border-b-0 lg:border-r lg:px-0 lg:pb-20 lg:pt-0">
+          <div className="lg:px-[12.5%] lg:pt-[clamp(2.5rem,4vw,4.75rem)]">
+            <p className="text-[11px] uppercase tracking-[0.22em] text-gold/80">Your Welcome Center</p>
+            <div className="mt-6 flex items-center gap-5 lg:mt-0 lg:block">
+              {headshot.data?.url ? (
+                <img
+                  src={headshot.data.url}
+                  alt={`${name} ${m.last_name}`}
+                  className="aspect-square w-[clamp(64px,5vw,88px)] rounded-full border border-gold/55 object-cover lg:mt-7"
+                />
+              ) : (
+                <span className="grid aspect-square w-[clamp(64px,5vw,88px)] shrink-0 place-items-center rounded-full border border-gold/55 font-display text-xl text-gold lg:mt-7">
+                  {initials}
+                </span>
+              )}
+              <div>
+                <h2 className="font-display text-[clamp(1.2rem,1.35vw,1.55rem)] leading-tight lg:mt-4">
+                  {name} {m.last_name}
+                </h2>
+                <p className="mt-2 text-[14px] leading-5 text-ivory/65">{m.title || (m.role === "advisor" ? "Selected Advisor" : "Board Member")}</p>
+                <p className="text-[14px] leading-5 text-ivory/65">{entityWord}</p>
+              </div>
+            </div>
           </div>
 
-          <nav className="mt-8">
+          <nav className="mt-8 grid grid-cols-2 lg:block">
             {sideNav.map((item) => (
               <a
                 key={item.label}
                 href={item.href}
-                className={`flex items-center gap-3 py-3 text-sm transition-colors lg:px-7 ${
+                className={`grid min-h-14 grid-cols-[20px_minmax(0,1fr)] items-center gap-3 py-3 pr-2 text-[12px] transition-colors sm:text-[14px] lg:grid-cols-[24px_minmax(0,1fr)] lg:gap-4 lg:px-[12.5%] ${
                   item.active
-                    ? "border-l-2 border-gold bg-ivory/[.04] text-ivory lg:pl-[26px]"
-                    : "border-l-2 border-transparent text-ivory/60 hover:text-gold lg:pl-[26px]"
+                    ? "border-l-2 border-gold bg-ivory/[.055] text-gold"
+                    : "border-l-2 border-transparent text-ivory/60 hover:bg-ivory/[.025] hover:text-gold"
                 }`}
               >
-                <item.icon className={`h-4 w-4 shrink-0 ${item.active ? "text-gold" : "text-ivory/45"}`} />
+                <item.icon className={`h-[19px] w-[19px] shrink-0 ${item.active ? "text-gold" : "text-ivory/45"}`} />
                 {item.label}
               </a>
             ))}
           </nav>
 
-          <div className="lg:px-7">
-            <div className="my-8 h-px bg-gold/15" />
-            <div className="border border-gold/20 bg-ivory/[.02] p-5">
+          <div className="lg:px-[12.5%]">
+            <div className="my-9 h-px bg-gold/20" />
+            <div className="border border-gold/20 bg-[linear-gradient(145deg,var(--color-midnight),var(--color-navy))] p-[clamp(1.15rem,1.5vw,1.75rem)]">
               <p className="text-[10px] uppercase tracking-[0.22em] text-gold">Your Next Step</p>
-              <h3 className="mt-3 font-display text-lg">Board/Advisor Package</h3>
-              <p className="mt-3 flex items-center gap-2 text-sm text-gold">
-                <span className="h-2 w-2 rounded-full bg-gold shadow-[0_0_10px_var(--color-gold)]" />
+              <h3 className="mt-3 font-display text-[clamp(1.15rem,1.3vw,1.5rem)] leading-snug">Board/Advisor Package</h3>
+              <p className="mt-4 flex items-center gap-2 text-[13px] text-gold">
+                <span className="h-1.5 w-1.5 rounded-full bg-gold shadow-[0_0_7px_var(--color-gold)]" />
                 {m.package_status.replaceAll("_", " ").replace(/\b\w/g, (c) => c.toUpperCase())}
               </p>
-              <p className="mt-3 text-[13px] leading-6 text-ivory/55">
+              <p className="mt-4 text-[13px] leading-6 text-ivory/60">
                 We need a few details from you before your individualized materials are finalized.
               </p>
               <Link
                 to="/portal/profile"
-                className="mt-5 block bg-gold px-4 py-3 text-center text-sm font-medium text-navy transition-colors hover:bg-gold-light"
+                className="mt-6 flex min-h-12 w-full items-center justify-between gap-3 bg-gold px-4 py-3 text-[13px] font-semibold whitespace-nowrap text-navy shadow-[inset_0_1px_0_var(--color-gold-light)] transition-colors hover:bg-gold-light"
               >
-                Complete Your Profile
+                Complete Your Profile <ArrowRight className="h-4 w-4 shrink-0" />
               </Link>
               <p className="mt-4 flex items-start gap-2 text-[12px] leading-5 text-ivory/45">
                 <LockKeyhole className="mt-[2px] h-3.5 w-3.5 shrink-0" />
@@ -220,54 +224,55 @@ function PortalHome() {
               </p>
             </div>
 
-            <div className="my-8 h-px bg-gold/15" />
+            <div className="my-9 h-px bg-gold/20" />
             <p className="text-[10px] uppercase tracking-[0.22em] text-ivory/45">Need help?</p>
-            <p className="mt-3 text-sm text-ivory/60">We're here for you.</p>
-            <Link to="/portal/questions" className="mt-4 flex items-center gap-3 text-sm text-ivory/75 hover:text-gold">
+            <p className="mt-3 text-[14px] text-ivory/65">We're here for you.</p>
+            <Link to="/portal/questions" className="mt-5 flex min-h-10 items-center gap-3 text-[14px] text-ivory/80 hover:text-gold">
               <Mail className="h-4 w-4 text-gold" /> Send a message
             </Link>
           </div>
         </aside>
 
         {/* Main */}
-        <main className="min-w-0">
+        <main className="min-w-0 pb-5">
           {/* Hero */}
-          <section id="overview" className="relative overflow-hidden px-7 pb-14 pt-14 sm:px-10 lg:px-12 lg:pb-16 lg:pt-16">
+          <section id="overview" className="relative min-h-[clamp(540px,40vw,720px)] overflow-hidden px-7 pb-14 pt-14 sm:px-10 lg:px-[3.5%] lg:pb-14 lg:pt-[clamp(2.75rem,4vw,5rem)]">
             <img
               src={heroRoad}
               alt=""
               width={1280}
               height={960}
               aria-hidden="true"
-              className="pointer-events-none absolute right-0 top-0 hidden h-full w-[52%] object-cover opacity-55 [mask-image:linear-gradient(to_right,transparent,black_55%)] lg:block"
+              className="pointer-events-none absolute inset-y-0 right-0 h-full w-full object-cover object-[64%_48%] opacity-25 [mask-image:linear-gradient(to_right,transparent_0%,black_45%,black_82%,transparent_100%)] lg:w-[62%] lg:object-[60%_48%] lg:opacity-80 lg:[mask-image:linear-gradient(to_right,transparent_0%,black_38%,black_82%,transparent_100%)]"
             />
-            <div className="relative grid gap-10 lg:grid-cols-[minmax(0,1fr)_320px]">
+            <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(to_right,var(--color-navy)_0%,var(--color-navy)_38%,transparent_68%),linear-gradient(to_top,var(--color-navy)_0%,transparent_28%)]" />
+            <div className="relative grid min-h-[clamp(450px,32vw,600px)] gap-10 lg:grid-cols-[62%_38%]">
               <div className="min-w-0">
                 <p className="text-[11px] uppercase tracking-[0.28em] text-gold">Private Board &amp; Advisor Center</p>
-                <h1 className="mt-6 font-display text-5xl leading-[1.05] sm:text-6xl">Welcome, {name}.</h1>
-                <p className="mt-3 font-display text-2xl text-ivory/85 sm:text-3xl">To the future of Partnership Readiness.</p>
-                <div className="mt-7 h-px w-16 bg-gold" />
-                <p className="mt-7 max-w-xl text-[15px] leading-7 text-ivory/70">
+                <h1 className="mt-5 font-display text-5xl leading-[1.02] sm:text-6xl lg:text-[clamp(4.5rem,5.1vw,6rem)]">Welcome, {name}.</h1>
+                <p className="mt-2 font-display text-2xl leading-tight text-ivory/85 sm:text-3xl lg:whitespace-nowrap lg:text-[clamp(2rem,2.45vw,2.85rem)]">To the future of Partnership Readiness.</p>
+                <div className="mt-7 h-px w-12 bg-gold" />
+                <p className="mt-8 max-w-[46rem] text-[15px] leading-[1.65] text-ivory/72">
                   PRSC and Decision Intelligence Systems have reached an important inflection point. The foundation is built, the
                   platform is advancing, and DIS has officially entered investor prospecting.
                 </p>
-                <p className="mt-5 max-w-xl text-[15px] leading-7 text-ivory/70">
+                <p className="mt-6 max-w-[46rem] text-[15px] leading-[1.65] text-ivory/72">
                   You were selected to join us because we believe your experience, perspective, and credibility can contribute
                   meaningfully to what we're building.
                 </p>
                 <Link
                   to="/portal/profile"
-                  className="mt-9 inline-flex items-center gap-4 bg-gold px-7 py-4 text-[15px] font-medium text-navy transition-colors hover:bg-gold-light"
+                  className="mt-10 inline-flex min-h-14 w-full max-w-[300px] items-center justify-between gap-6 bg-gold px-7 py-4 text-[14px] font-semibold text-navy shadow-[inset_0_1px_0_var(--color-gold-light)] transition-colors hover:bg-gold-light"
                 >
                   Complete Your Profile <ArrowRight className="h-4 w-4" />
                 </Link>
-                <p className="mt-5 text-[13px] text-ivory/50">
+                <p className="mt-5 text-[12px] text-ivory/52">
                   5 – 7 minutes &nbsp;•&nbsp; Needed to prepare your individualized advisor package
                 </p>
               </div>
-              <div className="relative hidden flex-col justify-between lg:flex">
-                <div>
-                  <p className="font-display text-[13px] uppercase leading-[2.1] tracking-[0.32em] text-ivory/90">
+              <div className="relative hidden flex-col justify-between pb-3 pt-16 lg:flex">
+                <div className="ml-[18%]">
+                  <p className="text-[12px] uppercase leading-[2.15] tracking-[0.42em] text-ivory/90">
                     A higher
                     <br />
                     standard
@@ -276,9 +281,9 @@ function PortalHome() {
                     <br />
                     industry.
                   </p>
-                  <div className="mt-6 h-px w-10 bg-gold" />
+                  <div className="mt-6 h-px w-11 bg-gold" />
                 </div>
-                <p className="text-[10px] uppercase tracking-[0.24em] text-ivory/55">
+                <p className="text-[9px] uppercase tracking-[0.22em] text-ivory/55">
                   People <span className="text-gold/60">/</span> Data <span className="text-gold/60">/</span> Discipline{" "}
                   <span className="text-gold/60">/</span> Opportunity
                 </p>
@@ -287,20 +292,20 @@ function PortalHome() {
           </section>
 
           {/* Cards */}
-          <section className="grid gap-6 px-7 pb-6 sm:px-10 md:grid-cols-3 lg:px-12">
+          <section className="grid gap-5 px-7 pb-5 sm:px-10 md:grid-cols-3 lg:px-[2.5%]">
             {cards.map((card) => (
               <a
                 key={card.title}
                 href={card.href}
-                className="group flex flex-col border border-gold/20 bg-ivory/[.02] p-7 transition-colors hover:border-gold/50"
+                className="group flex min-h-[310px] flex-col border border-gold/25 bg-[linear-gradient(145deg,var(--color-midnight),var(--color-navy))] p-[clamp(1.5rem,2vw,2.25rem)] shadow-[inset_0_1px_0_color-mix(in_oklab,var(--color-gold)_8%,transparent)] transition-colors hover:border-gold/50"
               >
-                <span className="grid h-11 w-11 place-items-center rounded-full border border-gold/40">
-                  <card.icon className="h-5 w-5 text-gold" />
+                <span className="grid h-14 w-14 place-items-center rounded-full border border-gold/55">
+                  <card.icon className="h-[22px] w-[22px] text-gold" />
                 </span>
-                <p className="mt-8 text-[10px] uppercase tracking-[0.24em] text-gold">{card.eyebrow}</p>
-                <h2 className="mt-3 font-display text-[26px] leading-tight">{card.title}</h2>
-                <p className="mt-4 text-[14px] leading-6 text-ivory/60">{card.copy}</p>
-                <span className="mt-8 flex items-center gap-3 text-[13px] text-gold">
+                <p className="mt-7 text-[10px] uppercase tracking-[0.24em] text-gold">{card.eyebrow}</p>
+                <h2 className="mt-3 font-display text-[clamp(1.65rem,2vw,2.25rem)] leading-[1.08]">{card.title}</h2>
+                <p className="mt-5 text-[14px] leading-6 text-ivory/65">{card.copy}</p>
+                <span className="mt-auto flex items-center gap-3 pt-7 text-[13px] text-gold">
                   {card.cta}
                   <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
                 </span>
@@ -309,18 +314,18 @@ function PortalHome() {
           </section>
 
           {/* Why you */}
-          <section id="role" className="px-7 pb-6 sm:px-10 lg:px-12">
-            <div className="grid gap-10 border border-gold/20 bg-ivory/[.02] p-8 lg:grid-cols-[minmax(0,1fr)_360px] lg:p-11">
+          <section id="role" className="px-7 pb-5 sm:px-10 lg:px-[2.5%]">
+            <div className="grid gap-10 border border-gold/25 bg-[linear-gradient(135deg,var(--color-midnight),var(--color-navy))] p-8 lg:min-h-[250px] lg:grid-cols-[2fr_1fr] lg:p-[clamp(2rem,2.7vw,3.25rem)]">
               <div className="min-w-0">
                 <p className="text-[10px] uppercase tracking-[0.24em] text-gold">Why You</p>
-                <h2 className="mt-4 font-display text-[34px] leading-tight">Your Perspective Matters.</h2>
-                <p className="mt-5 max-w-2xl text-[15px] leading-7 text-ivory/70">{m.why_you}</p>
+                <h2 className="mt-4 font-display text-[clamp(2rem,2.5vw,2.8rem)] leading-tight">Your Perspective Matters.</h2>
+                <p className="mt-5 max-w-[50rem] text-[15px] leading-7 text-ivory/70">{m.why_you}</p>
                 <div className="mt-7 h-px w-16 bg-gold" />
                 <Link to="/portal/questions" className="mt-6 inline-flex items-center gap-3 text-[14px] text-ivory/85 hover:text-gold">
                   Read More <ArrowRight className="h-4 w-4 text-gold" />
                 </Link>
               </div>
-              <div className="border-gold/20 lg:border-l lg:pl-11">
+              <div className="relative flex flex-col justify-center overflow-hidden border-gold/20 py-2 lg:border-l lg:pl-[14%] before:absolute before:left-[7%] before:top-1/2 before:h-40 before:w-40 before:-translate-y-1/2 before:rounded-full before:border before:border-gold/10 after:absolute after:left-[10%] after:top-1/2 after:h-32 after:w-32 after:-translate-y-1/2 after:rounded-full after:border after:border-gold/10">
                 <blockquote className="font-display text-[26px] italic leading-snug text-gold">
                   “Independent standards create stronger markets.”
                 </blockquote>
@@ -335,8 +340,8 @@ function PortalHome() {
 
           {/* Entity sections */}
           {showPrsc && (
-            <section id="prsc" className="px-7 pb-6 sm:px-10 lg:px-12">
-              <div className="border border-gold/20 bg-ivory/[.02] p-8 lg:p-11">
+            <section id="prsc" className="px-7 pb-5 sm:px-10 lg:px-[2.5%]">
+              <div className="border border-gold/20 bg-[linear-gradient(145deg,var(--color-midnight),var(--color-navy))] p-8 lg:p-[clamp(2rem,2.7vw,3.25rem)]">
                 <p className="text-[10px] uppercase tracking-[0.24em] text-gold">PRSC</p>
                 <h2 className="mt-4 font-display text-[34px]">A standard built for trust.</h2>
                 <div className="mt-8 grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
@@ -354,8 +359,8 @@ function PortalHome() {
           )}
 
           {showDis && (
-            <section id="dis" className="px-7 pb-6 sm:px-10 lg:px-12">
-              <div className="border border-gold/20 bg-ivory/[.02] p-8 lg:p-11">
+            <section id="dis" className="px-7 pb-5 sm:px-10 lg:px-[2.5%]">
+              <div className="border border-gold/20 bg-[linear-gradient(145deg,var(--color-midnight),var(--color-navy))] p-8 lg:p-[clamp(2rem,2.7vw,3.25rem)]">
                 <p className="text-[10px] uppercase tracking-[0.24em] text-gold">DIS · Readiness Terminal™</p>
                 <h2 className="mt-4 max-w-3xl font-display text-[34px]">From evidence to decision intelligence.</h2>
                 <div className="mt-8 flex flex-wrap items-center gap-3 text-[10px] uppercase tracking-[0.18em] text-ivory/65">
@@ -371,8 +376,8 @@ function PortalHome() {
           )}
 
           {/* What happens next */}
-          <section id="next" className="px-7 pb-6 sm:px-10 lg:px-12">
-            <div className="border border-gold/20 bg-ivory/[.02] p-8 lg:p-11">
+          <section id="next" className="px-7 pb-5 sm:px-10 lg:px-[2.5%]">
+            <div className="border border-gold/20 bg-[linear-gradient(145deg,var(--color-midnight),var(--color-navy))] p-8 lg:p-[clamp(2rem,2.7vw,3.25rem)]">
               <p className="text-[10px] uppercase tracking-[0.24em] text-gold">What Happens Next</p>
               <h2 className="mt-4 font-display text-[34px]">A short, deliberate sequence.</h2>
               <div className="mt-8 grid gap-8 md:grid-cols-3">
@@ -392,8 +397,8 @@ function PortalHome() {
           </section>
 
           {/* Questions */}
-          <section id="questions" className="px-7 pb-16 sm:px-10 lg:px-12">
-            <div className="flex flex-col gap-6 border border-gold/20 bg-ivory/[.02] p-8 sm:flex-row sm:items-center sm:justify-between lg:p-11">
+          <section id="questions" className="px-7 pb-16 sm:px-10 lg:px-[2.5%] lg:pb-20">
+            <div className="flex flex-col gap-6 border border-gold/20 bg-[linear-gradient(145deg,var(--color-midnight),var(--color-navy))] p-8 sm:flex-row sm:items-center sm:justify-between lg:p-[clamp(2rem,2.7vw,3.25rem)]">
               <div>
                 <p className="text-[10px] uppercase tracking-[0.24em] text-gold">Questions</p>
                 <h2 className="mt-3 font-display text-[30px]">Share a private question.</h2>
