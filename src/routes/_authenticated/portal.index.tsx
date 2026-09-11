@@ -112,13 +112,6 @@ function PortalHome() {
   const profileComplete = data?.hasProfile ?? false;
   const packageReady = m.package_status === "package_ready";
 
-  const topNav = [
-    { label: "Overview", href: "#overview" },
-    ...(showPrsc ? [{ label: "PRSC", href: "#prsc", onSelect: () => setPanel("prsc") }] : []),
-    ...(showDis ? [{ label: "DIS", href: "#dis", onSelect: () => setPanel("dis") }] : []),
-    { label: "Your Role", href: "#role" },
-    { label: "Questions", href: "#questions", onSelect: () => setPanel("questions") },
-  ];
 
   const sideNav = [
     { label: "Overview", href: "#overview", icon: Home, active: true, onSelect: undefined as (() => void) | undefined },
