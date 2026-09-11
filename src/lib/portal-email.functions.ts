@@ -1,7 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
-import { applyTokens, renderBrandedEmail, renderBrandedEmailText } from "@/lib/branded-email";
+import { applyTokens, buildMemberTokens, parseSignatures, renderBrandedEmail, renderBrandedEmailText } from "@/lib/branded-email";
 
 export type EmailTemplate = {
   id: string;
@@ -13,6 +13,8 @@ export type EmailTemplate = {
   body: string;
   cta_label: string | null;
   cta_url: string | null;
+  cta_subtext: string | null;
+  signatures: string | null;
   created_at: string;
   updated_at: string;
 };
@@ -62,6 +64,8 @@ const templateSchema = z.object({
   body: z.string().trim().min(1).max(20000),
   cta_label: z.string().trim().max(80).optional().default(""),
   cta_url: z.string().trim().max(400).optional().default(""),
+  cta_subtext: z.string().trim().max(200).optional().default(""),
+  signatures: z.string().trim().max(600).optional().default(""),
 });
 
 export const saveEmailTemplate = createServerFn({ method: "POST" })
@@ -79,6 +83,8 @@ export const saveEmailTemplate = createServerFn({ method: "POST" })
       body: data.body,
       cta_label: data.cta_label || null,
       cta_url: data.cta_url || null,
+      cta_subtext: data.cta_subtext || null,
+      signatures: data.signatures || null,
       created_by: context.userId,
     };
     const { data: saved, error } = await context.supabase
@@ -110,6 +116,8 @@ const sendSchema = z.object({
   body: z.string().trim().min(1).max(20000),
   cta_label: z.string().trim().max(80).optional().default(""),
   cta_url: z.string().trim().max(400).optional().default(""),
+  cta_subtext: z.string().trim().max(200).optional().default(""),
+  signatures: z.string().trim().max(600).optional().default(""),
 });
 
 export const sendMemberEmail = createServerFn({ method: "POST" })
@@ -127,17 +135,10 @@ export const sendMemberEmail = createServerFn({ method: "POST" })
     const apiKey = process.env["SENDGRID_API_KEY"];
     const results: { member_id: string; status: string; error?: string }[] = [];
 
+    const signatures = parseSignatures(data.signatures);
+
     for (const member of members as any[]) {
-      const tokens = {
-        first_name: member.first_name,
-        last_name: member.last_name,
-        full_name: `${member.first_name} ${member.last_name}`,
-        organization: member.organization,
-        title: member.title ?? "",
-        entity: String(member.entity).toUpperCase(),
-        role: String(member.role).replace("_", " "),
-        email: member.email,
-      };
+      const tokens = buildMemberTokens(member);
       const subject = applyTokens(data.subject, tokens);
       const composed = {
         subject,
@@ -146,6 +147,8 @@ export const sendMemberEmail = createServerFn({ method: "POST" })
         body: applyTokens(data.body, tokens),
         ctaLabel: data.cta_label || null,
         ctaUrl: data.cta_url || null,
+        ctaSubtext: applyTokens(data.cta_subtext || "", tokens) || null,
+        signatures,
       };
 
       let status = "sent";
