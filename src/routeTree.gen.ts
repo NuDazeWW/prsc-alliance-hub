@@ -24,8 +24,8 @@ import { Route as VanguardHomeRouteImport } from './routes/vanguard.home'
 import { Route as GovernanceWrittenStandardsRouteImport } from './routes/governance_.written-standards'
 import { Route as GovernanceCharterRouteImport } from './routes/governance_.charter'
 import { Route as ApiGeoRouteImport } from './routes/api/geo'
-import { Route as AuthenticatedPortalRouteImport } from './routes/_authenticated/portal'
 import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/admin'
+import { Route as AuthenticatedPortalIndexRouteImport } from './routes/_authenticated/portal.index'
 import { Route as AuthenticatedPortalQuestionsRouteImport } from './routes/_authenticated/portal.questions'
 import { Route as AuthenticatedPortalProfileRouteImport } from './routes/_authenticated/portal.profile'
 
@@ -104,27 +104,28 @@ const ApiGeoRoute = ApiGeoRouteImport.update({
   path: '/api/geo',
   getParentRoute: () => rootRouteImport,
 } as any)
-const AuthenticatedPortalRoute = AuthenticatedPortalRouteImport.update({
-  id: '/portal',
-  path: '/portal',
-  getParentRoute: () => AuthenticatedRouteRoute,
-} as any)
 const AuthenticatedAdminRoute = AuthenticatedAdminRouteImport.update({
   id: '/admin',
   path: '/admin',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedPortalIndexRoute =
+  AuthenticatedPortalIndexRouteImport.update({
+    id: '/portal/',
+    path: '/portal/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedPortalQuestionsRoute =
   AuthenticatedPortalQuestionsRouteImport.update({
-    id: '/questions',
-    path: '/questions',
-    getParentRoute: () => AuthenticatedPortalRoute,
+    id: '/portal/questions',
+    path: '/portal/questions',
+    getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
 const AuthenticatedPortalProfileRoute =
   AuthenticatedPortalProfileRouteImport.update({
-    id: '/profile',
-    path: '/profile',
-    getParentRoute: () => AuthenticatedPortalRoute,
+    id: '/portal/profile',
+    path: '/portal/profile',
+    getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
 
 export interface FileRoutesByFullPath {
@@ -139,13 +140,13 @@ export interface FileRoutesByFullPath {
   '/standard-v1': typeof StandardV1Route
   '/the-standard': typeof TheStandardRoute
   '/admin': typeof AuthenticatedAdminRoute
-  '/portal': typeof AuthenticatedPortalRouteWithChildren
   '/api/geo': typeof ApiGeoRoute
   '/governance/charter': typeof GovernanceCharterRoute
   '/governance/written-standards': typeof GovernanceWrittenStandardsRoute
   '/vanguard/home': typeof VanguardHomeRoute
   '/portal/profile': typeof AuthenticatedPortalProfileRoute
   '/portal/questions': typeof AuthenticatedPortalQuestionsRoute
+  '/portal/': typeof AuthenticatedPortalIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -159,13 +160,13 @@ export interface FileRoutesByTo {
   '/standard-v1': typeof StandardV1Route
   '/the-standard': typeof TheStandardRoute
   '/admin': typeof AuthenticatedAdminRoute
-  '/portal': typeof AuthenticatedPortalRouteWithChildren
   '/api/geo': typeof ApiGeoRoute
   '/governance/charter': typeof GovernanceCharterRoute
   '/governance/written-standards': typeof GovernanceWrittenStandardsRoute
   '/vanguard/home': typeof VanguardHomeRoute
   '/portal/profile': typeof AuthenticatedPortalProfileRoute
   '/portal/questions': typeof AuthenticatedPortalQuestionsRoute
+  '/portal': typeof AuthenticatedPortalIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -181,13 +182,13 @@ export interface FileRoutesById {
   '/standard-v1': typeof StandardV1Route
   '/the-standard': typeof TheStandardRoute
   '/_authenticated/admin': typeof AuthenticatedAdminRoute
-  '/_authenticated/portal': typeof AuthenticatedPortalRouteWithChildren
   '/api/geo': typeof ApiGeoRoute
   '/governance_/charter': typeof GovernanceCharterRoute
   '/governance_/written-standards': typeof GovernanceWrittenStandardsRoute
   '/vanguard/home': typeof VanguardHomeRoute
   '/_authenticated/portal/profile': typeof AuthenticatedPortalProfileRoute
   '/_authenticated/portal/questions': typeof AuthenticatedPortalQuestionsRoute
+  '/_authenticated/portal/': typeof AuthenticatedPortalIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -203,13 +204,13 @@ export interface FileRouteTypes {
     | '/standard-v1'
     | '/the-standard'
     | '/admin'
-    | '/portal'
     | '/api/geo'
     | '/governance/charter'
     | '/governance/written-standards'
     | '/vanguard/home'
     | '/portal/profile'
     | '/portal/questions'
+    | '/portal/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -223,13 +224,13 @@ export interface FileRouteTypes {
     | '/standard-v1'
     | '/the-standard'
     | '/admin'
-    | '/portal'
     | '/api/geo'
     | '/governance/charter'
     | '/governance/written-standards'
     | '/vanguard/home'
     | '/portal/profile'
     | '/portal/questions'
+    | '/portal'
   id:
     | '__root__'
     | '/'
@@ -244,13 +245,13 @@ export interface FileRouteTypes {
     | '/standard-v1'
     | '/the-standard'
     | '/_authenticated/admin'
-    | '/_authenticated/portal'
     | '/api/geo'
     | '/governance_/charter'
     | '/governance_/written-standards'
     | '/vanguard/home'
     | '/_authenticated/portal/profile'
     | '/_authenticated/portal/questions'
+    | '/_authenticated/portal/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -378,13 +379,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiGeoRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/_authenticated/portal': {
-      id: '/_authenticated/portal'
-      path: '/portal'
-      fullPath: '/portal'
-      preLoaderRoute: typeof AuthenticatedPortalRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
-    }
     '/_authenticated/admin': {
       id: '/_authenticated/admin'
       path: '/admin'
@@ -392,44 +386,42 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/portal/': {
+      id: '/_authenticated/portal/'
+      path: '/portal'
+      fullPath: '/portal/'
+      preLoaderRoute: typeof AuthenticatedPortalIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/portal/questions': {
       id: '/_authenticated/portal/questions'
-      path: '/questions'
+      path: '/portal/questions'
       fullPath: '/portal/questions'
       preLoaderRoute: typeof AuthenticatedPortalQuestionsRouteImport
-      parentRoute: typeof AuthenticatedPortalRoute
+      parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/portal/profile': {
       id: '/_authenticated/portal/profile'
-      path: '/profile'
+      path: '/portal/profile'
       fullPath: '/portal/profile'
       preLoaderRoute: typeof AuthenticatedPortalProfileRouteImport
-      parentRoute: typeof AuthenticatedPortalRoute
+      parentRoute: typeof AuthenticatedRouteRoute
     }
   }
 }
 
-interface AuthenticatedPortalRouteChildren {
-  AuthenticatedPortalProfileRoute: typeof AuthenticatedPortalProfileRoute
-  AuthenticatedPortalQuestionsRoute: typeof AuthenticatedPortalQuestionsRoute
-}
-
-const AuthenticatedPortalRouteChildren: AuthenticatedPortalRouteChildren = {
-  AuthenticatedPortalProfileRoute: AuthenticatedPortalProfileRoute,
-  AuthenticatedPortalQuestionsRoute: AuthenticatedPortalQuestionsRoute,
-}
-
-const AuthenticatedPortalRouteWithChildren =
-  AuthenticatedPortalRoute._addFileChildren(AuthenticatedPortalRouteChildren)
-
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedAdminRoute: typeof AuthenticatedAdminRoute
-  AuthenticatedPortalRoute: typeof AuthenticatedPortalRouteWithChildren
+  AuthenticatedPortalProfileRoute: typeof AuthenticatedPortalProfileRoute
+  AuthenticatedPortalQuestionsRoute: typeof AuthenticatedPortalQuestionsRoute
+  AuthenticatedPortalIndexRoute: typeof AuthenticatedPortalIndexRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAdminRoute: AuthenticatedAdminRoute,
-  AuthenticatedPortalRoute: AuthenticatedPortalRouteWithChildren,
+  AuthenticatedPortalProfileRoute: AuthenticatedPortalProfileRoute,
+  AuthenticatedPortalQuestionsRoute: AuthenticatedPortalQuestionsRoute,
+  AuthenticatedPortalIndexRoute: AuthenticatedPortalIndexRoute,
 }
 
 const AuthenticatedRouteRouteWithChildren =

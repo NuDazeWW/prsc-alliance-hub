@@ -5,7 +5,7 @@ import { getPortalSession } from "@/lib/portal.functions";
 import { PortalShell } from "@/components/portal/PortalShell";
 import { Button } from "@/components/ui/button";
 
-export const Route = createFileRoute("/_authenticated/portal")({
+export const Route = createFileRoute("/_authenticated/portal/")({
   head: () => ({ meta: [{ title: "Private Board & Advisor Center | PRSC" }, { name: "description", content: "Confidential PRSC and DIS board and advisor briefing center." }, { name: "robots", content: "noindex,nofollow,noarchive" }, { property: "og:title", content: "Private Board & Advisor Center | PRSC" }, { property: "og:description", content: "Confidential PRSC and DIS board and advisor briefing center." }, { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary" }] }),
   component: PortalHome,
 });
