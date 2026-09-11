@@ -278,7 +278,7 @@ function PortalHome() {
                 </p>
                 <Link
                   to="/portal/profile"
-                  className="mt-[22px] inline-flex min-h-14 w-full max-w-[300px] items-center justify-between gap-6 bg-gold px-7 py-4 text-[19px] font-semibold text-navy shadow-[inset_0_1px_0_var(--color-gold-light)] transition-colors hover:bg-gold-light"
+                  className="mt-[22px] inline-flex min-h-14 w-full max-w-[300px] items-center justify-between gap-6 rounded-full bg-gold px-7 py-4 text-[19px] font-semibold text-navy shadow-[inset_0_1px_0_var(--color-gold-light),0_0_20px_rgba(255,255,255,0.10)] ring-1 ring-ivory/30 transition-all hover:bg-gold-light hover:ring-ivory/55"
                 >
                   {profileComplete ? "Review Your Profile" : "Complete Your Profile"} <ArrowRight className="h-4 w-4" />
                 </Link>
