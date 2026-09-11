@@ -249,27 +249,28 @@ function PortalHome() {
               className="pointer-events-none absolute inset-y-0 right-0 h-full w-full object-cover object-[64%_48%] opacity-25 [mask-image:linear-gradient(to_right,transparent_0%,black_45%,black_82%,transparent_100%)] lg:w-[62%] lg:object-[60%_48%] lg:opacity-80 lg:[mask-image:linear-gradient(to_right,transparent_0%,black_38%,black_82%,transparent_100%)]"
             />
             <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(to_right,var(--color-navy)_0%,var(--color-navy)_38%,transparent_68%),linear-gradient(to_top,var(--color-navy)_0%,transparent_28%)]" />
-            <div className="relative grid min-h-[clamp(450px,32vw,600px)] gap-10 lg:grid-cols-[62%_38%]">
+            <div className="relative grid gap-10 lg:grid-cols-[62%_38%]">
               <div className="min-w-0">
                 <p className="text-[11px] uppercase tracking-[0.28em] text-gold">Private Board &amp; Advisor Center</p>
-                <h1 className="mt-5 font-display text-5xl leading-[1.02] sm:text-6xl lg:text-[clamp(4.5rem,5.1vw,6rem)]">Welcome, {name}.</h1>
-                <p className="mt-2 font-display text-2xl leading-tight text-ivory/85 sm:text-3xl lg:whitespace-nowrap lg:text-[clamp(2rem,2.45vw,2.85rem)]">To the future of Partnership Readiness.</p>
-                <div className="mt-7 h-px w-12 bg-gold" />
-                <p className="mt-8 max-w-[46rem] text-[15px] leading-[1.65] text-ivory/72">
+                <h1 className="mt-3 font-display text-5xl leading-[1.02] sm:text-6xl lg:text-[clamp(4.5rem,5.1vw,6rem)]">Welcome, {name}.</h1>
+                <p className="mt-1 font-display text-2xl leading-tight text-ivory/85 sm:text-3xl lg:whitespace-nowrap lg:text-[clamp(2rem,2.45vw,2.85rem)]">To the future of Partnership Readiness.</p>
+                <div className="mt-5 h-px w-12 bg-gold" />
+                <p className="mt-5 max-w-[46rem] text-[15px] leading-[1.65] text-ivory/72">
                   PRSC and Decision Intelligence Systems have reached an important inflection point. The foundation is built, the
                   platform is advancing, and DIS has officially entered investor prospecting.
                 </p>
-                <p className="mt-6 max-w-[46rem] text-[15px] leading-[1.65] text-ivory/72">
+                <p className="mt-4 max-w-[46rem] text-[15px] leading-[1.65] text-ivory/72">
                   You were selected to join us because we believe your experience, perspective, and credibility can contribute
                   meaningfully to what we're building.
                 </p>
                 <Link
                   to="/portal/profile"
-                  className="mt-10 inline-flex min-h-14 w-full max-w-[300px] items-center justify-between gap-6 bg-gold px-7 py-4 text-[19px] font-semibold text-navy shadow-[inset_0_1px_0_var(--color-gold-light)] transition-colors hover:bg-gold-light"
+                  className="mt-[22px] inline-flex min-h-14 w-full max-w-[300px] items-center justify-between gap-6 bg-gold px-7 py-4 text-[19px] font-semibold text-navy shadow-[inset_0_1px_0_var(--color-gold-light)] transition-colors hover:bg-gold-light"
                 >
                   Complete Your Profile <ArrowRight className="h-4 w-4" />
                 </Link>
-                <p className="mt-5 text-[17px] text-ivory/52">
+                <p className="mt-3 text-[17px] text-ivory/52">
+
                   5 – 7 minutes &nbsp;•&nbsp; Needed to prepare your individualized advisor package
                 </p>
               </div>
