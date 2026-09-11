@@ -665,7 +665,8 @@ function Admin() {
                   </article>
                 ))
               )}
-            </div>
+              </div>
+            </section>
           </div>
         </div>
       </main>
