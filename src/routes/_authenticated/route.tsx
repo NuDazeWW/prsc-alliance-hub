@@ -5,7 +5,11 @@ import { supabase } from "@/integrations/supabase/client";
 export function isPreviewHost() {
   if (typeof window === "undefined") return false;
   const h = window.location.hostname;
-  return h === "localhost" || h.startsWith("id-preview--");
+  return (
+    h === "localhost" ||
+    h.startsWith("id-preview--") ||
+    h.endsWith(".lovableproject.com")
+  );
 }
 
 export const Route = createFileRoute("/_authenticated")({
