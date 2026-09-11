@@ -2,7 +2,7 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useEffect } from "react";
 import { ArrowRight, BookOpen, CheckCircle2, CircleHelp, FileText, Landmark, LockKeyhole, Scale } from "lucide-react";
-import { getPortalSession } from "@/lib/portal.functions";
+import { getMyHeadshotUrl, getPortalSession } from "@/lib/portal.functions";
 import { PortalShell } from "@/components/portal/PortalShell";
 import { Button } from "@/components/ui/button";
 
@@ -13,6 +13,7 @@ export const Route = createFileRoute("/_authenticated/portal/")({
 const entityLabel = { prsc: "PRSC", dis: "DIS", both: "PRSC + DIS" } as const;
 function PortalHome() {
   const { data, isLoading, error } = useQuery({ queryKey: ["portal-session"], queryFn: () => getPortalSession() });
+  const headshot = useQuery({ queryKey: ["my-headshot"], queryFn: () => getMyHeadshotUrl() });
   const navigate = useNavigate();
   useEffect(() => { if (data?.isAdmin) navigate({ to: "/admin", replace: true }); }, [data, navigate]);
   if (isLoading) return <PortalShell><div className="flex min-h-[70vh] items-center justify-center text-gold">Opening your private center…</div></PortalShell>;
@@ -26,7 +27,7 @@ function PortalHome() {
   return <PortalShell>
     <div className="mx-auto grid max-w-[1440px] lg:grid-cols-[285px_1fr]">
       <aside className="border-b border-gold/20 bg-ivory/[.025] p-7 lg:min-h-[calc(100vh-81px)] lg:border-b-0 lg:border-r lg:p-9">
-        <p className="text-[10px] uppercase text-gold">Welcome center</p><h2 className="mt-3 font-display text-3xl">{name} {m.last_name}</h2><p className="mt-1 text-sm text-ivory/50">{m.title || (m.role === "advisor" ? "Advisor" : "Board Member")}</p><p className="text-sm text-ivory/50">{m.organization}</p>
+        <p className="text-[10px] uppercase text-gold">Welcome center</p>{headshot.data?.url && <img src={headshot.data.url} alt={`${name} ${m.last_name}`} className="mt-6 h-24 w-24 rounded-full border border-gold/30 object-cover" />}<h2 className="mt-3 font-display text-3xl">{name} {m.last_name}</h2><p className="mt-1 text-sm text-ivory/50">{m.title || (m.role === "advisor" ? "Advisor" : "Board Member")}</p><p className="text-sm text-ivory/50">{m.organization}</p>
         <div className="my-8 h-px bg-gold/20"/><p className="text-[10px] uppercase text-ivory/45">Designation</p><p className="mt-2 text-sm text-gold">{entityLabel[m.entity]}</p><p className="mt-7 text-[10px] uppercase text-ivory/45">Package status</p><p className="mt-2 flex items-center gap-2 text-sm"><CheckCircle2 className="h-4 w-4 text-gold" />{m.package_status.replaceAll("_", " ")}</p>
         <Button asChild className="mt-8 w-full rounded-none bg-gold text-navy hover:bg-gold-light"><Link to="/portal/profile"><FileText className="mr-2 h-4 w-4"/>Open private profile</Link></Button>
         <nav className="mt-9 space-y-3 text-sm text-ivory/55"><a href="#overview" className="block hover:text-gold">Overview</a>{m.entity !== "dis" && <a href="#prsc" className="block hover:text-gold">PRSC</a>}{m.entity !== "prsc" && <a href="#dis" className="block hover:text-gold">DIS</a>}<a href="#role" className="block hover:text-gold">Your role</a><a href="#questions" className="block hover:text-gold">Questions</a></nav>
