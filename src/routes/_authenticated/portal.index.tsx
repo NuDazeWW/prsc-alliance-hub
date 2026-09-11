@@ -286,7 +286,13 @@ function PortalHome() {
                 <p className="mt-3 text-[17px] text-ivory/52">
                   {profileComplete
                     ? "Your profile is on file — your package is being prepared."
-                    : "Approx. 7–10 minutes  •  Completing your profile unlocks your individualized package"}
+                    : (
+                      <>
+                        Approx. 7–10 minutes  •  Your Submission is Private.
+                        <br />
+                        Completing your profile unlocks your individualized package
+                      </>
+                    )}
                 </p>
               </div>
               <div className="relative hidden flex-col justify-between pb-2 pt-8 lg:flex">
