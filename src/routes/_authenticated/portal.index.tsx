@@ -271,7 +271,7 @@ function PortalHome() {
                 </p>
               </div>
               <div className="relative hidden flex-col justify-between pb-3 pt-16 lg:flex">
-                <div className="ml-[18%]">
+                <div className="absolute right-[4%] top-6">
                   <p className="text-[12px] uppercase leading-[2.15] tracking-[0.42em] text-ivory/90">
                     A higher
                     <br />
@@ -283,7 +283,7 @@ function PortalHome() {
                   </p>
                   <div className="mt-6 h-px w-11 bg-gold" />
                 </div>
-                <p className="text-[9px] uppercase tracking-[0.22em] text-ivory/55">
+                <p className="absolute bottom-3 right-[4%] text-[9px] uppercase tracking-[0.22em] text-ivory/55">
                   People <span className="text-gold/60">/</span> Data <span className="text-gold/60">/</span> Discipline{" "}
                   <span className="text-gold/60">/</span> Opportunity
                 </p>
