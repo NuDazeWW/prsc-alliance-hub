@@ -346,10 +346,10 @@ function Admin() {
       <main className="px-4 py-10 sm:px-6 lg:px-8">
         <div className="flex flex-col justify-between gap-6 border-b border-gold/20 pb-8 md:flex-row md:items-end">
           <div>
-            <p className="text-xs uppercase text-gold">Administration</p>
+            <p className="text-sm uppercase text-gold">Administration</p>
             <h1 className="mt-3 font-display text-5xl">Private center</h1>
           </div>
-          <p className="text-sm text-ivory/45">Member access, submissions, and inquiries</p>
+          <p className="text-base text-ivory/45">Member access, submissions, and inquiries</p>
         </div>
 
         <section className="grid gap-px bg-gold/15 md:grid-cols-4">
@@ -373,23 +373,23 @@ function Admin() {
                 />
               </div>
               <form onSubmit={invite} className="mt-7 grid gap-4 sm:grid-cols-2">
-                <Input name="first_name" placeholder="First name" required />
-                <Input name="last_name" placeholder="Last name" required />
-                <Input name="email" type="email" placeholder="Email" required />
-                <Input name="organization" placeholder="Organization" required />
-                <Input name="title" placeholder="Title" required />
-                <select name="entity" required className="h-9 rounded-md border border-input bg-navy px-3 text-sm">
+                <Input name="first_name" placeholder="First name" required className="text-base" />
+                <Input name="last_name" placeholder="Last name" required className="text-base" />
+                <Input name="email" type="email" placeholder="Email" required className="text-base" />
+                <Input name="organization" placeholder="Organization" required className="text-base" />
+                <Input name="title" placeholder="Title" required className="text-base" />
+                <select name="entity" required className="h-9 rounded-md border border-input bg-navy px-3 text-base">
                   <option value="prsc">PRSC</option>
                   <option value="dis">DIS</option>
                   <option value="both">Both</option>
                 </select>
-                <select name="role" required className="h-9 rounded-md border border-input bg-navy px-3 text-sm">
+                <select name="role" required className="h-9 rounded-md border border-input bg-navy px-3 text-base">
                   <option value="board_member">Board member</option>
                   <option value="advisor">Advisor</option>
                 </select>
-                <Textarea name="why_you" placeholder="Personalized Why You statement" required className="min-h-28 sm:col-span-2" />
-                <Button className="rounded-none bg-gold text-navy sm:col-span-2">Send invitation</Button>
-                {status && <p className="text-sm text-ivory/60 sm:col-span-2">{status}</p>}
+                <Textarea name="why_you" placeholder="Personalized Why You statement" required className="min-h-28 text-base sm:col-span-2" />
+                <Button className="rounded-none bg-gold text-base text-navy sm:col-span-2">Send invitation</Button>
+                {status && <p className="text-base text-ivory/60 sm:col-span-2">{status}</p>}
               </form>
             </section>
 
@@ -401,7 +401,7 @@ function Admin() {
                   <h3 className="truncate text-[13px] uppercase tracking-[0.16em] text-gold">Email templates</h3>
                 </div>
                 <div className="flex shrink-0 items-center gap-2">
-                  <span className="rounded-full border border-gold/40 px-2.5 py-0.5 text-xs text-gold">{templates.length}</span>
+                  <span className="rounded-full border border-gold/40 px-2.5 py-0.5 text-sm text-gold">{templates.length}</span>
                   <InfoTip
                     title="Email templates"
                     body="Every saved template lives here — the badge shows how many exist. Click a template to load it into Compose & Send for editing or sending. “Sent ×” shows how many members have received it. The trash icon deletes a template; sent history is kept. Use New Template to start from scratch."
@@ -409,7 +409,7 @@ function Admin() {
                 </div>
               </div>
               <ul className="max-h-[320px] overflow-y-auto">
-                {templates.length === 0 && <li className="px-5 py-5 text-sm text-ivory/45">No templates yet. Upload or write one.</li>}
+                {templates.length === 0 && <li className="px-5 py-5 text-base text-ivory/45">No templates yet. Upload or write one.</li>}
                 {templates.map((t) => (
                   <li key={t.id} className="group flex items-start justify-between gap-3 border-b border-ivory/10 px-5 py-3 last:border-b-0">
                     <button
@@ -432,9 +432,9 @@ function Admin() {
                       }}
                       className="min-w-0 flex-1 text-left"
                     >
-                      <span className="block truncate text-sm text-ivory/90 group-hover:text-gold">{t.name}</span>
-                      <span className="mt-0.5 block truncate text-xs text-ivory/40">{t.description || t.subject}</span>
-                      <span className="mt-1 block text-[11px] text-ivory/35">
+                      <span className="block truncate text-base text-ivory/90 group-hover:text-gold">{t.name}</span>
+                      <span className="mt-0.5 block truncate text-sm text-ivory/40">{t.description || t.subject}</span>
+                      <span className="mt-1 block text-xs text-ivory/35">
                         Sent {sends.filter((s) => s.template_id === t.id && s.status === "sent").length}×
                       </span>
                     </button>
@@ -455,7 +455,7 @@ function Admin() {
                   setDraft(emptyDraft);
                   setEmailStatus("New template started.");
                 }}
-                className="flex w-full items-center justify-center gap-2 border-t border-gold/15 px-5 py-3 text-sm text-gold transition-colors hover:bg-gold/10"
+                className="flex w-full items-center justify-center gap-2 border-t border-gold/15 px-5 py-3 text-base text-gold transition-colors hover:bg-gold/10"
               >
                 <Plus className="h-4 w-4" /> New template
               </button>
@@ -485,58 +485,59 @@ function Admin() {
                       e.target.value = "";
                     }}
                   />
-                  <Button type="button" className="rounded-none border border-gold/40 bg-transparent text-ivory hover:bg-gold/10 hover:text-gold" onClick={() => fileRef.current?.click()}>
+                  <Button type="button" className="rounded-none border border-gold/40 bg-transparent text-base text-ivory hover:bg-gold/10 hover:text-gold" onClick={() => fileRef.current?.click()}>
                     <Upload className="mr-2 h-4 w-4" /> Upload content
                   </Button>
-                  <Button type="button" className="rounded-none bg-gold text-navy" onClick={() => setPreviewOpen(true)}>
+                  <Button type="button" className="rounded-none bg-gold text-base text-navy" onClick={() => setPreviewOpen(true)}>
                     <Eye className="mr-2 h-4 w-4" /> View in template
                   </Button>
                 </div>
               </div>
 
               <div className="mt-6 grid gap-4 sm:grid-cols-2">
-                <Input value={draft.name} onChange={(e) => setDraft({ ...draft, name: e.target.value })} placeholder="Template name" />
+                <Input value={draft.name} onChange={(e) => setDraft({ ...draft, name: e.target.value })} placeholder="Template name" className="text-base" />
                 <Input
                   value={draft.description}
                   onChange={(e) => setDraft({ ...draft, description: e.target.value })}
                   placeholder="Short description (optional)"
+                  className="text-base"
                 />
                 <Input
                   value={draft.subject}
                   onChange={(e) => setDraft({ ...draft, subject: e.target.value })}
                   placeholder="Subject line"
-                  className="sm:col-span-2"
+                  className="text-base sm:col-span-2"
                 />
-                <Input value={draft.eyebrow} onChange={(e) => setDraft({ ...draft, eyebrow: e.target.value })} placeholder="Eyebrow label" />
-                <Input value={draft.heading} onChange={(e) => setDraft({ ...draft, heading: e.target.value })} placeholder="Headline" />
+                <Input value={draft.eyebrow} onChange={(e) => setDraft({ ...draft, eyebrow: e.target.value })} placeholder="Eyebrow label" className="text-base" />
+                <Input value={draft.heading} onChange={(e) => setDraft({ ...draft, heading: e.target.value })} placeholder="Headline" className="text-base" />
                 <Textarea
                   value={draft.body}
                   onChange={(e) => setDraft({ ...draft, body: e.target.value })}
                   placeholder="Email content. Separate paragraphs with a blank line."
-                  className="min-h-56 sm:col-span-2"
+                  className="min-h-56 text-base sm:col-span-2"
                 />
-                <Input value={draft.cta_label} onChange={(e) => setDraft({ ...draft, cta_label: e.target.value })} placeholder="Button label (optional)" />
-                <Input value={draft.cta_url} onChange={(e) => setDraft({ ...draft, cta_url: e.target.value })} placeholder="Button link (optional)" />
+                <Input value={draft.cta_label} onChange={(e) => setDraft({ ...draft, cta_label: e.target.value })} placeholder="Button label (optional)" className="text-base" />
+                <Input value={draft.cta_url} onChange={(e) => setDraft({ ...draft, cta_url: e.target.value })} placeholder="Button link (optional)" className="text-base" />
                 <Input
                   value={draft.cta_subtext}
                   onChange={(e) => setDraft({ ...draft, cta_subtext: e.target.value })}
                   placeholder="Note under the button (optional)"
-                  className="sm:col-span-2"
+                  className="text-base sm:col-span-2"
                 />
                 <Textarea
                   value={draft.signatures}
                   onChange={(e) => setDraft({ ...draft, signatures: e.target.value })}
                   placeholder={"Signatures — one per line: Name, Title (rendered in cursive)"}
-                  className="min-h-20 sm:col-span-2"
+                  className="min-h-20 text-base sm:col-span-2"
                 />
               </div>
 
-              <p className="mt-3 text-xs text-ivory/40">
+              <p className="mt-3 text-sm text-ivory/40">
                 Personalize with {"{{first_name}}"}, {"{{last_name}}"}, {"{{full_name}}"}, {"{{organization}}"}, {"{{title}}"}, {"{{entity}}"}, {"{{entity_full}}"}, {"{{role}}"}, {"{{role_label}}"}, {"{{package_label}}"}.
               </p>
 
               <div className="mt-6 border-t border-gold/15 pt-5">
-                <p className="text-[11px] uppercase tracking-[0.18em] text-gold">Recipients</p>
+                <p className="text-xs uppercase tracking-[0.18em] text-gold">Recipients</p>
                 <div className="mt-3 grid gap-2 sm:grid-cols-2">
                   {members.map((m) => {
                     const already = draft.id
@@ -546,7 +547,7 @@ function Admin() {
                     return (
                       <label
                         key={m.id}
-                        className={`flex cursor-pointer items-start gap-3 border p-3 text-sm transition-colors ${
+                        className={`flex cursor-pointer items-start gap-3 border p-3 text-base transition-colors ${
                           checked ? "border-gold/60 bg-gold/5" : "border-ivory/12 hover:border-gold/30"
                         }`}
                       >
@@ -562,9 +563,9 @@ function Admin() {
                           <span className="block truncate">
                             {m.first_name} {m.last_name}
                           </span>
-                          <span className="block truncate text-xs text-ivory/40">{m.email}</span>
+                          <span className="block truncate text-sm text-ivory/40">{m.email}</span>
                           {already && (
-                            <span className="mt-1 flex items-center gap-1.5 text-[11px] text-amber-300/80">
+                            <span className="mt-1 flex items-center gap-1.5 text-xs text-amber-300/80">
                               <AlertTriangle className="h-3 w-3" /> Already received this template
                             </span>
                           )}
@@ -576,13 +577,13 @@ function Admin() {
               </div>
 
               <div className="mt-6 flex flex-wrap items-center gap-3">
-                <Button type="button" className="rounded-none border border-gold/40 bg-transparent text-ivory hover:bg-gold/10 hover:text-gold" onClick={saveDraft}>
+                <Button type="button" className="rounded-none border border-gold/40 bg-transparent text-base text-ivory hover:bg-gold/10 hover:text-gold" onClick={saveDraft}>
                   Save template
                 </Button>
-                <Button type="button" disabled={sending} className="rounded-none bg-gold text-navy" onClick={send}>
+                <Button type="button" disabled={sending} className="rounded-none bg-gold text-base text-navy" onClick={send}>
                   {sending ? "Sending…" : `Send to ${recipients.length || 0} member(s)`}
                 </Button>
-                {emailStatus && <p className="text-sm text-ivory/60">{emailStatus}</p>}
+                {emailStatus && <p className="text-base text-ivory/60">{emailStatus}</p>}
               </div>
             </section>
           </div>
@@ -599,8 +600,8 @@ function Admin() {
                 />
               </div>
               <div className="mt-5 overflow-x-auto border border-gold/20">
-                <table className="w-full min-w-[560px] text-left text-sm">
-                <thead className="bg-ivory/5 text-[10px] uppercase text-gold">
+                <table className="w-full min-w-[560px] text-left text-base">
+                <thead className="bg-ivory/5 text-xs uppercase text-gold">
                   <tr>
                     <th className="p-4">Member</th>
                     <th>Designation</th>
@@ -618,7 +619,7 @@ function Admin() {
                           <strong className="font-medium">
                             {m.first_name} {m.last_name}
                           </strong>
-                          <span className="block text-xs text-ivory/40">{m.email}</span>
+                          <span className="block text-sm text-ivory/40">{m.email}</span>
                         </td>
                         <td className="uppercase">{m.entity}</td>
                         <td>{String(m.package_status).replaceAll("_", " ")}</td>
@@ -628,7 +629,7 @@ function Admin() {
                           ) : (
                             <span className="flex flex-wrap gap-1.5">
                               {Array.from(new Set(list.map((s) => s.template_name))).map((name) => (
-                                <span key={name} className="flex items-center gap-1 border border-gold/30 px-2 py-0.5 text-[11px] text-ivory/75">
+                                <span key={name} className="flex items-center gap-1 border border-gold/30 px-2 py-0.5 text-xs text-ivory/75">
                                   <CheckCircle2 className="h-3 w-3 text-gold" /> {name}
                                 </span>
                               ))}
@@ -656,12 +657,12 @@ function Admin() {
               </div>
               <div className="mt-5 space-y-3">
               {d.inquiries.length === 0 ? (
-                <p className="text-sm text-ivory/45">No inquiries yet.</p>
+                <p className="text-base text-ivory/45">No inquiries yet.</p>
               ) : (
                 d.inquiries.slice(0, 6).map((q: any) => (
                   <article key={q.id} className="border-l-2 border-gold bg-ivory/[.025] p-4">
-                    <p className="font-medium">{q.subject}</p>
-                    <p className="mt-2 line-clamp-2 text-sm text-ivory/55">{q.message}</p>
+                    <p className="text-base font-medium">{q.subject}</p>
+                    <p className="mt-2 line-clamp-2 text-base text-ivory/55">{q.message}</p>
                   </article>
                 ))
               )}
@@ -676,8 +677,8 @@ function Admin() {
           <div className="flex h-full max-h-[90vh] w-full max-w-[760px] flex-col border border-gold/30 bg-navy">
             <div className="flex items-center justify-between border-b border-gold/20 px-5 py-4">
               <div className="min-w-0">
-                <p className="text-[10px] uppercase tracking-[0.2em] text-gold">Branded preview</p>
-                <p className="truncate text-sm text-ivory/70">{applyTokens(draft.subject || "Subject line", tokens)}</p>
+                <p className="text-xs uppercase tracking-[0.2em] text-gold">Branded preview</p>
+                <p className="truncate text-base text-ivory/70">{applyTokens(draft.subject || "Subject line", tokens)}</p>
               </div>
               <button type="button" aria-label="Close preview" onClick={() => setPreviewOpen(false)} className="text-ivory/60 hover:text-gold">
                 <X className="h-5 w-5" />
@@ -685,10 +686,10 @@ function Admin() {
             </div>
             <iframe title="Email preview" srcDoc={previewHtml} className="h-full w-full flex-1 bg-white" />
             <div className="flex items-center justify-end gap-3 border-t border-gold/20 px-5 py-3">
-              <Button type="button" className="rounded-none border border-gold/40 bg-transparent text-ivory hover:bg-gold/10 hover:text-gold" onClick={() => setPreviewOpen(false)}>
+              <Button type="button" className="rounded-none border border-gold/40 bg-transparent text-base text-ivory hover:bg-gold/10 hover:text-gold" onClick={() => setPreviewOpen(false)}>
                 Keep editing
               </Button>
-              <Button type="button" className="rounded-none bg-gold text-navy" onClick={saveDraft}>
+              <Button type="button" className="rounded-none bg-gold text-base text-navy" onClick={saveDraft}>
                 Save template
               </Button>
             </div>
@@ -715,8 +716,8 @@ function InfoTip({ title, body }: { title: string; body: string }) {
       </button>
       {open && (
         <div className="absolute right-0 top-9 z-40 w-72 border border-gold/30 bg-navy-deep p-4 shadow-xl shadow-black/40">
-          <p className="text-[10px] uppercase tracking-[0.18em] text-gold">{title}</p>
-          <p className="mt-2 text-[13px] leading-relaxed text-ivory/70">{body}</p>
+          <p className="text-xs uppercase tracking-[0.18em] text-gold">{title}</p>
+          <p className="mt-2 text-[15px] leading-relaxed text-ivory/70">{body}</p>
         </div>
       )}
     </div>
@@ -728,7 +729,7 @@ function Stat({ icon: Icon, label, value }: { icon: any; label: string; value: n
     <div className="bg-navy p-7">
       <Icon className="h-5 w-5 text-gold" />
       <p className="mt-6 font-display text-4xl">{value}</p>
-      <p className="mt-1 text-xs uppercase text-ivory/45">{label}</p>
+      <p className="mt-1 text-sm uppercase text-ivory/45">{label}</p>
     </div>
   );
 }
