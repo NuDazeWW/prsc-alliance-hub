@@ -228,7 +228,8 @@ function PortalHome() {
               <h3 className="mt-2 font-display text-[clamp(1.15rem,1.3vw,1.5rem)] leading-snug">Board/Advisor Package</h3>
               <p className="mt-3 flex items-center gap-2 text-[13px] text-gold">
                 <span className="h-1.5 w-1.5 rounded-full bg-gold shadow-[0_0_7px_var(--color-gold)]" />
-                {m.package_status.replaceAll("_", " ").replace(/\b\w/g, (c) => c.toUpperCase())}
+                <span className="uppercase tracking-wider text-ivory/55">Status:</span>
+                <span>{m.package_status.replaceAll("_", " ").replace(/\b\w/g, (c) => c.toUpperCase())}</span>
               </p>
               <p className="mt-3 text-[13px] leading-6 text-ivory/60">
                 {profileComplete
