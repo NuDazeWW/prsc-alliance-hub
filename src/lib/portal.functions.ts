@@ -102,6 +102,32 @@ export const saveMyProfile = createServerFn({ method: "POST" })
     return { ok: true, submitted: data.submit };
   });
 
+const HEADSHOT_BUCKET = "member-headshots";
+
+export const setMyHeadshot = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input) => z.object({ path: z.string().trim().min(1).max(300) }).parse(input))
+  .handler(async ({ context, data }) => {
+    if (!data.path.startsWith(`${context.userId}/`)) throw new Error("Invalid headshot path");
+    const { data: member, error: memberError } = await context.supabase.from("portal_members").select("id").eq("user_id", context.userId).single();
+    if (memberError || !member) throw new Error("Member profile unavailable");
+    const { error } = await context.supabase.from("portal_profiles").upsert({ member_id: member.id, headshot_path: data.path }, { onConflict: "member_id" });
+    if (error) throw error;
+    return { ok: true };
+  });
+
+export const getMyHeadshotUrl = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    const { data: member } = await context.supabase.from("portal_members").select("id").eq("user_id", context.userId).maybeSingle();
+    if (!member) return { url: null };
+    const { data: profile } = await context.supabase.from("portal_profiles").select("headshot_path").eq("member_id", member.id).maybeSingle();
+    if (!profile?.headshot_path) return { url: null };
+    const { data, error } = await context.supabase.storage.from(HEADSHOT_BUCKET).createSignedUrl(profile.headshot_path, 3600);
+    if (error) return { url: null };
+    return { url: data.signedUrl };
+  });
+
 const inquirySchema = z.object({ subject: z.string().trim().min(1).max(160), message: z.string().trim().min(10).max(4000) });
 export const submitPortalInquiry = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
