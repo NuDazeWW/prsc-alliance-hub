@@ -13,7 +13,7 @@ const CANONICAL = "https://prscstandards.com/";
 export const Route = createFileRoute("/")({
   beforeLoad: async () => {
     const { isPortalDomain } = await getRequestHost();
-    if (isPortalDomain) throw redirect({ to: "/auth", search: { redirect: "/portal" } });
+    if (isPortalDomain) throw redirect({ to: "/auth", search: { redirect: "/portal", mode: undefined } });
   },
   head: () => ({
     meta: [
