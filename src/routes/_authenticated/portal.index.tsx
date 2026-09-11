@@ -234,7 +234,7 @@ function PortalHome() {
               width={1280}
               height={960}
               aria-hidden="true"
-              className="pointer-events-none absolute right-0 top-0 hidden h-full w-[54%] object-cover opacity-80 [mask-image:linear-gradient(to_right,transparent,black_38%)] lg:block"
+              className="pointer-events-none absolute right-0 top-0 hidden h-full w-[52%] object-cover opacity-55 [mask-image:linear-gradient(to_right,transparent,black_55%)] lg:block"
             />
             <div className="relative grid gap-10 lg:grid-cols-[minmax(0,1fr)_320px]">
               <div className="min-w-0">
