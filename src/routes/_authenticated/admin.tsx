@@ -7,6 +7,7 @@ import {
   CheckCircle2,
   Eye,
   FileText,
+  Info,
   MailPlus,
   MessageSquare,
   Plus,
@@ -342,7 +343,7 @@ function Admin() {
 
   return (
     <PortalShell admin notifications={notifications}>
-      <main className="mx-auto max-w-[1440px] px-5 py-10 lg:px-10">
+      <main className="px-4 py-10 sm:px-6 lg:px-8">
         <div className="flex flex-col justify-between gap-6 border-b border-gold/20 pb-8 md:flex-row md:items-end">
           <div>
             <p className="text-xs uppercase text-gold">Administration</p>
