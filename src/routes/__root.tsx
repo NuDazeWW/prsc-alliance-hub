@@ -75,8 +75,10 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient; host
     const { host } = await getRequestHost();
     return { host };
   },
-  head: () => ({
-    meta: [
+  head: ({ context }: { context: { host?: string } }) => {
+    const isPortalHost = context.host === "access.prscstandards.org" || context.host === "access.prscstandards.com";
+    return {
+      meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
       { name: "google-site-verification", content: "e0IaWo7Z6cwjlkdMVIsvWX5cYfTFV4u-dxhc-HnwysU" },
