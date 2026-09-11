@@ -17,11 +17,14 @@ import { Route as ReadinessVanguardRouteImport } from './routes/readiness-vangua
 import { Route as GovernanceRouteImport } from './routes/governance'
 import { Route as FaqRouteImport } from './routes/faq'
 import { Route as CertificationRouteImport } from './routes/certification'
+import { Route as AuthRouteImport } from './routes/auth'
+import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as VanguardHomeRouteImport } from './routes/vanguard.home'
 import { Route as GovernanceWrittenStandardsRouteImport } from './routes/governance_.written-standards'
 import { Route as GovernanceCharterRouteImport } from './routes/governance_.charter'
 import { Route as ApiGeoRouteImport } from './routes/api/geo'
+import { Route as AuthenticatedPortalRouteImport } from './routes/_authenticated/portal'
 
 const TheStandardRoute = TheStandardRouteImport.update({
   id: '/the-standard',
@@ -63,6 +66,15 @@ const CertificationRoute = CertificationRouteImport.update({
   path: '/certification',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthRoute = AuthRouteImport.update({
+  id: '/auth',
+  path: '/auth',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthenticatedRouteRoute = AuthenticatedRouteRouteImport.update({
+  id: '/_authenticated',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
@@ -89,9 +101,15 @@ const ApiGeoRoute = ApiGeoRouteImport.update({
   path: '/api/geo',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthenticatedPortalRoute = AuthenticatedPortalRouteImport.update({
+  id: '/portal',
+  path: '/portal',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/auth': typeof AuthRoute
   '/certification': typeof CertificationRoute
   '/faq': typeof FaqRoute
   '/governance': typeof GovernanceRoute
@@ -100,6 +118,7 @@ export interface FileRoutesByFullPath {
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/standard-v1': typeof StandardV1Route
   '/the-standard': typeof TheStandardRoute
+  '/portal': typeof AuthenticatedPortalRoute
   '/api/geo': typeof ApiGeoRoute
   '/governance/charter': typeof GovernanceCharterRoute
   '/governance/written-standards': typeof GovernanceWrittenStandardsRoute
@@ -107,6 +126,7 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/auth': typeof AuthRoute
   '/certification': typeof CertificationRoute
   '/faq': typeof FaqRoute
   '/governance': typeof GovernanceRoute
@@ -115,6 +135,7 @@ export interface FileRoutesByTo {
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/standard-v1': typeof StandardV1Route
   '/the-standard': typeof TheStandardRoute
+  '/portal': typeof AuthenticatedPortalRoute
   '/api/geo': typeof ApiGeoRoute
   '/governance/charter': typeof GovernanceCharterRoute
   '/governance/written-standards': typeof GovernanceWrittenStandardsRoute
@@ -123,6 +144,8 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
+  '/auth': typeof AuthRoute
   '/certification': typeof CertificationRoute
   '/faq': typeof FaqRoute
   '/governance': typeof GovernanceRoute
@@ -131,6 +154,7 @@ export interface FileRoutesById {
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/standard-v1': typeof StandardV1Route
   '/the-standard': typeof TheStandardRoute
+  '/_authenticated/portal': typeof AuthenticatedPortalRoute
   '/api/geo': typeof ApiGeoRoute
   '/governance_/charter': typeof GovernanceCharterRoute
   '/governance_/written-standards': typeof GovernanceWrittenStandardsRoute
@@ -140,6 +164,7 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/auth'
     | '/certification'
     | '/faq'
     | '/governance'
@@ -148,6 +173,7 @@ export interface FileRouteTypes {
     | '/sitemap.xml'
     | '/standard-v1'
     | '/the-standard'
+    | '/portal'
     | '/api/geo'
     | '/governance/charter'
     | '/governance/written-standards'
@@ -155,6 +181,7 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/auth'
     | '/certification'
     | '/faq'
     | '/governance'
@@ -163,6 +190,7 @@ export interface FileRouteTypes {
     | '/sitemap.xml'
     | '/standard-v1'
     | '/the-standard'
+    | '/portal'
     | '/api/geo'
     | '/governance/charter'
     | '/governance/written-standards'
@@ -170,6 +198,8 @@ export interface FileRouteTypes {
   id:
     | '__root__'
     | '/'
+    | '/_authenticated'
+    | '/auth'
     | '/certification'
     | '/faq'
     | '/governance'
@@ -178,6 +208,7 @@ export interface FileRouteTypes {
     | '/sitemap.xml'
     | '/standard-v1'
     | '/the-standard'
+    | '/_authenticated/portal'
     | '/api/geo'
     | '/governance_/charter'
     | '/governance_/written-standards'
@@ -186,6 +217,8 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
+  AuthRoute: typeof AuthRoute
   CertificationRoute: typeof CertificationRoute
   FaqRoute: typeof FaqRoute
   GovernanceRoute: typeof GovernanceRoute
@@ -258,6 +291,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof CertificationRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/auth': {
+      id: '/auth'
+      path: '/auth'
+      fullPath: '/auth'
+      preLoaderRoute: typeof AuthRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/_authenticated': {
+      id: '/_authenticated'
+      path: ''
+      fullPath: '/'
+      preLoaderRoute: typeof AuthenticatedRouteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -293,11 +340,31 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiGeoRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_authenticated/portal': {
+      id: '/_authenticated/portal'
+      path: '/portal'
+      fullPath: '/portal'
+      preLoaderRoute: typeof AuthenticatedPortalRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
   }
 }
 
+interface AuthenticatedRouteRouteChildren {
+  AuthenticatedPortalRoute: typeof AuthenticatedPortalRoute
+}
+
+const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
+  AuthenticatedPortalRoute: AuthenticatedPortalRoute,
+}
+
+const AuthenticatedRouteRouteWithChildren =
+  AuthenticatedRouteRoute._addFileChildren(AuthenticatedRouteRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
+  AuthRoute: AuthRoute,
   CertificationRoute: CertificationRoute,
   FaqRoute: FaqRoute,
   GovernanceRoute: GovernanceRoute,
