@@ -3,11 +3,13 @@
 ## Product direction
 Build a confidential, executive welcome center at `/portal`, visually guided by the supplied navy-and-gold dashboard reference and the uploaded build direction. The public PRSC site remains unchanged. Portal pages use their own navigation and footer treatment, are excluded from search indexing, and never expose private content before authentication.
 
-The initial administrator will be `admin@readinessterminal.com`. Member and administrator emails will display `No-reply@readinessterminal.com` as sender, and portal questions will route to `info@readinessterminal.com`.
+The initial administrator will be `admin@readinessterminal.com`. Member and administrator emails will display `no-reply@readinessterminal.com` as sender, and portal questions will route to `info@readinessterminal.com`.
+
+Build priority is member experience first, security second, and administrative convenience third. The member experience must retain the premium executive quality even where a simpler administrative implementation would be easier.
 
 ## Access and invitations
 - Use invite-only email/password accounts; there is no public registration.
-- The administrator creates one member at a time with name, email, organization, PRSC/DIS designation, Board Member/Advisor role, and personalized “Why You” copy.
+- The administrator creates one member at a time with name, email, organization, PRSC/DIS/Both designation, Board Member/Advisor role, and personalized “Why You” copy.
 - Each invite sends a branded, single-use setup link. The member chooses a private password before entering.
 - Include forgot-password, password reset, logout, expired-link, revoked-access, and unauthorized states.
 - Enable leaked-password checks and require the current password for signed-in password changes.
@@ -18,7 +20,7 @@ The initial administrator will be `admin@readinessterminal.com`. Member and admi
 - Desktop: compact top bar, persistent personal sidebar, and dense main canvas matching the supplied executive portal direction.
 - Tablet/mobile: collapsible sidebar and persistent “Complete Private Profile” action.
 - Views: Overview, PRSC, DIS, Your Role, What Happens Next, and Questions.
-- Personalize the greeting, role/entity labels, package status, and “Why You” narrative.
+- Personalize the greeting, role/entity labels, package status, and “Why You” narrative. Member-facing language must correctly reflect PRSC, DIS, or Both.
 - Keep PRSC refresh content concise and link to the public site for deeper reading.
 - Present DIS as the Readiness Terminal™ and show the evidence-to-decision-intelligence flow plus the investor-prospecting milestone.
 - Questions use a small private inquiry form, not the public FAQ. Members can view their own submitted inquiries and status only.
@@ -31,17 +33,18 @@ The initial administrator will be `admin@readinessterminal.com`. Member and admi
 - Store headshots in private storage and serve them only through short-lived, authorized links.
 - After submission, lock the completed version from casual edits, show “Profile received,” and update package status. The administrator can reopen it when corrections are needed.
 - Clearly state that portal access and submission do not constitute appointment, acceptance, or legal agreement.
+- Clearly separate profile permission selections from legal consent: they are informational instructions for preparing company and investor materials and do not replace any consent, release, confidentiality, appointment, or other provision in the later formal package.
 
 ## Administrator center
 - Separate administrator-only area with overview counts and recent activity.
-- Member management: create, invite, resend setup, edit personalization, revoke/reactivate access, reopen profiles, and inspect member status.
+- Member management: create, invite, resend setup, edit personalization and PRSC/DIS/Both designation, revoke/reactivate access, reopen profiles, and inspect member status.
 - Submission review: read completed profiles, permission selections, restrictions, contact requests, and privately view/download headshots.
 - Inquiry management: read questions, mark open/resolved, add private internal notes, and reply outside the portal using the designated inquiry address.
 - Activity view: invitation delivery state, first/last login, profile progress/submission, inquiries, and access changes.
 - Email the administrator when a profile or inquiry is submitted; keep the authoritative record in the admin center.
 
 ## Email and domains
-- Configure `readinessterminal.com` as the verified sending domain, using a delegated sending subdomain while displaying `No-reply@readinessterminal.com`.
+- Configure `readinessterminal.com` as the verified sending domain, using a delegated sending subdomain while displaying `no-reply@readinessterminal.com` everywhere.
 - Create branded account invitation, recovery, and account-status emails using the managed delivery system and delivery logs.
 - Create operational alerts for one submission or inquiry event at a time; no newsletter or bulk-campaign capability.
 - Connect `access.prscstandards.com` to this project. The portal remains available at `/portal`; the subdomain entry point will send visitors directly there while preserving the existing `prscstandards.com` public site.
@@ -56,7 +59,9 @@ The initial administrator will be `admin@readinessterminal.com`. Member and admi
 
 ## Visual and responsive treatment
 - Use the project’s existing Guardian Navy, Council Gold, ivory, Cormorant Garamond, and Inter Tight system.
+- Protect the supplied reference’s executive-briefing character: generous negative space, editorial typography, restrained gold accents, premium hierarchy, and exclusivity. Avoid conventional SaaS dashboard, CRM, or onboarding-portal patterns.
 - Recreate the supplied reference as live interface elements rather than embedding the screenshot.
+- The administrator area may be more utilitarian, but its implementation must never weaken member privacy or the premium member-facing experience.
 - Add restrained photographic atmosphere only where it supports the welcome view; prioritize legibility and fast loading.
 - Keyboard-accessible overlay, visible focus states, labeled controls, robust validation, upload progress/errors, and reduced-motion support.
 
