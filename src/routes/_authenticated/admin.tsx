@@ -641,12 +641,20 @@ function Admin() {
                   })}
                 </tbody>
               </table>
-            </div>
+              </div>
+            </section>
 
-            <h2 id="inquiries" className="mt-10 font-display text-3xl">
-              Recent inquiries
-            </h2>
-            <div className="mt-5 space-y-3">
+            <section className="border border-gold/20 p-6 sm:p-8">
+              <div className="flex items-start justify-between gap-3">
+                <h2 id="inquiries" className="font-display text-3xl">
+                  Recent inquiries
+                </h2>
+                <InfoTip
+                  title="Recent inquiries"
+                  body="Private questions members submit from their portal. New submissions also appear in the notification bell at the top of the page, so you can see at a glance when someone is waiting on a reply."
+                />
+              </div>
+              <div className="mt-5 space-y-3">
               {d.inquiries.length === 0 ? (
                 <p className="text-sm text-ivory/45">No inquiries yet.</p>
               ) : (
