@@ -262,7 +262,7 @@ function PortalHome() {
                 </p>
                 <Link
                   to="/portal/profile"
-                  className="mt-10 inline-flex min-h-14 w-full max-w-[300px] items-center justify-between gap-6 bg-gold px-7 py-4 text-[14px] font-semibold text-navy shadow-[inset_0_1px_0_var(--color-gold-light)] transition-colors hover:bg-gold-light"
+                  className="mt-10 inline-flex min-h-14 w-full max-w-[300px] items-center justify-between gap-6 bg-gold px-7 py-4 text-[19px] font-semibold text-navy shadow-[inset_0_1px_0_var(--color-gold-light)] transition-colors hover:bg-gold-light"
                 >
                   Complete Your Profile <ArrowRight className="h-4 w-4" />
                 </Link>
