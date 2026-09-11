@@ -196,12 +196,14 @@ export type Database = {
           created_at: string
           created_by: string | null
           cta_label: string | null
+          cta_subtext: string | null
           cta_url: string | null
           description: string | null
           eyebrow: string
           heading: string
           id: string
           name: string
+          signatures: string | null
           subject: string
           updated_at: string
         }
@@ -210,12 +212,14 @@ export type Database = {
           created_at?: string
           created_by?: string | null
           cta_label?: string | null
+          cta_subtext?: string | null
           cta_url?: string | null
           description?: string | null
           eyebrow?: string
           heading?: string
           id?: string
           name: string
+          signatures?: string | null
           subject: string
           updated_at?: string
         }
@@ -224,12 +228,14 @@ export type Database = {
           created_at?: string
           created_by?: string | null
           cta_label?: string | null
+          cta_subtext?: string | null
           cta_url?: string | null
           description?: string | null
           eyebrow?: string
           heading?: string
           id?: string
           name?: string
+          signatures?: string | null
           subject?: string
           updated_at?: string
         }
