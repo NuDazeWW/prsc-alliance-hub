@@ -133,7 +133,7 @@ function PortalHome() {
             title: "The Standard",
             copy: "An independent, evidence-based framework for measuring commercial readiness in sports.",
             cta: "Refresh on PRSC",
-            href: "#prsc",
+            panel: "prsc" as const,
           },
         ]
       : []),
@@ -145,7 +145,7 @@ function PortalHome() {
             title: "The Intelligence Platform",
             copy: "Building the technology that turns the standard into actionable market intelligence.",
             cta: "Learn about DIS",
-            href: "#dis",
+            panel: "dis" as const,
           },
         ]
       : []),
@@ -155,7 +155,7 @@ function PortalHome() {
       title: "The Inflection Point",
       copy: "Governance, methodology, and technology are converging as DIS enters investor prospecting.",
       cta: "See What's Next",
-      href: "#next",
+      panel: "next" as const,
     },
   ];
 
