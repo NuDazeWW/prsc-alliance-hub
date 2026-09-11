@@ -326,10 +326,11 @@ function PortalHome() {
           {/* Cards */}
           <section className="grid gap-5 px-7 pb-5 sm:px-10 md:grid-cols-3 lg:px-[2.5%]">
             {cards.map((card) => (
-              <a
+              <button
                 key={card.title}
-                href={card.href}
-                className="group flex flex-col border border-gold/25 bg-[linear-gradient(145deg,var(--color-midnight),var(--color-navy))] px-[clamp(1.5rem,2vw,2.25rem)] py-[22px] shadow-[inset_0_1px_0_color-mix(in_oklab,var(--color-gold)_8%,transparent)] transition-colors hover:border-gold/50"
+                type="button"
+                onClick={() => setPanel(card.panel)}
+                className="group flex flex-col text-left border border-gold/25 bg-[linear-gradient(145deg,var(--color-midnight),var(--color-navy))] px-[clamp(1.5rem,2vw,2.25rem)] py-[22px] shadow-[inset_0_1px_0_color-mix(in_oklab,var(--color-gold)_8%,transparent)] transition-colors hover:border-gold/50"
               >
                 <span className="grid h-14 w-14 place-items-center rounded-full border border-gold/55">
                   <card.icon className="h-[22px] w-[22px] text-gold" />
