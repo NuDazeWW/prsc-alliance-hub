@@ -109,19 +109,19 @@ function PortalHome() {
 
   const topNav = [
     { label: "Overview", href: "#overview" },
-    ...(showPrsc ? [{ label: "PRSC", href: "#prsc" }] : []),
-    ...(showDis ? [{ label: "DIS", href: "#dis" }] : []),
+    ...(showPrsc ? [{ label: "PRSC", href: "#prsc", onSelect: () => setPanel("prsc") }] : []),
+    ...(showDis ? [{ label: "DIS", href: "#dis", onSelect: () => setPanel("dis") }] : []),
     { label: "Your Role", href: "#role" },
-    { label: "Questions", href: "#questions" },
+    { label: "Questions", href: "#questions", onSelect: () => setPanel("questions") },
   ];
 
   const sideNav = [
-    { label: "Overview", href: "#overview", icon: Home, active: true },
-    ...(showPrsc ? [{ label: "About PRSC", href: "#prsc", icon: ScrollText, active: false }] : []),
-    ...(showDis ? [{ label: "About DIS", href: "#dis", icon: FileText, active: false }] : []),
-    { label: "Your Role", href: "#role", icon: Users, active: false },
-    { label: "What Happens Next", href: "#next", icon: Flag, active: false },
-    { label: "Questions", href: "#questions", icon: MessageSquare, active: false },
+    { label: "Overview", href: "#overview", icon: Home, active: true, onSelect: undefined as (() => void) | undefined },
+    ...(showPrsc ? [{ label: "About PRSC", href: "#prsc", icon: ScrollText, active: false, onSelect: () => setPanel("prsc") }] : []),
+    ...(showDis ? [{ label: "About DIS", href: "#dis", icon: FileText, active: false, onSelect: () => setPanel("dis") }] : []),
+    { label: "Your Role", href: "#role", icon: Users, active: false, onSelect: undefined },
+    { label: "What Happens Next", href: "#next", icon: Flag, active: false, onSelect: () => setPanel("next") },
+    { label: "Questions", href: "#questions", icon: MessageSquare, active: false, onSelect: () => setPanel("questions") },
   ];
 
   const cards = [
