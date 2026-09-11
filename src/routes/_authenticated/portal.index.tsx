@@ -159,7 +159,7 @@ function PortalHome() {
   ];
 
   return (
-    <PortalShell nav={topNav} memberName={name}>
+    <PortalShell memberName={name}>
       <div className="grid w-full lg:grid-cols-[20%_80%]">
         {/* Sidebar */}
         <aside className="border-b border-gold/15 px-7 py-7 lg:border-b-0 lg:border-r lg:px-0 lg:pb-14 lg:pt-0">
