@@ -14,8 +14,8 @@ export const Route = createFileRoute("/_authenticated/portal/")({
 const entityLabel = { prsc: "PRSC", dis: "DIS", both: "PRSC + DIS" } as const;
 const demoMember = { id: "demo", user_id: "demo", first_name: "Alex", last_name: "Morgan", professional_name: "Alex", title: "Board Member", organization: "Meridian Capital Partners", email: "alex@example.com", role: "board_member" as const, entity: "both" as const, status: "active" as const, package_status: "in_preparation" as const, why_you: "Your decades of governance experience bring the independent judgment this standard was built to earn.", invited_at: "", first_access_at: "", last_access_at: "", created_at: "", updated_at: "" };
 function PortalHome() {
-  const { data, isLoading, error } = useQuery({ queryKey: ["portal-session"], queryFn: () => getPortalSession() });
-  const headshot = useQuery({ queryKey: ["my-headshot"], queryFn: () => getMyHeadshotUrl() });
+  const { data, isLoading, error } = useQuery({ queryKey: ["portal-session"], queryFn: () => getPortalSession(), retry: false });
+  const headshot = useQuery({ queryKey: ["my-headshot"], queryFn: () => getMyHeadshotUrl(), retry: false });
   const navigate = useNavigate();
   useEffect(() => { if (data?.isAdmin) navigate({ to: "/admin", replace: true }); }, [data, navigate]);
   if (isLoading) return <PortalShell><div className="flex min-h-[70vh] items-center justify-center text-gold">Opening your private center…</div></PortalShell>;
