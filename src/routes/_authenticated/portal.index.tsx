@@ -102,6 +102,8 @@ function PortalHome() {
   const showPrsc = m.entity !== "dis";
   const showDis = m.entity !== "prsc";
   const entityWord = entityLabel[m.entity];
+  const profileComplete = data?.hasProfile ?? false;
+  const packageReady = m.package_status === "package_ready";
 
   const topNav = [
     { label: "Overview", href: "#overview" },
