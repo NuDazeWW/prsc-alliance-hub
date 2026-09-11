@@ -336,7 +336,7 @@ function PortalHome() {
             <div className="grid gap-10 border border-gold/25 bg-[linear-gradient(135deg,var(--color-midnight),var(--color-navy))] p-8 lg:min-h-[250px] lg:grid-cols-[2fr_1fr] lg:p-[clamp(2rem,2.7vw,3.25rem)]">
               <div className="min-w-0">
                 <p className="text-[10px] uppercase tracking-[0.24em] text-gold">Why You</p>
-                <h2 className="mt-4 font-display text-[clamp(2rem,2.5vw,2.8rem)] leading-tight">Your Perspective Matters.</h2>
+                <h2 className="mt-4 font-display text-[clamp(2rem,2.5vw,2.8rem)] leading-tight">{name}, Your Perspective Matters.</h2>
                 <p className="mt-5 max-w-[50rem] text-[15px] leading-7 text-ivory/70">{m.why_you}</p>
                 <div className="mt-7 h-px w-16 bg-gold" />
                 <Link to="/portal/questions" className="mt-6 inline-flex items-center gap-3 text-[14px] text-ivory/85 hover:text-gold">
