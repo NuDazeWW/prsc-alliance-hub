@@ -264,7 +264,7 @@ function PortalHome() {
         {/* Main */}
         <main className="min-w-0 pb-5">
           {/* Hero */}
-          <section id="overview" className="relative overflow-hidden px-7 pb-7 pt-9 sm:px-10 lg:px-[3.5%] lg:pb-8 lg:pt-[clamp(1.75rem,2.4vw,3rem)]">
+          <section id="overview" className="relative overflow-hidden px-7 pb-7 pt-9 sm:px-10 lg:px-[3.5%] lg:pb-3 lg:pt-[clamp(1.75rem,2.4vw,3rem)]">
             <img
               src={heroRoad}
               alt=""
@@ -324,22 +324,21 @@ function PortalHome() {
           </section>
 
           {/* Cards */}
-          <section className="grid gap-5 px-7 pb-5 sm:px-10 md:grid-cols-3 lg:px-[2.5%]">
+          <section className="grid gap-3 px-7 pb-3 sm:px-10 md:grid-cols-3 lg:px-[2.5%]">
             {cards.map((card) => (
               <button
                 key={card.title}
                 type="button"
                 onClick={() => setPanel(card.panel)}
-                className="group flex flex-col text-left border border-gold/25 bg-[linear-gradient(145deg,var(--color-midnight),var(--color-navy))] px-[clamp(1.5rem,2vw,2.25rem)] py-[22px] shadow-[inset_0_1px_0_color-mix(in_oklab,var(--color-gold)_8%,transparent)] transition-colors hover:border-gold/50"
+                className="group flex flex-col text-left border border-gold/25 bg-[linear-gradient(145deg,var(--color-midnight),var(--color-navy))] px-[clamp(1.5rem,2vw,2.25rem)] py-3 shadow-[inset_0_1px_0_color-mix(in_oklab,var(--color-gold)_8%,transparent)] transition-colors hover:border-gold/50"
               >
-                <span className="grid h-14 w-14 place-items-center rounded-full border border-gold/55">
-                  <card.icon className="h-[22px] w-[22px] text-gold" />
+                <span className="grid h-11 w-11 place-items-center rounded-full border border-gold/55">
+                  <card.icon className="h-[18px] w-[18px] text-gold" />
                 </span>
-                <p className="mt-4 text-[10px] uppercase tracking-[0.24em] text-gold">{card.eyebrow}</p>
-                <h2 className="mt-2 font-display text-[clamp(1.65rem,2vw,2.25rem)] leading-[1.08]">{card.title}</h2>
-                <p className="mt-3 text-[14px] leading-6 text-ivory/65">{card.copy}</p>
-                <span className="mt-auto flex items-center gap-3 pt-5 text-[13px] text-gold">
-
+                <p className="mt-2 text-[10px] uppercase tracking-[0.24em] text-gold">{card.eyebrow}</p>
+                <h2 className="mt-1.5 font-display text-[clamp(1.65rem,2vw,2.25rem)] leading-[1.08]">{card.title}</h2>
+                <p className="mt-2 text-[14px] leading-6 text-ivory/65">{card.copy}</p>
+                <span className="mt-auto flex items-center gap-3 pt-3 text-[13px] text-gold">
                   {card.cta}
                   <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
                 </span>
@@ -348,22 +347,22 @@ function PortalHome() {
           </section>
 
           {/* Why you */}
-          <section id="role" className="px-7 pb-5 sm:px-10 lg:px-[2.5%]">
-            <div className="grid gap-10 border border-gold/25 bg-[linear-gradient(135deg,var(--color-midnight),var(--color-navy))] p-8 lg:min-h-[250px] lg:grid-cols-[2fr_1fr] lg:p-[clamp(2rem,2.7vw,3.25rem)]">
+          <section id="role" className="px-7 pb-3 sm:px-10 lg:px-[2.5%]">
+            <div className="grid items-center gap-5 border border-gold/25 bg-[linear-gradient(135deg,var(--color-midnight),var(--color-navy))] p-5 lg:grid-cols-[2fr_1fr] lg:gap-6 lg:p-[clamp(1rem,1.5vw,1.5rem)]">
               <div className="min-w-0">
                 <p className="text-[10px] uppercase tracking-[0.24em] text-gold">Why You</p>
-                <h2 className="mt-4 font-display text-[clamp(2rem,2.5vw,2.8rem)] leading-tight">{name}, Your Perspective Matters.</h2>
-                <p className="mt-5 max-w-[50rem] text-[15px] leading-7 text-ivory/70">{m.why_you}</p>
-                <div className="mt-7 h-px w-16 bg-gold" />
-                <Link to="/portal/questions" className="mt-6 inline-flex items-center gap-3 text-[14px] text-ivory/85 hover:text-gold">
+                <h2 className="mt-1.5 font-display text-[clamp(2rem,2.5vw,2.8rem)] leading-tight">{name}, Your Perspective Matters.</h2>
+                <p className="mt-2 max-w-[50rem] text-[15px] leading-7 text-ivory/70">{m.why_you}</p>
+                <div className="mt-3 h-px w-16 bg-gold" />
+                <Link to="/portal/questions" className="mt-3 inline-flex items-center gap-3 text-[14px] text-ivory/85 hover:text-gold">
                   Read More <ArrowRight className="h-4 w-4 text-gold" />
                 </Link>
               </div>
-              <div className="relative flex flex-col justify-center overflow-hidden border-gold/20 py-2 lg:border-l lg:pl-[14%] before:absolute before:left-[7%] before:top-1/2 before:h-40 before:w-40 before:-translate-y-1/2 before:rounded-full before:border before:border-gold/10 after:absolute after:left-[10%] after:top-1/2 after:h-32 after:w-32 after:-translate-y-1/2 after:rounded-full after:border after:border-gold/10">
-                <blockquote className="font-display text-[26px] italic leading-snug text-gold">
+              <div className="relative flex flex-col justify-center overflow-hidden border-gold/20 py-1 lg:border-l lg:pl-[8%]">
+                <blockquote className="font-display text-[20px] italic leading-snug text-gold lg:text-[24px]">
                   “Independent standards create stronger markets.”
                 </blockquote>
-                <p className="mt-7 text-[10px] uppercase leading-[2] tracking-[0.24em] text-ivory/60">
+                <p className="mt-3 text-[10px] uppercase leading-[2] tracking-[0.24em] text-ivory/60">
                   Better data.
                   <br />
                   Brighter opportunities.
@@ -372,7 +371,7 @@ function PortalHome() {
             </div>
           </section>
 
-          <div className="pb-10 lg:pb-14" />
+          <div className="pb-4 lg:pb-5" />
         </main>
       </div>
 
