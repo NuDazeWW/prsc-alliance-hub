@@ -59,7 +59,12 @@ const demoMember = {
 };
 
 function PortalHome() {
-  const { data, isLoading, error } = useQuery({ queryKey: ["portal-session"], queryFn: () => getPortalSession(), retry: false });
+  const { data, isLoading, error } = useQuery({
+    queryKey: ["portal-session"],
+    queryFn: () => getPortalSession().catch(() => null),
+    retry: false,
+  });
+
   const headshot = useQuery({
     queryKey: ["my-headshot"],
     queryFn: () => getMyHeadshotUrl().catch(() => null),
