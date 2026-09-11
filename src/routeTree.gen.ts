@@ -26,6 +26,7 @@ import { Route as GovernanceCharterRouteImport } from './routes/governance_.char
 import { Route as ApiGeoRouteImport } from './routes/api/geo'
 import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/admin'
 import { Route as AuthenticatedPortalIndexRouteImport } from './routes/_authenticated/portal.index'
+import { Route as ApiPublicSetupAdminRouteImport } from './routes/api/public/setup-admin'
 import { Route as AuthenticatedPortalQuestionsRouteImport } from './routes/_authenticated/portal.questions'
 import { Route as AuthenticatedPortalProfileRouteImport } from './routes/_authenticated/portal.profile'
 
@@ -115,6 +116,11 @@ const AuthenticatedPortalIndexRoute =
     path: '/portal/',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const ApiPublicSetupAdminRoute = ApiPublicSetupAdminRouteImport.update({
+  id: '/api/public/setup-admin',
+  path: '/api/public/setup-admin',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AuthenticatedPortalQuestionsRoute =
   AuthenticatedPortalQuestionsRouteImport.update({
     id: '/portal/questions',
@@ -146,6 +152,7 @@ export interface FileRoutesByFullPath {
   '/vanguard/home': typeof VanguardHomeRoute
   '/portal/profile': typeof AuthenticatedPortalProfileRoute
   '/portal/questions': typeof AuthenticatedPortalQuestionsRoute
+  '/api/public/setup-admin': typeof ApiPublicSetupAdminRoute
   '/portal/': typeof AuthenticatedPortalIndexRoute
 }
 export interface FileRoutesByTo {
@@ -166,6 +173,7 @@ export interface FileRoutesByTo {
   '/vanguard/home': typeof VanguardHomeRoute
   '/portal/profile': typeof AuthenticatedPortalProfileRoute
   '/portal/questions': typeof AuthenticatedPortalQuestionsRoute
+  '/api/public/setup-admin': typeof ApiPublicSetupAdminRoute
   '/portal': typeof AuthenticatedPortalIndexRoute
 }
 export interface FileRoutesById {
@@ -188,6 +196,7 @@ export interface FileRoutesById {
   '/vanguard/home': typeof VanguardHomeRoute
   '/_authenticated/portal/profile': typeof AuthenticatedPortalProfileRoute
   '/_authenticated/portal/questions': typeof AuthenticatedPortalQuestionsRoute
+  '/api/public/setup-admin': typeof ApiPublicSetupAdminRoute
   '/_authenticated/portal/': typeof AuthenticatedPortalIndexRoute
 }
 export interface FileRouteTypes {
@@ -210,6 +219,7 @@ export interface FileRouteTypes {
     | '/vanguard/home'
     | '/portal/profile'
     | '/portal/questions'
+    | '/api/public/setup-admin'
     | '/portal/'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -230,6 +240,7 @@ export interface FileRouteTypes {
     | '/vanguard/home'
     | '/portal/profile'
     | '/portal/questions'
+    | '/api/public/setup-admin'
     | '/portal'
   id:
     | '__root__'
@@ -251,6 +262,7 @@ export interface FileRouteTypes {
     | '/vanguard/home'
     | '/_authenticated/portal/profile'
     | '/_authenticated/portal/questions'
+    | '/api/public/setup-admin'
     | '/_authenticated/portal/'
   fileRoutesById: FileRoutesById
 }
@@ -270,6 +282,7 @@ export interface RootRouteChildren {
   GovernanceCharterRoute: typeof GovernanceCharterRoute
   GovernanceWrittenStandardsRoute: typeof GovernanceWrittenStandardsRoute
   VanguardHomeRoute: typeof VanguardHomeRoute
+  ApiPublicSetupAdminRoute: typeof ApiPublicSetupAdminRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -393,6 +406,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedPortalIndexRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/api/public/setup-admin': {
+      id: '/api/public/setup-admin'
+      path: '/api/public/setup-admin'
+      fullPath: '/api/public/setup-admin'
+      preLoaderRoute: typeof ApiPublicSetupAdminRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/_authenticated/portal/questions': {
       id: '/_authenticated/portal/questions'
       path: '/portal/questions'
@@ -443,6 +463,7 @@ const rootRouteChildren: RootRouteChildren = {
   GovernanceCharterRoute: GovernanceCharterRoute,
   GovernanceWrittenStandardsRoute: GovernanceWrittenStandardsRoute,
   VanguardHomeRoute: VanguardHomeRoute,
+  ApiPublicSetupAdminRoute: ApiPublicSetupAdminRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
