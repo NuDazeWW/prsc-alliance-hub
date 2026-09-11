@@ -73,6 +73,7 @@ function PortalHome() {
     enabled: Boolean(data?.member),
   });
   const navigate = useNavigate();
+  const [panel, setPanel] = useState<"prsc" | "dis" | "next" | "questions" | null>(null);
   useEffect(() => {
     if (data?.isAdmin) navigate({ to: "/admin", replace: true });
   }, [data, navigate]);
