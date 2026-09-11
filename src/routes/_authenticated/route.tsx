@@ -7,8 +7,11 @@ export function isPreviewHost() {
   const h = window.location.hostname;
   return (
     h === "localhost" ||
+    h === "127.0.0.1" ||
     h.startsWith("id-preview--") ||
-    h.endsWith(".lovableproject.com")
+    h.endsWith(".lovableproject.com") ||
+    // Lovable preview builds (never the published site or custom domains)
+    (h.endsWith(".lovable.app") && (h.startsWith("id-preview--") || h.includes("-dev.")))
   );
 }
 
