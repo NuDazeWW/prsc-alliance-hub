@@ -324,21 +324,21 @@ function PortalHome() {
           </section>
 
           {/* Cards */}
-          <section className="grid gap-4 px-7 pb-4 sm:px-10 md:grid-cols-3 lg:px-[2.5%]">
+          <section className="grid gap-3 px-7 pb-3 sm:px-10 md:grid-cols-3 lg:px-[2.5%]">
             {cards.map((card) => (
               <button
                 key={card.title}
                 type="button"
                 onClick={() => setPanel(card.panel)}
-                className="group flex flex-col text-left border border-gold/25 bg-[linear-gradient(145deg,var(--color-midnight),var(--color-navy))] px-[clamp(1.5rem,2vw,2.25rem)] py-4 shadow-[inset_0_1px_0_color-mix(in_oklab,var(--color-gold)_8%,transparent)] transition-colors hover:border-gold/50"
+                className="group flex flex-col text-left border border-gold/25 bg-[linear-gradient(145deg,var(--color-midnight),var(--color-navy))] px-[clamp(1.5rem,2vw,2.25rem)] py-3 shadow-[inset_0_1px_0_color-mix(in_oklab,var(--color-gold)_8%,transparent)] transition-colors hover:border-gold/50"
               >
-                <span className="grid h-12 w-12 place-items-center rounded-full border border-gold/55">
-                  <card.icon className="h-[20px] w-[20px] text-gold" />
+                <span className="grid h-11 w-11 place-items-center rounded-full border border-gold/55">
+                  <card.icon className="h-[18px] w-[18px] text-gold" />
                 </span>
-                <p className="mt-3 text-[10px] uppercase tracking-[0.24em] text-gold">{card.eyebrow}</p>
-                <h2 className="mt-2 font-display text-[clamp(1.65rem,2vw,2.25rem)] leading-[1.08]">{card.title}</h2>
+                <p className="mt-2 text-[10px] uppercase tracking-[0.24em] text-gold">{card.eyebrow}</p>
+                <h2 className="mt-1.5 font-display text-[clamp(1.65rem,2vw,2.25rem)] leading-[1.08]">{card.title}</h2>
                 <p className="mt-2 text-[14px] leading-6 text-ivory/65">{card.copy}</p>
-                <span className="mt-auto flex items-center gap-3 pt-4 text-[13px] text-gold">
+                <span className="mt-auto flex items-center gap-3 pt-3 text-[13px] text-gold">
                   {card.cta}
                   <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
                 </span>
