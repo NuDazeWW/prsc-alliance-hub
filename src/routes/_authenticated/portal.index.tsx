@@ -112,13 +112,6 @@ function PortalHome() {
   const profileComplete = data?.hasProfile ?? false;
   const packageReady = m.package_status === "package_ready";
 
-  const topNav = [
-    { label: "Overview", href: "#overview" },
-    ...(showPrsc ? [{ label: "PRSC", href: "#prsc", onSelect: () => setPanel("prsc") }] : []),
-    ...(showDis ? [{ label: "DIS", href: "#dis", onSelect: () => setPanel("dis") }] : []),
-    { label: "Your Role", href: "#role" },
-    { label: "Questions", href: "#questions", onSelect: () => setPanel("questions") },
-  ];
 
   const sideNav = [
     { label: "Overview", href: "#overview", icon: Home, active: true, onSelect: undefined as (() => void) | undefined },
@@ -166,7 +159,7 @@ function PortalHome() {
   ];
 
   return (
-    <PortalShell nav={topNav} memberName={name}>
+    <PortalShell memberName={name}>
       <div className="grid w-full lg:grid-cols-[20%_80%]">
         {/* Sidebar */}
         <aside className="border-b border-gold/15 px-7 py-7 lg:border-b-0 lg:border-r lg:px-0 lg:pb-14 lg:pt-0">
