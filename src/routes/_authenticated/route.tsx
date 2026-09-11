@@ -8,8 +8,7 @@ export function isPreviewHost() {
   return (
     h === "localhost" ||
     h.startsWith("id-preview--") ||
-    h.endsWith(".lovableproject.com") ||
-    h.endsWith(".lovable.app")
+    h.endsWith(".lovableproject.com")
   );
 }
 
