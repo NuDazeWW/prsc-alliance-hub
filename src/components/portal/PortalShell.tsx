@@ -40,16 +40,21 @@ export function PortalShell({
             <PrscMark variant="horizontal" className="h-auto w-[190px] max-w-full object-contain sm:w-[230px] lg:w-[min(88%,270px)]" />
           </a>
           <nav className="hidden h-full min-w-0 items-center justify-center gap-[clamp(2rem,3.3vw,4.5rem)] lg:flex">
-            {nav.map((item, i) => (
-              <a
-                key={item.href}
-                href={item.href}
-                className={`relative flex h-full items-center text-[14px] transition-colors hover:text-gold ${i === 0 ? "text-gold" : "text-ivory/65"}`}
-              >
-                {item.label}
-                {i === 0 && <span className="absolute inset-x-0 bottom-0 h-px bg-gold" />}
-              </a>
-            ))}
+            {nav.map((item, i) => {
+              const cls = `relative flex h-full items-center text-[14px] transition-colors hover:text-gold ${i === 0 ? "text-gold" : "text-ivory/65"}`;
+              const underline = i === 0 ? <span className="absolute inset-x-0 bottom-0 h-px bg-gold" /> : null;
+              return item.onSelect ? (
+                <button key={item.label} type="button" onClick={item.onSelect} className={cls}>
+                  {item.label}
+                  {underline}
+                </button>
+              ) : (
+                <a key={item.label} href={item.href} className={cls}>
+                  {item.label}
+                  {underline}
+                </a>
+              );
+            })}
           </nav>
           <div className="ml-auto flex h-10 items-center gap-4 pr-1 sm:gap-5 sm:pr-2 lg:ml-0 lg:border-l lg:border-gold/20 lg:pl-7 lg:pr-[clamp(1.5rem,2.5vw,3.5rem)]">
             {notifications.length > 0 && (
