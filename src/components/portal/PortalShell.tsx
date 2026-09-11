@@ -4,7 +4,7 @@ import { ArrowRight, Bell, ChevronDown, LogOut, User } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { PrscMark } from "@/components/site/PrscMark";
 
-type NavItem = { label: string; href: string };
+type NavItem = { label: string; href: string; onSelect?: () => void };
 export type PortalNotification = { id: string; label: string; detail?: string; href?: string };
 
 export function PortalShell({
