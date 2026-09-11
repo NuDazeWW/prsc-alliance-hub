@@ -102,6 +102,8 @@ function PortalHome() {
   const showPrsc = m.entity !== "dis";
   const showDis = m.entity !== "prsc";
   const entityWord = entityLabel[m.entity];
+  const profileComplete = data?.hasProfile ?? false;
+  const packageReady = m.package_status === "package_ready";
 
   const topNav = [
     { label: "Overview", href: "#overview" },
@@ -213,22 +215,28 @@ function PortalHome() {
                 {m.package_status.replaceAll("_", " ").replace(/\b\w/g, (c) => c.toUpperCase())}
               </p>
               <p className="mt-3 text-[13px] leading-6 text-ivory/60">
-                We need a few details from you before your individualized materials are finalized.
+                {profileComplete
+                  ? "Your profile is complete. We're preparing your individualized materials and will be in touch when your package is ready."
+                  : "Complete your profile to move on to the next step — this unlocks your individualized package."}
               </p>
-              <Link
-                to="/portal/profile"
-                className="mt-4 flex min-h-12 w-full items-center justify-between gap-3 bg-gold px-4 py-3 text-[18px] font-semibold whitespace-nowrap text-navy shadow-[inset_0_1px_0_var(--color-gold-light)] transition-colors hover:bg-gold-light"
-              >
-                Complete Your Profile <ArrowRight className="h-4 w-4 shrink-0" />
-              </Link>
-              <p className="mt-3 flex items-start gap-2 text-[12px] leading-5 text-ivory/45">
-                <LockKeyhole className="mt-[2px] h-3.5 w-3.5 shrink-0" />
-                <span>
-                  Private submission
-                  <br />
-                  Approx. 7–10 minutes
-                </span>
-              </p>
+              {!packageReady && (
+                <Link
+                  to="/portal/profile"
+                  className="mt-4 flex min-h-12 w-full items-center justify-between gap-3 bg-gold px-4 py-3 text-[18px] font-semibold whitespace-nowrap text-navy shadow-[inset_0_1px_0_var(--color-gold-light)] transition-colors hover:bg-gold-light"
+                >
+                  {profileComplete ? "Review Your Profile" : "Complete Your Profile"} <ArrowRight className="h-4 w-4 shrink-0" />
+                </Link>
+              )}
+              {!profileComplete && (
+                <p className="mt-3 flex items-start gap-2 text-[12px] leading-5 text-ivory/45">
+                  <LockKeyhole className="mt-[2px] h-3.5 w-3.5 shrink-0" />
+                  <span>
+                    Private submission
+                    <br />
+                    Approx. 7–10 minutes
+                  </span>
+                </p>
+              )}
             </div>
 
             <div className="my-6 h-px bg-gold/20" />
