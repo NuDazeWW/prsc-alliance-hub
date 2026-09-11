@@ -12,6 +12,8 @@ export const Route = createFileRoute("/_authenticated/portal/")({
 const entityLabel = { prsc: "PRSC", dis: "DIS", both: "PRSC + DIS" } as const;
 function PortalHome() {
   const { data, isLoading, error } = useQuery({ queryKey: ["portal-session"], queryFn: () => getPortalSession() });
+  const navigate = useNavigate();
+  useEffect(() => { if (data?.isAdmin) navigate({ to: "/admin", replace: true }); }, [data, navigate]);
   if (isLoading) return <PortalShell><div className="flex min-h-[70vh] items-center justify-center text-gold">Opening your private center…</div></PortalShell>;
   if (error || !data?.member) return <PortalShell><div className="mx-auto max-w-xl px-6 py-24 text-center"><LockKeyhole className="mx-auto h-8 w-8 text-gold"/><h1 className="mt-5 font-display text-4xl">Access unavailable</h1><p className="mt-4 text-ivory/60">Please contact info@readinessterminal.com for assistance.</p></div></PortalShell>;
   const m = data.member; const name = m.professional_name || m.first_name;

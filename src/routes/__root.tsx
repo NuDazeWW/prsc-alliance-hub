@@ -70,7 +70,11 @@ function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
   );
 }
 
-export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()({
+export const Route = createRootRouteWithContext<{ queryClient: QueryClient; host: string }>()({
+  beforeLoad: async () => {
+    const { host } = await getRequestHost();
+    return { host };
+  },
   head: () => ({
     meta: [
       { charSet: "utf-8" },
@@ -187,9 +191,10 @@ function RootShell({ children }: { children: ReactNode }) {
 }
 
 function RootComponent() {
-  const { queryClient } = Route.useRouteContext();
+  const { queryClient, host } = Route.useRouteContext();
   const pathname = useRouterState({ select: (s) => s.location.pathname });
-  const isPrivate = pathname.startsWith("/portal") || pathname.startsWith("/admin") || pathname.startsWith("/auth");
+  const isPortalHost = host === "access.prscstandards.org" || host === "access.prscstandards.com";
+  const isPrivate = isPortalHost || pathname.startsWith("/portal") || pathname.startsWith("/admin") || pathname.startsWith("/auth");
   const isChrome = !pathname.startsWith("/vanguard/") && !isPrivate;
   return (
     <QueryClientProvider client={queryClient}>

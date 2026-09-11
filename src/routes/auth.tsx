@@ -1,13 +1,25 @@
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { useState } from "react";
+import { createFileRoute, useNavigate, redirect } from "@tanstack/react-router";
+import { useEffect, useState } from "react";
 import { KeyRound, Mail, ShieldCheck } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { PrscMark } from "@/components/site/PrscMark";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { getPortalSession } from "@/lib/portal.functions";
 
 export const Route = createFileRoute("/auth")({
   validateSearch: (search: Record<string, unknown>) => ({ redirect: typeof search.redirect === "string" && search.redirect.startsWith("/") ? search.redirect : "/portal", mode: search.mode === "setup" ? "setup" : undefined }),
+  beforeLoad: async ({ search }) => {
+    const { data } = await supabase.auth.getUser();
+    if (data.user) {
+      try {
+        const session = await getPortalSession();
+        throw redirect({ to: session.isAdmin ? "/admin" : "/portal", search: { mode: undefined } });
+      } catch {
+        throw redirect({ to: search.redirect });
+      }
+    }
+  },
   head: () => ({ meta: [
     { title: "Private Center Access | PRSC" }, { name: "description", content: "Secure access for invited PRSC and DIS board members and advisors." },
     { name: "robots", content: "noindex,nofollow,noarchive" }, { property: "og:title", content: "Private Center Access | PRSC" },
