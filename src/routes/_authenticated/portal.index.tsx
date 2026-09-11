@@ -234,28 +234,8 @@ function PortalHome() {
               <p className="mt-3 text-[13px] leading-6 text-ivory/60">
                 {profileComplete
                   ? "Your profile is complete. We're preparing your individualized materials and will be in touch when your package is ready."
-                  : "Complete your profile to move on to the next step — this unlocks your individualized package."}
+                  : "Completing your profile unlocks your individualized package."}
               </p>
-              {!packageReady && (
-                <Link
-                  to="/portal/profile"
-                  className="cta-glow mt-4 flex min-h-12 w-full items-center justify-between gap-3 rounded-full px-4 py-3 text-[18px] font-semibold whitespace-nowrap transition-all"
-                >
-                  <span className="relative z-10 flex w-full items-center justify-between gap-3">
-                    {profileComplete ? "Review Your Profile" : "Complete Your Profile"} <ArrowRight className="h-4 w-4 shrink-0" />
-                  </span>
-                </Link>
-              )}
-              {!profileComplete && (
-                <p className="mt-3 flex items-start gap-2 text-[12px] leading-5 text-ivory/45">
-                  <LockKeyhole className="mt-[2px] h-3.5 w-3.5 shrink-0" />
-                  <span>
-                    Private submission
-                    <br />
-                    Approx. 7–10 minutes
-                  </span>
-                </p>
-              )}
             </div>
 
             <div className="my-6 h-px bg-gold/20" />
