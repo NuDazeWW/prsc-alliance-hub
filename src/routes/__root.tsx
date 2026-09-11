@@ -168,20 +168,24 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient; host
 });
 
 function RootShell({ children }: { children: ReactNode }) {
+  const host = Route.useRouteContext({ select: (s) => s.host }) ?? "";
+  const isPortalHost = host === "access.prscstandards.org" || host === "access.prscstandards.com";
   return (
     <html lang="en">
       <head>
         <HeadContent />
       </head>
       <body className="bg-navy">
-        <noscript>
-          <iframe
-            src="https://www.googletagmanager.com/ns.html?id=GTM-KPL6XBTW"
-            height="0"
-            width="0"
-            style={{ display: "none", visibility: "hidden" }}
-          />
-        </noscript>
+        {!isPortalHost && (
+          <noscript>
+            <iframe
+              src="https://www.googletagmanager.com/ns.html?id=GTM-KPL6XBTW"
+              height="0"
+              width="0"
+              style={{ display: "none", visibility: "hidden" }}
+            />
+          </noscript>
+        )}
         {children}
         <Scripts />
       </body>
