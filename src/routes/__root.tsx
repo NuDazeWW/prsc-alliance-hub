@@ -188,7 +188,8 @@ function RootShell({ children }: { children: ReactNode }) {
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
   const pathname = useRouterState({ select: (s) => s.location.pathname });
-  const isChrome = !pathname.startsWith("/vanguard/");
+  const isPrivate = pathname.startsWith("/portal") || pathname.startsWith("/admin") || pathname.startsWith("/auth");
+  const isChrome = !pathname.startsWith("/vanguard/") && !isPrivate;
   return (
     <QueryClientProvider client={queryClient}>
       {isChrome && <SiteNav />}
@@ -196,8 +197,8 @@ function RootComponent() {
         <Outlet />
       </main>
       {isChrome && <SiteFooter />}
-      <FaqLauncher />
-      <AnalyticsGate />
+      {!isPrivate && <FaqLauncher />}
+      {!isPrivate && <AnalyticsGate />}
     </QueryClientProvider>
   );
 }
