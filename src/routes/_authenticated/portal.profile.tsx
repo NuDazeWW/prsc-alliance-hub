@@ -35,4 +35,31 @@ function ProfilePage(){
  </div></main></PortalShell>;
 }
 function StepTitle({n,title,copy}:{n:string;title:string;copy:string}){return <div><p className="text-xs uppercase text-gold">Stage {n}</p><h2 className="mt-3 font-display text-4xl sm:text-5xl">{title}</h2><p className="mt-4 text-sm text-ivory/55">{copy}</p></div>}
+function HeadshotField(){
+ const fileRef=useRef<HTMLInputElement>(null); const[busy,setBusy]=useState(false); const[msg,setMsg]=useState("");
+ const url=useQuery({queryKey:["my-headshot"],queryFn:()=>getMyHeadshotUrl()});
+ async function upload(file:File){
+  if(!file.type.startsWith("image/")){setMsg("Please choose an image file.");return;}
+  if(file.size>5*1024*1024){setMsg("Please choose an image under 5 MB.");return;}
+  setBusy(true);setMsg("Uploading…");
+  try{
+   const{data:{user}}=await supabase.auth.getUser(); if(!user)throw new Error("Session expired. Please sign in again.");
+   const ext=(file.name.split(".").pop()||"jpg").toLowerCase().replace(/[^a-z0-9]/g,"")||"jpg";
+   const path=`${user.id}/headshot-${Date.now()}.${ext}`;
+   const{error}=await supabase.storage.from("member-headshots").upload(path,file,{cacheControl:"3600",upsert:false});
+   if(error)throw error;
+   await setMyHeadshot({data:{path}});
+   await url.refetch(); setMsg("Headshot saved.");
+  }catch(e){setMsg(e instanceof Error?e.message:"Upload failed. Please try again.");}
+  finally{setBusy(false);}
+ }
+ const src=url.data?.url;
+ return <div className="mt-10 flex items-center gap-6 border border-gold/15 bg-navy/40 p-5">
+  <div className="flex h-20 w-20 shrink-0 items-center justify-center overflow-hidden rounded-full border border-gold/30 bg-ivory/5 text-gold">{src?<img src={src} alt="Your headshot" className="h-full w-full object-cover"/>:<Upload className="h-6 w-6"/>}</div>
+  <div><p className="text-xs uppercase text-ivory/55">Headshot</p><p className="mt-1 text-sm text-ivory/50">Used only for your individualized materials. JPG or PNG, up to 5 MB.</p>
+  <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={e=>{const f=e.target.files?.[0];if(f)void upload(f);e.target.value="";}}/>
+  <Button type="button" variant="outline" disabled={busy} onClick={()=>fileRef.current?.click()} className="mt-3 rounded-none border-gold/40 text-gold hover:bg-gold hover:text-navy">{busy?"Uploading…":src?"Replace headshot":"Upload headshot"}</Button>
+  {msg&&<p role="status" className="mt-2 text-xs text-ivory/55">{msg}</p>}</div>
+ </div>;
+}
 function Field({label,value,onChange,type="text"}:{label:string;value:string;onChange:(v:string)=>void;type?:string}){return <label className="text-xs uppercase text-ivory/55">{label}<Input type={type} value={value} onChange={e=>onChange(e.target.value)} required className="mt-2 h-12 border-ivory/20 text-ivory"/></label>}
