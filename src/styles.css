@@ -151,6 +151,142 @@
   100% { background-position: -50% 0; }
 }
 
+/* ===== PRSC premium CTAs — ombre light treatment ===== */
+@utility cta-glow {
+  background-image:
+    radial-gradient(ellipse 90% 55% at 28% 0%, color-mix(in oklab, var(--color-gold-light) 85%, transparent) 0%, transparent 55%),
+    linear-gradient(
+      180deg,
+      color-mix(in oklab, var(--color-gold-light) 62%, var(--color-gold)) 0%,
+      var(--color-gold) 52%,
+      color-mix(in oklab, var(--color-bronze) 22%, var(--color-gold)) 100%
+    );
+  color: var(--color-navy);
+  box-shadow:
+    inset 0 1px 0 color-mix(in oklab, var(--color-ivory) 65%, transparent),
+    inset 0 -1px 0 color-mix(in oklab, var(--color-bronze) 55%, transparent),
+    0 0 34px color-mix(in oklab, var(--color-gold) 34%, transparent),
+    0 0 72px color-mix(in oklab, var(--color-gold) 18%, transparent),
+    0 6px 18px color-mix(in oklab, var(--color-navy-deep) 55%, transparent);
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+  transition: filter 250ms ease, box-shadow 250ms ease;
+
+  &:hover {
+    filter: brightness(1.06);
+    box-shadow:
+      inset 0 1px 0 color-mix(in oklab, var(--color-ivory) 78%, transparent),
+      inset 0 -1px 0 color-mix(in oklab, var(--color-bronze) 65%, transparent),
+      0 0 48px color-mix(in oklab, var(--color-gold) 48%, transparent),
+      0 0 96px color-mix(in oklab, var(--color-gold) 26%, transparent),
+      0 8px 22px color-mix(in oklab, var(--color-navy-deep) 62%, transparent);
+  }
+
+  & > * {
+    position: relative;
+    z-index: 2;
+  }
+
+  &::after {
+    content: "";
+    position: absolute;
+    inset: -40%;
+    width: 180%;
+    z-index: 1;
+    background: linear-gradient(
+      105deg,
+      transparent 36%,
+      color-mix(in oklab, var(--color-ivory) 30%, transparent) 49%,
+      color-mix(in oklab, var(--color-ivory) 8%, transparent) 53%,
+      transparent 66%
+    );
+    transform: translateX(-120%) skewX(-12deg);
+    animation: cta-shimmer 5.4s ease-in-out infinite;
+    pointer-events: none;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    &::after {
+      animation: none;
+      transform: none;
+      opacity: 0;
+    }
+  }
+}
+
+@utility cta-glow-outline {
+  background-image:
+    radial-gradient(ellipse 90% 55% at 28% 0%, color-mix(in oklab, var(--color-gold) 18%, transparent) 0%, transparent 55%),
+    linear-gradient(
+      180deg,
+      color-mix(in oklab, var(--color-ivory) 11%, transparent) 0%,
+      color-mix(in oklab, var(--color-ivory) 3%, transparent) 100%
+    );
+  color: var(--color-gold);
+  border: 1px solid color-mix(in oklab, var(--color-gold) 62%, transparent);
+  box-shadow:
+    inset 0 1px 0 color-mix(in oklab, var(--color-ivory) 18%, transparent),
+    0 0 32px color-mix(in oklab, var(--color-gold) 28%, transparent),
+    0 0 68px color-mix(in oklab, var(--color-gold) 14%, transparent);
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+  transition: background-image 250ms ease, box-shadow 250ms ease, color 250ms ease;
+
+  &:hover {
+    background-image:
+      radial-gradient(ellipse 90% 55% at 28% 0%, color-mix(in oklab, var(--color-gold-light) 55%, transparent) 0%, transparent 55%),
+      linear-gradient(
+        180deg,
+        color-mix(in oklab, var(--color-gold-light) 42%, var(--color-gold)) 0%,
+        var(--color-gold) 100%
+      );
+    color: var(--color-navy);
+    box-shadow:
+      inset 0 1px 0 color-mix(in oklab, var(--color-ivory) 60%, transparent),
+      0 0 46px color-mix(in oklab, var(--color-gold) 42%, transparent),
+      0 0 88px color-mix(in oklab, var(--color-gold) 22%, transparent);
+  }
+
+  & > * {
+    position: relative;
+    z-index: 2;
+  }
+
+  &::after {
+    content: "";
+    position: absolute;
+    inset: -40%;
+    width: 180%;
+    z-index: 1;
+    background: linear-gradient(
+      105deg,
+      transparent 36%,
+      color-mix(in oklab, var(--color-ivory) 22%, transparent) 49%,
+      color-mix(in oklab, var(--color-ivory) 5%, transparent) 53%,
+      transparent 66%
+    );
+    transform: translateX(-120%) skewX(-12deg);
+    animation: cta-shimmer 5.4s ease-in-out infinite;
+    pointer-events: none;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    &::after {
+      animation: none;
+      transform: none;
+      opacity: 0;
+    }
+  }
+}
+
+@keyframes cta-shimmer {
+  0% { transform: translateX(-120%) skewX(-12deg); }
+  18% { transform: translateX(120%) skewX(-12deg); }
+  100% { transform: translateX(120%) skewX(-12deg); }
+}
+
 /* ===== PRSC Readiness Gauge — live instrument ===== */
 .prsc-gauge-figure {
   margin: 0;
