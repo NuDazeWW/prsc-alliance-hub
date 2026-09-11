@@ -1,8 +1,9 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
-import { useEffect, useState } from "react";
-import { ArrowLeft, ArrowRight, Check, Save } from "lucide-react";
-import { getMyProfile, getPortalSession, saveMyProfile } from "@/lib/portal.functions";
+import { useEffect, useRef, useState } from "react";
+import { ArrowLeft, ArrowRight, Check, Save, Upload } from "lucide-react";
+import { getMyHeadshotUrl, getMyProfile, getPortalSession, saveMyProfile, setMyHeadshot } from "@/lib/portal.functions";
+import { supabase } from "@/integrations/supabase/client";
 import { PortalShell } from "@/components/portal/PortalShell";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
