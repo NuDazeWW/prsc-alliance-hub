@@ -202,21 +202,21 @@ function PortalHome() {
 
             <div className="border border-gold/20 bg-[linear-gradient(145deg,var(--color-midnight),var(--color-navy))] p-[clamp(1.15rem,1.5vw,1.75rem)]">
               <p className="text-[10px] uppercase tracking-[0.22em] text-gold">Your Next Step</p>
-              <h3 className="mt-3 font-display text-[clamp(1.15rem,1.3vw,1.5rem)] leading-snug">Board/Advisor Package</h3>
-              <p className="mt-4 flex items-center gap-2 text-[13px] text-gold">
+              <h3 className="mt-2 font-display text-[clamp(1.15rem,1.3vw,1.5rem)] leading-snug">Board/Advisor Package</h3>
+              <p className="mt-3 flex items-center gap-2 text-[13px] text-gold">
                 <span className="h-1.5 w-1.5 rounded-full bg-gold shadow-[0_0_7px_var(--color-gold)]" />
                 {m.package_status.replaceAll("_", " ").replace(/\b\w/g, (c) => c.toUpperCase())}
               </p>
-              <p className="mt-4 text-[13px] leading-6 text-ivory/60">
+              <p className="mt-3 text-[13px] leading-6 text-ivory/60">
                 We need a few details from you before your individualized materials are finalized.
               </p>
               <Link
                 to="/portal/profile"
-                className="mt-6 flex min-h-12 w-full items-center justify-between gap-3 bg-gold px-4 py-3 text-[18px] font-semibold whitespace-nowrap text-navy shadow-[inset_0_1px_0_var(--color-gold-light)] transition-colors hover:bg-gold-light"
+                className="mt-4 flex min-h-12 w-full items-center justify-between gap-3 bg-gold px-4 py-3 text-[18px] font-semibold whitespace-nowrap text-navy shadow-[inset_0_1px_0_var(--color-gold-light)] transition-colors hover:bg-gold-light"
               >
                 Complete Your Profile <ArrowRight className="h-4 w-4 shrink-0" />
               </Link>
-              <p className="mt-4 flex items-start gap-2 text-[12px] leading-5 text-ivory/45">
+              <p className="mt-3 flex items-start gap-2 text-[12px] leading-5 text-ivory/45">
                 <LockKeyhole className="mt-[2px] h-3.5 w-3.5 shrink-0" />
                 <span>
                   Private submission
@@ -226,7 +226,8 @@ function PortalHome() {
               </p>
             </div>
 
-            <div className="my-9 h-px bg-gold/20" />
+            <div className="my-6 h-px bg-gold/20" />
+
             <p className="text-[10px] uppercase tracking-[0.22em] text-ivory/45">Need help?</p>
             <p className="mt-3 text-[14px] text-ivory/65">We're here for you.</p>
             <Link to="/portal/questions" className="mt-5 flex min-h-10 items-center gap-3 text-[14px] text-ivory/80 hover:text-gold">
