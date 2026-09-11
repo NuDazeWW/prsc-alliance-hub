@@ -222,7 +222,7 @@ function PortalHome() {
               {!packageReady && (
                 <Link
                   to="/portal/profile"
-                  className="mt-4 flex min-h-12 w-full items-center justify-between gap-3 bg-gold px-4 py-3 text-[18px] font-semibold whitespace-nowrap text-navy shadow-[inset_0_1px_0_var(--color-gold-light)] transition-colors hover:bg-gold-light"
+                  className="mt-4 flex min-h-12 w-full items-center justify-between gap-3 rounded-full bg-gold px-4 py-3 text-[18px] font-semibold whitespace-nowrap text-navy shadow-[inset_0_1px_0_var(--color-gold-light),0_0_18px_rgba(255,255,255,0.10)] ring-1 ring-ivory/30 transition-all hover:bg-gold-light hover:ring-ivory/55"
                 >
                   {profileComplete ? "Review Your Profile" : "Complete Your Profile"} <ArrowRight className="h-4 w-4 shrink-0" />
                 </Link>
@@ -278,7 +278,7 @@ function PortalHome() {
                 </p>
                 <Link
                   to="/portal/profile"
-                  className="mt-[22px] inline-flex min-h-14 w-full max-w-[300px] items-center justify-between gap-6 bg-gold px-7 py-4 text-[19px] font-semibold text-navy shadow-[inset_0_1px_0_var(--color-gold-light)] transition-colors hover:bg-gold-light"
+                  className="mt-[22px] inline-flex min-h-14 w-full max-w-[300px] items-center justify-between gap-6 rounded-full bg-gold px-7 py-4 text-[19px] font-semibold text-navy shadow-[inset_0_1px_0_var(--color-gold-light),0_0_20px_rgba(255,255,255,0.10)] ring-1 ring-ivory/30 transition-all hover:bg-gold-light hover:ring-ivory/55"
                 >
                   {profileComplete ? "Review Your Profile" : "Complete Your Profile"} <ArrowRight className="h-4 w-4" />
                 </Link>
@@ -427,7 +427,7 @@ function PortalHome() {
               </div>
               <Link
                 to="/portal/questions"
-                className="inline-flex shrink-0 items-center gap-3 border border-gold px-7 py-4 text-[15px] text-gold transition-colors hover:bg-gold hover:text-navy"
+                className="inline-flex shrink-0 items-center gap-3 rounded-full border border-gold px-7 py-4 text-[15px] text-gold shadow-[0_0_18px_rgba(255,255,255,0.07)] ring-1 ring-ivory/20 transition-all hover:bg-gold hover:text-navy hover:ring-ivory/45"
               >
                 Open a private inquiry <ArrowRight className="h-4 w-4" />
               </Link>
