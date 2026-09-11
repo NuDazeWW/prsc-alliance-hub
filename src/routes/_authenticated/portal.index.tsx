@@ -13,6 +13,7 @@ export const Route = createFileRoute("/_authenticated/portal/")({
 const entityLabel = { prsc: "PRSC", dis: "DIS", both: "PRSC + DIS" } as const;
 function PortalHome() {
   const { data, isLoading, error } = useQuery({ queryKey: ["portal-session"], queryFn: () => getPortalSession() });
+  const headshot = useQuery({ queryKey: ["my-headshot"], queryFn: () => getMyHeadshotUrl() });
   const navigate = useNavigate();
   useEffect(() => { if (data?.isAdmin) navigate({ to: "/admin", replace: true }); }, [data, navigate]);
   if (isLoading) return <PortalShell><div className="flex min-h-[70vh] items-center justify-center text-gold">Opening your private center…</div></PortalShell>;
