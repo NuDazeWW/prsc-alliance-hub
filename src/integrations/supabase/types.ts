@@ -101,6 +101,246 @@ export type Database = {
         }
         Relationships: []
       }
+      portal_activity: {
+        Row: {
+          actor_user_id: string | null
+          created_at: string
+          event_type: string
+          id: string
+          member_id: string | null
+          metadata: Json
+        }
+        Insert: {
+          actor_user_id?: string | null
+          created_at?: string
+          event_type: string
+          id?: string
+          member_id?: string | null
+          metadata?: Json
+        }
+        Update: {
+          actor_user_id?: string | null
+          created_at?: string
+          event_type?: string
+          id?: string
+          member_id?: string | null
+          metadata?: Json
+        }
+        Relationships: [
+          {
+            foreignKeyName: "portal_activity_member_id_fkey"
+            columns: ["member_id"]
+            isOneToOne: false
+            referencedRelation: "portal_members"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      portal_inquiries: {
+        Row: {
+          admin_notes: string | null
+          created_at: string
+          id: string
+          member_id: string
+          message: string
+          resolved_at: string | null
+          status: Database["public"]["Enums"]["portal_inquiry_status"]
+          subject: string
+          updated_at: string
+        }
+        Insert: {
+          admin_notes?: string | null
+          created_at?: string
+          id?: string
+          member_id: string
+          message: string
+          resolved_at?: string | null
+          status?: Database["public"]["Enums"]["portal_inquiry_status"]
+          subject: string
+          updated_at?: string
+        }
+        Update: {
+          admin_notes?: string | null
+          created_at?: string
+          id?: string
+          member_id?: string
+          message?: string
+          resolved_at?: string | null
+          status?: Database["public"]["Enums"]["portal_inquiry_status"]
+          subject?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "portal_inquiries_member_id_fkey"
+            columns: ["member_id"]
+            isOneToOne: false
+            referencedRelation: "portal_members"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      portal_members: {
+        Row: {
+          created_at: string
+          email: string
+          entity: Database["public"]["Enums"]["portal_entity"]
+          first_access_at: string | null
+          first_name: string
+          id: string
+          invited_at: string
+          last_access_at: string | null
+          last_name: string
+          organization: string
+          package_status: Database["public"]["Enums"]["portal_package_status"]
+          professional_name: string | null
+          role: Database["public"]["Enums"]["app_role"]
+          status: Database["public"]["Enums"]["portal_member_status"]
+          title: string | null
+          updated_at: string
+          user_id: string
+          why_you: string
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          entity: Database["public"]["Enums"]["portal_entity"]
+          first_access_at?: string | null
+          first_name: string
+          id?: string
+          invited_at?: string
+          last_access_at?: string | null
+          last_name: string
+          organization: string
+          package_status?: Database["public"]["Enums"]["portal_package_status"]
+          professional_name?: string | null
+          role: Database["public"]["Enums"]["app_role"]
+          status?: Database["public"]["Enums"]["portal_member_status"]
+          title?: string | null
+          updated_at?: string
+          user_id: string
+          why_you: string
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          entity?: Database["public"]["Enums"]["portal_entity"]
+          first_access_at?: string | null
+          first_name?: string
+          id?: string
+          invited_at?: string
+          last_access_at?: string | null
+          last_name?: string
+          organization?: string
+          package_status?: Database["public"]["Enums"]["portal_package_status"]
+          professional_name?: string | null
+          role?: Database["public"]["Enums"]["app_role"]
+          status?: Database["public"]["Enums"]["portal_member_status"]
+          title?: string | null
+          updated_at?: string
+          user_id?: string
+          why_you?: string
+        }
+        Relationships: []
+      }
+      portal_profiles: {
+        Row: {
+          contact_requested: boolean
+          created_at: string
+          current_organization: string | null
+          current_stage: number
+          experience_answers: Json
+          final_notes: string | null
+          headshot_path: string | null
+          id: string
+          member_id: string
+          preferred_email: string | null
+          preferred_name: string | null
+          preferred_phone: string | null
+          professional_role: string | null
+          questions: string | null
+          reopened_at: string | null
+          restriction_details: string | null
+          restriction_status: string | null
+          submitted_at: string | null
+          updated_at: string
+          visibility_instructions: Json
+        }
+        Insert: {
+          contact_requested?: boolean
+          created_at?: string
+          current_organization?: string | null
+          current_stage?: number
+          experience_answers?: Json
+          final_notes?: string | null
+          headshot_path?: string | null
+          id?: string
+          member_id: string
+          preferred_email?: string | null
+          preferred_name?: string | null
+          preferred_phone?: string | null
+          professional_role?: string | null
+          questions?: string | null
+          reopened_at?: string | null
+          restriction_details?: string | null
+          restriction_status?: string | null
+          submitted_at?: string | null
+          updated_at?: string
+          visibility_instructions?: Json
+        }
+        Update: {
+          contact_requested?: boolean
+          created_at?: string
+          current_organization?: string | null
+          current_stage?: number
+          experience_answers?: Json
+          final_notes?: string | null
+          headshot_path?: string | null
+          id?: string
+          member_id?: string
+          preferred_email?: string | null
+          preferred_name?: string | null
+          preferred_phone?: string | null
+          professional_role?: string | null
+          questions?: string | null
+          reopened_at?: string | null
+          restriction_details?: string | null
+          restriction_status?: string | null
+          submitted_at?: string | null
+          updated_at?: string
+          visibility_instructions?: Json
+        }
+        Relationships: [
+          {
+            foreignKeyName: "portal_profiles_member_id_fkey"
+            columns: ["member_id"]
+            isOneToOne: true
+            referencedRelation: "portal_members"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      user_roles: {
+        Row: {
+          created_at: string
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
       vanguard_interest: {
         Row: {
           created_at: string
@@ -143,9 +383,24 @@ export type Database = {
           total: number
         }[]
       }
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
     }
     Enums: {
-      [_ in never]: never
+      app_role: "admin" | "board_member" | "advisor"
+      portal_entity: "prsc" | "dis" | "both"
+      portal_inquiry_status: "open" | "resolved"
+      portal_member_status: "invited" | "active" | "revoked"
+      portal_package_status:
+        | "awaiting_profile"
+        | "in_preparation"
+        | "profile_received"
+        | "package_ready"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -272,6 +527,17 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      app_role: ["admin", "board_member", "advisor"],
+      portal_entity: ["prsc", "dis", "both"],
+      portal_inquiry_status: ["open", "resolved"],
+      portal_member_status: ["invited", "active", "revoked"],
+      portal_package_status: [
+        "awaiting_profile",
+        "in_preparation",
+        "profile_received",
+        "package_ready",
+      ],
+    },
   },
 } as const
