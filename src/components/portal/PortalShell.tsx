@@ -1,28 +1,33 @@
 import { useState } from "react";
 import { Link, useNavigate } from "@tanstack/react-router";
-import { ArrowRight, ChevronDown, LogOut, User } from "lucide-react";
+import { ArrowRight, Bell, ChevronDown, LogOut, User } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { PrscMark } from "@/components/site/PrscMark";
 
 type NavItem = { label: string; href: string };
+export type PortalNotification = { id: string; label: string; detail?: string; href?: string };
 
 export function PortalShell({
   children,
   admin = false,
   nav = [],
   memberName,
+  notifications = [],
 }: {
   children: React.ReactNode;
   admin?: boolean;
   nav?: NavItem[];
   memberName?: string;
+  notifications?: PortalNotification[];
 }) {
   const navigate = useNavigate();
   const [open, setOpen] = useState(false);
+  const [alertsOpen, setAlertsOpen] = useState(false);
   async function signOut() {
     await supabase.auth.signOut();
     await navigate({ to: "/auth", search: { redirect: "/portal", mode: undefined }, replace: true });
   }
+
   return (
     <div className="flex min-h-screen w-full flex-col overflow-x-hidden bg-[linear-gradient(135deg,var(--color-navy-deep),var(--color-navy)_52%,var(--color-midnight))] text-ivory">
       <header className="sticky top-0 z-40 border-b border-gold/15 bg-navy/95 backdrop-blur">
