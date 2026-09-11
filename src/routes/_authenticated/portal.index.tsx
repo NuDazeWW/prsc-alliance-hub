@@ -280,11 +280,12 @@ function PortalHome() {
                   to="/portal/profile"
                   className="mt-[22px] inline-flex min-h-14 w-full max-w-[300px] items-center justify-between gap-6 bg-gold px-7 py-4 text-[19px] font-semibold text-navy shadow-[inset_0_1px_0_var(--color-gold-light)] transition-colors hover:bg-gold-light"
                 >
-                  Complete Your Profile <ArrowRight className="h-4 w-4" />
+                  {profileComplete ? "Review Your Profile" : "Complete Your Profile"} <ArrowRight className="h-4 w-4" />
                 </Link>
                 <p className="mt-3 text-[17px] text-ivory/52">
-
-                  5 – 7 minutes &nbsp;•&nbsp; Needed to prepare your individualized advisor package
+                  {profileComplete
+                    ? "Your profile is on file — your package is being prepared."
+                    : "Approx. 7–10 minutes  •  Completing your profile unlocks your individualized package"}
                 </p>
               </div>
               <div className="relative hidden flex-col justify-between pb-2 pt-8 lg:flex">
