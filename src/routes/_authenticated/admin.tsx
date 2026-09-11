@@ -469,7 +469,7 @@ function Admin() {
                       e.target.value = "";
                     }}
                   />
-                  <Button type="button" variant="outline" className="rounded-none" onClick={() => fileRef.current?.click()}>
+                  <Button type="button" className="rounded-none border border-gold/40 bg-transparent text-ivory hover:bg-gold/10 hover:text-gold" onClick={() => fileRef.current?.click()}>
                     <Upload className="mr-2 h-4 w-4" /> Upload content
                   </Button>
                   <Button type="button" className="rounded-none bg-gold text-navy" onClick={() => setPreviewOpen(true)}>
@@ -548,7 +548,7 @@ function Admin() {
               </div>
 
               <div className="mt-6 flex flex-wrap items-center gap-3">
-                <Button type="button" variant="outline" className="rounded-none" onClick={saveDraft}>
+                <Button type="button" className="rounded-none border border-gold/40 bg-transparent text-ivory hover:bg-gold/10 hover:text-gold" onClick={saveDraft}>
                   Save template
                 </Button>
                 <Button type="button" disabled={sending} className="rounded-none bg-gold text-navy" onClick={send}>
@@ -639,7 +639,7 @@ function Admin() {
             </div>
             <iframe title="Email preview" srcDoc={previewHtml} className="h-full w-full flex-1 bg-white" />
             <div className="flex items-center justify-end gap-3 border-t border-gold/20 px-5 py-3">
-              <Button type="button" variant="outline" className="rounded-none" onClick={() => setPreviewOpen(false)}>
+              <Button type="button" className="rounded-none border border-gold/40 bg-transparent text-ivory hover:bg-gold/10 hover:text-gold" onClick={() => setPreviewOpen(false)}>
                 Keep editing
               </Button>
               <Button type="button" className="rounded-none bg-gold text-navy" onClick={saveDraft}>
