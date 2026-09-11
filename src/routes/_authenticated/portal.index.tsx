@@ -372,48 +372,56 @@ function PortalHome() {
             </div>
           </section>
 
-          {/* Entity sections */}
-          {showPrsc && (
-            <section id="prsc" className="px-7 pb-5 sm:px-10 lg:px-[2.5%]">
-              <div className="border border-gold/20 bg-[linear-gradient(145deg,var(--color-midnight),var(--color-navy))] p-8 lg:p-[clamp(2rem,2.7vw,3.25rem)]">
+          <div className="pb-10 lg:pb-14" />
+        </main>
+      </div>
+
+      <Dialog open={panel !== null} onOpenChange={(open) => !open && setPanel(null)}>
+        <DialogContent className="max-h-[86vh] w-[min(94vw,980px)] max-w-none overflow-y-auto border-gold/30 bg-[linear-gradient(145deg,var(--color-midnight),var(--color-navy))] p-8 text-ivory shadow-2xl lg:p-[clamp(2rem,2.7vw,3.25rem)]">
+          {panel === "prsc" && (
+            <>
+              <DialogHeader className="space-y-0 text-left">
                 <p className="text-[10px] uppercase tracking-[0.24em] text-gold">PRSC</p>
-                <h2 className="mt-4 font-display text-[34px]">A standard built for trust.</h2>
-                <div className="mt-8 grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
-                  {["Independent", "Objective", "Comparable", "Governed"].map((x) => (
-                    <div key={x} className="border-t border-gold/40 pt-5">
-                      <h3 className="font-display text-xl">{x}</h3>
-                      <p className="mt-3 text-[14px] leading-6 text-ivory/55">
-                        A disciplined foundation for evidence-based partnership readiness.
-                      </p>
-                    </div>
-                  ))}
-                </div>
+                <DialogTitle className="mt-4 font-display text-[34px] font-normal leading-tight">A standard built for trust.</DialogTitle>
+              </DialogHeader>
+              <div className="mt-8 grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
+                {["Independent", "Objective", "Comparable", "Governed"].map((x) => (
+                  <div key={x} className="border-t border-gold/40 pt-5">
+                    <h3 className="font-display text-xl">{x}</h3>
+                    <p className="mt-3 text-[14px] leading-6 text-ivory/55">
+                      A disciplined foundation for evidence-based partnership readiness.
+                    </p>
+                  </div>
+                ))}
               </div>
-            </section>
+            </>
           )}
 
-          {showDis && (
-            <section id="dis" className="px-7 pb-5 sm:px-10 lg:px-[2.5%]">
-              <div className="border border-gold/20 bg-[linear-gradient(145deg,var(--color-midnight),var(--color-navy))] p-8 lg:p-[clamp(2rem,2.7vw,3.25rem)]">
+          {panel === "dis" && (
+            <>
+              <DialogHeader className="space-y-0 text-left">
                 <p className="text-[10px] uppercase tracking-[0.24em] text-gold">DIS · Readiness Terminal™</p>
-                <h2 className="mt-4 max-w-3xl font-display text-[34px]">From evidence to decision intelligence.</h2>
-                <div className="mt-8 flex flex-wrap items-center gap-3 text-[10px] uppercase tracking-[0.18em] text-ivory/65">
-                  {["Evidence", "Readiness engine", "Readiness score", "Benchmarks", "Decision intelligence"].map((x, i) => (
-                    <span key={x} className="flex items-center gap-3">
-                      <span className="border border-gold/30 px-4 py-3">{x}</span>
-                      {i < 4 && <ArrowRight className="h-3 w-3 text-gold" />}
-                    </span>
-                  ))}
-                </div>
+                <DialogTitle className="mt-4 max-w-3xl font-display text-[34px] font-normal leading-tight">
+                  From evidence to decision intelligence.
+                </DialogTitle>
+              </DialogHeader>
+              <div className="mt-8 flex flex-wrap items-center gap-3 text-[10px] uppercase tracking-[0.18em] text-ivory/65">
+                {["Evidence", "Readiness engine", "Readiness score", "Benchmarks", "Decision intelligence"].map((x, i) => (
+                  <span key={x} className="flex items-center gap-3">
+                    <span className="border border-gold/30 px-4 py-3">{x}</span>
+                    {i < 4 && <ArrowRight className="h-3 w-3 text-gold" />}
+                  </span>
+                ))}
               </div>
-            </section>
+            </>
           )}
 
-          {/* What happens next */}
-          <section id="next" className="px-7 pb-5 sm:px-10 lg:px-[2.5%]">
-            <div className="border border-gold/20 bg-[linear-gradient(145deg,var(--color-midnight),var(--color-navy))] p-8 lg:p-[clamp(2rem,2.7vw,3.25rem)]">
-              <p className="text-[10px] uppercase tracking-[0.24em] text-gold">What Happens Next</p>
-              <h2 className="mt-4 font-display text-[34px]">A short, deliberate sequence.</h2>
+          {panel === "next" && (
+            <>
+              <DialogHeader className="space-y-0 text-left">
+                <p className="text-[10px] uppercase tracking-[0.24em] text-gold">What Happens Next</p>
+                <DialogTitle className="mt-4 font-display text-[34px] font-normal leading-tight">A short, deliberate sequence.</DialogTitle>
+              </DialogHeader>
               <div className="mt-8 grid gap-8 md:grid-cols-3">
                 {[
                   { n: "01", t: "Complete your profile", c: "A private submission that shapes your individualized materials." },
@@ -427,31 +435,31 @@ function PortalHome() {
                   </div>
                 ))}
               </div>
-            </div>
-          </section>
+            </>
+          )}
 
-          {/* Questions */}
-          <section id="questions" className="px-7 pb-16 sm:px-10 lg:px-[2.5%] lg:pb-20">
-            <div className="flex flex-col gap-6 border border-gold/20 bg-[linear-gradient(145deg,var(--color-midnight),var(--color-navy))] p-8 sm:flex-row sm:items-center sm:justify-between lg:p-[clamp(2rem,2.7vw,3.25rem)]">
-              <div>
+          {panel === "questions" && (
+            <>
+              <DialogHeader className="space-y-0 text-left">
                 <p className="text-[10px] uppercase tracking-[0.24em] text-gold">Questions</p>
-                <h2 className="mt-3 font-display text-[30px]">Share a private question.</h2>
-                <p className="mt-3 max-w-xl text-[15px] leading-7 text-ivory/60">
-                  Anything you'd like to discuss, at any time. Your message comes directly to us.
-                </p>
-              </div>
+                <DialogTitle className="mt-3 font-display text-[30px] font-normal leading-tight">Share a private question.</DialogTitle>
+              </DialogHeader>
+              <p className="mt-3 max-w-xl text-[15px] leading-7 text-ivory/60">
+                Anything you'd like to discuss, at any time. Your message comes directly to us.
+              </p>
               <Link
                 to="/portal/questions"
-                className="cta-glow-outline inline-flex shrink-0 items-center gap-3 rounded-full px-7 py-4 text-[15px] transition-all"
+                onClick={() => setPanel(null)}
+                className="cta-glow-outline mt-7 inline-flex shrink-0 items-center gap-3 rounded-full px-7 py-4 text-[15px] transition-all"
               >
                 <span className="relative z-10 flex items-center gap-3">
                   Open a private inquiry <ArrowRight className="h-4 w-4" />
                 </span>
               </Link>
-            </div>
-          </section>
-        </main>
-      </div>
+            </>
+          )}
+        </DialogContent>
+      </Dialog>
     </PortalShell>
   );
 }
