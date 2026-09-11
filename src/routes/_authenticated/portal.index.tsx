@@ -1,5 +1,6 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
+import { useEffect } from "react";
 import { ArrowRight, BookOpen, CheckCircle2, CircleHelp, FileText, Landmark, LockKeyhole, Scale } from "lucide-react";
 import { getPortalSession } from "@/lib/portal.functions";
 import { PortalShell } from "@/components/portal/PortalShell";
