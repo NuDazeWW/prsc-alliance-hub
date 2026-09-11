@@ -190,20 +190,28 @@ function PortalHome() {
           </div>
 
           <nav className="mt-5 grid grid-cols-2 lg:block">
-            {sideNav.map((item) => (
-              <a
-                key={item.label}
-                href={item.href}
-                className={`grid min-h-14 grid-cols-[20px_minmax(0,1fr)] items-center gap-3 py-3 pr-2 text-[12px] transition-colors sm:text-[14px] lg:grid-cols-[24px_minmax(0,1fr)] lg:gap-4 lg:px-[12.5%] ${
-                  item.active
-                    ? "border-l-2 border-gold bg-ivory/[.055] text-gold"
-                    : "border-l-2 border-transparent text-ivory/60 hover:bg-ivory/[.025] hover:text-gold"
-                }`}
-              >
-                <item.icon className={`h-[19px] w-[19px] shrink-0 ${item.active ? "text-gold" : "text-ivory/45"}`} />
-                {item.label}
-              </a>
-            ))}
+            {sideNav.map((item) => {
+              const cls = `grid min-h-14 w-full grid-cols-[20px_minmax(0,1fr)] items-center gap-3 py-3 pr-2 text-left text-[12px] transition-colors sm:text-[14px] lg:grid-cols-[24px_minmax(0,1fr)] lg:gap-4 lg:px-[12.5%] ${
+                item.active
+                  ? "border-l-2 border-gold bg-ivory/[.055] text-gold"
+                  : "border-l-2 border-transparent text-ivory/60 hover:bg-ivory/[.025] hover:text-gold"
+              }`;
+              const inner = (
+                <>
+                  <item.icon className={`h-[19px] w-[19px] shrink-0 ${item.active ? "text-gold" : "text-ivory/45"}`} />
+                  {item.label}
+                </>
+              );
+              return item.onSelect ? (
+                <button key={item.label} type="button" onClick={item.onSelect} className={cls}>
+                  {inner}
+                </button>
+              ) : (
+                <a key={item.label} href={item.href} className={cls}>
+                  {inner}
+                </a>
+              );
+            })}
           </nav>
 
           <div className="lg:px-[12.5%]">
