@@ -275,7 +275,7 @@ function PortalHome() {
                 </p>
               </div>
               <div className="relative hidden flex-col justify-between pb-2 pt-8 lg:flex">
-                <div className="absolute right-[4%] top-6">
+                <div className="absolute right-[4%] top-2">
                   <p className="text-[12px] uppercase leading-[2.15] tracking-[0.42em] text-ivory/90">
                     A higher
                     <br />
