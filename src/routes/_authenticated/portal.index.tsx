@@ -61,7 +61,7 @@ const demoMember = {
 function PortalHome() {
   const { data, isLoading, error } = useQuery({
     queryKey: ["portal-session"],
-    queryFn: () => getPortalSession().catch(() => null),
+    queryFn: () => isPreviewHost() ? Promise.resolve(null) : getPortalSession(),
     retry: false,
   });
 
