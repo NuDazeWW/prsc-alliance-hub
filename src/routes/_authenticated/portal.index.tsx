@@ -157,30 +157,34 @@ function PortalHome() {
         <aside className="border-b border-gold/15 px-7 py-9 lg:border-b-0 lg:border-r lg:px-0 lg:pb-20 lg:pt-0">
           <div className="lg:px-[12.5%] lg:pt-[clamp(2.5rem,4vw,4.75rem)]">
             <p className="text-[11px] uppercase tracking-[0.22em] text-gold/80">Your Welcome Center</p>
-            {headshot.data?.url ? (
-              <img
-                src={headshot.data.url}
-                alt={`${name} ${m.last_name}`}
-                className="mt-7 aspect-square w-[clamp(64px,5vw,88px)] rounded-full border border-gold/55 object-cover"
-              />
-            ) : (
-              <span className="mt-7 grid aspect-square w-[clamp(64px,5vw,88px)] place-items-center rounded-full border border-gold/55 font-display text-xl text-gold">
-                {initials}
-              </span>
-            )}
-            <h2 className="mt-4 font-display text-[clamp(1.2rem,1.35vw,1.55rem)] leading-tight">
-              {name} {m.last_name}
-            </h2>
-            <p className="mt-2 text-[14px] leading-5 text-ivory/65">{m.title || (m.role === "advisor" ? "Selected Advisor" : "Board Member")}</p>
-            <p className="text-[14px] leading-5 text-ivory/65">{entityWord}</p>
+            <div className="mt-6 flex items-center gap-5 lg:mt-0 lg:block">
+              {headshot.data?.url ? (
+                <img
+                  src={headshot.data.url}
+                  alt={`${name} ${m.last_name}`}
+                  className="aspect-square w-[clamp(64px,5vw,88px)] rounded-full border border-gold/55 object-cover lg:mt-7"
+                />
+              ) : (
+                <span className="grid aspect-square w-[clamp(64px,5vw,88px)] shrink-0 place-items-center rounded-full border border-gold/55 font-display text-xl text-gold lg:mt-7">
+                  {initials}
+                </span>
+              )}
+              <div>
+                <h2 className="font-display text-[clamp(1.2rem,1.35vw,1.55rem)] leading-tight lg:mt-4">
+                  {name} {m.last_name}
+                </h2>
+                <p className="mt-2 text-[14px] leading-5 text-ivory/65">{m.title || (m.role === "advisor" ? "Selected Advisor" : "Board Member")}</p>
+                <p className="text-[14px] leading-5 text-ivory/65">{entityWord}</p>
+              </div>
+            </div>
           </div>
 
-          <nav className="mt-8">
+          <nav className="mt-8 grid grid-cols-2 lg:block">
             {sideNav.map((item) => (
               <a
                 key={item.label}
                 href={item.href}
-                className={`grid min-h-14 grid-cols-[24px_minmax(0,1fr)] items-center gap-4 py-3 text-[14px] transition-colors lg:px-[12.5%] ${
+                className={`grid min-h-14 grid-cols-[20px_minmax(0,1fr)] items-center gap-3 py-3 pr-2 text-[12px] transition-colors sm:text-[14px] lg:grid-cols-[24px_minmax(0,1fr)] lg:gap-4 lg:px-[12.5%] ${
                   item.active
                     ? "border-l-2 border-gold bg-ivory/[.055] text-gold"
                     : "border-l-2 border-transparent text-ivory/60 hover:bg-ivory/[.025] hover:text-gold"
@@ -239,14 +243,14 @@ function PortalHome() {
               width={1280}
               height={960}
               aria-hidden="true"
-              className="pointer-events-none absolute inset-y-0 right-0 hidden h-full w-[62%] object-cover object-[60%_48%] opacity-80 [mask-image:linear-gradient(to_right,transparent_0%,black_38%,black_82%,transparent_100%)] lg:block"
+              className="pointer-events-none absolute inset-y-0 right-0 h-full w-full object-cover object-[64%_48%] opacity-25 [mask-image:linear-gradient(to_right,transparent_0%,black_45%,black_82%,transparent_100%)] lg:w-[62%] lg:object-[60%_48%] lg:opacity-80 lg:[mask-image:linear-gradient(to_right,transparent_0%,black_38%,black_82%,transparent_100%)]"
             />
             <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(to_right,var(--color-navy)_0%,var(--color-navy)_38%,transparent_68%),linear-gradient(to_top,var(--color-navy)_0%,transparent_28%)]" />
             <div className="relative grid min-h-[clamp(450px,32vw,600px)] gap-10 lg:grid-cols-[62%_38%]">
               <div className="min-w-0">
                 <p className="text-[11px] uppercase tracking-[0.28em] text-gold">Private Board &amp; Advisor Center</p>
                 <h1 className="mt-5 font-display text-5xl leading-[1.02] sm:text-6xl lg:text-[clamp(4.5rem,5.1vw,6rem)]">Welcome, {name}.</h1>
-                <p className="mt-2 whitespace-nowrap font-display text-2xl leading-tight text-ivory/85 sm:text-3xl lg:text-[clamp(2rem,2.45vw,2.85rem)]">To the future of Partnership Readiness.</p>
+                <p className="mt-2 font-display text-2xl leading-tight text-ivory/85 sm:text-3xl lg:whitespace-nowrap lg:text-[clamp(2rem,2.45vw,2.85rem)]">To the future of Partnership Readiness.</p>
                 <div className="mt-7 h-px w-12 bg-gold" />
                 <p className="mt-8 max-w-[46rem] text-[15px] leading-[1.65] text-ivory/72">
                   PRSC and Decision Intelligence Systems have reached an important inflection point. The foundation is built, the
