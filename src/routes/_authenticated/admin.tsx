@@ -577,6 +577,17 @@ function Admin() {
               </div>
 
               <div className="mt-6 flex flex-wrap items-center gap-3">
+                <Button
+                  type="button"
+                  className="rounded-none border border-ivory/20 bg-transparent text-base text-ivory/70 hover:border-gold/40 hover:text-gold"
+                  onClick={() => {
+                    setDraft(emptyDraft);
+                    setEmailStatus("");
+                    setRecipients([]);
+                  }}
+                >
+                  <Trash2 className="mr-2 h-4 w-4" /> Discard
+                </Button>
                 <Button type="button" className="rounded-none border border-gold/40 bg-transparent text-base text-ivory hover:bg-gold/10 hover:text-gold" onClick={saveDraft}>
                   Save template
                 </Button>
