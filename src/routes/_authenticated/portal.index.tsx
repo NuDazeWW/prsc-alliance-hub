@@ -4,6 +4,7 @@ import { useEffect } from "react";
 import { ArrowRight, BookOpen, CheckCircle2, CircleHelp, FileText, Landmark, LockKeyhole, Scale } from "lucide-react";
 import { getMyHeadshotUrl, getPortalSession } from "@/lib/portal.functions";
 import { PortalShell } from "@/components/portal/PortalShell";
+import { isPreviewHost } from "@/routes/_authenticated/route";
 import { Button } from "@/components/ui/button";
 
 export const Route = createFileRoute("/_authenticated/portal/")({
@@ -11,14 +12,17 @@ export const Route = createFileRoute("/_authenticated/portal/")({
   component: PortalHome,
 });
 const entityLabel = { prsc: "PRSC", dis: "DIS", both: "PRSC + DIS" } as const;
+const demoMember = { id: "demo", user_id: "demo", first_name: "Alex", last_name: "Morgan", professional_name: "Alex", title: "Board Member", organization: "Meridian Capital Partners", email: "alex@example.com", role: "board" as const, entity: "both" as const, package_status: "in_preparation", why_you: "Your decades of governance experience bring the independent judgment this standard was built to earn.", created_at: "", updated_at: "" };
 function PortalHome() {
   const { data, isLoading, error } = useQuery({ queryKey: ["portal-session"], queryFn: () => getPortalSession() });
   const headshot = useQuery({ queryKey: ["my-headshot"], queryFn: () => getMyHeadshotUrl() });
   const navigate = useNavigate();
   useEffect(() => { if (data?.isAdmin) navigate({ to: "/admin", replace: true }); }, [data, navigate]);
   if (isLoading) return <PortalShell><div className="flex min-h-[70vh] items-center justify-center text-gold">Opening your private center…</div></PortalShell>;
-  if (error || !data?.member) return <PortalShell><div className="mx-auto max-w-xl px-6 py-24 text-center"><LockKeyhole className="mx-auto h-8 w-8 text-gold"/><h1 className="mt-5 font-display text-4xl">Access unavailable</h1><p className="mt-4 text-ivory/60">Please contact info@readinessterminal.com for assistance.</p></div></PortalShell>;
-  const m = data.member; const name = m.professional_name || m.first_name;
+  let member = data?.member;
+  if ((error || !member) && isPreviewHost()) member = demoMember;
+  if (!member) return <PortalShell><div className="mx-auto max-w-xl px-6 py-24 text-center"><LockKeyhole className="mx-auto h-8 w-8 text-gold"/><h1 className="mt-5 font-display text-4xl">Access unavailable</h1><p className="mt-4 text-ivory/60">Please contact info@readinessterminal.com for assistance.</p></div></PortalShell>;
+  const m = member; const name = m.professional_name || m.first_name;
   const cards = [
     ...(m.entity !== "dis" ? [{ icon: Scale, eyebrow: "The standard", title: "PRSC", copy: "The independent framework establishing how partnership readiness is defined, measured, and governed.", anchor: "prsc" }] : []),
     ...(m.entity !== "prsc" ? [{ icon: Landmark, eyebrow: "Decision intelligence", title: "DIS", copy: "The operating system translating evidence into readiness intelligence for leaders and investors.", anchor: "dis" }] : []),
