@@ -136,6 +136,105 @@ export type Database = {
           },
         ]
       }
+      portal_email_sends: {
+        Row: {
+          created_at: string
+          error: string | null
+          id: string
+          member_id: string
+          recipient_email: string
+          sent_by: string | null
+          status: string
+          subject: string
+          template_id: string | null
+          template_name: string
+        }
+        Insert: {
+          created_at?: string
+          error?: string | null
+          id?: string
+          member_id: string
+          recipient_email: string
+          sent_by?: string | null
+          status?: string
+          subject: string
+          template_id?: string | null
+          template_name: string
+        }
+        Update: {
+          created_at?: string
+          error?: string | null
+          id?: string
+          member_id?: string
+          recipient_email?: string
+          sent_by?: string | null
+          status?: string
+          subject?: string
+          template_id?: string | null
+          template_name?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "portal_email_sends_member_id_fkey"
+            columns: ["member_id"]
+            isOneToOne: false
+            referencedRelation: "portal_members"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "portal_email_sends_template_id_fkey"
+            columns: ["template_id"]
+            isOneToOne: false
+            referencedRelation: "portal_email_templates"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      portal_email_templates: {
+        Row: {
+          body: string
+          created_at: string
+          created_by: string | null
+          cta_label: string | null
+          cta_url: string | null
+          description: string | null
+          eyebrow: string
+          heading: string
+          id: string
+          name: string
+          subject: string
+          updated_at: string
+        }
+        Insert: {
+          body: string
+          created_at?: string
+          created_by?: string | null
+          cta_label?: string | null
+          cta_url?: string | null
+          description?: string | null
+          eyebrow?: string
+          heading?: string
+          id?: string
+          name: string
+          subject: string
+          updated_at?: string
+        }
+        Update: {
+          body?: string
+          created_at?: string
+          created_by?: string | null
+          cta_label?: string | null
+          cta_url?: string | null
+          description?: string | null
+          eyebrow?: string
+          heading?: string
+          id?: string
+          name?: string
+          subject?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       portal_inquiries: {
         Row: {
           admin_notes: string | null
