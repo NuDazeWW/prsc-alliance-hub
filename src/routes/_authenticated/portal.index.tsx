@@ -60,7 +60,12 @@ const demoMember = {
 
 function PortalHome() {
   const { data, isLoading, error } = useQuery({ queryKey: ["portal-session"], queryFn: () => getPortalSession(), retry: false });
-  const headshot = useQuery({ queryKey: ["my-headshot"], queryFn: () => getMyHeadshotUrl(), retry: false });
+  const headshot = useQuery({
+    queryKey: ["my-headshot"],
+    queryFn: () => getMyHeadshotUrl().catch(() => null),
+    retry: false,
+    enabled: Boolean(data?.member),
+  });
   const navigate = useNavigate();
   useEffect(() => {
     if (data?.isAdmin) navigate({ to: "/admin", replace: true });
