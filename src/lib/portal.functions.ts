@@ -41,7 +41,16 @@ export const getPortalSession = createServerFn({ method: "GET" })
     const roleNames = (roles ?? []).map((item: { role: string }) => item.role);
     if (!member && !roleNames.includes("admin")) throw new Error("Portal access has not been granted");
     if (member?.status === "revoked") throw new Error("Portal access has been revoked");
-    return { member: member as PortalMember | null, isAdmin: roleNames.includes("admin") };
+    let hasProfile = false;
+    if (member) {
+      const { data: profile } = await context.supabase
+        .from("portal_profiles")
+        .select("id")
+        .eq("member_id", member.id)
+        .maybeSingle();
+      hasProfile = Boolean(profile);
+    }
+    return { member: member as PortalMember | null, isAdmin: roleNames.includes("admin"), hasProfile };
   });
 
 export const getMyProfile = createServerFn({ method: "GET" })
