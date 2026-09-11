@@ -699,6 +699,30 @@ function Admin() {
   );
 }
 
+function InfoTip({ title, body }: { title: string; body: string }) {
+  const [open, setOpen] = useState(false);
+  return (
+    <div className="relative shrink-0">
+      <button
+        type="button"
+        aria-label={`About: ${title}`}
+        aria-expanded={open}
+        onClick={() => setOpen((v) => !v)}
+        onBlur={() => setTimeout(() => setOpen(false), 150)}
+        className="grid h-7 w-7 place-items-center rounded-full border border-gold/40 text-gold transition-colors hover:bg-gold/10"
+      >
+        <Info className="h-3.5 w-3.5" />
+      </button>
+      {open && (
+        <div className="absolute right-0 top-9 z-40 w-72 border border-gold/30 bg-navy-deep p-4 shadow-xl shadow-black/40">
+          <p className="text-[10px] uppercase tracking-[0.18em] text-gold">{title}</p>
+          <p className="mt-2 text-[13px] leading-relaxed text-ivory/70">{body}</p>
+        </div>
+      )}
+    </div>
+  );
+}
+
 function Stat({ icon: Icon, label, value }: { icon: any; label: string; value: number }) {
   return (
     <div className="bg-navy p-7">
