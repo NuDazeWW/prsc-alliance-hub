@@ -12,7 +12,7 @@ export const Route = createFileRoute("/_authenticated/portal/")({
   component: PortalHome,
 });
 const entityLabel = { prsc: "PRSC", dis: "DIS", both: "PRSC + DIS" } as const;
-const demoMember = { id: "demo", user_id: "demo", first_name: "Alex", last_name: "Morgan", professional_name: "Alex", title: "Board Member", organization: "Meridian Capital Partners", email: "alex@example.com", role: "board_member" as const, entity: "both" as const, status: "active" as const, package_status: "in_preparation", why_you: "Your decades of governance experience bring the independent judgment this standard was built to earn.", invited_at: null, first_access_at: null, last_access_at: null, created_at: "", updated_at: "" };
+const demoMember = { id: "demo", user_id: "demo", first_name: "Alex", last_name: "Morgan", professional_name: "Alex", title: "Board Member", organization: "Meridian Capital Partners", email: "alex@example.com", role: "board_member" as const, entity: "both" as const, status: "active" as const, package_status: "in_preparation" as const, why_you: "Your decades of governance experience bring the independent judgment this standard was built to earn.", invited_at: null, first_access_at: null, last_access_at: null, created_at: "", updated_at: "" };
 function PortalHome() {
   const { data, isLoading, error } = useQuery({ queryKey: ["portal-session"], queryFn: () => getPortalSession() });
   const headshot = useQuery({ queryKey: ["my-headshot"], queryFn: () => getMyHeadshotUrl() });
