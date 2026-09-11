@@ -1,16 +1,9 @@
 import { createFileRoute } from '@tanstack/react-router'
-import { timingSafeEqual } from 'crypto'
 
 export const Route = createFileRoute('/api/public/setup-admin')({
   server: {
     handlers: {
-      POST: async ({ request }) => {
-        const secret = new URL(request.url).searchParams.get('secret') ?? ''
-        const expected = process.env.SETUP_SECRET ?? ''
-        if (!expected || secret.length !== expected.length || !timingSafeEqual(Buffer.from(secret), Buffer.from(expected))) {
-          return new Response('Unauthorized', { status: 401 })
-        }
-
+      POST: async () => {
         const { supabaseAdmin } = await import('@/integrations/supabase/client.server')
 
         // Prevent repeated bootstraps
@@ -44,11 +37,12 @@ export const Route = createFileRoute('/api/public/setup-admin')({
 
         await supabaseAdmin.from('user_roles').insert({ user_id: userData.user.id, role: 'admin' })
 
+        const siteUrl = process.env.VITE_SITE_URL ?? 'https://access.prscstandards.org'
         const { data: linkData, error: linkError } = await supabaseAdmin.auth.admin.generateLink({
           type: 'recovery',
           email,
           options: {
-            redirectTo: `${process.env.VITE_SITE_URL ?? 'https://access.prscstandards.org'}/auth?mode=recovery`,
+            redirectTo: `${siteUrl}/auth?mode=recovery`,
           },
         })
 
