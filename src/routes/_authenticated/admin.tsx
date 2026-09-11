@@ -412,6 +412,8 @@ function Admin() {
                           body: t.body,
                           cta_label: t.cta_label ?? "",
                           cta_url: t.cta_url ?? "",
+                          cta_subtext: t.cta_subtext ?? "",
+                          signatures: t.signatures ?? "",
                         });
                         setEmailStatus(`Editing “${t.name}”.`);
                       }}
