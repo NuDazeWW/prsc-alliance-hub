@@ -16,6 +16,7 @@ import { SiteNav } from "@/components/site/SiteNav";
 import { SiteFooter } from "@/components/site/SiteFooter";
 import { AnalyticsGate } from "@/components/site/AnalyticsGate";
 import { FaqLauncher } from "@/components/site/FaqLauncher";
+import { getRequestHost } from "@/lib/portal.functions";
 
 const FAVICON = "/favicon.png";
 
