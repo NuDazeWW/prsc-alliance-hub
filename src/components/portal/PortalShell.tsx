@@ -46,8 +46,48 @@ export function PortalShell({
               </a>
             ))}
           </nav>
-          <div className="ml-auto flex h-10 items-center gap-5 pr-1 sm:pr-2 lg:ml-0 lg:border-l lg:border-gold/20 lg:pl-7 lg:pr-[clamp(1.5rem,2.5vw,3.5rem)]">
+          <div className="ml-auto flex h-10 items-center gap-4 pr-1 sm:gap-5 sm:pr-2 lg:ml-0 lg:border-l lg:border-gold/20 lg:pl-7 lg:pr-[clamp(1.5rem,2.5vw,3.5rem)]">
+            {notifications.length > 0 && (
+              <div className="relative">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setAlertsOpen((v) => !v);
+                    setOpen(false);
+                  }}
+                  aria-label={`${notifications.length} items need attention`}
+                  className="relative grid h-10 w-10 place-items-center rounded-full border border-gold/40 text-gold transition-colors hover:border-gold hover:bg-gold/10"
+                >
+                  <Bell className="h-[18px] w-[18px]" />
+                  <span className="absolute -right-1 -top-1 grid h-[18px] min-w-[18px] place-items-center rounded-full bg-gold px-1 text-[10px] font-semibold text-navy">
+                    {notifications.length}
+                  </span>
+                </button>
+                {alertsOpen && (
+                  <div className="absolute right-0 top-12 z-50 w-[320px] border border-gold/25 bg-navy-deep shadow-2xl">
+                    <p className="border-b border-gold/15 px-4 py-3 text-[10px] uppercase tracking-[0.2em] text-gold">
+                      Needs attention
+                    </p>
+                    <ul className="max-h-[380px] overflow-y-auto">
+                      {notifications.map((n) => (
+                        <li key={n.id} className="border-b border-ivory/10 last:border-b-0">
+                          <a
+                            href={n.href ?? "#"}
+                            onClick={() => setAlertsOpen(false)}
+                            className="block px-4 py-3 transition-colors hover:bg-ivory/5"
+                          >
+                            <span className="block text-sm text-ivory/90">{n.label}</span>
+                            {n.detail && <span className="mt-1 block text-xs text-ivory/45">{n.detail}</span>}
+                          </a>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+              </div>
+            )}
             <div className="relative">
+
               <button
                 type="button"
                 onClick={() => setOpen((v) => !v)}
