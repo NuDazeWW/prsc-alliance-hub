@@ -123,40 +123,6 @@ function PortalHome() {
   ];
 
 
-  const cards = [
-    ...(showPrsc
-      ? [
-          {
-            icon: ScrollText,
-            eyebrow: "PRSC",
-            title: "The Standard",
-            copy: "An independent, evidence-based framework for measuring commercial readiness in sports.",
-            cta: "Refresh on PRSC",
-            panel: "prsc" as const,
-          },
-        ]
-      : []),
-    ...(showDis
-      ? [
-          {
-            icon: BarChart3,
-            eyebrow: "DIS",
-            title: "The Intelligence Platform",
-            copy: "Building the technology that turns the standard into actionable market intelligence.",
-            cta: "Learn about DIS",
-            panel: "dis" as const,
-          },
-        ]
-      : []),
-    {
-      icon: Target,
-      eyebrow: "Why Now",
-      title: "The Inflection Point",
-      copy: "Governance, methodology, and technology are converging as DIS enters investor prospecting.",
-      cta: "See What's Next",
-      panel: "next" as const,
-    },
-  ];
 
   return (
     <PortalShell memberName={name}>
