@@ -117,8 +117,8 @@ function PortalHome() {
     { label: "Overview", href: "#overview", icon: Home, active: true, onSelect: undefined as (() => void) | undefined },
     { label: "Your Role", href: "#role", icon: Users, active: false, onSelect: undefined },
     { label: "What Happens Next", href: "#next", icon: Flag, active: false, onSelect: () => setPanel("next") },
-    ...(showPrsc ? [{ label: "About PRSC", href: "#prsc", icon: ScrollText, active: false, onSelect: () => setPanel("prsc") }] : []),
-    ...(showDis ? [{ label: "About DIS", href: "#dis", icon: FileText, active: false, onSelect: () => setPanel("dis") }] : []),
+    ...(showPrsc ? [{ label: "Refresh on PRSC", href: "#prsc", icon: ScrollText, active: false, onSelect: () => setPanel("prsc") }] : []),
+    ...(showDis ? [{ label: "Learn about DIS", href: "#dis", icon: FileText, active: false, onSelect: () => setPanel("dis") }] : []),
     { label: "Questions", href: "#questions", icon: MessageSquare, active: false, onSelect: () => setPanel("questions") },
   ];
 
