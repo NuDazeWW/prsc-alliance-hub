@@ -210,7 +210,8 @@ function PortalHome() {
         {/* Main */}
         <main className="flex min-w-0 flex-col justify-between pb-5">
           {/* Hero */}
-          <section id="overview" className="relative overflow-hidden px-7 pb-5 pt-9 sm:px-10 lg:px-[3.5%] lg:pb-[clamp(2rem,2.6vw,3.5rem)] lg:pt-[clamp(2.75rem,3.6vw,4.5rem)]">
+          <section id="overview" className="relative overflow-hidden px-7 pb-5 pt-9 sm:px-10 lg:px-[3.5%] lg:pb-[clamp(3rem,3.8vw,5rem)] lg:pt-[clamp(4rem,5.2vw,6.75rem)]">
+
 
             <img
               src={heroRoad}
