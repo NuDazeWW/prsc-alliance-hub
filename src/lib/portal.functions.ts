@@ -154,7 +154,7 @@ const inviteSchema = z.object({
   email: z.string().trim().email().max(200), first_name: z.string().trim().min(1).max(80),
   last_name: z.string().trim().min(1).max(80), organization: z.string().trim().min(1).max(180),
   title: z.string().trim().max(160), entity: entitySchema, role: roleSchema,
-  why_you: z.string().trim().min(1).max(2000),
+  why_you: z.string().trim().min(20).max(2000),
 });
 export const invitePortalMember = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])

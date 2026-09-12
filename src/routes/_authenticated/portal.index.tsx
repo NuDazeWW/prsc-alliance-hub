@@ -277,17 +277,14 @@ function PortalHome() {
 
           {/* Why you */}
           <section id="role" className="px-7 pb-3 sm:px-10 lg:px-[2.5%]">
-            <div className="grid items-center gap-5 border border-gold/25 bg-[linear-gradient(135deg,var(--color-midnight),var(--color-navy))] p-5 lg:grid-cols-[2fr_1fr] lg:gap-6 lg:p-[clamp(1rem,1.5vw,1.5rem)]">
+            <div className="grid items-stretch gap-7 border border-gold/25 bg-[linear-gradient(135deg,var(--color-midnight),var(--color-navy))] p-7 sm:p-9 lg:min-h-[310px] lg:grid-cols-[2fr_1fr] lg:gap-10 lg:px-[clamp(2rem,3vw,3.5rem)] lg:py-[clamp(2.25rem,3vw,3.75rem)]">
               <div className="min-w-0">
                 <p className="text-[10px] uppercase tracking-[0.24em] text-gold">Why You</p>
-                <h2 className="mt-1.5 font-display text-[clamp(2rem,2.5vw,2.8rem)] leading-tight">{name}, Your Perspective Matters.</h2>
-                <p className="mt-2 max-w-[50rem] text-[15px] leading-7 text-ivory/70">{m.why_you}</p>
-                <div className="mt-3 h-px w-16 bg-gold" />
-                <Link to="/portal/questions" className="mt-3 inline-flex items-center gap-3 text-[14px] text-ivory/85 hover:text-gold">
-                  Read More <ArrowRight className="h-4 w-4 text-gold" />
-                </Link>
+                <h2 className="mt-2 font-display text-[clamp(2rem,2.5vw,2.8rem)] leading-tight">{name}, Your Perspective Matters.</h2>
+                <p className="mt-5 max-w-[52rem] text-[16px] leading-8 text-ivory/75">{m.why_you}</p>
+                <div className="mt-7 h-px w-16 bg-gold" />
               </div>
-              <div className="relative flex flex-col justify-center overflow-hidden border-gold/20 py-1 lg:border-l lg:pl-[8%]">
+              <div className="relative flex flex-col justify-center overflow-hidden border-gold/20 py-4 lg:border-l lg:pl-[12%]">
                 <blockquote className="font-display text-[20px] italic leading-snug text-gold lg:text-[24px]">
                   “Independent standards create stronger markets.”
                 </blockquote>
