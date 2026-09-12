@@ -369,7 +369,7 @@ function Admin() {
                 </div>
                 <InfoTip
                   title="Invite a member"
-                  body="Add a board member or advisor here. They receive a branded welcome email with a link to set their password and enter the private center. The “Why You” statement appears in their welcome center, so write it personally. Choose PRSC, DIS, or Both — their portal language adapts to the designation."
+                  body="Add a board member or advisor here. Before sending their first welcome email, explain why this person was chosen. That private, personalized message appears prominently in their welcome center. Choose PRSC, DIS, or Both — their portal language adapts to the designation."
                 />
               </div>
               <form onSubmit={invite} className="mt-7 grid gap-4 sm:grid-cols-2">
@@ -387,7 +387,20 @@ function Admin() {
                   <option value="board_member">Board member</option>
                   <option value="advisor">Advisor</option>
                 </select>
-                <Textarea name="why_you" placeholder="Personalized Why You statement" required className="min-h-28 text-base sm:col-span-2" />
+                <label className="sm:col-span-2">
+                  <span className="mb-2 block text-base font-medium text-ivory/90">Why this candidate was chosen</span>
+                  <span className="mb-3 block text-sm leading-6 text-ivory/55">
+                    This private message will appear in the member’s “Why You” section when they first enter the center.
+                  </span>
+                  <Textarea
+                    name="why_you"
+                    placeholder="Describe the experience, judgment, perspective, or relationships that led to this invitation."
+                    required
+                    minLength={20}
+                    maxLength={2000}
+                    className="min-h-40 text-base"
+                  />
+                </label>
                 <Button className="rounded-none bg-gold text-base text-navy sm:col-span-2">Send invitation</Button>
                 {status && <p className="text-base text-ivory/60 sm:col-span-2">{status}</p>}
               </form>
