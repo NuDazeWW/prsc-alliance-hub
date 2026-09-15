@@ -17,7 +17,14 @@ import {
   Users,
   X,
 } from "lucide-react";
-import { getAdminOverview, invitePortalMember } from "@/lib/portal.functions";
+import {
+  getAdminOverview,
+  getMemberDetail,
+  invitePortalMember,
+  setMemberAccess,
+  setMemberPackageStatus,
+  updateInquiry,
+} from "@/lib/portal.functions";
 import {
   deleteEmailTemplate,
   getEmailCenter,
