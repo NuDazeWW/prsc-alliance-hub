@@ -976,3 +976,21 @@ function Stat({ icon: Icon, label, value }: { icon: any; label: string; value: n
     </div>
   );
 }
+
+function Field({ label, value }: { label: string; value: string | null | undefined }) {
+  return (
+    <div>
+      <dt className="text-xs uppercase tracking-[0.16em] text-gold">{label}</dt>
+      <dd className="mt-1 whitespace-pre-wrap text-base leading-relaxed text-ivory/75">{value || "—"}</dd>
+    </div>
+  );
+}
+
+function Block({ label, children }: { label: string; children: React.ReactNode }) {
+  return (
+    <section className="border-t border-gold/15 pt-5">
+      <p className="text-sm uppercase tracking-[0.18em] text-ivory/45">{label}</p>
+      <div className="mt-4 grid gap-4 sm:grid-cols-2">{children}</div>
+    </section>
+  );
+}
