@@ -841,6 +841,78 @@ function Admin() {
         </div>
       </main>
 
+      {detailId && (
+        <div className="fixed inset-0 z-[60] grid place-items-center bg-navy-deep/85 p-4 backdrop-blur">
+          <div className="flex h-full max-h-[90vh] w-full max-w-[860px] flex-col border border-gold/30 bg-navy">
+            <div className="flex items-center justify-between border-b border-gold/20 px-6 py-4">
+              <div className="min-w-0">
+                <p className="text-xs uppercase tracking-[0.2em] text-gold">Submitted profile</p>
+                <p className="truncate text-base text-ivory/70">
+                  {(() => {
+                    const m = members.find((x) => x.id === detailId);
+                    return m ? `${m.first_name} ${m.last_name} · ${m.organization}` : "Member";
+                  })()}
+                </p>
+              </div>
+              <button type="button" aria-label="Close profile" onClick={() => setDetailId(null)} className="text-ivory/60 hover:text-gold">
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+            <div className="flex-1 overflow-y-auto px-6 py-6">
+              {preview ? (
+                <p className="text-base text-ivory/55">Preview mode: submitted profiles appear here once you are signed in.</p>
+              ) : detail.isLoading ? (
+                <p className="text-base text-gold">Opening profile…</p>
+              ) : detail.error || !detail.data ? (
+                <p className="text-base text-ivory/55">This profile could not be loaded.</p>
+              ) : !detail.data.profile ? (
+                <p className="text-base text-ivory/55">This member has not started their profile yet.</p>
+              ) : (
+                <div className="space-y-7">
+                  {detail.data.headshotUrl && (
+                    <img
+                      src={detail.data.headshotUrl}
+                      alt="Member headshot"
+                      className="h-40 w-40 border border-gold/30 object-cover"
+                    />
+                  )}
+                  <dl className="grid gap-4 sm:grid-cols-2">
+                    <Field label="Preferred name" value={detail.data.profile.preferred_name} />
+                    <Field label="Professional role" value={detail.data.profile.professional_role} />
+                    <Field label="Organization" value={detail.data.profile.current_organization} />
+                    <Field label="Preferred email" value={detail.data.profile.preferred_email} />
+                    <Field label="Preferred phone" value={detail.data.profile.preferred_phone} />
+                    <Field
+                      label="Submitted"
+                      value={detail.data.profile.submitted_at ? new Date(detail.data.profile.submitted_at).toLocaleString() : "Not submitted yet"}
+                    />
+                  </dl>
+                  <Block label="Experience">
+                    {Object.entries(detail.data.profile.experience_answers ?? {}).map(([k, v]) => (
+                      <Field key={k} label={k.replaceAll("_", " ")} value={String(v)} />
+                    ))}
+                  </Block>
+                  <Block label="Visibility instructions">
+                    {Object.entries(detail.data.profile.visibility_instructions ?? {}).map(([k, v]) => (
+                      <Field key={k} label={k.replaceAll("_", " ")} value={String(v)} />
+                    ))}
+                  </Block>
+                  <Block label="Restrictions">
+                    <Field label="Status" value={detail.data.profile.restriction_status} />
+                    <Field label="Details" value={detail.data.profile.restriction_details} />
+                  </Block>
+                  <Block label="Notes and questions">
+                    <Field label="Final notes" value={detail.data.profile.final_notes} />
+                    <Field label="Questions" value={detail.data.profile.questions} />
+                    <Field label="Contact requested" value={detail.data.profile.contact_requested ? "Yes" : "No"} />
+                  </Block>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
       {previewOpen && (
         <div className="fixed inset-0 z-[60] grid place-items-center bg-navy-deep/85 p-4 backdrop-blur">
           <div className="flex h-full max-h-[90vh] w-full max-w-[760px] flex-col border border-gold/30 bg-navy">
