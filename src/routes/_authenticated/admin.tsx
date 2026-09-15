@@ -792,12 +792,48 @@ function Admin() {
               {d.inquiries.length === 0 ? (
                 <p className="text-base text-ivory/45">No inquiries yet.</p>
               ) : (
-                d.inquiries.slice(0, 6).map((q: any) => (
-                  <article key={q.id} className="border-l-2 border-gold bg-ivory/[.025] p-4">
-                    <p className="text-base font-medium">{q.subject}</p>
-                    <p className="mt-2 line-clamp-2 text-base text-ivory/55">{q.message}</p>
-                  </article>
-                ))
+                d.inquiries.slice(0, 8).map((q: any) => {
+                  const member = members.find((x) => x.id === q.member_id);
+                  const resolved = q.status === "resolved";
+                  const notes = inquiryDraft[q.id] ?? q.admin_notes ?? "";
+                  return (
+                    <article
+                      key={q.id}
+                      className={`border-l-2 bg-ivory/[.025] p-4 ${resolved ? "border-ivory/25 opacity-75" : "border-gold"}`}
+                    >
+                      <div className="flex flex-wrap items-start justify-between gap-3">
+                        <div className="min-w-0">
+                          <p className="text-base font-medium">{q.subject}</p>
+                          <p className="mt-0.5 text-sm text-ivory/40">
+                            {member ? `${member.first_name} ${member.last_name}` : "Member"} ·{" "}
+                            {resolved ? "Resolved" : "Open"}
+                          </p>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => void saveInquiry(q.id, resolved ? "open" : "resolved", notes)}
+                          className="flex shrink-0 items-center gap-1.5 border border-gold/40 px-2.5 py-1.5 text-sm text-gold transition-colors hover:bg-gold/10"
+                        >
+                          <CheckCircle2 className="h-3.5 w-3.5" /> {resolved ? "Reopen" : "Mark resolved"}
+                        </button>
+                      </div>
+                      <p className="mt-2 text-base text-ivory/55">{q.message}</p>
+                      <Textarea
+                        value={notes}
+                        onChange={(e) => setInquiryDraft((prev) => ({ ...prev, [q.id]: e.target.value }))}
+                        placeholder="Private note for your records (not visible to the member)"
+                        className="mt-3 min-h-20 text-base"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => void saveInquiry(q.id, q.status, notes)}
+                        className="mt-2 text-sm text-gold transition-colors hover:text-ivory"
+                      >
+                        Save note
+                      </button>
+                    </article>
+                  );
+                })
               )}
               </div>
             </section>
