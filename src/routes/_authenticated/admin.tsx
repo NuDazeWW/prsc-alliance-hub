@@ -12,6 +12,8 @@ import {
   MessageSquare,
   Plus,
   Send,
+  ShieldCheck,
+  ShieldOff,
   Trash2,
   Upload,
   Users,
