@@ -690,14 +690,17 @@ function Admin() {
                   <tr>
                     <th className="p-4">Member</th>
                     <th>Designation</th>
-                    <th>Status</th>
+                    <th>Package status</th>
                     <th>Emails received</th>
-                    <th>Last sent</th>
+                    <th className="pr-4">Actions</th>
                   </tr>
                 </thead>
                 <tbody>
                   {d.members.map((m: any) => {
-                    const list = (sendsByMember.get(m.id) ?? []).filter((s) => s.status === "sent");
+                    const all = sendsByMember.get(m.id) ?? [];
+                    const list = all.filter((s) => s.status === "sent");
+                    const failed = all.filter((s) => s.status !== "sent");
+                    const revoked = m.status === "revoked";
                     return (
                       <tr key={m.id} className="border-t border-ivory/10 align-top">
                         <td className="p-4">
@@ -705,9 +708,23 @@ function Admin() {
                             {m.first_name} {m.last_name}
                           </strong>
                           <span className="block text-sm text-ivory/40">{m.email}</span>
+                          <span className={`mt-1 inline-block text-xs uppercase tracking-[0.14em] ${revoked ? "text-red-300/80" : "text-ivory/40"}`}>
+                            Access: {m.status}
+                          </span>
                         </td>
                         <td className="uppercase">{m.entity}</td>
-                        <td>{String(m.package_status).replaceAll("_", " ")}</td>
+                        <td className="py-4 pr-3">
+                          <select
+                            value={m.package_status}
+                            onChange={(e) => void changePackage(m.id, e.target.value)}
+                            className="h-9 w-full min-w-[150px] rounded-md border border-input bg-navy px-2 text-sm"
+                          >
+                            <option value="awaiting_profile">Awaiting profile</option>
+                            <option value="in_preparation">In preparation</option>
+                            <option value="profile_received">Profile received</option>
+                            <option value="package_ready">Package ready</option>
+                          </select>
+                        </td>
                         <td className="py-4 pr-4">
                           {list.length === 0 ? (
                             <span className="text-ivory/40">None yet</span>
@@ -720,14 +737,45 @@ function Admin() {
                               ))}
                             </span>
                           )}
+                          {failed.length > 0 && (
+                            <span className="mt-1.5 flex items-center gap-1.5 text-xs text-red-300/85">
+                              <AlertTriangle className="h-3 w-3" /> {failed.length} failed send{failed.length > 1 ? "s" : ""}
+                            </span>
+                          )}
+                          <span className="mt-1 block text-xs text-ivory/35">
+                            Last sent: {list[0] ? new Date(list[0].created_at).toLocaleDateString() : "—"}
+                          </span>
                         </td>
-                        <td className="text-ivory/45">{list[0] ? new Date(list[0].created_at).toLocaleDateString() : "—"}</td>
+                        <td className="py-4 pr-4">
+                          <div className="flex flex-col gap-2">
+                            <button
+                              type="button"
+                              onClick={() => setDetailId(m.id)}
+                              className="flex items-center gap-1.5 border border-gold/40 px-2.5 py-1.5 text-sm text-gold transition-colors hover:bg-gold/10"
+                            >
+                              <Eye className="h-3.5 w-3.5" /> View profile
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => void changeAccess(m.id, revoked ? "active" : "revoked")}
+                              className={`flex items-center gap-1.5 border px-2.5 py-1.5 text-sm transition-colors ${
+                                revoked
+                                  ? "border-ivory/25 text-ivory/70 hover:border-gold/40 hover:text-gold"
+                                  : "border-red-400/35 text-red-300/85 hover:bg-red-400/10"
+                              }`}
+                            >
+                              {revoked ? <ShieldCheck className="h-3.5 w-3.5" /> : <ShieldOff className="h-3.5 w-3.5" />}
+                              {revoked ? "Reactivate" : "Revoke access"}
+                            </button>
+                          </div>
+                        </td>
                       </tr>
                     );
                   })}
                 </tbody>
               </table>
               </div>
+              {memberBusy && <p className="mt-3 text-base text-ivory/60">{memberBusy}</p>}
             </section>
 
             <section className="border border-gold/20 p-6 sm:p-8">
