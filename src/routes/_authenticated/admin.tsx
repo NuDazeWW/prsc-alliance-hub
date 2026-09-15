@@ -245,8 +245,19 @@ function Admin() {
         });
       }
     }
+    for (const s of sends) {
+      if (s.status !== "sent") {
+        const m = members.find((x) => x.id === s.member_id);
+        items.unshift({
+          id: `fail-${s.id}`,
+          label: `Email failed to ${m ? `${m.first_name} ${m.last_name}` : s.recipient_email}`,
+          detail: `“${s.template_name}” was not delivered — resend required`,
+          href: "#tracker",
+        });
+      }
+    }
     return items;
-  }, [overview.data, members, sendsByMember]);
+  }, [overview.data, members, sends, sendsByMember]);
 
   async function invite(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
