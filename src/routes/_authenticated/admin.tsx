@@ -12,12 +12,21 @@ import {
   MessageSquare,
   Plus,
   Send,
+  ShieldCheck,
+  ShieldOff,
   Trash2,
   Upload,
   Users,
   X,
 } from "lucide-react";
-import { getAdminOverview, invitePortalMember } from "@/lib/portal.functions";
+import {
+  getAdminOverview,
+  getMemberDetail,
+  invitePortalMember,
+  setMemberAccess,
+  setMemberPackageStatus,
+  updateInquiry,
+} from "@/lib/portal.functions";
 import {
   deleteEmailTemplate,
   getEmailCenter,
@@ -149,6 +158,49 @@ function Admin() {
   const [recipients, setRecipients] = useState<string[]>([]);
   const [sending, setSending] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
+  const [detailId, setDetailId] = useState<string | null>(null);
+  const [memberBusy, setMemberBusy] = useState("");
+  const [inquiryDraft, setInquiryDraft] = useState<Record<string, string>>({});
+
+  const detail = useQuery({
+    queryKey: ["portal-admin-member", detailId],
+    enabled: Boolean(detailId) && !preview,
+    retry: false,
+    queryFn: () => getMemberDetail({ data: { member_id: detailId! } }),
+  });
+
+  async function changeAccess(id: string, status: "active" | "revoked") {
+    if (preview) return setMemberBusy("Preview mode: access changes are available once you are signed in.");
+    try {
+      await setMemberAccess({ data: { member_id: id, status } });
+      setMemberBusy(status === "revoked" ? "Access revoked." : "Access restored.");
+      await overview.refetch();
+    } catch (error) {
+      setMemberBusy(error instanceof Error ? error.message : "Could not update access.");
+    }
+  }
+
+  async function changePackage(id: string, value: string) {
+    if (preview) return setMemberBusy("Preview mode: package changes are available once you are signed in.");
+    try {
+      await setMemberPackageStatus({ data: { member_id: id, package_status: value as any } });
+      setMemberBusy("Package status updated.");
+      await overview.refetch();
+    } catch (error) {
+      setMemberBusy(error instanceof Error ? error.message : "Could not update the package status.");
+    }
+  }
+
+  async function saveInquiry(id: string, status: "open" | "resolved", notes: string) {
+    if (preview) return setMemberBusy("Preview mode: inquiry updates are available once you are signed in.");
+    try {
+      await updateInquiry({ data: { id, status, admin_notes: notes } });
+      setMemberBusy(status === "resolved" ? "Inquiry marked resolved." : "Inquiry reopened.");
+      await overview.refetch();
+    } catch (error) {
+      setMemberBusy(error instanceof Error ? error.message : "Could not update the inquiry.");
+    }
+  }
 
   const members: any[] = overview.data?.members ?? [];
   const templates: EmailTemplate[] = email.data?.templates ?? [];
@@ -195,8 +247,19 @@ function Admin() {
         });
       }
     }
+    for (const s of sends) {
+      if (s.status !== "sent") {
+        const m = members.find((x) => x.id === s.member_id);
+        items.unshift({
+          id: `fail-${s.id}`,
+          label: `Email failed to ${m ? `${m.first_name} ${m.last_name}` : s.recipient_email}`,
+          detail: `“${s.template_name}” was not delivered — resend required`,
+          href: "#tracker",
+        });
+      }
+    }
     return items;
-  }, [overview.data, members, sendsByMember]);
+  }, [overview.data, members, sends, sendsByMember]);
 
   async function invite(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -629,14 +692,17 @@ function Admin() {
                   <tr>
                     <th className="p-4">Member</th>
                     <th>Designation</th>
-                    <th>Status</th>
+                    <th>Package status</th>
                     <th>Emails received</th>
-                    <th>Last sent</th>
+                    <th className="pr-4">Actions</th>
                   </tr>
                 </thead>
                 <tbody>
                   {d.members.map((m: any) => {
-                    const list = (sendsByMember.get(m.id) ?? []).filter((s) => s.status === "sent");
+                    const all = sendsByMember.get(m.id) ?? [];
+                    const list = all.filter((s) => s.status === "sent");
+                    const failed = all.filter((s) => s.status !== "sent");
+                    const revoked = m.status === "revoked";
                     return (
                       <tr key={m.id} className="border-t border-ivory/10 align-top">
                         <td className="p-4">
@@ -644,9 +710,23 @@ function Admin() {
                             {m.first_name} {m.last_name}
                           </strong>
                           <span className="block text-sm text-ivory/40">{m.email}</span>
+                          <span className={`mt-1 inline-block text-xs uppercase tracking-[0.14em] ${revoked ? "text-red-300/80" : "text-ivory/40"}`}>
+                            Access: {m.status}
+                          </span>
                         </td>
                         <td className="uppercase">{m.entity}</td>
-                        <td>{String(m.package_status).replaceAll("_", " ")}</td>
+                        <td className="py-4 pr-3">
+                          <select
+                            value={m.package_status}
+                            onChange={(e) => void changePackage(m.id, e.target.value)}
+                            className="h-9 w-full min-w-[150px] rounded-md border border-input bg-navy px-2 text-sm"
+                          >
+                            <option value="awaiting_profile">Awaiting profile</option>
+                            <option value="in_preparation">In preparation</option>
+                            <option value="profile_received">Profile received</option>
+                            <option value="package_ready">Package ready</option>
+                          </select>
+                        </td>
                         <td className="py-4 pr-4">
                           {list.length === 0 ? (
                             <span className="text-ivory/40">None yet</span>
@@ -659,14 +739,45 @@ function Admin() {
                               ))}
                             </span>
                           )}
+                          {failed.length > 0 && (
+                            <span className="mt-1.5 flex items-center gap-1.5 text-xs text-red-300/85">
+                              <AlertTriangle className="h-3 w-3" /> {failed.length} failed send{failed.length > 1 ? "s" : ""}
+                            </span>
+                          )}
+                          <span className="mt-1 block text-xs text-ivory/35">
+                            Last sent: {list[0] ? new Date(list[0].created_at).toLocaleDateString() : "—"}
+                          </span>
                         </td>
-                        <td className="text-ivory/45">{list[0] ? new Date(list[0].created_at).toLocaleDateString() : "—"}</td>
+                        <td className="py-4 pr-4">
+                          <div className="flex flex-col gap-2">
+                            <button
+                              type="button"
+                              onClick={() => setDetailId(m.id)}
+                              className="flex items-center gap-1.5 border border-gold/40 px-2.5 py-1.5 text-sm text-gold transition-colors hover:bg-gold/10"
+                            >
+                              <Eye className="h-3.5 w-3.5" /> View profile
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => void changeAccess(m.id, revoked ? "active" : "revoked")}
+                              className={`flex items-center gap-1.5 border px-2.5 py-1.5 text-sm transition-colors ${
+                                revoked
+                                  ? "border-ivory/25 text-ivory/70 hover:border-gold/40 hover:text-gold"
+                                  : "border-red-400/35 text-red-300/85 hover:bg-red-400/10"
+                              }`}
+                            >
+                              {revoked ? <ShieldCheck className="h-3.5 w-3.5" /> : <ShieldOff className="h-3.5 w-3.5" />}
+                              {revoked ? "Reactivate" : "Revoke access"}
+                            </button>
+                          </div>
+                        </td>
                       </tr>
                     );
                   })}
                 </tbody>
               </table>
               </div>
+              {memberBusy && <p className="mt-3 text-base text-ivory/60">{memberBusy}</p>}
             </section>
 
             <section className="border border-gold/20 p-6 sm:p-8">
@@ -683,18 +794,126 @@ function Admin() {
               {d.inquiries.length === 0 ? (
                 <p className="text-base text-ivory/45">No inquiries yet.</p>
               ) : (
-                d.inquiries.slice(0, 6).map((q: any) => (
-                  <article key={q.id} className="border-l-2 border-gold bg-ivory/[.025] p-4">
-                    <p className="text-base font-medium">{q.subject}</p>
-                    <p className="mt-2 line-clamp-2 text-base text-ivory/55">{q.message}</p>
-                  </article>
-                ))
+                d.inquiries.slice(0, 8).map((q: any) => {
+                  const member = members.find((x) => x.id === q.member_id);
+                  const resolved = q.status === "resolved";
+                  const notes = inquiryDraft[q.id] ?? q.admin_notes ?? "";
+                  return (
+                    <article
+                      key={q.id}
+                      className={`border-l-2 bg-ivory/[.025] p-4 ${resolved ? "border-ivory/25 opacity-75" : "border-gold"}`}
+                    >
+                      <div className="flex flex-wrap items-start justify-between gap-3">
+                        <div className="min-w-0">
+                          <p className="text-base font-medium">{q.subject}</p>
+                          <p className="mt-0.5 text-sm text-ivory/40">
+                            {member ? `${member.first_name} ${member.last_name}` : "Member"} ·{" "}
+                            {resolved ? "Resolved" : "Open"}
+                          </p>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => void saveInquiry(q.id, resolved ? "open" : "resolved", notes)}
+                          className="flex shrink-0 items-center gap-1.5 border border-gold/40 px-2.5 py-1.5 text-sm text-gold transition-colors hover:bg-gold/10"
+                        >
+                          <CheckCircle2 className="h-3.5 w-3.5" /> {resolved ? "Reopen" : "Mark resolved"}
+                        </button>
+                      </div>
+                      <p className="mt-2 text-base text-ivory/55">{q.message}</p>
+                      <Textarea
+                        value={notes}
+                        onChange={(e) => setInquiryDraft((prev) => ({ ...prev, [q.id]: e.target.value }))}
+                        placeholder="Private note for your records (not visible to the member)"
+                        className="mt-3 min-h-20 text-base"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => void saveInquiry(q.id, q.status, notes)}
+                        className="mt-2 text-sm text-gold transition-colors hover:text-ivory"
+                      >
+                        Save note
+                      </button>
+                    </article>
+                  );
+                })
               )}
               </div>
             </section>
           </div>
         </div>
       </main>
+
+      {detailId && (
+        <div className="fixed inset-0 z-[60] grid place-items-center bg-navy-deep/85 p-4 backdrop-blur">
+          <div className="flex h-full max-h-[90vh] w-full max-w-[860px] flex-col border border-gold/30 bg-navy">
+            <div className="flex items-center justify-between border-b border-gold/20 px-6 py-4">
+              <div className="min-w-0">
+                <p className="text-xs uppercase tracking-[0.2em] text-gold">Submitted profile</p>
+                <p className="truncate text-base text-ivory/70">
+                  {(() => {
+                    const m = members.find((x) => x.id === detailId);
+                    return m ? `${m.first_name} ${m.last_name} · ${m.organization}` : "Member";
+                  })()}
+                </p>
+              </div>
+              <button type="button" aria-label="Close profile" onClick={() => setDetailId(null)} className="text-ivory/60 hover:text-gold">
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+            <div className="flex-1 overflow-y-auto px-6 py-6">
+              {preview ? (
+                <p className="text-base text-ivory/55">Preview mode: submitted profiles appear here once you are signed in.</p>
+              ) : detail.isLoading ? (
+                <p className="text-base text-gold">Opening profile…</p>
+              ) : detail.error || !detail.data ? (
+                <p className="text-base text-ivory/55">This profile could not be loaded.</p>
+              ) : !detail.data.profile ? (
+                <p className="text-base text-ivory/55">This member has not started their profile yet.</p>
+              ) : (
+                <div className="space-y-7">
+                  {detail.data.headshotUrl && (
+                    <img
+                      src={detail.data.headshotUrl}
+                      alt="Member headshot"
+                      className="h-40 w-40 border border-gold/30 object-cover"
+                    />
+                  )}
+                  <dl className="grid gap-4 sm:grid-cols-2">
+                    <Field label="Preferred name" value={detail.data.profile.preferred_name} />
+                    <Field label="Professional role" value={detail.data.profile.professional_role} />
+                    <Field label="Organization" value={detail.data.profile.current_organization} />
+                    <Field label="Preferred email" value={detail.data.profile.preferred_email} />
+                    <Field label="Preferred phone" value={detail.data.profile.preferred_phone} />
+                    <Field
+                      label="Submitted"
+                      value={detail.data.profile.submitted_at ? new Date(detail.data.profile.submitted_at).toLocaleString() : "Not submitted yet"}
+                    />
+                  </dl>
+                  <Block label="Experience">
+                    {Object.entries(detail.data.profile.experience_answers ?? {}).map(([k, v]) => (
+                      <Field key={k} label={k.replaceAll("_", " ")} value={String(v)} />
+                    ))}
+                  </Block>
+                  <Block label="Visibility instructions">
+                    {Object.entries(detail.data.profile.visibility_instructions ?? {}).map(([k, v]) => (
+                      <Field key={k} label={k.replaceAll("_", " ")} value={String(v)} />
+                    ))}
+                  </Block>
+                  <Block label="Restrictions">
+                    <Field label="Status" value={detail.data.profile.restriction_status} />
+                    <Field label="Details" value={detail.data.profile.restriction_details} />
+                  </Block>
+                  <Block label="Notes and questions">
+                    <Field label="Final notes" value={detail.data.profile.final_notes} />
+                    <Field label="Questions" value={detail.data.profile.questions} />
+                    <Field label="Contact requested" value={detail.data.profile.contact_requested ? "Yes" : "No"} />
+                  </Block>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
 
       {previewOpen && (
         <div className="fixed inset-0 z-[60] grid place-items-center bg-navy-deep/85 p-4 backdrop-blur">
@@ -755,5 +974,23 @@ function Stat({ icon: Icon, label, value }: { icon: any; label: string; value: n
       <p className="mt-6 font-display text-4xl">{value}</p>
       <p className="mt-1 text-sm uppercase text-ivory/45">{label}</p>
     </div>
+  );
+}
+
+function Field({ label, value }: { label: string; value: string | null | undefined }) {
+  return (
+    <div>
+      <dt className="text-xs uppercase tracking-[0.16em] text-gold">{label}</dt>
+      <dd className="mt-1 whitespace-pre-wrap text-base leading-relaxed text-ivory/75">{value || "—"}</dd>
+    </div>
+  );
+}
+
+function Block({ label, children }: { label: string; children: React.ReactNode }) {
+  return (
+    <section className="border-t border-gold/15 pt-5">
+      <p className="text-sm uppercase tracking-[0.18em] text-ivory/45">{label}</p>
+      <div className="mt-4 grid gap-4 sm:grid-cols-2">{children}</div>
+    </section>
   );
 }

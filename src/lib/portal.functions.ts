@@ -190,6 +190,104 @@ export const getAdminOverview = createServerFn({ method: "GET" })
     return { members: (members ?? []) as PortalMember[], inquiries: inquiries ?? [], activity: activity ?? [] };
   });
 
+export const getMemberDetail = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input) => z.object({ member_id: z.string().uuid() }).parse(input))
+  .handler(async ({ context, data }) => {
+    await assertAdmin(context);
+    const { data: member, error } = await context.supabase
+      .from("portal_members")
+      .select("*")
+      .eq("id", data.member_id)
+      .single();
+    if (error) throw error;
+    const { data: profile } = await context.supabase
+      .from("portal_profiles")
+      .select("*")
+      .eq("member_id", data.member_id)
+      .maybeSingle();
+    let headshotUrl: string | null = null;
+    if (profile?.headshot_path) {
+      const { data: signed } = await context.supabase.storage
+        .from(HEADSHOT_BUCKET)
+        .createSignedUrl(profile.headshot_path, 3600);
+      headshotUrl = signed?.signedUrl ?? null;
+    }
+    return { member: member as PortalMember, profile: (profile ?? null) as PortalProfile | null, headshotUrl };
+  });
+
+export const setMemberAccess = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input) =>
+    z.object({ member_id: z.string().uuid(), status: z.enum(["invited", "active", "revoked"]) }).parse(input),
+  )
+  .handler(async ({ context, data }) => {
+    await assertAdmin(context);
+    const { error } = await context.supabase
+      .from("portal_members")
+      .update({ status: data.status })
+      .eq("id", data.member_id);
+    if (error) throw error;
+    await context.supabase.from("portal_activity").insert({
+      member_id: data.member_id,
+      actor_user_id: context.userId,
+      event_type: data.status === "revoked" ? "access_revoked" : "access_restored",
+      metadata: { status: data.status },
+    });
+    return { ok: true };
+  });
+
+export const setMemberPackageStatus = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input) =>
+    z
+      .object({
+        member_id: z.string().uuid(),
+        package_status: z.enum(["awaiting_profile", "in_preparation", "profile_received", "package_ready"]),
+      })
+      .parse(input),
+  )
+  .handler(async ({ context, data }) => {
+    await assertAdmin(context);
+    const { error } = await context.supabase
+      .from("portal_members")
+      .update({ package_status: data.package_status })
+      .eq("id", data.member_id);
+    if (error) throw error;
+    await context.supabase.from("portal_activity").insert({
+      member_id: data.member_id,
+      actor_user_id: context.userId,
+      event_type: "package_status_changed",
+      metadata: { package_status: data.package_status },
+    });
+    return { ok: true };
+  });
+
+export const updateInquiry = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input) =>
+    z
+      .object({
+        id: z.string().uuid(),
+        status: z.enum(["open", "resolved"]),
+        admin_notes: z.string().trim().max(4000).optional().default(""),
+      })
+      .parse(input),
+  )
+  .handler(async ({ context, data }) => {
+    await assertAdmin(context);
+    const { error } = await context.supabase
+      .from("portal_inquiries")
+      .update({
+        status: data.status,
+        admin_notes: data.admin_notes || null,
+        resolved_at: data.status === "resolved" ? new Date().toISOString() : null,
+      })
+      .eq("id", data.id);
+    if (error) throw error;
+    return { ok: true };
+  });
+
 const PORTAL_HOSTS = new Set(["access.prscstandards.org", "access.prscstandards.com"]);
 
 export const getRequestHost = createServerFn({ method: "GET" })
