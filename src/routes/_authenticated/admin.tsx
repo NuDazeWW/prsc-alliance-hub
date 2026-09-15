@@ -156,6 +156,49 @@ function Admin() {
   const [recipients, setRecipients] = useState<string[]>([]);
   const [sending, setSending] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
+  const [detailId, setDetailId] = useState<string | null>(null);
+  const [memberBusy, setMemberBusy] = useState("");
+  const [inquiryDraft, setInquiryDraft] = useState<Record<string, string>>({});
+
+  const detail = useQuery({
+    queryKey: ["portal-admin-member", detailId],
+    enabled: Boolean(detailId) && !preview,
+    retry: false,
+    queryFn: () => getMemberDetail({ data: { member_id: detailId! } }),
+  });
+
+  async function changeAccess(id: string, status: "active" | "revoked") {
+    if (preview) return setMemberBusy("Preview mode: access changes are available once you are signed in.");
+    try {
+      await setMemberAccess({ data: { member_id: id, status } });
+      setMemberBusy(status === "revoked" ? "Access revoked." : "Access restored.");
+      await overview.refetch();
+    } catch (error) {
+      setMemberBusy(error instanceof Error ? error.message : "Could not update access.");
+    }
+  }
+
+  async function changePackage(id: string, value: string) {
+    if (preview) return setMemberBusy("Preview mode: package changes are available once you are signed in.");
+    try {
+      await setMemberPackageStatus({ data: { member_id: id, package_status: value as any } });
+      setMemberBusy("Package status updated.");
+      await overview.refetch();
+    } catch (error) {
+      setMemberBusy(error instanceof Error ? error.message : "Could not update the package status.");
+    }
+  }
+
+  async function saveInquiry(id: string, status: "open" | "resolved", notes: string) {
+    if (preview) return setMemberBusy("Preview mode: inquiry updates are available once you are signed in.");
+    try {
+      await updateInquiry({ data: { id, status, admin_notes: notes } });
+      setMemberBusy(status === "resolved" ? "Inquiry marked resolved." : "Inquiry reopened.");
+      await overview.refetch();
+    } catch (error) {
+      setMemberBusy(error instanceof Error ? error.message : "Could not update the inquiry.");
+    }
+  }
 
   const members: any[] = overview.data?.members ?? [];
   const templates: EmailTemplate[] = email.data?.templates ?? [];
