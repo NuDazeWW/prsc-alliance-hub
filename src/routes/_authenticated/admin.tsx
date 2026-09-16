@@ -161,6 +161,55 @@ function Admin() {
   const [detailId, setDetailId] = useState<string | null>(null);
   const [memberBusy, setMemberBusy] = useState("");
   const [inquiryDraft, setInquiryDraft] = useState<Record<string, string>>({});
+  const listRef = useRef<HTMLInputElement>(null);
+  const [importRows, setImportRows] = useState<MemberRow[]>([]);
+  const [importErrors, setImportErrors] = useState<string[]>([]);
+  const [importStatus, setImportStatus] = useState("");
+  const [importResults, setImportResults] = useState<{ email: string; ok: boolean; message: string }[]>([]);
+  const [sendOnImport, setSendOnImport] = useState(false);
+  const [importing, setImporting] = useState(false);
+
+  async function onMemberList(file: File) {
+    setImportResults([]);
+    setImportStatus("");
+    const { rows, errors } = parseMemberList(await file.text());
+    setImportRows(rows);
+    setImportErrors(errors);
+    setImportStatus(
+      rows.length
+        ? `${rows.length} member${rows.length === 1 ? "" : "s"} ready from ${file.name}.`
+        : `No usable rows found in ${file.name}.`,
+    );
+  }
+
+  async function runImport() {
+    if (!importRows.length) return;
+    if (preview) {
+      setImportStatus("Preview mode: the list uploads once you are signed in.");
+      return;
+    }
+    setImporting(true);
+    try {
+      const res = await importPortalMembers({ data: { rows: importRows, send_invitations: sendOnImport } });
+      setImportResults(res.results);
+      setImportStatus(`${res.added} added${res.failed ? `, ${res.failed} could not be added` : ""}.`);
+      setImportRows([]);
+      if (listRef.current) listRef.current.value = "";
+      await overview.refetch();
+    } catch (error) {
+      setImportStatus(error instanceof Error ? error.message : "The list could not be uploaded.");
+    } finally {
+      setImporting(false);
+    }
+  }
+
+  function clearImport() {
+    setImportRows([]);
+    setImportErrors([]);
+    setImportResults([]);
+    setImportStatus("");
+    if (listRef.current) listRef.current.value = "";
+  }
 
   const detail = useQuery({
     queryKey: ["portal-admin-member", detailId],
