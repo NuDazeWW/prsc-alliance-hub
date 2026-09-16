@@ -602,6 +602,104 @@ function Admin() {
               </form>
             </section>
 
+            <section className="border border-gold/20 p-6 sm:p-8">
+              <div className="flex items-start justify-between gap-3">
+                <div className="flex items-center gap-3">
+                  <Upload className="h-5 w-5 text-gold" />
+                  <h2 className="font-display text-3xl">Upload a member list</h2>
+                </div>
+                <InfoTip
+                  title="Upload a member list"
+                  body="Add several board members and advisors at once from a spreadsheet saved as CSV. Download the template, fill in one row per person, then upload it. Everyone is reviewed before anything is saved. Leave the invitation box unchecked to add people quietly now and send their welcome emails later from Compose & Send."
+                />
+              </div>
+
+              <p className="mt-5 text-base leading-7 text-ivory/60">
+                One row per person, with columns for first name, last name, email, organization, title, designation
+                (PRSC, DIS, or Both), role (Board member or Advisor), and the private “why you” note.
+              </p>
+
+              <div className="mt-6 flex flex-wrap items-center gap-3">
+                <Button type="button" variant="outline" className="rounded-none text-base" onClick={downloadListTemplate}>
+                  Download template
+                </Button>
+                <Button type="button" variant="outline" className="rounded-none text-base" onClick={() => listRef.current?.click()}>
+                  Choose file
+                </Button>
+                <input
+                  ref={listRef}
+                  type="file"
+                  accept=".csv,text/csv"
+                  className="hidden"
+                  onChange={(e) => {
+                    const file = e.target.files?.[0];
+                    if (file) void onMemberList(file);
+                  }}
+                />
+              </div>
+
+              {importRows.length > 0 && (
+                <div className="mt-6 border border-gold/15">
+                  <div className="max-h-64 overflow-y-auto">
+                    <table className="w-full text-base">
+                      <tbody>
+                        {importRows.map((r) => (
+                          <tr key={r.email} className="border-b border-ivory/10 last:border-b-0">
+                            <td className="px-4 py-2.5">{r.first_name} {r.last_name}</td>
+                            <td className="px-4 py-2.5 text-ivory/60">{r.email}</td>
+                            <td className="px-4 py-2.5 text-ivory/60">{r.organization}</td>
+                            <td className="px-4 py-2.5 uppercase text-gold">{r.entity}</td>
+                            <td className="px-4 py-2.5 text-ivory/60">{r.role === "advisor" ? "Advisor" : "Board member"}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              )}
+
+              {importErrors.length > 0 && (
+                <ul className="mt-5 space-y-1.5 text-base text-amber-300/80">
+                  {importErrors.map((e) => (
+                    <li key={e}>{e}</li>
+                  ))}
+                </ul>
+              )}
+
+              {importRows.length > 0 && (
+                <div className="mt-6 flex flex-wrap items-center gap-4">
+                  <label className="flex items-center gap-2.5 text-base text-ivory/75">
+                    <input
+                      type="checkbox"
+                      checked={sendOnImport}
+                      onChange={(e) => setSendOnImport(e.target.checked)}
+                      className="h-4 w-4 accent-[hsl(var(--gold))]"
+                    />
+                    Send welcome invitations now
+                  </label>
+                  <Button type="button" disabled={importing} className="rounded-none bg-gold text-base text-navy" onClick={runImport}>
+                    {importing ? "Uploading…" : `Add ${importRows.length} member${importRows.length === 1 ? "" : "s"}`}
+                  </Button>
+                  <Button type="button" variant="ghost" className="rounded-none text-base text-ivory/60" onClick={clearImport}>
+                    <Trash2 className="mr-2 h-4 w-4" /> Discard
+                  </Button>
+                </div>
+              )}
+
+              {importStatus && <p className="mt-5 text-base text-ivory/60">{importStatus}</p>}
+
+              {importResults.length > 0 && (
+                <ul className="mt-4 space-y-1.5 text-base">
+                  {importResults.map((r) => (
+                    <li key={r.email} className={r.ok ? "text-ivory/60" : "text-amber-300/80"}>
+                      {r.email} — {r.message}
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </section>
+
+
             {/* Template sidebar — constrained to the same column width as the invite panel */}
             <aside className="border border-gold/20">
               <div className="flex items-center justify-between gap-3 border-b border-gold/15 px-5 py-4">
