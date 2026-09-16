@@ -456,15 +456,6 @@ function PortalHome() {
                   first credible standard, the first benchmark, and the intelligence platform that can make better
                   partnership decisions possible across the market.
                 </p>
-                <button
-                  type="button"
-                  onClick={() => setPanel("next")}
-                  className="cta-glow-outline mt-7 inline-flex items-center gap-4 rounded-full px-7 py-3.5 text-[15px] transition-all"
-                >
-                  <span className="relative z-10 flex items-center gap-4">
-                    Learn about DIS <ArrowRight className="h-4 w-4" />
-                  </span>
-                </button>
               </div>
               <div className="flex flex-col justify-center gap-8">
                 <div className="flex flex-wrap items-start gap-x-2 gap-y-5">
