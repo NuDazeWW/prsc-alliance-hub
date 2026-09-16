@@ -1092,7 +1092,7 @@ function Admin() {
                 <X className="h-5 w-5" />
               </button>
             </div>
-            <div className="flex-1 overflow-y-auto px-6 py-6">
+            <div className="flex-1 space-y-7 overflow-y-auto px-6 py-6">
               {preview ? (
                 <p className="text-base text-ivory/55">Preview mode: submitted profiles appear here once you are signed in.</p>
               ) : detail.isLoading ? (
@@ -1142,6 +1142,15 @@ function Admin() {
                   </Block>
                 </div>
               )}
+
+              <AdminMemberDocuments
+                memberId={detailId}
+                memberName={(() => {
+                  const m = members.find((x) => x.id === detailId);
+                  return m ? `${m.first_name} ${m.last_name}` : "this member";
+                })()}
+                preview={preview}
+              />
             </div>
           </div>
         </div>
