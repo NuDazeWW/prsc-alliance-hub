@@ -81,6 +81,18 @@ function PortalHome() {
     retry: false,
     enabled: Boolean(data?.member),
   });
+  const documents = useQuery({
+    queryKey: ["my-documents"],
+    queryFn: () => getMyDocuments().catch(() => null),
+    retry: false,
+    enabled: Boolean(data?.member && data?.hasProfile),
+  });
+  const queryClient = useQueryClient();
+  const [initialsDraft, setInitialsDraft] = useState<Record<string, string>>({});
+  const acknowledge = useMutation({
+    mutationFn: (input: { document_id: string; initials: string }) => acknowledgeDocument({ data: input }),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["my-documents"] }),
+  });
   const navigate = useNavigate();
   const [panel, setPanel] = useState<"role" | "prsc" | "dis" | "documents" | "questions" | null>(null);
   useEffect(() => {
