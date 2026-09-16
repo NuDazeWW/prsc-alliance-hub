@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link, useNavigate } from "@tanstack/react-router";
-import { ArrowRight, Bell, ChevronDown, LogOut, User } from "lucide-react";
+import { Bell, ChevronDown, LogOut, User } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { PrscMark } from "@/components/site/PrscMark";
 
@@ -146,42 +146,20 @@ export function PortalShell({
   );
 }
 
-const footerLinks = [
-  { label: "PRSC Readiness Score", href: "https://www.prscstandards.com/the-standard" },
-  { label: "Governance", href: "https://www.prscstandards.com/governance" },
-  { label: "The Readiness Vanguard", href: "https://www.prscstandards.com/readiness-vanguard" },
-];
 
 function PortalFooter() {
   return (
     <footer className="border-t border-gold/15 bg-navy-deep">
       <div className="w-full px-6 py-12 sm:px-10 lg:px-[4vw] lg:py-16">
-        <div className="grid items-start gap-12 md:grid-cols-[1.2fr_1fr_1fr] lg:gap-20">
+        <div className="grid items-start gap-12 md:grid-cols-[1.2fr_1fr] lg:gap-20">
           <PrscMark variant="horizontal" className="h-auto w-[260px] max-w-full object-contain lg:w-[310px]" />
-          <div>
-            <p className="text-[10px] uppercase tracking-[0.22em] text-gold">Explore the council</p>
-            <ul className="mt-5 space-y-3">
-              {footerLinks.map((l) => (
-                <li key={l.href}>
-                  <a
-                    href={l.href}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="group flex items-center justify-between gap-6 text-sm text-ivory/70 hover:text-gold md:max-w-[230px]"
-                  >
-                    {l.label}
-                    <ArrowRight className="h-4 w-4 text-gold transition-transform group-hover:translate-x-1" />
-                  </a>
-                </li>
-              ))}
-            </ul>
-          </div>
           <p className="font-display text-xl italic leading-8 text-ivory/55 md:text-right">
             A more transparent,
             <br />
             more valuable partnership industry.
           </p>
         </div>
+
         <div className="mt-14 flex flex-col gap-4 border-t border-gold/15 pt-7 text-xs text-ivory/45 sm:flex-row sm:items-center sm:justify-between">
           <p>© {new Date().getFullYear()} Partnership Readiness Standards Council™. All rights reserved.</p>
           <p className="flex items-center gap-4">
