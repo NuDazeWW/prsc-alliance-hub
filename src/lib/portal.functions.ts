@@ -351,6 +351,134 @@ export const updateInquiry = createServerFn({ method: "POST" })
     return { ok: true };
   });
 
+/* ---------------- Member documents ---------------- */
+
+const DOCUMENT_BUCKET = "member-documents";
+
+export type PortalDocumentRecord = {
+  id: string;
+  member_id: string | null;
+  category: "sign" | "read";
+  action: "docusign" | "download" | "acknowledge";
+  title: string;
+  description: string;
+  external_url: string | null;
+  file_path: string | null;
+  sort_order: number;
+  created_at: string;
+};
+
+async function signDocumentUrls(documents: PortalDocumentRecord[]) {
+  const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+  return Promise.all(
+    documents.map(async (doc) => {
+      if (!doc.file_path) return { ...doc, url: doc.external_url };
+      const { data } = await supabaseAdmin.storage.from(DOCUMENT_BUCKET).createSignedUrl(doc.file_path, 3600);
+      return { ...doc, url: data?.signedUrl ?? null };
+    }),
+  );
+}
+
+export const getMyDocuments = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    const { data: member } = await context.supabase
+      .from("portal_members").select("id").eq("user_id", context.userId).maybeSingle();
+    if (!member) return { memberId: null, documents: [], acknowledged: [] as string[] };
+    const { data: documents } = await context.supabase
+      .from("portal_documents")
+      .select("*")
+      .or(`member_id.is.null,member_id.eq.${member.id}`)
+      .order("sort_order", { ascending: true })
+      .order("created_at", { ascending: true });
+    const { data: acks } = await context.supabase
+      .from("portal_document_acknowledgements").select("document_id").eq("member_id", member.id);
+    return {
+      memberId: member.id as string,
+      documents: await signDocumentUrls((documents ?? []) as PortalDocumentRecord[]),
+      acknowledged: (acks ?? []).map((a: { document_id: string }) => a.document_id),
+    };
+  });
+
+export const acknowledgeDocument = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input) =>
+    z.object({ document_id: z.string().uuid(), initials: z.string().trim().min(1).max(8) }).parse(input),
+  )
+  .handler(async ({ context, data }) => {
+    const { data: member, error: memberError } = await context.supabase
+      .from("portal_members").select("id").eq("user_id", context.userId).single();
+    if (memberError || !member) throw new Error("Member profile unavailable");
+    const { error } = await context.supabase
+      .from("portal_document_acknowledgements")
+      .upsert(
+        { document_id: data.document_id, member_id: member.id, initials: data.initials.toUpperCase() },
+        { onConflict: "document_id,member_id" },
+      );
+    if (error) throw error;
+    await context.supabase.from("portal_activity").insert({
+      member_id: member.id, actor_user_id: context.userId,
+      event_type: "document_acknowledged", metadata: { document_id: data.document_id },
+    });
+    return { ok: true };
+  });
+
+export const listDocumentsForAdmin = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input) => z.object({ member_id: z.string().uuid().nullable().optional() }).parse(input ?? {}))
+  .handler(async ({ context, data }) => {
+    await assertAdmin(context);
+    let query = context.supabase.from("portal_documents").select("*").order("created_at", { ascending: false });
+    if (data.member_id) query = query.or(`member_id.is.null,member_id.eq.${data.member_id}`);
+    const { data: documents, error } = await query;
+    if (error) throw error;
+    const { data: acks } = await context.supabase
+      .from("portal_document_acknowledgements").select("document_id, member_id, initials, acknowledged_at");
+    return { documents: (documents ?? []) as PortalDocumentRecord[], acknowledgements: acks ?? [] };
+  });
+
+export const createMemberDocument = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input) =>
+    z
+      .object({
+        member_id: z.string().uuid().nullable(),
+        category: z.enum(["sign", "read"]),
+        action: z.enum(["docusign", "download", "acknowledge"]),
+        title: z.string().trim().min(1).max(200),
+        description: z.string().trim().max(600).default(""),
+        external_url: z.string().trim().url().max(600).nullable().optional(),
+        file_path: z.string().trim().max(400).nullable().optional(),
+      })
+      .parse(input),
+  )
+  .handler(async ({ context, data }) => {
+    await assertAdmin(context);
+    if (!data.external_url && !data.file_path) throw new Error("Provide a signing link or upload a file");
+    const { error } = await context.supabase.from("portal_documents").insert({
+      member_id: data.member_id,
+      category: data.category,
+      action: data.action,
+      title: data.title,
+      description: data.description,
+      external_url: data.external_url || null,
+      file_path: data.file_path || null,
+      created_by: context.userId,
+    });
+    if (error) throw error;
+    return { ok: true };
+  });
+
+export const deleteMemberDocument = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input) => z.object({ id: z.string().uuid() }).parse(input))
+  .handler(async ({ context, data }) => {
+    await assertAdmin(context);
+    const { error } = await context.supabase.from("portal_documents").delete().eq("id", data.id);
+    if (error) throw error;
+    return { ok: true };
+  });
+
 const PORTAL_HOSTS = new Set(["access.prscstandards.org", "access.prscstandards.com"]);
 
 export const getRequestHost = createServerFn({ method: "GET" })
