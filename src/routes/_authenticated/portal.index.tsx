@@ -498,24 +498,82 @@ function PortalHome() {
           )}
 
 
-          {panel === "next" && (
+          {panel === "documents" && (
             <>
               <DialogHeader className="space-y-0 text-left">
-                <p className="text-[10px] uppercase tracking-[0.24em] text-gold">What Happens Next</p>
-                <DialogTitle className="mt-4 font-display text-[34px] font-normal leading-tight">A short, deliberate sequence.</DialogTitle>
+                <p className="text-[10px] uppercase tracking-[0.24em] text-gold">Legal Documents</p>
+                <DialogTitle className="mt-4 font-display text-[clamp(2rem,2.6vw,2.9rem)] font-normal leading-tight">
+                  Your documents to review and sign.
+                </DialogTitle>
               </DialogHeader>
-              <div className="mt-8 grid gap-8 md:grid-cols-3">
-                {[
-                  { n: "01", t: "Complete your profile", c: "A private submission that shapes your individualized materials." },
-                  { n: "02", t: "Package preparation", c: "We prepare your board or advisor package with the details you provide." },
-                  { n: "03", t: "Formal package", c: "Your individualized package follows separately, with all formal terms." },
-                ].map((s) => (
-                  <div key={s.n} className="border-t border-gold/40 pt-5">
-                    <p className="font-display text-sm text-gold">{s.n}</p>
-                    <h3 className="mt-2 font-display text-xl">{s.t}</h3>
-                    <p className="mt-3 text-[14px] leading-6 text-ivory/55">{s.c}</p>
+              <p className="mt-5 max-w-[46rem] text-[15px] leading-7 text-ivory/70">
+                After your profile is complete, your individualized package includes two sets of documents: those to read and
+                retain for your records, and those to sign and return electronically through DocuSign.
+              </p>
+              <div className="mt-9 grid gap-10 lg:grid-cols-2">
+                <div>
+                  <div className="flex items-center gap-3">
+                    <BookOpen className="h-[18px] w-[18px] text-gold" />
+                    <p className="text-[11px] uppercase tracking-[0.24em] text-gold">Read &amp; Retain</p>
                   </div>
-                ))}
+                  <div className="mt-5 space-y-4">
+                    {readAndRetainDocuments.map((d) => (
+                      <div key={d.title} className="border border-gold/20 bg-ivory/[.03] p-5">
+                        <h3 className="font-display text-[19px] leading-snug">{d.title}</h3>
+                        <p className="mt-2 text-[14px] leading-6 text-ivory/60">{d.description}</p>
+                        {d.href ? (
+                          <a
+                            href={d.href}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="cta-glow-outline mt-4 inline-flex items-center gap-3 rounded-full px-5 py-2.5 text-[13px] transition-all"
+                          >
+                            <span className="relative z-10 flex items-center gap-3">
+                              Download <Download className="h-4 w-4" />
+                            </span>
+                          </a>
+                        ) : (
+                          <p className="mt-4 inline-flex items-center gap-2 text-[12px] uppercase tracking-[0.18em] text-ivory/45">
+                            <span className="h-1.5 w-1.5 rounded-full bg-gold/70" /> Coming with your package
+                          </p>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+                <div>
+                  <div className="flex items-center gap-3">
+                    <PenLine className="h-[18px] w-[18px] text-gold" />
+                    <p className="text-[11px] uppercase tracking-[0.24em] text-gold">Sign &amp; Return</p>
+                  </div>
+                  <div className="mt-5 space-y-4">
+                    {signAndReturnDocuments.map((d) => (
+                      <div key={d.title} className="border border-gold/20 bg-ivory/[.03] p-5">
+                        <h3 className="font-display text-[19px] leading-snug">{d.title}</h3>
+                        <p className="mt-2 text-[14px] leading-6 text-ivory/60">{d.description}</p>
+                        {d.href ? (
+                          <a
+                            href={d.href}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="cta-glow-outline mt-4 inline-flex items-center gap-3 rounded-full px-5 py-2.5 text-[13px] transition-all"
+                          >
+                            <span className="relative z-10 flex items-center gap-3">
+                              Sign in DocuSign <ArrowRight className="h-4 w-4" />
+                            </span>
+                          </a>
+                        ) : (
+                          <p className="mt-4 inline-flex items-center gap-2 text-[12px] uppercase tracking-[0.18em] text-ivory/45">
+                            <span className="h-1.5 w-1.5 rounded-full bg-gold/70" /> Awaiting release
+                          </p>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                  <p className="mt-5 text-[13px] leading-6 text-ivory/50">
+                    Signature documents are completed only through DocuSign. Printed or emailed copies are not accepted.
+                  </p>
+                </div>
               </div>
             </>
           )}
