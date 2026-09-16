@@ -1,17 +1,19 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import {
   ArrowRight,
   BarChart3,
   BookOpen,
+  Check,
   Cog,
   Download,
   FileSignature,
   FileText,
   Globe,
   Home,
+  Lock,
   LockKeyhole,
   PenLine,
   ScrollText,
@@ -22,8 +24,7 @@ import {
   Users,
 } from "lucide-react";
 
-import { readAndRetainDocuments, signAndReturnDocuments } from "@/data/portal-documents";
-import { getMyHeadshotUrl, getPortalSession } from "@/lib/portal.functions";
+import { acknowledgeDocument, getMyDocuments, getMyHeadshotUrl, getPortalSession } from "@/lib/portal.functions";
 import { PortalShell } from "@/components/portal/PortalShell";
 import { isPreviewHost } from "@/routes/_authenticated/route";
 import heroRoad from "@/assets/portal-hero-road.jpg";
