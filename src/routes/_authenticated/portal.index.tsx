@@ -214,9 +214,24 @@ function PortalHome() {
               </p>
               <p className="mt-3 text-[13px] leading-6 text-ivory/60">
                 {profileComplete
-                  ? "Your profile is complete. We're preparing your individualized materials and will be in touch when your package is ready."
-                  : "Completing your profile unlocks your individualized package."}
+                  ? "Your profile is on file. Your documents are now open — sign and return, read and retain."
+                  : "Your documents unlock once your profile is complete."}
               </p>
+              {profileComplete ? (
+                <button
+                  type="button"
+                  onClick={() => setPanel("documents")}
+                  className="cta-glow-outline mt-4 inline-flex items-center gap-3 rounded-full px-5 py-2.5 text-[13px] transition-all"
+                >
+                  <span className="relative z-10 flex items-center gap-3">
+                    Review Your Documents <ArrowRight className="h-4 w-4" />
+                  </span>
+                </button>
+              ) : (
+                <p className="mt-4 inline-flex items-center gap-2 text-[12px] uppercase tracking-[0.18em] text-ivory/45">
+                  <Lock className="h-3.5 w-3.5 text-gold/70" /> Documents locked
+                </p>
+              )}
             </div>
 
             <div className="my-6 h-px bg-gold/20" />
