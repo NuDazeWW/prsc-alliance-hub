@@ -22,6 +22,7 @@ import {
 import {
   getAdminOverview,
   getMemberDetail,
+  importPortalMembers,
   invitePortalMember,
   setMemberAccess,
   setMemberPackageStatus,
