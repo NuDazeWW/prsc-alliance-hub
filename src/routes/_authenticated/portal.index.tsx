@@ -5,13 +5,15 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import {
   ArrowRight,
   BarChart3,
+  BookOpen,
   Cog,
+  Download,
+  FileSignature,
   FileText,
-  Flag,
   Globe,
   Home,
   LockKeyhole,
-  Mail,
+  PenLine,
   ScrollText,
   Share2,
   Shield,
@@ -20,6 +22,7 @@ import {
   Users,
 } from "lucide-react";
 
+import { readAndRetainDocuments, signAndReturnDocuments } from "@/data/portal-documents";
 import { getMyHeadshotUrl, getPortalSession } from "@/lib/portal.functions";
 import { PortalShell } from "@/components/portal/PortalShell";
 import { isPreviewHost } from "@/routes/_authenticated/route";
@@ -78,7 +81,7 @@ function PortalHome() {
     enabled: Boolean(data?.member),
   });
   const navigate = useNavigate();
-  const [panel, setPanel] = useState<"role" | "prsc" | "dis" | "next" | "questions" | null>(null);
+  const [panel, setPanel] = useState<"role" | "prsc" | "dis" | "documents" | "questions" | null>(null);
   useEffect(() => {
     if (data?.isAdmin) navigate({ to: "/admin", replace: true });
   }, [data, navigate]);
@@ -115,7 +118,7 @@ function PortalHome() {
 
   const sideNav = [
     { label: "Overview", href: "#overview", icon: Home, active: true, onSelect: undefined as (() => void) | undefined },
-    { label: "What Happens Next", href: "#next", icon: Flag, active: false, onSelect: () => setPanel("next") },
+    { label: "Legal Documents", href: "#documents", icon: FileSignature, active: false, onSelect: () => setPanel("documents") },
     ...(showPrsc ? [{ label: "Refresh on PRSC", href: "#prsc", icon: ScrollText, active: false, onSelect: () => setPanel("prsc") }] : []),
     ...(showDis ? [{ label: "Learn about DIS", href: "#dis", icon: FileText, active: false, onSelect: () => setPanel("dis") }] : []),
   ];
