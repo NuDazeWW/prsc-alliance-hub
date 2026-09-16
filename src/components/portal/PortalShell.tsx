@@ -150,7 +150,7 @@ export function PortalShell({
 function PortalFooter() {
   return (
     <footer className="border-t border-gold/15 bg-navy-deep">
-      <div className="w-full px-6 py-12 sm:px-10 lg:px-[4vw] lg:py-16">
+      <div className="w-full px-6 py-8 sm:px-10 lg:px-[4vw] lg:py-10">
         <div className="grid items-start gap-12 md:grid-cols-[1.2fr_1fr] lg:gap-20">
           <PrscMark variant="horizontal" className="h-auto w-[260px] max-w-full object-contain lg:w-[310px]" />
           <p className="font-display text-xl italic leading-8 text-ivory/55 md:text-right">
