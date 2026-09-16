@@ -45,17 +45,21 @@ function AuthPage() {
     } catch (error) { setMessage(error instanceof Error ? error.message : "Please try again."); }
     finally { setBusy(false); }
   }
-  return <main className="relative min-h-screen overflow-hidden bg-navy px-5 py-10 text-ivory">
+  return <main className="relative flex min-h-screen items-center overflow-hidden bg-navy px-5 py-10 text-ivory">
     <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-gold to-transparent" />
-    <div className="mx-auto flex min-h-[calc(100vh-5rem)] max-w-6xl items-center justify-center">
-      <section className="grid w-full overflow-hidden border border-gold/25 bg-navy-light/40 shadow-2xl lg:grid-cols-[1.15fr_.85fr]">
-        <div className="hidden min-h-[660px] flex-col justify-between border-r border-gold/20 p-14 lg:flex">
-          <PrscMark variant="mission" className="h-20 w-auto self-start object-contain" />
-          <div><p className="mb-5 text-xs uppercase text-gold">Private board & advisor center</p><h1 className="max-w-xl font-display text-6xl leading-[.95]">A confidential environment for consequential work.</h1><p className="mt-7 max-w-lg text-base leading-7 text-ivory/65">Access is limited to invited PRSC and DIS board members and advisors.</p></div>
+    <div className="mx-auto w-full max-w-6xl">
+      <section className="grid w-full overflow-hidden border border-gold/25 bg-[linear-gradient(145deg,var(--color-navy),var(--color-navy-deep))] shadow-2xl lg:grid-cols-[1.15fr_.85fr]">
+        <div className="hidden flex-col justify-between border-r border-gold/20 px-12 py-10 lg:flex lg:min-h-[620px]">
+          <PrscMark variant="emblem" className="h-28 w-auto self-start object-contain" />
+          <div>
+            <p className="mb-5 text-[11px] uppercase tracking-[0.22em] text-gold">Private Board &amp; Advisor Center</p>
+            <h1 className="max-w-xl font-display text-[clamp(3.25rem,4.2vw,4.5rem)] leading-[0.95]">Built for those who shape the standard.</h1>
+            <p className="mt-7 max-w-lg text-base leading-7 text-ivory/65">Access is reserved for invited PRSC and DIS board members and advisors.</p>
+          </div>
           <p className="flex items-center gap-2 text-xs text-ivory/45"><ShieldCheck className="h-4 w-4 text-gold" /> Invitation-only access</p>
         </div>
-        <div className="flex min-h-[620px] items-center p-7 sm:p-12">
-          <div className="w-full"><PrscMark className="mb-12 h-14 w-auto object-contain lg:hidden" /><KeyRound className="mb-6 h-7 w-7 text-gold" /><p className="text-xs uppercase text-gold">Welcome center</p><h2 className="mt-3 font-display text-4xl">{mode === "reset" ? "Recover access" : mode === "setup" ? "Secure your account" : "Private access"}</h2><p className="mt-4 text-sm leading-6 text-ivory/55">{mode === "setup" ? "Create a private password to complete your invitation." : "Use the email address associated with your invitation."}</p>
+        <div className="flex min-h-[620px] items-center px-7 py-10 sm:px-12">
+          <div className="w-full"><PrscMark variant="emblem" className="mb-10 h-16 w-auto object-contain lg:hidden" /><KeyRound className="mb-5 h-7 w-7 text-gold" /><p className="text-[11px] uppercase tracking-[0.22em] text-gold">Welcome Center</p><h2 className="mt-3 font-display text-4xl">{mode === "reset" ? "Recover access" : mode === "setup" ? "Secure your account" : "Private access"}</h2><p className="mt-4 text-sm leading-6 text-ivory/55">{mode === "setup" ? "Create a private password to complete your invitation." : "Use the email address associated with your invitation."}</p>
             <form onSubmit={submit} className="mt-9 space-y-5">
               {mode !== "setup" && <label className="block text-xs uppercase text-ivory/60">Email address<Input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required autoComplete="email" className="mt-2 h-12 border-ivory/20 bg-transparent text-ivory" /></label>}
               {mode !== "reset" && <label className="block text-xs uppercase text-ivory/60">Password<Input type="password" value={password} onChange={(e) => setPassword(e.target.value)} required minLength={mode === "setup" ? 12 : undefined} autoComplete={mode === "setup" ? "new-password" : "current-password"} className="mt-2 h-12 border-ivory/20 bg-transparent text-ivory" /></label>}
