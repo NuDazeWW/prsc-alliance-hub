@@ -78,7 +78,7 @@ function PortalHome() {
     enabled: Boolean(data?.member),
   });
   const navigate = useNavigate();
-  const [panel, setPanel] = useState<"prsc" | "dis" | "next" | "questions" | null>(null);
+  const [panel, setPanel] = useState<"role" | "prsc" | "dis" | "next" | "questions" | null>(null);
   useEffect(() => {
     if (data?.isAdmin) navigate({ to: "/admin", replace: true });
   }, [data, navigate]);
@@ -115,7 +115,6 @@ function PortalHome() {
 
   const sideNav = [
     { label: "Overview", href: "#overview", icon: Home, active: true, onSelect: undefined as (() => void) | undefined },
-    { label: "Your Role", href: "#role", icon: Users, active: false, onSelect: undefined },
     { label: "What Happens Next", href: "#next", icon: Flag, active: false, onSelect: () => setPanel("next") },
     ...(showPrsc ? [{ label: "Refresh on PRSC", href: "#prsc", icon: ScrollText, active: false, onSelect: () => setPanel("prsc") }] : []),
     ...(showDis ? [{ label: "Learn about DIS", href: "#dis", icon: FileText, active: false, onSelect: () => setPanel("dis") }] : []),
@@ -150,6 +149,13 @@ function PortalHome() {
                 </h2>
                 <p className="mt-2 text-[14px] leading-5 text-ivory/65">{m.title || (m.role === "advisor" ? "Selected Advisor" : "Board Member")}</p>
                 <p className="text-[14px] leading-5 text-ivory/65">{entityWord}</p>
+                <button
+                  type="button"
+                  onClick={() => setPanel("role")}
+                  className="mt-2 inline-flex items-center gap-2 text-[13px] font-medium text-gold transition-colors hover:text-ivory"
+                >
+                  Role Details <ArrowRight className="h-3.5 w-3.5" />
+                </button>
               </div>
             </div>
           </div>
@@ -305,6 +311,49 @@ function PortalHome() {
 
       <Dialog open={panel !== null} onOpenChange={(open) => !open && setPanel(null)}>
         <DialogContent className="max-h-[86vh] w-[min(94vw,980px)] max-w-none overflow-y-auto border-gold/30 bg-[linear-gradient(145deg,var(--color-midnight),var(--color-navy))] p-8 text-ivory shadow-2xl lg:p-[clamp(2rem,2.7vw,3.25rem)]">
+          {panel === "role" && (
+            <div className="grid gap-9 lg:grid-cols-[1.35fr_1fr] lg:gap-14">
+              <div className="min-w-0">
+                <DialogHeader className="space-y-0 text-left">
+                  <p className="text-[10px] uppercase tracking-[0.24em] text-gold">Role Details</p>
+                  <DialogTitle className="mt-4 font-display text-[clamp(2.25rem,3vw,3.4rem)] font-normal leading-[1.05]">
+                    {name} {m.last_name}
+                  </DialogTitle>
+                </DialogHeader>
+                <p className="mt-5 font-display text-[clamp(1.35rem,1.8vw,2rem)] leading-tight text-gold">
+                  {m.title || (m.role === "advisor" ? "Selected Advisor" : "Board Member")}
+                </p>
+                {m.organization && (
+                  <p className="mt-3 text-[16px] leading-7 text-ivory/70">{m.organization}</p>
+                )}
+                <p className="mt-7 max-w-[36rem] text-[15px] leading-7 text-ivory/65">
+                  Your role details reflect the information provided when your private center access was created. Your
+                  individualized package will provide the formal terms and complete scope of your role.
+                </p>
+              </div>
+              <div className="border-t border-gold/20 pt-7 lg:border-l lg:border-t-0 lg:pl-10 lg:pt-1">
+                <dl className="space-y-7">
+                  <div>
+                    <dt className="text-[10px] uppercase tracking-[0.22em] text-ivory/45">Designation</dt>
+                    <dd className="mt-2 font-display text-2xl text-ivory">{entityWord}</dd>
+                  </div>
+                  <div>
+                    <dt className="text-[10px] uppercase tracking-[0.22em] text-ivory/45">Capacity</dt>
+                    <dd className="mt-2 font-display text-2xl text-ivory">
+                      {m.role === "advisor" ? "Advisor" : "Board Member"}
+                    </dd>
+                  </div>
+                  {m.organization && (
+                    <div>
+                      <dt className="text-[10px] uppercase tracking-[0.22em] text-ivory/45">Organization</dt>
+                      <dd className="mt-2 text-[16px] leading-7 text-ivory/80">{m.organization}</dd>
+                    </div>
+                  )}
+                </dl>
+              </div>
+            </div>
+          )}
+
           {panel === "prsc" && (
             <div className="relative">
               <img
