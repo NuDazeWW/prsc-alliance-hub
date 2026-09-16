@@ -160,7 +160,7 @@ function PortalFooter() {
           </p>
         </div>
 
-        <div className="mt-14 flex flex-col gap-4 border-t border-gold/15 pt-7 text-xs text-ivory/45 sm:flex-row sm:items-center sm:justify-between">
+        <div className="mt-8 flex flex-col gap-4 border-t border-gold/15 pt-5 text-xs text-ivory/45 sm:flex-row sm:items-center sm:justify-between">
           <p>© {new Date().getFullYear()} Partnership Readiness Standards Council™. All rights reserved.</p>
           <p className="flex items-center gap-4">
             <span>Private &amp; confidential</span>
