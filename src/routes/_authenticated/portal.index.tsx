@@ -316,7 +316,7 @@ function PortalHome() {
           </section>
 
           {/* Why you */}
-          <section id="role" className="flex-1 px-7 pb-3 sm:px-10 lg:px-[2.5%]">
+          <section id="role" className="flex-1 px-7 pb-2 sm:px-10 lg:px-[2.5%]">
             <div className="grid h-full min-h-0 items-stretch gap-7 border border-gold/25 bg-[linear-gradient(135deg,var(--color-midnight),var(--color-navy))] p-7 sm:p-9 lg:grid-cols-[2fr_1fr] lg:gap-10 lg:px-[clamp(2rem,3vw,3.5rem)] lg:py-[clamp(3.75rem,5.4vw,7rem)]">
               <div className="flex min-w-0 flex-col justify-center">
                 <p className="text-[10px] uppercase tracking-[0.24em] text-gold">Why You</p>
