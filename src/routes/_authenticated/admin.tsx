@@ -22,6 +22,7 @@ import {
 import {
   getAdminOverview,
   getMemberDetail,
+  importPortalMembers,
   invitePortalMember,
   setMemberAccess,
   setMemberPackageStatus,
@@ -138,6 +139,90 @@ const emptyDraft = {
 
 type Draft = typeof emptyDraft;
 
+type MemberRow = {
+  first_name: string; last_name: string; email: string; organization: string;
+  title: string; entity: "prsc" | "dis" | "both"; role: "board_member" | "advisor"; why_you: string;
+};
+
+const LIST_HEADERS = "first_name,last_name,email,organization,title,entity,role,why_you";
+const LIST_TEMPLATE = `${LIST_HEADERS}\nJane,Doe,jane@example.com,Example Group,Managing Partner,both,advisor,"Two sentences on why this person was chosen."\n`;
+
+function splitCsvLine(line: string) {
+  const out: string[] = [];
+  let value = "";
+  let quoted = false;
+  for (let i = 0; i < line.length; i += 1) {
+    const ch = line[i];
+    if (quoted) {
+      if (ch === '"' && line[i + 1] === '"') { value += '"'; i += 1; }
+      else if (ch === '"') quoted = false;
+      else value += ch;
+    } else if (ch === '"') quoted = true;
+    else if (ch === ",") { out.push(value); value = ""; }
+    else value += ch;
+  }
+  out.push(value);
+  return out.map((v) => v.trim());
+}
+
+function normalizeKey(key: string) {
+  return key.trim().toLowerCase().replace(/[^a-z]+/g, "_").replace(/^_|_$/g, "");
+}
+
+function parseMemberList(text: string): { rows: MemberRow[]; errors: string[] } {
+  const lines = text.split(/\r?\n/).filter((l) => l.trim().length > 0);
+  const errors: string[] = [];
+  if (lines.length < 2) return { rows: [], errors: ["The file needs a header row and at least one member."] };
+
+  const headers = splitCsvLine(lines[0]).map(normalizeKey);
+  const alias: Record<string, string> = {
+    first: "first_name", firstname: "first_name", last: "last_name", lastname: "last_name",
+    email_address: "email", company: "organization", org: "organization",
+    designation: "entity", entity_designation: "entity", why: "why_you", why_they_were_chosen: "why_you",
+  };
+  const keys = headers.map((h) => alias[h] ?? h);
+  const required = ["first_name", "last_name", "email", "organization", "entity", "role", "why_you"];
+  const missing = required.filter((r) => !keys.includes(r));
+  if (missing.length) return { rows: [], errors: [`Missing column${missing.length > 1 ? "s" : ""}: ${missing.join(", ")}`] };
+
+  const rows: MemberRow[] = [];
+  lines.slice(1).forEach((line, index) => {
+    const cells = splitCsvLine(line);
+    const record: Record<string, string> = {};
+    keys.forEach((k, i) => { record[k] = cells[i] ?? ""; });
+    const label = `Row ${index + 2}`;
+
+    const entityRaw = record["entity"]?.toLowerCase();
+    const entity = entityRaw === "prsc" || entityRaw === "dis" || entityRaw === "both" ? entityRaw : null;
+    const roleRaw = record["role"]?.toLowerCase().replace(/[\s-]+/g, "_");
+    const role = roleRaw === "advisor" ? "advisor" : roleRaw === "board_member" || roleRaw === "board" ? "board_member" : null;
+
+    if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(record["email"] ?? "")) return errors.push(`${label}: a valid email is required.`);
+    if (!record["first_name"] || !record["last_name"]) return errors.push(`${label}: first and last name are required.`);
+    if (!record["organization"]) return errors.push(`${label}: organization is required.`);
+    if (!entity) return errors.push(`${label}: designation must be PRSC, DIS, or Both.`);
+    if (!role) return errors.push(`${label}: role must be Board member or Advisor.`);
+    if ((record["why_you"] ?? "").trim().length < 20) return errors.push(`${label}: “why you” needs at least 20 characters.`);
+
+    rows.push({
+      first_name: record["first_name"], last_name: record["last_name"], email: record["email"],
+      organization: record["organization"], title: record["title"] ?? "",
+      entity, role, why_you: record["why_you"].trim(),
+    });
+  });
+
+  return { rows, errors };
+}
+
+function downloadListTemplate() {
+  const url = URL.createObjectURL(new Blob([LIST_TEMPLATE], { type: "text/csv" }));
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = "prsc-member-list-template.csv";
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
 function Admin() {
   const preview = isPreviewHost();
   const overview = useQuery({
@@ -161,6 +246,55 @@ function Admin() {
   const [detailId, setDetailId] = useState<string | null>(null);
   const [memberBusy, setMemberBusy] = useState("");
   const [inquiryDraft, setInquiryDraft] = useState<Record<string, string>>({});
+  const listRef = useRef<HTMLInputElement>(null);
+  const [importRows, setImportRows] = useState<MemberRow[]>([]);
+  const [importErrors, setImportErrors] = useState<string[]>([]);
+  const [importStatus, setImportStatus] = useState("");
+  const [importResults, setImportResults] = useState<{ email: string; ok: boolean; message: string }[]>([]);
+  const [sendOnImport, setSendOnImport] = useState(false);
+  const [importing, setImporting] = useState(false);
+
+  async function onMemberList(file: File) {
+    setImportResults([]);
+    setImportStatus("");
+    const { rows, errors } = parseMemberList(await file.text());
+    setImportRows(rows);
+    setImportErrors(errors);
+    setImportStatus(
+      rows.length
+        ? `${rows.length} member${rows.length === 1 ? "" : "s"} ready from ${file.name}.`
+        : `No usable rows found in ${file.name}.`,
+    );
+  }
+
+  async function runImport() {
+    if (!importRows.length) return;
+    if (preview) {
+      setImportStatus("Preview mode: the list uploads once you are signed in.");
+      return;
+    }
+    setImporting(true);
+    try {
+      const res = await importPortalMembers({ data: { rows: importRows, send_invitations: sendOnImport } });
+      setImportResults(res.results);
+      setImportStatus(`${res.added} added${res.failed ? `, ${res.failed} could not be added` : ""}.`);
+      setImportRows([]);
+      if (listRef.current) listRef.current.value = "";
+      await overview.refetch();
+    } catch (error) {
+      setImportStatus(error instanceof Error ? error.message : "The list could not be uploaded.");
+    } finally {
+      setImporting(false);
+    }
+  }
+
+  function clearImport() {
+    setImportRows([]);
+    setImportErrors([]);
+    setImportResults([]);
+    setImportStatus("");
+    if (listRef.current) listRef.current.value = "";
+  }
 
   const detail = useQuery({
     queryKey: ["portal-admin-member", detailId],
@@ -468,6 +602,104 @@ function Admin() {
                 {status && <p className="text-base text-ivory/60 sm:col-span-2">{status}</p>}
               </form>
             </section>
+
+            <section className="border border-gold/20 p-6 sm:p-8">
+              <div className="flex items-start justify-between gap-3">
+                <div className="flex items-center gap-3">
+                  <Upload className="h-5 w-5 text-gold" />
+                  <h2 className="font-display text-3xl">Upload a member list</h2>
+                </div>
+                <InfoTip
+                  title="Upload a member list"
+                  body="Add several board members and advisors at once from a spreadsheet saved as CSV. Download the template, fill in one row per person, then upload it. Everyone is reviewed before anything is saved. Leave the invitation box unchecked to add people quietly now and send their welcome emails later from Compose & Send."
+                />
+              </div>
+
+              <p className="mt-5 text-base leading-7 text-ivory/60">
+                One row per person, with columns for first name, last name, email, organization, title, designation
+                (PRSC, DIS, or Both), role (Board member or Advisor), and the private “why you” note.
+              </p>
+
+              <div className="mt-6 flex flex-wrap items-center gap-3">
+                <Button type="button" variant="outline" className="rounded-none text-base" onClick={downloadListTemplate}>
+                  Download template
+                </Button>
+                <Button type="button" variant="outline" className="rounded-none text-base" onClick={() => listRef.current?.click()}>
+                  Choose file
+                </Button>
+                <input
+                  ref={listRef}
+                  type="file"
+                  accept=".csv,text/csv"
+                  className="hidden"
+                  onChange={(e) => {
+                    const file = e.target.files?.[0];
+                    if (file) void onMemberList(file);
+                  }}
+                />
+              </div>
+
+              {importRows.length > 0 && (
+                <div className="mt-6 border border-gold/15">
+                  <div className="max-h-64 overflow-y-auto">
+                    <table className="w-full text-base">
+                      <tbody>
+                        {importRows.map((r) => (
+                          <tr key={r.email} className="border-b border-ivory/10 last:border-b-0">
+                            <td className="px-4 py-2.5">{r.first_name} {r.last_name}</td>
+                            <td className="px-4 py-2.5 text-ivory/60">{r.email}</td>
+                            <td className="px-4 py-2.5 text-ivory/60">{r.organization}</td>
+                            <td className="px-4 py-2.5 uppercase text-gold">{r.entity}</td>
+                            <td className="px-4 py-2.5 text-ivory/60">{r.role === "advisor" ? "Advisor" : "Board member"}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              )}
+
+              {importErrors.length > 0 && (
+                <ul className="mt-5 space-y-1.5 text-base text-amber-300/80">
+                  {importErrors.map((e) => (
+                    <li key={e}>{e}</li>
+                  ))}
+                </ul>
+              )}
+
+              {importRows.length > 0 && (
+                <div className="mt-6 flex flex-wrap items-center gap-4">
+                  <label className="flex items-center gap-2.5 text-base text-ivory/75">
+                    <input
+                      type="checkbox"
+                      checked={sendOnImport}
+                      onChange={(e) => setSendOnImport(e.target.checked)}
+                      className="h-4 w-4 accent-[hsl(var(--gold))]"
+                    />
+                    Send welcome invitations now
+                  </label>
+                  <Button type="button" disabled={importing} className="rounded-none bg-gold text-base text-navy" onClick={runImport}>
+                    {importing ? "Uploading…" : `Add ${importRows.length} member${importRows.length === 1 ? "" : "s"}`}
+                  </Button>
+                  <Button type="button" variant="ghost" className="rounded-none text-base text-ivory/60" onClick={clearImport}>
+                    <Trash2 className="mr-2 h-4 w-4" /> Discard
+                  </Button>
+                </div>
+              )}
+
+              {importStatus && <p className="mt-5 text-base text-ivory/60">{importStatus}</p>}
+
+              {importResults.length > 0 && (
+                <ul className="mt-4 space-y-1.5 text-base">
+                  {importResults.map((r) => (
+                    <li key={r.email} className={r.ok ? "text-ivory/60" : "text-amber-300/80"}>
+                      {r.email} — {r.message}
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </section>
+
 
             {/* Template sidebar — constrained to the same column width as the invite panel */}
             <aside className="border border-gold/20">
