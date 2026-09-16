@@ -127,6 +127,10 @@ function PortalHome() {
   const entityWord = entityLabel[m.entity];
   const profileComplete = data?.hasProfile ?? false;
   const packageReady = m.package_status === "package_ready";
+  const myDocs = documents.data?.documents ?? [];
+  const signDocs = myDocs.filter((d) => d.category === "sign");
+  const readDocs = myDocs.filter((d) => d.category === "read");
+  const acknowledged = new Set(documents.data?.acknowledged ?? []);
 
 
   const sideNav = [
