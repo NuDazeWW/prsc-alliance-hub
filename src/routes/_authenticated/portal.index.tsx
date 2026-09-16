@@ -337,7 +337,6 @@ function PortalHome() {
             </div>
           </section>
 
-          <div className="pb-4 lg:pb-5" />
         </main>
       </div>
 
