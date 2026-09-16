@@ -386,16 +386,25 @@ function PortalHome() {
                     participation helps ensure that this standard is trusted, practical, and built to serve the entire
                     ecosystem—not any single commercial interest.
                   </p>
-                  <a
-                    href="https://www.prscstandards.com/the-standard"
-                    target="_blank"
-                    rel="noreferrer"
-                    className="cta-glow-outline mt-7 inline-flex items-center gap-4 rounded-full px-7 py-3.5 text-[15px] transition-all"
-                  >
-                    <span className="relative z-10 flex items-center gap-4">
-                      Explore PRSC <ArrowRight className="h-4 w-4" />
-                    </span>
-                  </a>
+                  <div className="mt-7 flex flex-wrap items-center gap-3">
+                    {[
+                      { label: "PRSC Readiness Score", href: "https://www.prscstandards.com/the-standard" },
+                      { label: "Governance", href: "https://www.prscstandards.com/governance" },
+                      { label: "The Readiness Vanguard", href: "https://www.prscstandards.com/readiness-vanguard" },
+                    ].map((l) => (
+                      <a
+                        key={l.href}
+                        href={l.href}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="cta-glow-outline inline-flex items-center gap-3 rounded-full px-6 py-3 text-[14px] transition-all"
+                      >
+                        <span className="relative z-10 flex items-center gap-3">
+                          {l.label} <ArrowRight className="h-4 w-4" />
+                        </span>
+                      </a>
+                    ))}
+                  </div>
                 </div>
                 <div className="flex flex-col justify-center gap-6">
                   {[
