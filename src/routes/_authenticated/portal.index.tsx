@@ -1,17 +1,19 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import {
   ArrowRight,
   BarChart3,
   BookOpen,
+  Check,
   Cog,
   Download,
   FileSignature,
   FileText,
   Globe,
   Home,
+  Lock,
   LockKeyhole,
   PenLine,
   ScrollText,
@@ -22,8 +24,7 @@ import {
   Users,
 } from "lucide-react";
 
-import { readAndRetainDocuments, signAndReturnDocuments } from "@/data/portal-documents";
-import { getMyHeadshotUrl, getPortalSession } from "@/lib/portal.functions";
+import { acknowledgeDocument, getMyDocuments, getMyHeadshotUrl, getPortalSession } from "@/lib/portal.functions";
 import { PortalShell } from "@/components/portal/PortalShell";
 import { isPreviewHost } from "@/routes/_authenticated/route";
 import heroRoad from "@/assets/portal-hero-road.jpg";
@@ -80,6 +81,18 @@ function PortalHome() {
     retry: false,
     enabled: Boolean(data?.member),
   });
+  const documents = useQuery({
+    queryKey: ["my-documents"],
+    queryFn: () => getMyDocuments().catch(() => null),
+    retry: false,
+    enabled: Boolean(data?.member && data?.hasProfile),
+  });
+  const queryClient = useQueryClient();
+  const [initialsDraft, setInitialsDraft] = useState<Record<string, string>>({});
+  const acknowledge = useMutation({
+    mutationFn: (input: { document_id: string; initials: string }) => acknowledgeDocument({ data: input }),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["my-documents"] }),
+  });
   const navigate = useNavigate();
   const [panel, setPanel] = useState<"role" | "prsc" | "dis" | "documents" | "questions" | null>(null);
   useEffect(() => {
@@ -114,11 +127,15 @@ function PortalHome() {
   const entityWord = entityLabel[m.entity];
   const profileComplete = data?.hasProfile ?? false;
   const packageReady = m.package_status === "package_ready";
+  const myDocs = documents.data?.documents ?? [];
+  const signDocs = myDocs.filter((d) => d.category === "sign");
+  const readDocs = myDocs.filter((d) => d.category === "read");
+  const acknowledged = new Set(documents.data?.acknowledged ?? []);
 
 
   const sideNav = [
     { label: "Overview", href: "#overview", icon: Home, active: true, onSelect: undefined as (() => void) | undefined },
-    { label: "Your Documents", href: "#documents", icon: FileSignature, active: false, onSelect: () => setPanel("documents") },
+    { label: "Your Documents", href: "#documents", icon: profileComplete ? FileSignature : Lock, active: false, onSelect: () => setPanel("documents") },
     ...(showPrsc ? [{ label: "Refresh on PRSC", href: "#prsc", icon: ScrollText, active: false, onSelect: () => setPanel("prsc") }] : []),
     ...(showDis ? [{ label: "Learn about DIS", href: "#dis", icon: FileText, active: false, onSelect: () => setPanel("dis") }] : []),
   ];
@@ -201,9 +218,24 @@ function PortalHome() {
               </p>
               <p className="mt-3 text-[13px] leading-6 text-ivory/60">
                 {profileComplete
-                  ? "Your profile is complete. We're preparing your individualized materials and will be in touch when your package is ready."
-                  : "Completing your profile unlocks your individualized package."}
+                  ? "Your profile is on file. Your documents are now open — sign and return, read and retain."
+                  : "Your documents unlock once your profile is complete."}
               </p>
+              {profileComplete ? (
+                <button
+                  type="button"
+                  onClick={() => setPanel("documents")}
+                  className="cta-glow-outline mt-4 inline-flex items-center gap-3 rounded-full px-5 py-2.5 text-[13px] transition-all"
+                >
+                  <span className="relative z-10 flex items-center gap-3">
+                    Review Your Documents <ArrowRight className="h-4 w-4" />
+                  </span>
+                </button>
+              ) : (
+                <p className="mt-4 inline-flex items-center gap-2 text-[12px] uppercase tracking-[0.18em] text-ivory/45">
+                  <Lock className="h-3.5 w-3.5 text-gold/70" /> Documents locked
+                </p>
+              )}
             </div>
 
             <div className="my-6 h-px bg-gold/20" />
@@ -509,75 +541,141 @@ function PortalHome() {
                   Documents to sign and return. Documents to read and retain.
                 </DialogTitle>
               </DialogHeader>
-              <p className="mt-5 max-w-[46rem] text-[15px] leading-7 text-ivory/70">
-                After your profile is complete, your individualized package includes two sets of documents: those to sign and
-                return electronically through DocuSign, and those to read and retain for your records.
-              </p>
-              <div className="mt-9 grid gap-10 lg:grid-cols-2">
-                <div>
-                  <div className="flex items-center gap-3">
-                    <PenLine className="h-[18px] w-[18px] text-gold" />
-                    <p className="text-[11px] uppercase tracking-[0.24em] text-gold">Documents to sign and return</p>
-                  </div>
-                  <div className="mt-5 space-y-4">
-                    {signAndReturnDocuments.map((d) => (
-                      <div key={d.title} className="border border-gold/20 bg-ivory/[.03] p-5">
-                        <h3 className="font-display text-[19px] leading-snug">{d.title}</h3>
-                        <p className="mt-2 text-[14px] leading-6 text-ivory/60">{d.description}</p>
-                        {d.href ? (
-                          <a
-                            href={d.href}
-                            target="_blank"
-                            rel="noreferrer"
-                            className="cta-glow-outline mt-4 inline-flex items-center gap-3 rounded-full px-5 py-2.5 text-[13px] transition-all"
-                          >
-                            <span className="relative z-10 flex items-center gap-3">
-                              Sign in DocuSign <ArrowRight className="h-4 w-4" />
-                            </span>
-                          </a>
-                        ) : (
-                          <p className="mt-4 inline-flex items-center gap-2 text-[12px] uppercase tracking-[0.18em] text-ivory/45">
-                            <span className="h-1.5 w-1.5 rounded-full bg-gold/70" /> Awaiting release
-                          </p>
-                        )}
-                      </div>
-                    ))}
-                  </div>
-                  <p className="mt-5 text-[13px] leading-6 text-ivory/50">
-                    Signature documents are completed only through DocuSign. Printed or emailed copies are not accepted.
+
+              {!profileComplete ? (
+                <div className="mt-8 border border-gold/25 bg-ivory/[.03] p-8 text-center">
+                  <Lock className="mx-auto h-7 w-7 text-gold" />
+                  <h3 className="mt-5 font-display text-[24px] leading-snug">Available after your profile is complete.</h3>
+                  <p className="mx-auto mt-4 max-w-[34rem] text-[15px] leading-7 text-ivory/65">
+                    Your documents are prepared individually. Once your profile is on file, the documents to sign and return
+                    and the documents to read and retain will appear here.
                   </p>
+                  <Link
+                    to="/portal/profile"
+                    onClick={() => setPanel(null)}
+                    className="cta-glow mt-7 inline-flex items-center gap-3 rounded-full px-7 py-3.5 text-[16px] font-semibold transition-all"
+                  >
+                    <span className="relative z-10 flex items-center gap-3">
+                      Complete Your Profile <ArrowRight className="h-4 w-4" />
+                    </span>
+                  </Link>
                 </div>
-                <div>
-                  <div className="flex items-center gap-3">
-                    <BookOpen className="h-[18px] w-[18px] text-gold" />
-                    <p className="text-[11px] uppercase tracking-[0.24em] text-gold">Documents to read and retain</p>
-                  </div>
-                  <div className="mt-5 space-y-4">
-                    {readAndRetainDocuments.map((d) => (
-                      <div key={d.title} className="border border-gold/20 bg-ivory/[.03] p-5">
-                        <h3 className="font-display text-[19px] leading-snug">{d.title}</h3>
-                        <p className="mt-2 text-[14px] leading-6 text-ivory/60">{d.description}</p>
-                        {d.href ? (
-                          <a
-                            href={d.href}
-                            target="_blank"
-                            rel="noreferrer"
-                            className="cta-glow-outline mt-4 inline-flex items-center gap-3 rounded-full px-5 py-2.5 text-[13px] transition-all"
-                          >
-                            <span className="relative z-10 flex items-center gap-3">
-                              Download <Download className="h-4 w-4" />
-                            </span>
-                          </a>
-                        ) : (
-                          <p className="mt-4 inline-flex items-center gap-2 text-[12px] uppercase tracking-[0.18em] text-ivory/45">
-                            <span className="h-1.5 w-1.5 rounded-full bg-gold/70" /> Coming with your package
+              ) : (
+                <>
+                  <p className="mt-5 max-w-[46rem] text-[15px] leading-7 text-ivory/70">
+                    Your individualized package includes two sets of documents: those to sign and return electronically, and
+                    those to read, initial, and retain for your records.
+                  </p>
+                  <div className="mt-9 grid gap-10 lg:grid-cols-2">
+                    <div>
+                      <div className="flex items-center gap-3">
+                        <PenLine className="h-[18px] w-[18px] text-gold" />
+                        <p className="text-[11px] uppercase tracking-[0.24em] text-gold">Documents to sign and return</p>
+                      </div>
+                      <div className="mt-5 space-y-4">
+                        {signDocs.length === 0 && (
+                          <p className="text-[14px] leading-6 text-ivory/50">
+                            No signature documents have been released to you yet.
                           </p>
                         )}
+                        {signDocs.map((d) => (
+                          <div key={d.id} className="border border-gold/20 bg-ivory/[.03] p-5">
+                            <h3 className="font-display text-[19px] leading-snug">{d.title}</h3>
+                            {d.description && <p className="mt-2 text-[14px] leading-6 text-ivory/60">{d.description}</p>}
+                            {d.url ? (
+                              <a
+                                href={d.url}
+                                target="_blank"
+                                rel="noreferrer"
+                                className="cta-glow-outline mt-4 inline-flex items-center gap-3 rounded-full px-5 py-2.5 text-[13px] transition-all"
+                              >
+                                <span className="relative z-10 flex items-center gap-3">
+                                  {d.action === "docusign" ? "Sign in DocuSign" : "Open document"} <ArrowRight className="h-4 w-4" />
+                                </span>
+                              </a>
+                            ) : (
+                              <p className="mt-4 inline-flex items-center gap-2 text-[12px] uppercase tracking-[0.18em] text-ivory/45">
+                                <span className="h-1.5 w-1.5 rounded-full bg-gold/70" /> Awaiting release
+                              </p>
+                            )}
+                          </div>
+                        ))}
                       </div>
-                    ))}
+                      <p className="mt-5 text-[13px] leading-6 text-ivory/50">
+                        Signature documents are completed only through DocuSign. Printed or emailed copies are not accepted.
+                      </p>
+                    </div>
+                    <div>
+                      <div className="flex items-center gap-3">
+                        <BookOpen className="h-[18px] w-[18px] text-gold" />
+                        <p className="text-[11px] uppercase tracking-[0.24em] text-gold">Documents to read and retain</p>
+                      </div>
+                      <div className="mt-5 space-y-4">
+                        {readDocs.length === 0 && (
+                          <p className="text-[14px] leading-6 text-ivory/50">
+                            No documents have been released to you yet.
+                          </p>
+                        )}
+                        {readDocs.map((d) => {
+                          const done = acknowledged.has(d.id);
+                          return (
+                            <div key={d.id} className="border border-gold/20 bg-ivory/[.03] p-5">
+                              <h3 className="font-display text-[19px] leading-snug">{d.title}</h3>
+                              {d.description && <p className="mt-2 text-[14px] leading-6 text-ivory/60">{d.description}</p>}
+                              {d.url ? (
+                                <a
+                                  href={d.url}
+                                  target="_blank"
+                                  rel="noreferrer"
+                                  className="cta-glow-outline mt-4 inline-flex items-center gap-3 rounded-full px-5 py-2.5 text-[13px] transition-all"
+                                >
+                                  <span className="relative z-10 flex items-center gap-3">
+                                    {d.action === "acknowledge" ? "View document" : "Download"}{" "}
+                                    {d.action === "acknowledge" ? <ArrowRight className="h-4 w-4" /> : <Download className="h-4 w-4" />}
+                                  </span>
+                                </a>
+                              ) : (
+                                <p className="mt-4 inline-flex items-center gap-2 text-[12px] uppercase tracking-[0.18em] text-ivory/45">
+                                  <span className="h-1.5 w-1.5 rounded-full bg-gold/70" /> Coming with your package
+                                </p>
+                              )}
+                              {d.action === "acknowledge" && (
+                                done ? (
+                                  <p className="mt-4 inline-flex items-center gap-2 text-[13px] text-gold">
+                                    <Check className="h-4 w-4" /> Read and initialed
+                                  </p>
+                                ) : (
+                                  <div className="mt-4 flex items-center gap-3">
+                                    <input
+                                      value={initialsDraft[d.id] ?? ""}
+                                      onChange={(e) =>
+                                        setInitialsDraft((prev) => ({ ...prev, [d.id]: e.target.value.slice(0, 8) }))
+                                      }
+                                      placeholder="Initials"
+                                      aria-label={`Initials for ${d.title}`}
+                                      className="h-10 w-28 border border-gold/30 bg-transparent px-3 text-[14px] uppercase tracking-[0.18em] text-ivory outline-none focus:border-gold"
+                                    />
+                                    <button
+                                      type="button"
+                                      disabled={!((initialsDraft[d.id] ?? "").trim()) || acknowledge.isPending}
+                                      onClick={() =>
+                                        acknowledge.mutate({ document_id: d.id, initials: (initialsDraft[d.id] ?? "").trim() })
+                                      }
+                                      className="cta-glow-outline inline-flex items-center gap-2 rounded-full px-5 py-2.5 text-[13px] transition-all disabled:opacity-40"
+                                    >
+                                      <span className="relative z-10">Confirm read</span>
+                                    </button>
+                                  </div>
+                                )
+                              )}
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
                   </div>
-                </div>
-              </div>
+                </>
+              )}
             </>
           )}
 
