@@ -250,9 +250,9 @@ function PortalHome() {
         </aside>
 
         {/* Main */}
-        <main className="flex min-w-0 flex-col justify-between pb-5">
+        <main className="flex min-w-0 flex-col justify-between pb-2">
           {/* Hero */}
-          <section id="overview" className="relative overflow-hidden px-7 pb-5 pt-9 sm:px-10 lg:px-[3.5%] lg:pb-[clamp(3rem,3.8vw,5rem)] lg:pt-[clamp(4rem,5.2vw,6.75rem)]">
+          <section id="overview" className="relative overflow-hidden px-7 pb-5 pt-9 sm:px-10 lg:px-[3.5%] lg:pb-[clamp(1.5rem,2vw,2.75rem)] lg:pt-[clamp(3.25rem,4.2vw,5.5rem)]">
 
 
             <img
@@ -316,8 +316,8 @@ function PortalHome() {
           </section>
 
           {/* Why you */}
-          <section id="role" className="flex-1 px-7 pb-3 sm:px-10 lg:px-[2.5%]">
-            <div className="grid h-full min-h-0 items-stretch gap-7 border border-gold/25 bg-[linear-gradient(135deg,var(--color-midnight),var(--color-navy))] p-7 sm:p-9 lg:grid-cols-[2fr_1fr] lg:gap-10 lg:px-[clamp(2rem,3vw,3.5rem)] lg:py-[clamp(3.75rem,5.4vw,7rem)]">
+          <section id="role" className="flex-1 px-7 pb-2 sm:px-10 lg:px-[2.5%]">
+            <div className="grid h-full min-h-0 items-stretch gap-6 border border-gold/25 bg-[linear-gradient(135deg,var(--color-midnight),var(--color-navy))] p-6 sm:p-8 lg:grid-cols-[2fr_1fr] lg:gap-8 lg:px-[clamp(1.75rem,2.6vw,3rem)] lg:py-[clamp(2.5rem,3.6vw,4.75rem)]">
               <div className="flex min-w-0 flex-col justify-center">
                 <p className="text-[10px] uppercase tracking-[0.24em] text-gold">Why You</p>
                 <h2 className="mt-4 font-display text-[clamp(2rem,2.5vw,2.8rem)] leading-tight">{name}, Your Perspective Matters.</h2>
@@ -337,7 +337,6 @@ function PortalHome() {
             </div>
           </section>
 
-          <div className="pb-4 lg:pb-5" />
         </main>
       </div>
 
