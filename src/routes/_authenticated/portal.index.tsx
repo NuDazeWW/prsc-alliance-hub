@@ -250,7 +250,7 @@ function PortalHome() {
         </aside>
 
         {/* Main */}
-        <main className="flex min-w-0 flex-col justify-between pb-5">
+        <main className="flex min-w-0 flex-col justify-between pb-2">
           {/* Hero */}
           <section id="overview" className="relative overflow-hidden px-7 pb-5 pt-9 sm:px-10 lg:px-[3.5%] lg:pb-[clamp(1.5rem,2vw,2.75rem)] lg:pt-[clamp(3.25rem,4.2vw,5.5rem)]">
 
