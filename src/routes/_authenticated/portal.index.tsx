@@ -12,10 +12,10 @@ import {
   Home,
   LockKeyhole,
   Mail,
-  MessageSquare,
   ScrollText,
   Share2,
   Shield,
+
   Target,
   Users,
 } from "lucide-react";
@@ -118,8 +118,8 @@ function PortalHome() {
     { label: "What Happens Next", href: "#next", icon: Flag, active: false, onSelect: () => setPanel("next") },
     ...(showPrsc ? [{ label: "Refresh on PRSC", href: "#prsc", icon: ScrollText, active: false, onSelect: () => setPanel("prsc") }] : []),
     ...(showDis ? [{ label: "Learn about DIS", href: "#dis", icon: FileText, active: false, onSelect: () => setPanel("dis") }] : []),
-    { label: "Questions", href: "#questions", icon: MessageSquare, active: false, onSelect: () => setPanel("questions") },
   ];
+
 
 
 
@@ -208,8 +208,9 @@ function PortalHome() {
             <p className="text-[10px] uppercase tracking-[0.22em] text-ivory/45">Need help?</p>
             <p className="mt-3 text-[14px] text-ivory/65">We're here for you.</p>
             <Link to="/portal/questions" className="mt-5 flex min-h-10 items-center gap-3 text-[14px] text-ivory/80 hover:text-gold">
-              <Mail className="h-4 w-4 text-gold" /> Send a message
+              <LockKeyhole className="h-4 w-4 text-gold" /> Questions? Send a Message
             </Link>
+
           </div>
         </aside>
 
