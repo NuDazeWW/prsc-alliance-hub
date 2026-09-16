@@ -178,6 +178,69 @@ export const invitePortalMember = createServerFn({ method: "POST" })
     return { ok: true };
   });
 
+const importSchema = z.object({
+  send_invitations: z.boolean(),
+  rows: z.array(inviteSchema).min(1).max(200),
+});
+export const importPortalMembers = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input) => importSchema.parse(input))
+  .handler(async ({ context, data }) => {
+    await assertAdmin(context);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const results: { email: string; ok: boolean; message: string }[] = [];
+
+    for (const row of data.rows) {
+      const email = row.email.toLowerCase();
+      try {
+        let userId: string | null = null;
+
+        const { data: existingMember } = await supabaseAdmin
+          .from("portal_members").select("user_id").eq("email", email).maybeSingle();
+        if (existingMember?.user_id) userId = existingMember.user_id as string;
+
+        if (!userId && data.send_invitations) {
+          const { data: invitation, error } = await supabaseAdmin.auth.admin.inviteUserByEmail(email, {
+            redirectTo: "https://access.prscstandards.org/auth?mode=setup",
+            data: { first_name: row.first_name, last_name: row.last_name },
+          });
+          if (error || !invitation.user) throw error ?? new Error("Invitation could not be created");
+          userId = invitation.user.id;
+        }
+
+        if (!userId) {
+          const { data: created, error } = await supabaseAdmin.auth.admin.createUser({
+            email, email_confirm: false,
+            user_metadata: { first_name: row.first_name, last_name: row.last_name },
+          });
+          if (error || !created.user) throw error ?? new Error("Member could not be staged");
+          userId = created.user.id;
+        }
+
+        const { error: memberError } = await supabaseAdmin.from("portal_members").upsert({
+          user_id: userId, email, first_name: row.first_name, last_name: row.last_name,
+          organization: row.organization, title: row.title || null, entity: row.entity,
+          role: row.role, why_you: row.why_you, status: "invited",
+        }, { onConflict: "email" });
+        if (memberError) throw memberError;
+
+        const { error: roleError } = await supabaseAdmin
+          .from("user_roles").upsert({ user_id: userId, role: row.role }, { onConflict: "user_id,role" });
+        if (roleError) throw roleError;
+
+        results.push({
+          email,
+          ok: true,
+          message: data.send_invitations ? "Invitation sent" : "Added — invitation not sent yet",
+        });
+      } catch (error) {
+        results.push({ email, ok: false, message: error instanceof Error ? error.message : "Could not be added" });
+      }
+    }
+
+    return { results, added: results.filter((r) => r.ok).length, failed: results.filter((r) => !r.ok).length };
+  });
+
 export const getAdminOverview = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
