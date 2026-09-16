@@ -38,6 +38,7 @@ import {
 } from "@/lib/portal-email.functions";
 import { applyTokens, buildMemberTokens, parseSignatures, renderBrandedEmail } from "@/lib/branded-email";
 import { PortalShell, type PortalNotification } from "@/components/portal/PortalShell";
+import { AdminMemberDocuments } from "@/components/portal/AdminMemberDocuments";
 import { isPreviewHost } from "@/routes/_authenticated/route";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
