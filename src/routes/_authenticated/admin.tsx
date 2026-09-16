@@ -138,6 +138,90 @@ const emptyDraft = {
 
 type Draft = typeof emptyDraft;
 
+type MemberRow = {
+  first_name: string; last_name: string; email: string; organization: string;
+  title: string; entity: "prsc" | "dis" | "both"; role: "board_member" | "advisor"; why_you: string;
+};
+
+const LIST_HEADERS = "first_name,last_name,email,organization,title,entity,role,why_you";
+const LIST_TEMPLATE = `${LIST_HEADERS}\nJane,Doe,jane@example.com,Example Group,Managing Partner,both,advisor,"Two sentences on why this person was chosen."\n`;
+
+function splitCsvLine(line: string) {
+  const out: string[] = [];
+  let value = "";
+  let quoted = false;
+  for (let i = 0; i < line.length; i += 1) {
+    const ch = line[i];
+    if (quoted) {
+      if (ch === '"' && line[i + 1] === '"') { value += '"'; i += 1; }
+      else if (ch === '"') quoted = false;
+      else value += ch;
+    } else if (ch === '"') quoted = true;
+    else if (ch === ",") { out.push(value); value = ""; }
+    else value += ch;
+  }
+  out.push(value);
+  return out.map((v) => v.trim());
+}
+
+function normalizeKey(key: string) {
+  return key.trim().toLowerCase().replace(/[^a-z]+/g, "_").replace(/^_|_$/g, "");
+}
+
+function parseMemberList(text: string): { rows: MemberRow[]; errors: string[] } {
+  const lines = text.split(/\r?\n/).filter((l) => l.trim().length > 0);
+  const errors: string[] = [];
+  if (lines.length < 2) return { rows: [], errors: ["The file needs a header row and at least one member."] };
+
+  const headers = splitCsvLine(lines[0]).map(normalizeKey);
+  const alias: Record<string, string> = {
+    first: "first_name", firstname: "first_name", last: "last_name", lastname: "last_name",
+    email_address: "email", company: "organization", org: "organization",
+    designation: "entity", entity_designation: "entity", why: "why_you", why_they_were_chosen: "why_you",
+  };
+  const keys = headers.map((h) => alias[h] ?? h);
+  const required = ["first_name", "last_name", "email", "organization", "entity", "role", "why_you"];
+  const missing = required.filter((r) => !keys.includes(r));
+  if (missing.length) return { rows: [], errors: [`Missing column${missing.length > 1 ? "s" : ""}: ${missing.join(", ")}`] };
+
+  const rows: MemberRow[] = [];
+  lines.slice(1).forEach((line, index) => {
+    const cells = splitCsvLine(line);
+    const record: Record<string, string> = {};
+    keys.forEach((k, i) => { record[k] = cells[i] ?? ""; });
+    const label = `Row ${index + 2}`;
+
+    const entityRaw = record["entity"]?.toLowerCase();
+    const entity = entityRaw === "prsc" || entityRaw === "dis" || entityRaw === "both" ? entityRaw : null;
+    const roleRaw = record["role"]?.toLowerCase().replace(/[\s-]+/g, "_");
+    const role = roleRaw === "advisor" ? "advisor" : roleRaw === "board_member" || roleRaw === "board" ? "board_member" : null;
+
+    if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(record["email"] ?? "")) return errors.push(`${label}: a valid email is required.`);
+    if (!record["first_name"] || !record["last_name"]) return errors.push(`${label}: first and last name are required.`);
+    if (!record["organization"]) return errors.push(`${label}: organization is required.`);
+    if (!entity) return errors.push(`${label}: designation must be PRSC, DIS, or Both.`);
+    if (!role) return errors.push(`${label}: role must be Board member or Advisor.`);
+    if ((record["why_you"] ?? "").trim().length < 20) return errors.push(`${label}: “why you” needs at least 20 characters.`);
+
+    rows.push({
+      first_name: record["first_name"], last_name: record["last_name"], email: record["email"],
+      organization: record["organization"], title: record["title"] ?? "",
+      entity, role, why_you: record["why_you"].trim(),
+    });
+  });
+
+  return { rows, errors };
+}
+
+function downloadListTemplate() {
+  const url = URL.createObjectURL(new Blob([LIST_TEMPLATE], { type: "text/csv" }));
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = "prsc-member-list-template.csv";
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
 function Admin() {
   const preview = isPreviewHost();
   const overview = useQuery({
