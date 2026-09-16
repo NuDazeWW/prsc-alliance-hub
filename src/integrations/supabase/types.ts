@@ -136,6 +136,98 @@ export type Database = {
           },
         ]
       }
+      portal_document_acknowledgements: {
+        Row: {
+          acknowledged_at: string
+          document_id: string
+          id: string
+          initials: string
+          member_id: string
+        }
+        Insert: {
+          acknowledged_at?: string
+          document_id: string
+          id?: string
+          initials: string
+          member_id: string
+        }
+        Update: {
+          acknowledged_at?: string
+          document_id?: string
+          id?: string
+          initials?: string
+          member_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "portal_document_acknowledgements_document_id_fkey"
+            columns: ["document_id"]
+            isOneToOne: false
+            referencedRelation: "portal_documents"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "portal_document_acknowledgements_member_id_fkey"
+            columns: ["member_id"]
+            isOneToOne: false
+            referencedRelation: "portal_members"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      portal_documents: {
+        Row: {
+          action: string
+          category: string
+          created_at: string
+          created_by: string | null
+          description: string
+          external_url: string | null
+          file_path: string | null
+          id: string
+          member_id: string | null
+          sort_order: number
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          action: string
+          category: string
+          created_at?: string
+          created_by?: string | null
+          description?: string
+          external_url?: string | null
+          file_path?: string | null
+          id?: string
+          member_id?: string | null
+          sort_order?: number
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          action?: string
+          category?: string
+          created_at?: string
+          created_by?: string | null
+          description?: string
+          external_url?: string | null
+          file_path?: string | null
+          id?: string
+          member_id?: string | null
+          sort_order?: number
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "portal_documents_member_id_fkey"
+            columns: ["member_id"]
+            isOneToOne: false
+            referencedRelation: "portal_members"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       portal_email_sends: {
         Row: {
           created_at: string
