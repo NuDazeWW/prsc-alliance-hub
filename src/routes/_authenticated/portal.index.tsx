@@ -131,7 +131,7 @@ function PortalHome() {
 
   const sideNav = [
     { label: "Overview", href: "#overview", icon: Home, active: true, onSelect: undefined as (() => void) | undefined },
-    { label: "Your Documents", href: "#documents", icon: FileSignature, active: false, onSelect: () => setPanel("documents") },
+    { label: "Your Documents", href: "#documents", icon: profileComplete ? FileSignature : Lock, active: false, onSelect: () => setPanel("documents") },
     ...(showPrsc ? [{ label: "Refresh on PRSC", href: "#prsc", icon: ScrollText, active: false, onSelect: () => setPanel("prsc") }] : []),
     ...(showDis ? [{ label: "Learn about DIS", href: "#dis", icon: FileText, active: false, onSelect: () => setPanel("dis") }] : []),
   ];
