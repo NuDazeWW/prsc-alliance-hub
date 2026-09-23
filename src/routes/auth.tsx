@@ -41,7 +41,12 @@ function AuthPage() {
       } else {
         const { error } = await supabase.auth.signInWithPassword({ email, password }); if (error) throw new Error("The email or password was not recognized.");
       }
-      await navigate({ to: search.redirect });
+      try {
+        const s = await getPortalSession();
+        await navigate({ to: s.isAdmin ? "/admin" : search.redirect, replace: true });
+      } catch {
+        await navigate({ to: search.redirect, replace: true });
+      }
     } catch (error) { setMessage(error instanceof Error ? error.message : "Please try again."); }
     finally { setBusy(false); }
   }
