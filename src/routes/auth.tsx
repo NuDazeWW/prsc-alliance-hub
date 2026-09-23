@@ -23,10 +23,17 @@ function AuthPage() {
   const [mode, setMode] = useState<"signin" | "reset" | "setup">(search.mode === "setup" ? "setup" : "signin");
   const [email, setEmail] = useState(""); const [password, setPassword] = useState(""); const [message, setMessage] = useState(""); const [busy, setBusy] = useState(false);
   useEffect(() => {
-    supabase.auth.getUser().then(({ data }) => {
-      if (!data.user) return;
-      getPortalSession().then((s) => navigate({ to: s.isAdmin ? "/admin" : search.redirect, replace: true })).catch(() => navigate({ to: search.redirect, replace: true }));
+    const isRecovery = search.mode === "setup" || (typeof window !== "undefined" && /type=(recovery|invite)/.test(window.location.hash));
+    const { data: sub } = supabase.auth.onAuthStateChange((event) => {
+      if (event === "PASSWORD_RECOVERY") setMode("setup");
     });
+    if (!isRecovery) {
+      supabase.auth.getUser().then(({ data }) => {
+        if (!data.user) return;
+        getPortalSession().then((s) => navigate({ to: s.isAdmin ? "/admin" : search.redirect, replace: true })).catch(() => navigate({ to: search.redirect, replace: true }));
+      });
+    } else setMode("setup");
+    return () => sub.subscription.unsubscribe();
   }, []);
   async function submit(event: React.FormEvent) {
     event.preventDefault(); setBusy(true); setMessage("");
@@ -64,7 +71,7 @@ function AuthPage() {
           <p className="flex items-center gap-2 text-xs text-ivory/45"><ShieldCheck className="h-4 w-4 text-gold" /> Invitation-only access</p>
         </div>
         <div className="flex min-h-[620px] items-center px-7 py-10 sm:px-12">
-          <div className="w-full"><PrscMark variant="emblem" className="mb-10 h-16 w-auto object-contain lg:hidden" /><KeyRound className="mb-5 h-7 w-7 text-gold" /><p className="text-[11px] uppercase tracking-[0.22em] text-gold">Welcome Center</p><h2 className="mt-3 font-display text-4xl">{mode === "reset" ? "Recover access" : mode === "setup" ? "Secure your account" : "Private access"}</h2><p className="mt-4 text-sm leading-6 text-ivory/55">{mode === "setup" ? "Create a private password to complete your invitation." : "Use the email address associated with your invitation."}</p>
+          <div className="w-full"><PrscMark variant="emblem" className="mb-10 h-16 w-auto object-contain lg:hidden" /><KeyRound className="mb-5 h-7 w-7 text-gold" /><p className="text-[11px] uppercase tracking-[0.22em] text-gold">Welcome Center</p><h2 className="mt-3 font-display text-4xl">{mode === "reset" ? "Recover access" : mode === "setup" ? "Secure your account" : "Private access"}</h2><p className="mt-4 text-sm leading-6 text-ivory/55">{mode === "setup" ? "Create a new private password (at least 12 characters) to continue." : "Use the email address associated with your invitation."}</p>
             <form onSubmit={submit} className="mt-9 space-y-5">
               {mode !== "setup" && <label className="block text-xs uppercase text-ivory/60">Email address<Input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required autoComplete="email" className="mt-2 h-12 border-ivory/20 bg-transparent text-ivory" /></label>}
               {mode !== "reset" && <label className="block text-xs uppercase text-ivory/60">Password<Input type="password" value={password} onChange={(e) => setPassword(e.target.value)} required minLength={mode === "setup" ? 12 : undefined} autoComplete={mode === "setup" ? "new-password" : "current-password"} className="mt-2 h-12 border-ivory/20 bg-transparent text-ivory" /></label>}
