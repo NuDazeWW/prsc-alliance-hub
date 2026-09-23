@@ -7,6 +7,7 @@ import {
   useRouterState,
   HeadContent,
   Scripts,
+  redirect,
 } from "@tanstack/react-router";
 import { useEffect, type ReactNode } from "react";
 
@@ -20,6 +21,13 @@ import { getRequestHost } from "@/lib/portal.functions";
 
 const FAVICON = "/prsc-favicon.png";
 const PORTAL_HOSTS = new Set(["access.prscstandards.org", "access.prscstandards.com"]);
+const PUBLIC_HOSTS = new Set([
+  "prscstandards.com",
+  "www.prscstandards.com",
+  "prscstandards.org",
+  "www.prscstandards.org",
+  "prsc-alliance-hub.lovable.app",
+]);
 
 function NotFoundComponent() {
   return (
@@ -72,8 +80,27 @@ function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
 }
 
 export const Route = createRootRouteWithContext<{ queryClient: QueryClient; host: string }>()({
-  beforeLoad: async () => {
+  beforeLoad: async ({ location }) => {
     const { host } = await getRequestHost();
+    const h = host.split(":")[0].toLowerCase();
+    const path = location.pathname;
+    const qs = location.searchStr ?? "";
+    const isPrivatePath = /^\/(portal|admin|auth)(\/|$)/.test(path);
+    const isSystemPath = /^\/(api|lovable)(\/|$)/.test(path);
+    if (!isSystemPath) {
+      // Private address: only the private center; public pages go to the .com site.
+      if (PORTAL_HOSTS.has(h) && !isPrivatePath && path !== "/") {
+        throw redirect({ href: `https://prscstandards.com${path}${qs}`, statusCode: 301 });
+      }
+      // Public addresses: private pages go to the private address.
+      if (PUBLIC_HOSTS.has(h) && isPrivatePath) {
+        throw redirect({ href: `https://access.prscstandards.org${path}${qs}`, statusCode: 301 });
+      }
+      // Secondary public addresses consolidate on prscstandards.com.
+      if (PUBLIC_HOSTS.has(h) && h !== "prscstandards.com") {
+        throw redirect({ href: `https://prscstandards.com${path}${qs}`, statusCode: 301 });
+      }
+    }
     return { host };
   },
   head: () => ({
