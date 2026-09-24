@@ -377,6 +377,36 @@ export type Database = {
           },
         ]
       }
+      portal_login_security: {
+        Row: {
+          created_at: string
+          failed_attempts: number
+          last_failed_at: string | null
+          last_success_at: string | null
+          normalized_email: string
+          reset_required: boolean
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          failed_attempts?: number
+          last_failed_at?: string | null
+          last_success_at?: string | null
+          normalized_email: string
+          reset_required?: boolean
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          failed_attempts?: number
+          last_failed_at?: string | null
+          last_success_at?: string | null
+          normalized_email?: string
+          reset_required?: boolean
+          updated_at?: string
+        }
+        Relationships: []
+      }
       portal_members: {
         Row: {
           created_at: string
@@ -565,6 +595,24 @@ export type Database = {
           phone?: string | null
           property?: string
           role?: string
+        }
+        Relationships: []
+      }
+      vanguard_seat_tally: {
+        Row: {
+          application_count: number
+          singleton: boolean
+          updated_at: string
+        }
+        Insert: {
+          application_count?: number
+          singleton?: boolean
+          updated_at?: string
+        }
+        Update: {
+          application_count?: number
+          singleton?: boolean
+          updated_at?: string
         }
         Relationships: []
       }

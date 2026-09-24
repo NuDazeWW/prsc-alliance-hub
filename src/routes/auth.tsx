@@ -1,11 +1,12 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { KeyRound, Mail, ShieldCheck } from "lucide-react";
+import { Eye, EyeOff, KeyRound, Mail, ShieldCheck } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { PrscMark } from "@/components/site/PrscMark";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { getPortalSession } from "@/lib/portal.functions";
+import { clearPortalLoginFailures, signInToPortal } from "@/lib/portal-auth.functions";
 
 export const Route = createFileRoute("/auth")({
   validateSearch: (search: Record<string, unknown>) => ({ redirect: typeof search.redirect === "string" && search.redirect.startsWith("/") ? search.redirect : "/portal", mode: search.mode === "setup" ? "setup" : undefined }),
@@ -22,6 +23,7 @@ function AuthPage() {
   const navigate = useNavigate();
   const [mode, setMode] = useState<"signin" | "reset" | "setup">(search.mode === "setup" ? "setup" : "signin");
   const [email, setEmail] = useState(""); const [password, setPassword] = useState(""); const [message, setMessage] = useState(""); const [busy, setBusy] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
   useEffect(() => {
     const isRecovery = search.mode === "setup" || (typeof window !== "undefined" && /type=(recovery|invite)/.test(window.location.hash));
     const { data: sub } = supabase.auth.onAuthStateChange((event) => {
@@ -45,8 +47,20 @@ function AuthPage() {
       if (mode === "setup") {
         if (password.length < 12) throw new Error("Use at least 12 characters.");
         const { error } = await supabase.auth.updateUser({ password }); if (error) throw error;
+        await clearPortalLoginFailures();
       } else {
-        const { error } = await supabase.auth.signInWithPassword({ email, password }); if (error) throw new Error("The email or password was not recognized.");
+        const result = await signInToPortal({ data: { email, password } });
+        if (!result.ok) {
+          if (result.resetRequired) {
+            setMode("reset");
+            setPassword("");
+            setMessage("Three unsuccessful sign-in attempts require a password reset. Send instructions below to continue.");
+            return;
+          }
+          throw new Error("The email or password was not recognized.");
+        }
+        const { error } = await supabase.auth.setSession({ access_token: result.accessToken, refresh_token: result.refreshToken });
+        if (error) throw new Error("We could not complete sign-in. Please try again.");
       }
       try {
         const s = await getPortalSession();
@@ -74,11 +88,11 @@ function AuthPage() {
           <div className="w-full"><PrscMark variant="emblem" className="mb-10 h-16 w-auto object-contain lg:hidden" /><KeyRound className="mb-5 h-7 w-7 text-gold" /><p className="text-[11px] uppercase tracking-[0.22em] text-gold">Welcome Center</p><h2 className="mt-3 font-display text-4xl">{mode === "reset" ? "Recover access" : mode === "setup" ? "Secure your account" : "Private access"}</h2><p className="mt-4 text-sm leading-6 text-ivory/55">{mode === "setup" ? "Create a new private password (at least 12 characters) to continue." : "Use the email address associated with your invitation."}</p>
             <form onSubmit={submit} className="mt-9 space-y-5">
               {mode !== "setup" && <label className="block text-xs uppercase text-ivory/60">Email address<Input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required autoComplete="email" className="mt-2 h-12 border-ivory/20 bg-transparent text-ivory" /></label>}
-              {mode !== "reset" && <label className="block text-xs uppercase text-ivory/60">Password<Input type="password" value={password} onChange={(e) => setPassword(e.target.value)} required minLength={mode === "setup" ? 12 : undefined} autoComplete={mode === "setup" ? "new-password" : "current-password"} className="mt-2 h-12 border-ivory/20 bg-transparent text-ivory" /></label>}
+              {mode !== "reset" && <label className="block text-xs uppercase text-ivory/60">Password<span className="relative mt-2 block"><Input type={showPassword ? "text" : "password"} value={password} onChange={(e) => setPassword(e.target.value)} required minLength={mode === "setup" ? 12 : undefined} autoComplete={mode === "setup" ? "new-password" : "current-password"} className="h-12 border-ivory/20 bg-transparent pr-12 text-ivory" /><Button type="button" variant="ghost" size="icon" onClick={() => setShowPassword((visible) => !visible)} aria-label={showPassword ? "Hide password" : "Show password"} title={showPassword ? "Hide password" : "Show password"} className="absolute right-1 top-1 h-10 w-10 text-ivory/60 hover:bg-ivory/10 hover:text-gold">{showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}</Button></span></label>}
               {message && <p role="status" className="border-l-2 border-gold pl-3 text-sm text-ivory/75">{message}</p>}
               <Button disabled={busy} className="h-12 w-full rounded-none bg-gold text-navy hover:bg-gold-light">{busy ? "Please wait…" : mode === "reset" ? "Send instructions" : mode === "setup" ? "Set password & enter" : "Enter the center"}</Button>
             </form>
-            <button type="button" onClick={() => { setMessage(""); setMode(mode === "reset" ? "signin" : "reset"); }} className="mt-6 flex items-center gap-2 text-sm text-ivory/55 hover:text-gold"><Mail className="h-4 w-4" />{mode === "reset" ? "Return to sign in" : "Forgot your password?"}</button>
+            <Button type="button" variant="ghost" onClick={() => { setMessage(""); setPassword(""); setShowPassword(false); setMode(mode === "reset" ? "signin" : "reset"); }} className="mt-6 h-auto px-0 text-sm text-ivory/55 hover:bg-transparent hover:text-gold"><Mail className="h-4 w-4" />{mode === "reset" ? "Return to sign in" : "Forgot your password?"}</Button>
           </div>
         </div>
       </section>
