@@ -400,6 +400,11 @@ function Admin() {
     e.preventDefault();
     const form = e.currentTarget;
     const f = new FormData(form);
+    if (preview) {
+      setStatus("Preview mode: invitation validated but not sent. Invites send on the live admin page.");
+      form.reset();
+      return;
+    }
     try {
       await invitePortalMember({
         data: {
