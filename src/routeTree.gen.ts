@@ -27,7 +27,6 @@ import { Route as ApiGeoRouteImport } from './routes/api/geo'
 import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/admin'
 import { Route as AuthenticatedPortalIndexRouteImport } from './routes/_authenticated/portal.index'
 import { Route as LovableEmailEventsRouteImport } from './routes/lovable/email/events'
-import { Route as LovableEmailAuthRouteImport } from './routes/lovable/email/auth'
 import { Route as AuthenticatedPortalQuestionsRouteImport } from './routes/_authenticated/portal.questions'
 import { Route as AuthenticatedPortalProfileRouteImport } from './routes/_authenticated/portal.profile'
 import { Route as LovableEmailAuthWebhookRouteImport } from './routes/lovable/email/auth/webhook'
@@ -124,11 +123,6 @@ const LovableEmailEventsRoute = LovableEmailEventsRouteImport.update({
   path: '/lovable/email/events',
   getParentRoute: () => rootRouteImport,
 } as any)
-const LovableEmailAuthRoute = LovableEmailAuthRouteImport.update({
-  id: '/lovable/email/auth',
-  path: '/lovable/email/auth',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const AuthenticatedPortalQuestionsRoute =
   AuthenticatedPortalQuestionsRouteImport.update({
     id: '/portal/questions',
@@ -142,14 +136,14 @@ const AuthenticatedPortalProfileRoute =
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
 const LovableEmailAuthWebhookRoute = LovableEmailAuthWebhookRouteImport.update({
-  id: '/webhook',
-  path: '/webhook',
-  getParentRoute: () => LovableEmailAuthRoute,
+  id: '/lovable/email/auth/webhook',
+  path: '/lovable/email/auth/webhook',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const LovableEmailAuthPreviewRoute = LovableEmailAuthPreviewRouteImport.update({
-  id: '/preview',
-  path: '/preview',
-  getParentRoute: () => LovableEmailAuthRoute,
+  id: '/lovable/email/auth/preview',
+  path: '/lovable/email/auth/preview',
+  getParentRoute: () => rootRouteImport,
 } as any)
 
 export interface FileRoutesByFullPath {
@@ -170,7 +164,6 @@ export interface FileRoutesByFullPath {
   '/vanguard/home': typeof VanguardHomeRoute
   '/portal/profile': typeof AuthenticatedPortalProfileRoute
   '/portal/questions': typeof AuthenticatedPortalQuestionsRoute
-  '/lovable/email/auth': typeof LovableEmailAuthRouteWithChildren
   '/lovable/email/events': typeof LovableEmailEventsRoute
   '/portal/': typeof AuthenticatedPortalIndexRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
@@ -194,7 +187,6 @@ export interface FileRoutesByTo {
   '/vanguard/home': typeof VanguardHomeRoute
   '/portal/profile': typeof AuthenticatedPortalProfileRoute
   '/portal/questions': typeof AuthenticatedPortalQuestionsRoute
-  '/lovable/email/auth': typeof LovableEmailAuthRouteWithChildren
   '/lovable/email/events': typeof LovableEmailEventsRoute
   '/portal': typeof AuthenticatedPortalIndexRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
@@ -220,7 +212,6 @@ export interface FileRoutesById {
   '/vanguard/home': typeof VanguardHomeRoute
   '/_authenticated/portal/profile': typeof AuthenticatedPortalProfileRoute
   '/_authenticated/portal/questions': typeof AuthenticatedPortalQuestionsRoute
-  '/lovable/email/auth': typeof LovableEmailAuthRouteWithChildren
   '/lovable/email/events': typeof LovableEmailEventsRoute
   '/_authenticated/portal/': typeof AuthenticatedPortalIndexRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
@@ -246,7 +237,6 @@ export interface FileRouteTypes {
     | '/vanguard/home'
     | '/portal/profile'
     | '/portal/questions'
-    | '/lovable/email/auth'
     | '/lovable/email/events'
     | '/portal/'
     | '/lovable/email/auth/preview'
@@ -270,7 +260,6 @@ export interface FileRouteTypes {
     | '/vanguard/home'
     | '/portal/profile'
     | '/portal/questions'
-    | '/lovable/email/auth'
     | '/lovable/email/events'
     | '/portal'
     | '/lovable/email/auth/preview'
@@ -295,7 +284,6 @@ export interface FileRouteTypes {
     | '/vanguard/home'
     | '/_authenticated/portal/profile'
     | '/_authenticated/portal/questions'
-    | '/lovable/email/auth'
     | '/lovable/email/events'
     | '/_authenticated/portal/'
     | '/lovable/email/auth/preview'
@@ -318,8 +306,9 @@ export interface RootRouteChildren {
   GovernanceCharterRoute: typeof GovernanceCharterRoute
   GovernanceWrittenStandardsRoute: typeof GovernanceWrittenStandardsRoute
   VanguardHomeRoute: typeof VanguardHomeRoute
-  LovableEmailAuthRoute: typeof LovableEmailAuthRouteWithChildren
   LovableEmailEventsRoute: typeof LovableEmailEventsRoute
+  LovableEmailAuthPreviewRoute: typeof LovableEmailAuthPreviewRoute
+  LovableEmailAuthWebhookRoute: typeof LovableEmailAuthWebhookRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -450,13 +439,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LovableEmailEventsRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/lovable/email/auth': {
-      id: '/lovable/email/auth'
-      path: '/lovable/email/auth'
-      fullPath: '/lovable/email/auth'
-      preLoaderRoute: typeof LovableEmailAuthRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/_authenticated/portal/questions': {
       id: '/_authenticated/portal/questions'
       path: '/portal/questions'
@@ -473,17 +455,17 @@ declare module '@tanstack/react-router' {
     }
     '/lovable/email/auth/webhook': {
       id: '/lovable/email/auth/webhook'
-      path: '/webhook'
+      path: '/lovable/email/auth/webhook'
       fullPath: '/lovable/email/auth/webhook'
       preLoaderRoute: typeof LovableEmailAuthWebhookRouteImport
-      parentRoute: typeof LovableEmailAuthRoute
+      parentRoute: typeof rootRouteImport
     }
     '/lovable/email/auth/preview': {
       id: '/lovable/email/auth/preview'
-      path: '/preview'
+      path: '/lovable/email/auth/preview'
       fullPath: '/lovable/email/auth/preview'
       preLoaderRoute: typeof LovableEmailAuthPreviewRouteImport
-      parentRoute: typeof LovableEmailAuthRoute
+      parentRoute: typeof rootRouteImport
     }
   }
 }
@@ -505,19 +487,6 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
 const AuthenticatedRouteRouteWithChildren =
   AuthenticatedRouteRoute._addFileChildren(AuthenticatedRouteRouteChildren)
 
-interface LovableEmailAuthRouteChildren {
-  LovableEmailAuthPreviewRoute: typeof LovableEmailAuthPreviewRoute
-  LovableEmailAuthWebhookRoute: typeof LovableEmailAuthWebhookRoute
-}
-
-const LovableEmailAuthRouteChildren: LovableEmailAuthRouteChildren = {
-  LovableEmailAuthPreviewRoute: LovableEmailAuthPreviewRoute,
-  LovableEmailAuthWebhookRoute: LovableEmailAuthWebhookRoute,
-}
-
-const LovableEmailAuthRouteWithChildren =
-  LovableEmailAuthRoute._addFileChildren(LovableEmailAuthRouteChildren)
-
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
@@ -534,8 +503,9 @@ const rootRouteChildren: RootRouteChildren = {
   GovernanceCharterRoute: GovernanceCharterRoute,
   GovernanceWrittenStandardsRoute: GovernanceWrittenStandardsRoute,
   VanguardHomeRoute: VanguardHomeRoute,
-  LovableEmailAuthRoute: LovableEmailAuthRouteWithChildren,
   LovableEmailEventsRoute: LovableEmailEventsRoute,
+  LovableEmailAuthPreviewRoute: LovableEmailAuthPreviewRoute,
+  LovableEmailAuthWebhookRoute: LovableEmailAuthWebhookRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
