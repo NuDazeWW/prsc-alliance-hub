@@ -47,6 +47,11 @@ export const Route = createFileRoute("/lovable/email/auth/webhook")({
                   .select('first_name, entity, role')
                   .eq('email', data.email.toLowerCase())
                   .maybeSingle()
+                const { data: inviteCopy } = await supabaseAdmin
+                  .from('portal_email_templates')
+                  .select('eyebrow, heading, body, cta_label, cta_subtext, signatures')
+                  .eq('system_key', 'invite')
+                  .maybeSingle()
                 const callbackEntity = callback.searchParams.get('entity')
                 const callbackRole = callback.searchParams.get('role')
                 const entityValue = member?.entity ?? callbackEntity
@@ -58,6 +63,7 @@ export const Route = createFileRoute("/lovable/email/auth/webhook")({
                   firstName: member?.first_name ?? callback.searchParams.get('first_name') ?? 'there',
                   entity,
                   roleLabel: role ? INVITE_ROLE_LABELS[role] : 'Board Member or Advisor',
+                  copy: inviteCopy,
                 })
               },
             },
