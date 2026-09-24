@@ -30,6 +30,8 @@ import { Route as LovableEmailEventsRouteImport } from './routes/lovable/email/e
 import { Route as LovableEmailAuthRouteImport } from './routes/lovable/email/auth'
 import { Route as AuthenticatedPortalQuestionsRouteImport } from './routes/_authenticated/portal.questions'
 import { Route as AuthenticatedPortalProfileRouteImport } from './routes/_authenticated/portal.profile'
+import { Route as LovableEmailAuthWebhookRouteImport } from './routes/lovable/email/auth/webhook'
+import { Route as LovableEmailAuthPreviewRouteImport } from './routes/lovable/email/auth/preview'
 
 const TheStandardRoute = TheStandardRouteImport.update({
   id: '/the-standard',
@@ -139,6 +141,16 @@ const AuthenticatedPortalProfileRoute =
     path: '/portal/profile',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const LovableEmailAuthWebhookRoute = LovableEmailAuthWebhookRouteImport.update({
+  id: '/webhook',
+  path: '/webhook',
+  getParentRoute: () => LovableEmailAuthRoute,
+} as any)
+const LovableEmailAuthPreviewRoute = LovableEmailAuthPreviewRouteImport.update({
+  id: '/preview',
+  path: '/preview',
+  getParentRoute: () => LovableEmailAuthRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -158,9 +170,11 @@ export interface FileRoutesByFullPath {
   '/vanguard/home': typeof VanguardHomeRoute
   '/portal/profile': typeof AuthenticatedPortalProfileRoute
   '/portal/questions': typeof AuthenticatedPortalQuestionsRoute
-  '/lovable/email/auth': typeof LovableEmailAuthRoute
+  '/lovable/email/auth': typeof LovableEmailAuthRouteWithChildren
   '/lovable/email/events': typeof LovableEmailEventsRoute
   '/portal/': typeof AuthenticatedPortalIndexRoute
+  '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
+  '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -180,9 +194,11 @@ export interface FileRoutesByTo {
   '/vanguard/home': typeof VanguardHomeRoute
   '/portal/profile': typeof AuthenticatedPortalProfileRoute
   '/portal/questions': typeof AuthenticatedPortalQuestionsRoute
-  '/lovable/email/auth': typeof LovableEmailAuthRoute
+  '/lovable/email/auth': typeof LovableEmailAuthRouteWithChildren
   '/lovable/email/events': typeof LovableEmailEventsRoute
   '/portal': typeof AuthenticatedPortalIndexRoute
+  '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
+  '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -204,9 +220,11 @@ export interface FileRoutesById {
   '/vanguard/home': typeof VanguardHomeRoute
   '/_authenticated/portal/profile': typeof AuthenticatedPortalProfileRoute
   '/_authenticated/portal/questions': typeof AuthenticatedPortalQuestionsRoute
-  '/lovable/email/auth': typeof LovableEmailAuthRoute
+  '/lovable/email/auth': typeof LovableEmailAuthRouteWithChildren
   '/lovable/email/events': typeof LovableEmailEventsRoute
   '/_authenticated/portal/': typeof AuthenticatedPortalIndexRoute
+  '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
+  '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -231,6 +249,8 @@ export interface FileRouteTypes {
     | '/lovable/email/auth'
     | '/lovable/email/events'
     | '/portal/'
+    | '/lovable/email/auth/preview'
+    | '/lovable/email/auth/webhook'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -253,6 +273,8 @@ export interface FileRouteTypes {
     | '/lovable/email/auth'
     | '/lovable/email/events'
     | '/portal'
+    | '/lovable/email/auth/preview'
+    | '/lovable/email/auth/webhook'
   id:
     | '__root__'
     | '/'
@@ -276,6 +298,8 @@ export interface FileRouteTypes {
     | '/lovable/email/auth'
     | '/lovable/email/events'
     | '/_authenticated/portal/'
+    | '/lovable/email/auth/preview'
+    | '/lovable/email/auth/webhook'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -294,7 +318,7 @@ export interface RootRouteChildren {
   GovernanceCharterRoute: typeof GovernanceCharterRoute
   GovernanceWrittenStandardsRoute: typeof GovernanceWrittenStandardsRoute
   VanguardHomeRoute: typeof VanguardHomeRoute
-  LovableEmailAuthRoute: typeof LovableEmailAuthRoute
+  LovableEmailAuthRoute: typeof LovableEmailAuthRouteWithChildren
   LovableEmailEventsRoute: typeof LovableEmailEventsRoute
 }
 
@@ -447,6 +471,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedPortalProfileRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/lovable/email/auth/webhook': {
+      id: '/lovable/email/auth/webhook'
+      path: '/webhook'
+      fullPath: '/lovable/email/auth/webhook'
+      preLoaderRoute: typeof LovableEmailAuthWebhookRouteImport
+      parentRoute: typeof LovableEmailAuthRoute
+    }
+    '/lovable/email/auth/preview': {
+      id: '/lovable/email/auth/preview'
+      path: '/preview'
+      fullPath: '/lovable/email/auth/preview'
+      preLoaderRoute: typeof LovableEmailAuthPreviewRouteImport
+      parentRoute: typeof LovableEmailAuthRoute
+    }
   }
 }
 
@@ -467,6 +505,19 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
 const AuthenticatedRouteRouteWithChildren =
   AuthenticatedRouteRoute._addFileChildren(AuthenticatedRouteRouteChildren)
 
+interface LovableEmailAuthRouteChildren {
+  LovableEmailAuthPreviewRoute: typeof LovableEmailAuthPreviewRoute
+  LovableEmailAuthWebhookRoute: typeof LovableEmailAuthWebhookRoute
+}
+
+const LovableEmailAuthRouteChildren: LovableEmailAuthRouteChildren = {
+  LovableEmailAuthPreviewRoute: LovableEmailAuthPreviewRoute,
+  LovableEmailAuthWebhookRoute: LovableEmailAuthWebhookRoute,
+}
+
+const LovableEmailAuthRouteWithChildren =
+  LovableEmailAuthRoute._addFileChildren(LovableEmailAuthRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
@@ -483,7 +534,7 @@ const rootRouteChildren: RootRouteChildren = {
   GovernanceCharterRoute: GovernanceCharterRoute,
   GovernanceWrittenStandardsRoute: GovernanceWrittenStandardsRoute,
   VanguardHomeRoute: VanguardHomeRoute,
-  LovableEmailAuthRoute: LovableEmailAuthRoute,
+  LovableEmailAuthRoute: LovableEmailAuthRouteWithChildren,
   LovableEmailEventsRoute: LovableEmailEventsRoute,
 }
 export const routeTree = rootRouteImport
