@@ -183,38 +183,33 @@ function PortalHome() {
         <aside className="border-b border-gold/15 px-7 py-7 lg:border-b-0 lg:border-r lg:px-0 lg:pb-14 lg:pt-0">
           <div className="lg:px-[12.5%] lg:pt-[clamp(1.5rem,2vw,2.25rem)]">
             <p className="text-[11px] uppercase tracking-[0.22em] text-gold/80">Your Welcome Center</p>
-            <div className="mt-5 flex items-center gap-5 lg:mt-0 lg:block">
+            <div className="mt-5 flex items-center gap-4">
               {headshot.data?.url ? (
                 <img
                   src={headshot.data.url}
                   alt={`${name} ${m.last_name}`}
-                  className="aspect-square w-[clamp(64px,5vw,88px)] rounded-full border border-gold/55 object-cover lg:mt-4"
+                  className="aspect-square w-[64px] shrink-0 rounded-full border border-gold/55 object-cover"
                 />
               ) : (
-                <span className="grid aspect-square w-[clamp(64px,5vw,88px)] shrink-0 place-items-center rounded-full border border-gold/55 font-display text-xl text-gold lg:mt-4">
-
+                <span className="grid aspect-square w-[64px] shrink-0 place-items-center rounded-full border border-gold/55 font-display text-xl text-gold">
                   {initials}
                 </span>
               )}
-              <div>
-                <h2 className="font-display text-[clamp(1.2rem,1.35vw,1.55rem)] leading-tight lg:mt-4">
-                  {name} {m.last_name}
-                </h2>
-                <p className="mt-2 text-[14px] leading-5 text-ivory/65">{m.title || (m.role === "advisor" ? "Selected Advisor" : "Board Member")}</p>
-                <p className="text-[14px] leading-5 text-ivory/65">{entityWord}</p>
-                <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-2">
-                  <Link to="/portal/profile" className="inline-flex items-center gap-2 text-[13px] font-medium text-gold transition-colors hover:text-ivory">
-                    <PenLine className="h-3.5 w-3.5" /> Update Private Profile
-                  </Link>
-                  <button
-                    type="button"
-                    onClick={() => setPanel("role")}
-                    className="inline-flex items-center gap-2 text-[13px] font-medium text-gold transition-colors hover:text-ivory"
-                  >
-                    Role Details <ArrowRight className="h-3.5 w-3.5" />
-                  </button>
-                </div>
-              </div>
+              <h2 className="min-w-0 font-display text-[clamp(1.15rem,1.3vw,1.5rem)] leading-tight">
+                {name} {m.last_name}
+              </h2>
+            </div>
+            <div className="mt-4 flex flex-col items-start gap-2 border-t border-gold/15 pt-4">
+              <Link to="/portal/profile" className="inline-flex items-center gap-2 text-[13px] font-medium text-gold transition-colors hover:text-ivory">
+                <PenLine className="h-3.5 w-3.5" /> Update Private Profile
+              </Link>
+              <button
+                type="button"
+                onClick={() => setPanel("role")}
+                className="inline-flex items-center gap-2 text-[13px] font-medium text-gold transition-colors hover:text-ivory"
+              >
+                Role Details <ArrowRight className="h-3.5 w-3.5" />
+              </button>
             </div>
           </div>
 
@@ -325,7 +320,12 @@ function PortalHome() {
           <section id="role" className="flex-1 px-7 pb-2 sm:px-10 lg:px-[2.5%]">
             <div className="grid h-full min-h-0 items-stretch gap-6 border border-gold/25 bg-[linear-gradient(135deg,var(--color-midnight),var(--color-navy))] p-6 sm:p-8 lg:grid-cols-[2fr_1fr] lg:gap-8 lg:px-[clamp(1.75rem,2.6vw,3rem)] lg:py-[clamp(2.5rem,3.6vw,4.75rem)]">
               <div className="flex min-w-0 flex-col justify-center">
-                <p className="text-[10px] uppercase tracking-[0.24em] text-gold">Why You</p>
+                <p className="text-[10px] uppercase tracking-[0.24em] text-gold">
+                  Why You <span className="mx-2 text-gold/40">|</span>
+                  <span className="text-ivory/70">{m.title || (m.role === "advisor" ? "Selected Advisor" : "Board Member")}</span>
+                  <span className="mx-2 text-gold/40">·</span>
+                  <span className="text-ivory/70">{entityWord}</span>
+                </p>
                 <h2 className="mt-4 font-display text-[clamp(2rem,2.5vw,2.8rem)] leading-tight">{name}, Your Perspective Matters.</h2>
                 <p className="mt-7 max-w-[52rem] text-[16px] leading-8 text-ivory/75">{m.why_you}</p>
                 <div className="mt-9 h-px w-16 bg-gold" />
