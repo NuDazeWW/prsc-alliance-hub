@@ -3,9 +3,9 @@ import { Body, Button, Column, Container, Head, Heading, Html, Img, Link, Previe
 import prscLogo from '@/assets/prsc-horizontal-lockup.png.asset.json'
 import disLogo from '@/assets/dis-lockup-site.png.asset.json'
 
-type InviteEntity = 'prsc' | 'dis' | 'both'
+export type InviteEntity = 'prsc' | 'dis' | 'both'
 
-interface InviteEmailProps {
+export interface InviteEmailProps {
   confirmationUrl: string
   firstName?: string
   recipientEmail: string
@@ -15,7 +15,7 @@ interface InviteEmailProps {
 
 const APP_ORIGIN = 'https://access.prscstandards.org'
 
-const entityCopy: Record<InviteEntity, { full: string; short: string }> = {
+export const inviteEntityCopy: Record<InviteEntity, { full: string; short: string }> = {
   prsc: { full: 'Partnership Readiness Standards Council (PRSC)', short: 'PRSC' },
   dis: { full: 'Decision Intelligence Systems (DIS)', short: 'DIS' },
   both: {
@@ -24,7 +24,7 @@ const entityCopy: Record<InviteEntity, { full: string; short: string }> = {
   },
 }
 
-function capitalizeName(value: string) {
+export function capitalizeInviteName(value: string) {
   return value
     .trim()
     .toLocaleLowerCase('en-US')
@@ -38,8 +38,8 @@ export const InviteEmail = ({
   entity = 'both',
   roleLabel = 'Board Member or Advisor',
 }: InviteEmailProps) => {
-  const inviteeName = capitalizeName(firstName) || 'There'
-  const selectedEntity = entityCopy[entity]
+  const inviteeName = capitalizeInviteName(firstName) || 'There'
+  const selectedEntity = inviteEntityCopy[entity]
   const showPrsc = entity === 'prsc' || entity === 'both'
   const showDis = entity === 'dis' || entity === 'both'
 

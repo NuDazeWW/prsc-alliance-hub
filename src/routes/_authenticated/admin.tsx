@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useMemo, useRef, useState } from "react";
+import { render } from "@react-email/render";
 import {
   Activity,
   AlertTriangle,
@@ -43,6 +44,9 @@ import { isPreviewHost } from "@/routes/_authenticated/route";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { InviteEmail, capitalizeInviteName, inviteEntityCopy } from "@/lib/email-templates/invite";
+import { INVITE_EMAIL_PREVIEW_URL, INVITE_EMAIL_REPLY_TO, INVITE_EMAIL_SUBJECT, INVITE_ROLE_LABELS } from "@/lib/invite-email-config";
+import { sendInviteEmailTest, type InviteEmailReview } from "@/lib/portal-invite-email.functions";
 
 export const Route = createFileRoute("/_authenticated/admin")({
   head: () => ({
@@ -145,6 +149,17 @@ type MemberRow = {
   title: string; entity: "prsc" | "dis" | "both"; role: "board_member" | "advisor"; why_you: string;
 };
 
+const emptyInvite: InviteEmailReview = {
+  first_name: "",
+  last_name: "",
+  email: "",
+  organization: "",
+  title: "",
+  entity: "prsc",
+  role: "board_member",
+  why_you: "",
+};
+
 const LIST_HEADERS = "first_name,last_name,email,organization,title,entity,role,why_you";
 const LIST_TEMPLATE = `${LIST_HEADERS}\nJane,Doe,jane@example.com,Example Group,Managing Partner,both,advisor,"Two sentences on why this person was chosen."\n`;
 
@@ -238,6 +253,12 @@ function Admin() {
   });
 
   const [status, setStatus] = useState("");
+  const [inviteDraft, setInviteDraft] = useState<InviteEmailReview>(emptyInvite);
+  const [invitePreviewOpen, setInvitePreviewOpen] = useState(false);
+  const [invitePreviewHtml, setInvitePreviewHtml] = useState("");
+  const [inviteTestStatus, setInviteTestStatus] = useState("");
+  const [inviteTestSending, setInviteTestSending] = useState(false);
+  const inviteFormRef = useRef<HTMLFormElement>(null);
   const [draft, setDraft] = useState<Draft>(emptyDraft);
   const [emailStatus, setEmailStatus] = useState("");
   const [previewOpen, setPreviewOpen] = useState(false);
@@ -399,30 +420,57 @@ function Admin() {
   async function invite(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     const form = e.currentTarget;
-    const f = new FormData(form);
     if (preview) {
       setStatus("Preview mode: invitation validated but not sent. Invites send on the live admin page.");
-      form.reset();
       return;
     }
     try {
-      await invitePortalMember({
-        data: {
-          email: String(f.get("email")),
-          first_name: String(f.get("first_name")),
-          last_name: String(f.get("last_name")),
-          organization: String(f.get("organization")),
-          title: String(f.get("title")),
-          entity: String(f.get("entity")) as "prsc" | "dis" | "both",
-          role: String(f.get("role")) as "board_member" | "advisor",
-          why_you: String(f.get("why_you")),
-        },
-      });
+      await invitePortalMember({ data: inviteDraft });
       setStatus("Invitation sent.");
       form.reset();
+      setInviteDraft(emptyInvite);
       await overview.refetch();
     } catch (error) {
       setStatus(error instanceof Error ? error.message : "Invitation failed.");
+    }
+  }
+
+  async function openInvitePreview() {
+    const form = inviteFormRef.current;
+    if (!form?.reportValidity()) return;
+    setStatus("");
+    setInviteTestStatus("");
+    try {
+      const html = await render(
+        <InviteEmail
+          confirmationUrl={INVITE_EMAIL_PREVIEW_URL}
+          firstName={inviteDraft.first_name}
+          recipientEmail={inviteDraft.email}
+          entity={inviteDraft.entity}
+          roleLabel={INVITE_ROLE_LABELS[inviteDraft.role]}
+        />,
+      );
+      setInvitePreviewHtml(html);
+      setInvitePreviewOpen(true);
+    } catch {
+      setStatus("The invitation preview could not be prepared.");
+    }
+  }
+
+  async function sendInviteTest() {
+    if (preview) {
+      setInviteTestStatus("Test delivery is available after signing in on the live admin page.");
+      return;
+    }
+    setInviteTestSending(true);
+    setInviteTestStatus("");
+    try {
+      const result = await sendInviteEmailTest({ data: inviteDraft });
+      setInviteTestStatus(`Test sent to ${result.sentTo}. No member was created.`);
+    } catch (error) {
+      setInviteTestStatus(error instanceof Error ? error.message : "The invitation test could not be sent.");
+    } finally {
+      setInviteTestSending(false);
     }
   }
 
@@ -575,18 +623,18 @@ function Admin() {
                   body="Add a board member or advisor here. Before sending their first welcome email, explain why this person was chosen. That private, personalized message appears prominently in their welcome center. Choose PRSC, DIS, or Both — their portal language adapts to the designation."
                 />
               </div>
-              <form onSubmit={invite} className="mt-7 grid gap-4 sm:grid-cols-2">
-                <Input name="first_name" placeholder="First name" required className="text-base" />
-                <Input name="last_name" placeholder="Last name" required className="text-base" />
-                <Input name="email" type="email" placeholder="Email" required className="text-base" />
-                <Input name="organization" placeholder="Organization" required className="text-base" />
-                <Input name="title" placeholder="Title" required className="text-base" />
-                <select name="entity" required className="h-9 rounded-md border border-input bg-navy px-3 text-base">
+              <form ref={inviteFormRef} onSubmit={invite} className="mt-7 grid gap-4 sm:grid-cols-2">
+                <Input name="first_name" value={inviteDraft.first_name} onChange={(e) => setInviteDraft({ ...inviteDraft, first_name: e.target.value })} placeholder="First name" required className="text-base" />
+                <Input name="last_name" value={inviteDraft.last_name} onChange={(e) => setInviteDraft({ ...inviteDraft, last_name: e.target.value })} placeholder="Last name" required className="text-base" />
+                <Input name="email" type="email" value={inviteDraft.email} onChange={(e) => setInviteDraft({ ...inviteDraft, email: e.target.value })} placeholder="Email" required className="text-base" />
+                <Input name="organization" value={inviteDraft.organization} onChange={(e) => setInviteDraft({ ...inviteDraft, organization: e.target.value })} placeholder="Organization" required className="text-base" />
+                <Input name="title" value={inviteDraft.title} onChange={(e) => setInviteDraft({ ...inviteDraft, title: e.target.value })} placeholder="Title" required className="text-base" />
+                <select name="entity" value={inviteDraft.entity} onChange={(e) => setInviteDraft({ ...inviteDraft, entity: e.target.value as InviteEmailReview["entity"] })} required className="h-9 rounded-md border border-input bg-navy px-3 text-base">
                   <option value="prsc">PRSC</option>
                   <option value="dis">DIS</option>
                   <option value="both">Both</option>
                 </select>
-                <select name="role" required className="h-9 rounded-md border border-input bg-navy px-3 text-base">
+                <select name="role" value={inviteDraft.role} onChange={(e) => setInviteDraft({ ...inviteDraft, role: e.target.value as InviteEmailReview["role"] })} required className="h-9 rounded-md border border-input bg-navy px-3 text-base">
                   <option value="board_member">Board member</option>
                   <option value="advisor">Advisor</option>
                 </select>
@@ -597,6 +645,8 @@ function Admin() {
                   </span>
                   <Textarea
                     name="why_you"
+                    value={inviteDraft.why_you}
+                    onChange={(e) => setInviteDraft({ ...inviteDraft, why_you: e.target.value })}
                     placeholder="Describe the experience, judgment, perspective, or relationships that led to this invitation."
                     required
                     minLength={20}
@@ -604,7 +654,10 @@ function Admin() {
                     className="min-h-40 text-base"
                   />
                 </label>
-                <Button type="submit" className="rounded-none bg-gold text-base font-semibold text-navy opacity-100 hover:bg-gold/85 hover:text-navy focus-visible:bg-gold/85 active:bg-gold/75 sm:col-span-2">Send invitation</Button>
+                <Button type="button" variant="outline" className="rounded-none text-base" onClick={() => void openInvitePreview()}>
+                  <Eye className="mr-2 h-4 w-4" /> Preview invitation
+                </Button>
+                <Button type="submit" className="rounded-none bg-gold text-base font-semibold text-navy opacity-100 hover:bg-gold/85 hover:text-navy focus-visible:bg-gold/85 active:bg-gold/75">Send invitation</Button>
                 {status && <p className="text-base text-ivory/60 sm:col-span-2">{status}</p>}
               </form>
             </section>
@@ -1157,6 +1210,56 @@ function Admin() {
                 })()}
                 preview={preview}
               />
+            </div>
+          </div>
+        </div>
+      )}
+
+      {invitePreviewOpen && (
+        <div className="fixed inset-0 z-[70] grid place-items-center bg-navy-deep/90 p-3 backdrop-blur sm:p-6">
+          <div className="flex h-full max-h-[94vh] w-full max-w-[980px] flex-col border border-gold/30 bg-navy">
+            <div className="flex items-start justify-between gap-5 border-b border-gold/20 px-5 py-4 sm:px-7">
+              <div className="min-w-0">
+                <p className="text-xs uppercase tracking-[0.2em] text-gold">Invitation review</p>
+                <p className="mt-1 truncate text-base text-ivory/75">{INVITE_EMAIL_SUBJECT}</p>
+              </div>
+              <Button type="button" size="icon" variant="ghost" aria-label="Close invitation preview" onClick={() => setInvitePreviewOpen(false)} className="shrink-0 text-ivory/60 hover:text-gold">
+                <X className="h-5 w-5" />
+              </Button>
+            </div>
+
+            <div className="grid gap-px bg-gold/15 sm:grid-cols-2 lg:grid-cols-4">
+              <div className="bg-navy px-5 py-3">
+                <p className="text-xs uppercase tracking-[0.14em] text-gold">Greeting</p>
+                <p className="mt-1 text-base text-ivory">Welcome, {capitalizeInviteName(inviteDraft.first_name)}!</p>
+              </div>
+              <div className="bg-navy px-5 py-3">
+                <p className="text-xs uppercase tracking-[0.14em] text-gold">Company &amp; role</p>
+                <p className="mt-1 text-base text-ivory">{inviteEntityCopy[inviteDraft.entity].short} · {INVITE_ROLE_LABELS[inviteDraft.role]}</p>
+              </div>
+              <div className="bg-navy px-5 py-3">
+                <p className="text-xs uppercase tracking-[0.14em] text-gold">Logos shown</p>
+                <p className="mt-1 text-base text-ivory">{inviteDraft.entity === "both" ? "PRSC + DIS" : inviteDraft.entity.toUpperCase()}</p>
+              </div>
+              <div className="bg-navy px-5 py-3">
+                <p className="text-xs uppercase tracking-[0.14em] text-gold">Contact</p>
+                <a className="mt-1 block truncate text-base text-gold underline" href={`mailto:${INVITE_EMAIL_REPLY_TO}`}>{INVITE_EMAIL_REPLY_TO}</a>
+              </div>
+            </div>
+
+            <div className="min-h-0 flex-1 bg-ivory p-2 sm:p-4">
+              <iframe title="Exact invitation email preview" sandbox="" srcDoc={invitePreviewHtml} className="h-full min-h-[420px] w-full bg-ivory" />
+            </div>
+
+            <div className="border-t border-gold/20 px-5 py-4 sm:px-7">
+              <p className="mb-3 text-sm text-ivory/50">The access button is disabled in this preview. A test sends only to admin@readinessterminal.com and does not create a member.</p>
+              <div className="flex flex-wrap items-center justify-end gap-3">
+                {inviteTestStatus && <p aria-live="polite" className="mr-auto text-base text-ivory/70">{inviteTestStatus}</p>}
+                <Button type="button" variant="outline" className="rounded-none text-base" onClick={() => setInvitePreviewOpen(false)}>Keep editing</Button>
+                <Button type="button" disabled={inviteTestSending || preview} className="rounded-none bg-gold text-base text-navy" onClick={() => void sendInviteTest()}>
+                  <Send className="mr-2 h-4 w-4" /> {inviteTestSending ? "Sending test…" : "Send test to admin"}
+                </Button>
+              </div>
             </div>
           </div>
         </div>
