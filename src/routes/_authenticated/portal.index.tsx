@@ -212,7 +212,6 @@ function PortalHome() {
               </button>
             </div>
           </div>
-          </div>
 
           <nav className="mt-5 grid grid-cols-2 lg:block">
             {sideNav.map((item) => {
