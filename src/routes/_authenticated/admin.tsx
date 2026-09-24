@@ -269,6 +269,8 @@ function Admin() {
   const fileRef = useRef<HTMLInputElement>(null);
   const [detailId, setDetailId] = useState<string | null>(null);
   const [memberBusy, setMemberBusy] = useState("");
+  const [selectedMemberIds, setSelectedMemberIds] = useState<string[]>([]);
+  const [selectedEmailIds, setSelectedEmailIds] = useState<string[]>([]);
   const [inquiryDraft, setInquiryDraft] = useState<Record<string, string>>({});
   const listRef = useRef<HTMLInputElement>(null);
   const [importRows, setImportRows] = useState<MemberRow[]>([]);
@@ -349,30 +351,37 @@ function Admin() {
     }
   }
 
-  async function removeMember(id: string, name: string) {
-    if (!window.confirm(`Permanently delete ${name} and all associated test data? This cannot be undone.`)) return;
+  async function removeSelectedMembers() {
+    if (selectedMemberIds.length === 0) return;
+    if (!window.confirm(`Permanently delete ${selectedMemberIds.length} selected member record${selectedMemberIds.length === 1 ? "" : "s"} and all associated test data? This cannot be undone.`)) return;
     if (preview) return setMemberBusy("Preview mode: member deletion is available once you are signed in.");
     try {
-      await deletePortalMember({ data: { member_id: id } });
-      setRecipients((current) => current.filter((memberId) => memberId !== id));
-      if (detailId === id) setDetailId(null);
-      setMemberBusy(`${name} and all associated data were deleted.`);
+      for (const memberId of selectedMemberIds) {
+        await deletePortalMember({ data: { member_id: memberId } });
+      }
+      setRecipients((current) => current.filter((memberId) => !selectedMemberIds.includes(memberId)));
+      if (detailId && selectedMemberIds.includes(detailId)) setDetailId(null);
+      setSelectedMemberIds([]);
+      setSelectedEmailIds([]);
+      setMemberBusy(`${selectedMemberIds.length} selected member record${selectedMemberIds.length === 1 ? " was" : "s were"} deleted.`);
       await Promise.all([overview.refetch(), email.refetch()]);
     } catch (error) {
-      setMemberBusy(error instanceof Error ? error.message : "Could not delete the member.");
+      setMemberBusy(error instanceof Error ? error.message : "Could not delete the selected members.");
     }
   }
 
-  async function clearEmailHistory(memberId?: string, name?: string) {
-    const target = name ? ` for ${name}` : "";
-    if (!window.confirm(`Permanently delete all email history${target}? This cannot be undone.`)) return;
+  async function removeSelectedEmailHistory() {
+    if (selectedEmailIds.length === 0) return;
+    if (!window.confirm(`Permanently delete ${selectedEmailIds.length} selected email record${selectedEmailIds.length === 1 ? "" : "s"}? This cannot be undone.`)) return;
     if (preview) return setMemberBusy("Preview mode: email-history deletion is available once you are signed in.");
     try {
-      await deleteEmailHistory({ data: memberId ? { member_id: memberId } : {} });
-      setMemberBusy(`Email history${target} was deleted.`);
+      const count = selectedEmailIds.length;
+      await deleteEmailHistory({ data: { send_ids: selectedEmailIds } });
+      setSelectedEmailIds([]);
+      setMemberBusy(`${count} selected email record${count === 1 ? " was" : "s were"} deleted.`);
       await email.refetch();
     } catch (error) {
-      setMemberBusy(error instanceof Error ? error.message : "Could not delete email history.");
+      setMemberBusy(error instanceof Error ? error.message : "Could not delete the selected email records.");
     }
   }
 
@@ -1002,14 +1011,29 @@ function Admin() {
                   Members &amp; email history
                 </h2>
                 <div className="flex items-center gap-2">
-                  {sends.length > 0 && (
-                    <Button type="button" variant="outline" size="sm" className="rounded-none" onClick={() => void clearEmailHistory()}>
-                      <Trash2 className="h-3.5 w-3.5" /> Clear email history
-                    </Button>
-                  )}
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    disabled={selectedEmailIds.length === 0}
+                    className="rounded-none"
+                    onClick={() => void removeSelectedEmailHistory()}
+                  >
+                    <Trash2 className="h-3.5 w-3.5" /> Delete selected emails ({selectedEmailIds.length})
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    disabled={selectedMemberIds.length === 0}
+                    className="rounded-none border-red-400/35 text-red-800 hover:bg-red-400/10 hover:text-red-900"
+                    onClick={() => void removeSelectedMembers()}
+                  >
+                    <Trash2 className="h-3.5 w-3.5" /> Delete selected members ({selectedMemberIds.length})
+                  </Button>
                   <InfoTip
                     title="Members & email history"
-                    body="Every member with their designation, package status, the templates they have received, and the date of the last send. Check this before sending so no one gets the same email twice. A member showing “None yet” has never been emailed from this center."
+                    body="Select only the member or individual email records you want to remove, then use the matching Delete selected action. Member deletion also removes that person’s associated test data."
                   />
                 </div>
               </div>
@@ -1017,7 +1041,18 @@ function Admin() {
                 <table className="w-full min-w-[560px] text-left text-base">
                 <thead className="bg-ivory/5 text-xs uppercase text-gold">
                   <tr>
-                    <th className="p-4">Member</th>
+                    <th className="p-4">
+                      <label className="flex items-center gap-2">
+                        <input
+                          type="checkbox"
+                          aria-label="Select all members"
+                          checked={members.length > 0 && selectedMemberIds.length === members.length}
+                          onChange={(e) => setSelectedMemberIds(e.target.checked ? members.map((member) => member.id) : [])}
+                          className="h-4 w-4 accent-[var(--color-gold)]"
+                        />
+                        Member
+                      </label>
+                    </th>
                     <th>Designation</th>
                     <th>Package status</th>
                     <th>Emails received</th>
@@ -1033,13 +1068,24 @@ function Admin() {
                     return (
                       <tr key={m.id} className="border-t border-ivory/10 align-top">
                         <td className="p-4">
-                          <strong className="font-medium">
-                            {m.first_name} {m.last_name}
-                          </strong>
-                          <span className="block text-sm text-ivory/40">{m.email}</span>
-                          <span className={`mt-1 inline-block text-xs uppercase tracking-[0.14em] ${revoked ? "text-red-300/80" : "text-ivory/40"}`}>
-                            Access: {m.status}
-                          </span>
+                          <label className="flex cursor-pointer items-start gap-3">
+                            <input
+                              type="checkbox"
+                              aria-label={`Select ${m.first_name} ${m.last_name}`}
+                              checked={selectedMemberIds.includes(m.id)}
+                              onChange={(e) => setSelectedMemberIds((current) => e.target.checked ? [...current, m.id] : current.filter((id) => id !== m.id))}
+                              className="mt-1 h-4 w-4 shrink-0 accent-[var(--color-gold)]"
+                            />
+                            <span>
+                              <strong className="font-medium">
+                                {m.first_name} {m.last_name}
+                              </strong>
+                              <span className="block text-sm text-ivory/40">{m.email}</span>
+                              <span className={`mt-1 inline-block text-xs uppercase tracking-[0.14em] ${revoked ? "text-red-300/80" : "text-ivory/40"}`}>
+                                Access: {m.status}
+                              </span>
+                            </span>
+                          </label>
                         </td>
                         <td className="uppercase">{m.entity}</td>
                         <td className="py-4 pr-3">
@@ -1055,14 +1101,25 @@ function Admin() {
                           </select>
                         </td>
                         <td className="py-4 pr-4">
-                          {list.length === 0 ? (
+                          {all.length === 0 ? (
                             <span className="text-ivory/40">None yet</span>
                           ) : (
-                            <span className="flex flex-wrap gap-1.5">
-                              {Array.from(new Set(list.map((s) => s.template_name))).map((name) => (
-                                <span key={name} className="flex items-center gap-1 border border-gold/30 px-2 py-0.5 text-xs text-ivory/75">
-                                  <CheckCircle2 className="h-3 w-3 text-gold" /> {name}
-                                </span>
+                            <span className="flex flex-col gap-2">
+                              {all.map((sendRecord) => (
+                                <label key={sendRecord.id} className="flex cursor-pointer items-start gap-2 border border-gold/20 px-2 py-1.5 text-xs text-ivory/75">
+                                  <input
+                                    type="checkbox"
+                                    aria-label={`Select email ${sendRecord.template_name} to ${m.first_name} ${m.last_name}`}
+                                    checked={selectedEmailIds.includes(sendRecord.id)}
+                                    onChange={(e) => setSelectedEmailIds((current) => e.target.checked ? [...current, sendRecord.id] : current.filter((id) => id !== sendRecord.id))}
+                                    className="mt-0.5 h-3.5 w-3.5 shrink-0 accent-[var(--color-gold)]"
+                                  />
+                                  {sendRecord.status === "sent" ? <CheckCircle2 className="mt-0.5 h-3 w-3 shrink-0 text-gold" /> : <AlertTriangle className="mt-0.5 h-3 w-3 shrink-0 text-red-300/85" />}
+                                  <span>
+                                    <span className="block">{sendRecord.template_name}</span>
+                                    <span className="block text-ivory/40">{new Date(sendRecord.created_at).toLocaleDateString()}</span>
+                                  </span>
+                                </label>
                               ))}
                             </span>
                           )}
@@ -1096,26 +1153,6 @@ function Admin() {
                               {revoked ? <ShieldCheck className="h-3.5 w-3.5" /> : <ShieldOff className="h-3.5 w-3.5" />}
                               {revoked ? "Reactivate" : "Revoke access"}
                             </button>
-                            {all.length > 0 && (
-                              <Button
-                                type="button"
-                                variant="ghost"
-                                size="sm"
-                                className="h-auto justify-start rounded-none px-2.5 py-1.5 text-red-300/85 hover:bg-red-400/10 hover:text-red-300"
-                                onClick={() => void clearEmailHistory(m.id, `${m.first_name} ${m.last_name}`)}
-                              >
-                                <Trash2 className="h-3.5 w-3.5" /> Delete email history
-                              </Button>
-                            )}
-                            <Button
-                              type="button"
-                              variant="ghost"
-                              size="sm"
-                              className="h-auto justify-start rounded-none px-2.5 py-1.5 text-red-300/85 hover:bg-red-400/10 hover:text-red-300"
-                              onClick={() => void removeMember(m.id, `${m.first_name} ${m.last_name}`)}
-                            >
-                              <Trash2 className="h-3.5 w-3.5" /> Delete member
-                            </Button>
                           </div>
                         </td>
                       </tr>

@@ -11,5 +11,6 @@
 - [x] Personalize invitation copy and official logos by member entity
 - [x] Add an exact invitation preview and administrator-only test-send workflow
 - [x] Add guarded deletion for test members and email history
+- [x] Replace clear-all deletion with selectable member and email records
 - [ ] Connect access.prscstandards.org — /portal, /admin, /auth (confirmed)
 - [ ] Verify security isolation, email flows, responsive layouts, metadata, and public-site separation
