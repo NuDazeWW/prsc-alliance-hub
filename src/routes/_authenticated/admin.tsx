@@ -1255,7 +1255,7 @@ function Admin() {
               <p className="mb-3 text-sm text-ivory/50">The access button is disabled in this preview. A test sends only to admin@readinessterminal.com and does not create a member.</p>
               <div className="flex flex-wrap items-center justify-end gap-3">
                 {inviteTestStatus && <p aria-live="polite" className="mr-auto text-base text-ivory/70">{inviteTestStatus}</p>}
-                <Button type="button" variant="outline" className="rounded-none text-base" onClick={() => setInvitePreviewOpen(false)}>Keep editing</Button>
+                <Button type="button" className="rounded-none border border-gold/40 bg-transparent text-base text-ivory hover:bg-gold/10 hover:text-gold" onClick={() => setInvitePreviewOpen(false)}>Keep editing</Button>
                 <Button type="button" disabled={inviteTestSending || preview} className="rounded-none bg-gold text-base text-navy" onClick={() => void sendInviteTest()}>
                   <Send className="mr-2 h-4 w-4" /> {inviteTestSending ? "Sending test…" : "Send test to admin"}
                 </Button>
