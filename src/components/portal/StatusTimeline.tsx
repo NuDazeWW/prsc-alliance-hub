@@ -13,8 +13,8 @@ export function StatusTimeline({
   documentsReleased: boolean;
   allAcknowledged: boolean;
 }) {
-  const reviewed = packageStatus === "in_preparation" || packageStatus === "package_ready" || documentsReleased;
-  const prepared = packageStatus === "package_ready" || documentsReleased;
+  const reviewed = profileComplete && (packageStatus === "in_preparation" || packageStatus === "package_ready" || documentsReleased);
+  const prepared = reviewed && (packageStatus === "package_ready" || documentsReleased);
   const steps: { label: string; note: string; state: State }[] = [
     {
       label: "Profile submitted",
