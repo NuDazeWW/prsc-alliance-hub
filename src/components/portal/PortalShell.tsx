@@ -6,19 +6,24 @@ import { PrscMark } from "@/components/site/PrscMark";
 
 type NavItem = { label: string; href: string; onSelect?: () => void };
 export type PortalNotification = { id: string; label: string; detail?: string; href?: string };
+export type PortalStat = { label: string; value: React.ReactNode };
 
 export function PortalShell({
   children,
   admin = false,
   nav = [],
   memberName,
+  avatarUrl,
   notifications = [],
+  stats = [],
 }: {
   children: React.ReactNode;
   admin?: boolean;
   nav?: NavItem[];
   memberName?: string;
+  avatarUrl?: string | null;
   notifications?: PortalNotification[];
+  stats?: PortalStat[];
 }) {
   const navigate = useNavigate();
   const [open, setOpen] = useState(false);
