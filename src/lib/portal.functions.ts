@@ -146,6 +146,37 @@ export const saveMyProfile = createServerFn({ method: "POST" })
         } catch (notificationError) {
           console.error("Profile submission admin notification failed", notificationError);
         }
+        try {
+          const { sendLovableEmail } = await import("@lovable.dev/email-js");
+          const firstName = member.first_name?.trim() || "there";
+          const confirmation = {
+            subject: "We've received your profile — next steps are being prepared",
+            eyebrow: "Profile received",
+            heading: `Thank you, ${firstName}. Your profile has been received.`,
+            body: `Your private profile has been submitted successfully, and your individualized ${entityLabel} ${roleLabel.toLowerCase()} package is now being prepared.\n\nYou will receive your next steps privately and shortly. There is nothing further you need to do at this time.\n\nIf any questions come to mind in the meantime, you can send them to us from the Welcome Center at any time — or simply reply to this email.`,
+            ctaLabel: "Return to Your Welcome Center",
+            ctaUrl: "https://access.prscstandards.org/portal",
+            ctaSubtext: "Your Welcome Center shows your current status and any documents released to you.",
+            signatures: [
+              { name: "Shirley Johnson", title: `Founder, ${entityLabel === "PRSC and DIS" ? "PRSC / DIS" : entityLabel}` },
+            ],
+          };
+          await sendLovableEmail(
+            {
+              to: member.email,
+              from: "PRSC Board & Advisor Center <no-reply@readinessterminal.com>",
+              sender_domain: "notify.readinessterminal.com",
+              reply_to: "info@readinessterminal.com",
+              subject: confirmation.subject,
+              html: renderBrandedEmail(confirmation),
+              text: renderBrandedEmailText(confirmation),
+              label: "profile-submitted-member-confirmation",
+            },
+            { apiKey, sendUrl: process.env["LOVABLE_SEND_URL"] },
+          );
+        } catch (confirmationError) {
+          console.error("Profile submission member confirmation failed", confirmationError);
+        }
       }
     }
     return { ok: true, submitted: data.submit };
