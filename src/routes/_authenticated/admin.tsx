@@ -6,6 +6,7 @@ import {
   Activity,
   AlertTriangle,
   CheckCircle2,
+  Clock3,
   Eye,
   FileText,
   Info,
@@ -49,6 +50,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { InviteEmail, capitalizeInviteName, inviteEntityCopy } from "@/lib/email-templates/invite";
 import { INVITE_EMAIL_PREVIEW_URL, INVITE_EMAIL_REPLY_TO, INVITE_EMAIL_SUBJECT, INVITE_ROLE_LABELS } from "@/lib/invite-email-config";
 import { sendInviteEmailTest, type InviteEmailReview } from "@/lib/portal-invite-email.functions";
+import { PORTAL_EXPERIENCE_QUESTIONS, PORTAL_PERMISSION_LABELS, PORTAL_PROFILE_STAGES, PORTAL_VISIBILITY_PERMISSIONS } from "@/lib/portal-profile-fields";
 
 export const Route = createFileRoute("/_authenticated/admin")({
   head: () => ({
@@ -344,7 +346,10 @@ function Admin() {
     queryKey: ["portal-admin-member", detailId],
     enabled: Boolean(detailId) && !preview,
     retry: false,
-    queryFn: () => getMemberDetail({ data: { member_id: detailId! } }),
+    queryFn: () => {
+      if (!detailId) throw new Error("Select a member to view their profile.");
+      return getMemberDetail({ data: { member_id: detailId } });
+    },
   });
 
   async function changeAccess(id: string, status: "active" | "revoked") {
@@ -1287,7 +1292,7 @@ function Admin() {
           <div className="flex h-full max-h-[90vh] w-full max-w-[860px] flex-col border border-gold/30 bg-navy">
             <div className="flex items-center justify-between border-b border-gold/20 px-6 py-4">
               <div className="min-w-0">
-                <p className="text-xs uppercase tracking-[0.2em] text-gold">Submitted profile</p>
+                <p className="text-xs uppercase tracking-[0.2em] text-gold">Member journey &amp; profile</p>
                 <p className="truncate text-base text-ivory/70">
                   {(() => {
                     const m = members.find((x) => x.id === detailId);
@@ -1306,10 +1311,55 @@ function Admin() {
                 <p className="text-base text-gold">Opening profile…</p>
               ) : detail.error || !detail.data ? (
                 <p className="text-base text-ivory/55">This profile could not be loaded.</p>
-              ) : !detail.data.profile ? (
-                <p className="text-base text-ivory/55">This member has not started their profile yet.</p>
               ) : (
                 <div className="space-y-7">
+                  {(() => {
+                    const member = detail.data.member;
+                    const profile = detail.data.profile;
+                    const journey = detail.data.journey;
+                    const stage = profile?.submitted_at ? 5 : profile?.current_stage ?? 0;
+                    const profileState = profile?.submitted_at ? "Submitted" : profile ? "In progress" : "Not started";
+                    const openInquiries = journey.inquiries.filter((inquiry: any) => inquiry.status === "open").length;
+                    return <>
+                      <section className="border border-gold/20 bg-ivory/[.025] p-5">
+                        <div className="flex flex-wrap items-start justify-between gap-4">
+                          <div>
+                            <p className="text-xs uppercase tracking-[0.18em] text-gold">Journey status</p>
+                            <h3 className="mt-2 font-display text-3xl">{profileState}</h3>
+                            <p className="mt-1 text-sm text-ivory/50">{stage ? `Stage ${stage} of 5 · ${PORTAL_PROFILE_STAGES[stage - 1]}` : "No profile answers saved yet"}</p>
+                          </div>
+                          <span className="border border-gold/30 px-3 py-2 text-xs uppercase tracking-[0.14em] text-gold">{member.package_status.replaceAll("_", " ")}</span>
+                        </div>
+                        <dl className="mt-6 grid gap-5 border-t border-gold/15 pt-5 sm:grid-cols-2 lg:grid-cols-4">
+                          <Field label="Access" value={member.status} />
+                          <Field label="Last visit" value={member.last_access_at ? new Date(member.last_access_at).toLocaleString() : "Not accessed yet"} />
+                          <Field label="Documents available" value={String(journey.documentCount)} />
+                          <Field label="Documents initialed" value={String(journey.acknowledgedDocumentCount)} />
+                          <Field label="Questions sent" value={String(journey.inquiries.length)} />
+                          <Field label="Open questions" value={String(openInquiries)} />
+                          <Field label="Profile last saved" value={profile?.updated_at ? new Date(profile.updated_at).toLocaleString() : "Not started"} />
+                          <Field label="Profile submitted" value={profile?.submitted_at ? new Date(profile.submitted_at).toLocaleString() : "Not submitted"} />
+                        </dl>
+                      </section>
+
+                      <Block label="Recent journey activity">
+                        {journey.activity.length ? journey.activity.slice(0, 8).map((event: any) => (
+                          <div key={event.id} className="flex gap-3 border-l border-gold/30 pl-3">
+                            <Clock3 className="mt-0.5 h-4 w-4 shrink-0 text-gold" />
+                            <div>
+                              <p className="text-base text-ivory/75">{activityLabel(event.event_type)}</p>
+                              <p className="mt-1 text-xs text-ivory/40">{new Date(event.created_at).toLocaleString()}</p>
+                            </div>
+                          </div>
+                        )) : <p className="text-base text-ivory/50">No recorded activity yet.</p>}
+                      </Block>
+                    </>;
+                  })()}
+                  {!detail.data.profile ? (
+                    <section className="border border-gold/20 p-6">
+                      <p className="text-base text-ivory/55">This member has not started their profile yet. Their saved answers will appear here as they move through each stage.</p>
+                    </section>
+                  ) : <>
                   {detail.data.headshotUrl && (
                     <img
                       src={detail.data.headshotUrl}
@@ -1329,14 +1379,13 @@ function Admin() {
                     />
                   </dl>
                   <Block label="Experience">
-                    {Object.entries(detail.data.profile.experience_answers ?? {}).map(([k, v]) => (
-                      <Field key={k} label={k.replaceAll("_", " ")} value={String(v)} />
-                    ))}
+                    {PORTAL_EXPERIENCE_QUESTIONS.map((question, index) => <Field key={question} label={question} value={detail.data.profile?.experience_answers?.[`q${index + 1}`]} />)}
                   </Block>
                   <Block label="Visibility instructions">
-                    {Object.entries(detail.data.profile.visibility_instructions ?? {}).map(([k, v]) => (
-                      <Field key={k} label={k.replaceAll("_", " ")} value={String(v)} />
-                    ))}
+                    {PORTAL_VISIBILITY_PERMISSIONS.map((permission, index) => {
+                      const answer = detail.data.profile?.visibility_instructions?.[`p${index + 1}`];
+                      return <Field key={permission} label={permission} value={answer ? PORTAL_PERMISSION_LABELS[answer] ?? answer : undefined} />;
+                    })}
                   </Block>
                   <Block label="Restrictions">
                     <Field label="Status" value={detail.data.profile.restriction_status} />
@@ -1347,6 +1396,7 @@ function Admin() {
                     <Field label="Questions" value={detail.data.profile.questions} />
                     <Field label="Contact requested" value={detail.data.profile.contact_requested ? "Yes" : "No"} />
                   </Block>
+                  </>}
                 </div>
               )}
 
@@ -1491,4 +1541,17 @@ function Block({ label, children }: { label: string; children: React.ReactNode }
       <div className="mt-4 grid gap-4 sm:grid-cols-2">{children}</div>
     </section>
   );
+}
+
+function activityLabel(eventType: string) {
+  const labels: Record<string, string> = {
+    profile_submitted: "Profile submitted",
+    inquiry_submitted: "Private question sent",
+    access_revoked: "Access revoked",
+    access_restored: "Access restored",
+    package_status_changed: "Package status updated",
+    document_added: "Document added",
+    document_acknowledged: "Document viewed and initialed",
+  };
+  return labels[eventType] ?? eventType.replaceAll("_", " ").replace(/^./, (letter) => letter.toUpperCase());
 }
