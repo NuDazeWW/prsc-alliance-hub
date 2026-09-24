@@ -149,12 +149,12 @@ function PortalHome() {
     <PortalShell
       memberName={name}
       memberProgress={
-        <div className="min-w-[620px] lg:min-w-0">
+        <div className="min-w-0 lg:min-w-[620px]">
           <div className="mb-2 flex items-center justify-between gap-4">
             <div className="flex min-w-0 items-center gap-3">
               <p className="whitespace-nowrap text-[9px] uppercase tracking-[0.18em] text-gold">Your Next Step</p>
               <span className="h-3 w-px bg-gold/25" />
-              <p className="truncate text-[11px] text-ivory/55">
+              <p className="hidden truncate text-[11px] text-ivory/55 sm:block">
                 {profileComplete
                   ? documentsReleased
                     ? "Your documents are ready to review."
@@ -294,7 +294,7 @@ function PortalHome() {
                       <>
                         Approx. 7–10 minutes  •  Your Submission is Private.
                         <br />
-                        Completing your profile unlocks your individualized package
+                         Completing your profile unlocks your individualized package.
                       </>
                     )}
                 </p>
