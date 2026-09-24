@@ -47,7 +47,7 @@ const SAMPLE_DATA: Record<string, object> = {
     confirmationUrl: SAMPLE_PROJECT_URL,
     firstName: 'Shirley',
     recipientEmail: SAMPLE_EMAIL,
-    entityName: 'Partnership Readiness Standards Council (PRSC)',
+    entity: 'prsc',
     roleLabel: 'Advisor',
   },
   email_change: {

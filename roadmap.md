@@ -8,5 +8,6 @@
 - [x] Build save-and-return private profile and inquiries
 - [x] Build administrator center and alerts
 - [x] Personalize the member “Why You” panel from the first invitation workflow
+- [x] Personalize invitation copy and official logos by member entity
 - [ ] Connect access.prscstandards.org — /portal, /admin, /auth (confirmed)
 - [ ] Verify security isolation, email flows, responsive layouts, metadata, and public-site separation
