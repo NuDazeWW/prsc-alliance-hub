@@ -157,8 +157,7 @@ const inviteSchema = z.object({
   why_you: z.string().trim().min(20).max(2000),
 });
 function portalInviteRedirect(member: { first_name: string; entity: string; role: string }) {
-  const url = new URL("https://access.prscstandards.org/auth");
-  url.searchParams.set("mode", "setup");
+  const url = new URL("https://access.prscstandards.org/accept-invitation");
   url.searchParams.set("first_name", member.first_name);
   url.searchParams.set("entity", member.entity);
   url.searchParams.set("role", member.role);
