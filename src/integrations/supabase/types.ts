@@ -598,6 +598,24 @@ export type Database = {
         }
         Relationships: []
       }
+      vanguard_seat_tally: {
+        Row: {
+          application_count: number
+          singleton: boolean
+          updated_at: string
+        }
+        Insert: {
+          application_count?: number
+          singleton?: boolean
+          updated_at?: string
+        }
+        Update: {
+          application_count?: number
+          singleton?: boolean
+          updated_at?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
