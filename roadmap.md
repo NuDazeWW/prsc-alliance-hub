@@ -17,5 +17,6 @@
 - [x] Add a return-to-Welcome-Center option after profile submission
 - [x] Correct live profile status, submitted-profile review, document readiness, and inquiry confirmation
 - [x] Email the administrator when a member submits a profile and link to the next-step workflow
+- [x] Give administrators a complete per-member profile and portal-journey view
 - [ ] Connect access.prscstandards.org — /portal, /admin, /auth (confirmed)
 - [ ] Verify security isolation, email flows, responsive layouts, metadata, and public-site separation

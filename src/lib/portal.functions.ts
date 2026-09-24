@@ -311,11 +311,13 @@ export const getMemberDetail = createServerFn({ method: "GET" })
       .eq("id", data.member_id)
       .single();
     if (error) throw error;
-    const { data: profile } = await context.supabase
-      .from("portal_profiles")
-      .select("*")
-      .eq("member_id", data.member_id)
-      .maybeSingle();
+    const [{ data: profile }, { data: activity }, { data: inquiries }, { data: documents }, { data: acknowledgements }] = await Promise.all([
+      context.supabase.from("portal_profiles").select("*").eq("member_id", data.member_id).maybeSingle(),
+      context.supabase.from("portal_activity").select("id, event_type, metadata, created_at").eq("member_id", data.member_id).order("created_at", { ascending: false }).limit(25),
+      context.supabase.from("portal_inquiries").select("id, subject, status, created_at").eq("member_id", data.member_id).order("created_at", { ascending: false }),
+      context.supabase.from("portal_documents").select("id, member_id").or(`member_id.is.null,member_id.eq.${data.member_id}`),
+      context.supabase.from("portal_document_acknowledgements").select("document_id, acknowledged_at").eq("member_id", data.member_id),
+    ]);
     let headshotUrl: string | null = null;
     if (profile?.headshot_path) {
       const { data: signed } = await context.supabase.storage
@@ -323,7 +325,17 @@ export const getMemberDetail = createServerFn({ method: "GET" })
         .createSignedUrl(profile.headshot_path, 3600);
       headshotUrl = signed?.signedUrl ?? null;
     }
-    return { member: member as PortalMember, profile: (profile ?? null) as PortalProfile | null, headshotUrl };
+    return {
+      member: member as PortalMember,
+      profile: (profile ?? null) as PortalProfile | null,
+      headshotUrl,
+      journey: {
+        activity: activity ?? [],
+        inquiries: inquiries ?? [],
+        documentCount: documents?.length ?? 0,
+        acknowledgedDocumentCount: acknowledgements?.length ?? 0,
+      },
+    };
   });
 
 export const setMemberAccess = createServerFn({ method: "POST" })
