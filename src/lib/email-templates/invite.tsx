@@ -40,7 +40,7 @@ export const InviteEmail = ({
             <Text style={listItem}>• Send us any questions before your formal materials are delivered</Text>
           </Section>
           <Button style={button} href={confirmationUrl}>Access Your Private Welcome Center →</Button>
-          <Text style={text}>Your access is individual and private. The link above will allow you to create your password and enter the Welcome Center securely.</Text>
+          <Text style={instruction}>After you click the button, you’ll create your own private password on the secure invitation page. No password will be sent by email. Once your password is set, you’ll enter the Welcome Center immediately.</Text>
           <Text style={text}>We’re excited to reconnect and officially welcome you into this next chapter.</Text>
           <Text style={signoff}>Warmly,</Text>
           <Text style={signature}>Shirley Johnson</Text>
@@ -71,6 +71,7 @@ const list = { margin: '0 0 24px', paddingLeft: '4px' }
 const listItem = { ...text, margin: '0 0 8px' }
 const button = { backgroundColor: '#C8A464', color: '#0A1322', fontSize: '12px', fontWeight: 'bold' as const, letterSpacing: '0.09em', textTransform: 'uppercase' as const, border: '1px solid #C8A464', borderRadius: '2px', padding: '15px 22px', textDecoration: 'none', margin: '2px 0 24px' }
 const signoff = { ...text, margin: '26px 0 2px' }
+const instruction = { ...text, backgroundColor: '#F4F1EA', borderLeft: '3px solid #C8A464', padding: '14px 16px', margin: '0 0 22px' }
 const signature = { color: '#8C6E3B', fontFamily: "'Brush Script MT', 'Segoe Script', cursive", fontSize: '28px', lineHeight: '1.2', margin: '0 0 4px' }
 const signatureTitle = { color: '#25303F', fontSize: '12px', lineHeight: '1.55', margin: 0 }
 const securityFooter = { backgroundColor: '#0A1322', padding: '20px 28px' }
