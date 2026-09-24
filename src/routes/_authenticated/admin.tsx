@@ -715,7 +715,16 @@ function Admin() {
   const d = overview.data;
 
   return (
-    <PortalShell admin notifications={notifications}>
+    <PortalShell
+      admin
+      notifications={notifications}
+      stats={[
+        { label: "Members", value: d.members.length },
+        { label: "Open inquiries", value: d.inquiries.filter((x: any) => x.status === "open").length },
+        { label: "Email templates", value: templates.length },
+        { label: "Recent events", value: d.activity.length },
+      ]}
+    >
       <main className="px-4 py-10 sm:px-6 lg:px-8">
         <div className="flex flex-col justify-between gap-6 border-b border-gold/20 pb-8 md:flex-row md:items-end">
           <div>
@@ -724,13 +733,6 @@ function Admin() {
           </div>
           <p className="text-base text-ivory/45">Member access, submissions, and inquiries</p>
         </div>
-
-        <section className="grid gap-px bg-gold/15 md:grid-cols-4">
-          <Stat icon={Users} label="Members" value={d.members.length} />
-          <Stat icon={MessageSquare} label="Open inquiries" value={d.inquiries.filter((x: any) => x.status === "open").length} />
-          <Stat icon={FileText} label="Email templates" value={templates.length} />
-          <Stat icon={Activity} label="Recent events" value={d.activity.length} />
-        </section>
 
         <div className="mt-10 grid items-start gap-6 xl:grid-cols-3">
           <div className="flex flex-col gap-8">
@@ -1541,15 +1543,6 @@ function InfoTip({ title, body }: { title: string; body: string }) {
   );
 }
 
-function Stat({ icon: Icon, label, value }: { icon: any; label: string; value: number }) {
-  return (
-    <div className="bg-navy p-7">
-      <Icon className="h-5 w-5 text-gold" />
-      <p className="mt-6 font-display text-4xl">{value}</p>
-      <p className="mt-1 text-sm uppercase text-ivory/45">{label}</p>
-    </div>
-  );
-}
 
 function Field({ label, value }: { label: string; value: string | null | undefined }) {
   return (

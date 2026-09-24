@@ -6,19 +6,24 @@ import { PrscMark } from "@/components/site/PrscMark";
 
 type NavItem = { label: string; href: string; onSelect?: () => void };
 export type PortalNotification = { id: string; label: string; detail?: string; href?: string };
+export type PortalStat = { label: string; value: React.ReactNode };
 
 export function PortalShell({
   children,
   admin = false,
   nav = [],
   memberName,
+  avatarUrl,
   notifications = [],
+  stats = [],
 }: {
   children: React.ReactNode;
   admin?: boolean;
   nav?: NavItem[];
   memberName?: string;
+  avatarUrl?: string | null;
   notifications?: PortalNotification[];
+  stats?: PortalStat[];
 }) {
   const navigate = useNavigate();
   const [open, setOpen] = useState(false);
@@ -59,6 +64,16 @@ export function PortalShell({
             </nav>
           )}
           <div className="ml-auto flex h-10 items-center gap-4 pr-1 sm:gap-5 sm:pr-2 lg:ml-0 lg:border-l lg:border-gold/20 lg:pl-7 lg:pr-[clamp(1.5rem,2.5vw,3.5rem)]">
+            {stats.length > 0 && (
+              <div className="hidden items-center gap-[clamp(1rem,2vw,2.25rem)] pr-2 md:flex">
+                {stats.map((s) => (
+                  <div key={s.label} className="flex flex-col items-end leading-tight">
+                    <span className="font-display text-xl text-gold">{s.value}</span>
+                    <span className="text-[10px] uppercase tracking-[0.16em] text-ivory/50">{s.label}</span>
+                  </div>
+                ))}
+              </div>
+            )}
             {notifications.length > 0 && (
               <div className="relative">
                 <button
@@ -98,6 +113,23 @@ export function PortalShell({
                 )}
               </div>
             )}
+            {admin ? (
+              <div className="flex items-center gap-3">
+                <span className="grid h-10 w-10 shrink-0 place-items-center rounded-full border border-gold/55">
+                  <User className="h-[18px] w-[18px] text-gold" />
+                </span>
+                <span className="hidden text-[13px] font-semibold uppercase tracking-[0.18em] text-gold sm:inline">Admin</span>
+                <button
+                  type="button"
+                  onClick={signOut}
+                  aria-label="Sign out"
+                  title="Sign out"
+                  className="grid h-10 w-10 place-items-center rounded-full border border-gold/30 text-ivory/60 transition-colors hover:border-gold hover:text-gold"
+                >
+                  <LogOut className="h-[16px] w-[16px]" />
+                </button>
+              </div>
+            ) : (
             <div className="relative">
 
               <button
@@ -105,9 +137,17 @@ export function PortalShell({
                 onClick={() => setOpen((v) => !v)}
                 className="flex min-h-11 items-center gap-3 text-[14px] text-ivory/80 transition-colors hover:text-gold"
               >
-                <span className="grid h-10 w-10 shrink-0 place-items-center rounded-full border border-gold/55">
-                  <User className="h-[18px] w-[18px] text-gold" />
-                </span>
+                {avatarUrl ? (
+                  <img
+                    src={avatarUrl}
+                    alt={memberName ? `${memberName}'s photo` : "Your photo"}
+                    className="h-10 w-10 shrink-0 rounded-full border border-gold/55 object-cover"
+                  />
+                ) : (
+                  <span className="grid h-10 w-10 shrink-0 place-items-center rounded-full border border-gold/55">
+                    <User className="h-[18px] w-[18px] text-gold" />
+                  </span>
+                )}
                 <span className="hidden sm:inline">Welcome{memberName ? `, ${memberName}` : ""}</span>
                 <ChevronDown className="h-4 w-4" />
               </button>
@@ -137,6 +177,7 @@ export function PortalShell({
                 </div>
               )}
             </div>
+            )}
           </div>
         </div>
       </header>
