@@ -15,5 +15,6 @@
 - [x] Correct invitation password handoff and remove false expired-link state
 - [x] Keep yellow portal buttons visible on hover
 - [x] Add a return-to-Welcome-Center option after profile submission
+- [x] Correct live profile status, submitted-profile review, document readiness, and inquiry confirmation
 - [ ] Connect access.prscstandards.org — /portal, /admin, /auth (confirmed)
 - [ ] Verify security isolation, email flows, responsive layouts, metadata, and public-site separation
