@@ -63,7 +63,7 @@ export function PortalShell({
             </nav>
           )}
           {!admin && memberProgress && (
-            <div className="order-3 col-span-2 mt-2 min-w-0 overflow-x-auto border-t border-gold/15 pt-3 lg:order-none lg:col-span-1 lg:mt-0 lg:border-t-0 lg:pt-0">
+            <div className="order-3 col-span-2 mt-2 min-w-0 border-t border-gold/15 pt-3 lg:order-none lg:col-span-1 lg:mt-0 lg:overflow-x-auto lg:border-t-0 lg:pt-0">
               {memberProgress}
             </div>
           )}
