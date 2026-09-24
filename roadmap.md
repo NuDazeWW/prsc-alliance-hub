@@ -9,5 +9,6 @@
 - [x] Build administrator center and alerts
 - [x] Personalize the member “Why You” panel from the first invitation workflow
 - [x] Personalize invitation copy and official logos by member entity
+- [x] Add an exact invitation preview and administrator-only test-send workflow
 - [ ] Connect access.prscstandards.org — /portal, /admin, /auth (confirmed)
 - [ ] Verify security isolation, email flows, responsive layouts, metadata, and public-site separation
