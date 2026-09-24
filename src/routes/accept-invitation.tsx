@@ -51,7 +51,7 @@ function AcceptInvitationPage() {
     });
     const timeout = window.setTimeout(() => {
       if (!active) return;
-      setMessage((current) => current || "This invitation link has expired or has already been used. Please contact info@readinessterminal.com for a new invitation.");
+      setMessage("This invitation link has expired or has already been used. Please contact info@readinessterminal.com for a new invitation.");
     }, 4000);
     return () => {
       active = false;
