@@ -88,7 +88,7 @@ function AcceptInvitationPage() {
       if (signOutError) throw signOutError;
       await navigate({
         to: "/auth",
-        search: { email, passwordCreated: true, redirect: "/portal" },
+        search: { email, passwordCreated: true, redirect: "/portal", mode: undefined },
         replace: true,
       });
     } catch (error) {
