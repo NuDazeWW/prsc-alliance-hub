@@ -156,6 +156,14 @@ const inviteSchema = z.object({
   title: z.string().trim().max(160), entity: entitySchema, role: roleSchema,
   why_you: z.string().trim().min(20).max(2000),
 });
+function portalInviteRedirect(member: { first_name: string; entity: string; role: string }) {
+  const url = new URL("https://access.prscstandards.org/auth");
+  url.searchParams.set("mode", "setup");
+  url.searchParams.set("first_name", member.first_name);
+  url.searchParams.set("entity", member.entity);
+  url.searchParams.set("role", member.role);
+  return url.toString();
+}
 export const invitePortalMember = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input) => inviteSchema.parse(input))
@@ -163,7 +171,7 @@ export const invitePortalMember = createServerFn({ method: "POST" })
     await assertAdmin(context);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { data: invitation, error: inviteError } = await supabaseAdmin.auth.admin.inviteUserByEmail(data.email, {
-      redirectTo: "https://access.prscstandards.org/auth?mode=setup",
+      redirectTo: portalInviteRedirect(data),
       data: { first_name: data.first_name, last_name: data.last_name, entity: data.entity, role: data.role },
     });
     if (inviteError || !invitation.user) throw inviteError ?? new Error("Invitation could not be created");
@@ -201,7 +209,7 @@ export const importPortalMembers = createServerFn({ method: "POST" })
 
         if (!userId && data.send_invitations) {
           const { data: invitation, error } = await supabaseAdmin.auth.admin.inviteUserByEmail(email, {
-            redirectTo: "https://access.prscstandards.org/auth?mode=setup",
+            redirectTo: portalInviteRedirect(row),
             data: { first_name: row.first_name, last_name: row.last_name, entity: row.entity, role: row.role },
           });
           if (error || !invitation.user) throw error ?? new Error("Invitation could not be created");
