@@ -100,6 +100,34 @@ const demoOverview: any = {
   activity: [{ id: "a1" }],
 };
 
+const demoMemberDetail: any = {
+  member: demoOverview.members[0],
+  profile: {
+    current_stage: 3,
+    preferred_name: "Alex",
+    professional_role: "Strategic Advisor",
+    current_organization: "Northline Partners",
+    preferred_email: "alex.morgan@example.com",
+    preferred_phone: "+1 212 555 0140",
+    experience_answers: { q1: "Partnership strategy, operating models, and investor readiness." },
+    visibility_instructions: { p1: "yes", p2: "discuss", p3: "no" },
+    restriction_status: "no",
+    restriction_details: "",
+    final_notes: "",
+    questions: "",
+    contact_requested: false,
+    submitted_at: null,
+    updated_at: new Date().toISOString(),
+  },
+  headshotUrl: null,
+  journey: {
+    activity: [{ id: "demo-activity", event_type: "inquiry_submitted", metadata: {}, created_at: new Date().toISOString() }],
+    inquiries: [{ id: "q1", subject: "Preview inquiry", status: "open", created_at: new Date().toISOString() }],
+    documentCount: 0,
+    acknowledgedDocumentCount: 0,
+  },
+};
+
 const demoEmailCenter: { templates: EmailTemplate[]; sends: EmailSend[] } = {
   templates: [
     {
@@ -344,11 +372,11 @@ function Admin() {
 
   const detail = useQuery({
     queryKey: ["portal-admin-member", detailId],
-    enabled: Boolean(detailId) && !preview,
+    enabled: Boolean(detailId),
     retry: false,
     queryFn: () => {
       if (!detailId) throw new Error("Select a member to view their profile.");
-      return getMemberDetail({ data: { member_id: detailId } });
+      return preview ? Promise.resolve(demoMemberDetail) : getMemberDetail({ data: { member_id: detailId } });
     },
   });
 
@@ -1305,9 +1333,7 @@ function Admin() {
               </button>
             </div>
             <div className="flex-1 space-y-7 overflow-y-auto px-6 py-6">
-              {preview ? (
-                <p className="text-base text-ivory/55">Preview mode: submitted profiles appear here once you are signed in.</p>
-              ) : detail.isLoading ? (
+              {detail.isLoading ? (
                 <p className="text-base text-gold">Opening profile…</p>
               ) : detail.error || !detail.data ? (
                 <p className="text-base text-ivory/55">This profile could not be loaded.</p>
