@@ -18,7 +18,7 @@ const EMAIL_TEMPLATES: Record<string, React.ComponentType<any>> = {
 }
 
 // Configuration
-const SITE_NAME = "PRSC Standards Hub"
+const SITE_NAME = "PRSC Board & Advisor Center"
 const ROOT_DOMAIN = "readinessterminal.com"
 
 // Sample data for preview mode ONLY (not used in actual email sending).
@@ -26,7 +26,7 @@ const ROOT_DOMAIN = "readinessterminal.com"
 // The sample email uses a fixed placeholder (RFC 6761 .test TLD) so the Go backend
 // can always find-and-replace it with the actual recipient when sending test emails,
 // even if the project's domain has changed since the template was scaffolded.
-const SAMPLE_PROJECT_URL = "https://prsc-alliance-hub.lovable.app"
+const SAMPLE_PROJECT_URL = "https://access.prscstandards.org/auth?mode=setup"
 const SAMPLE_EMAIL = "user@example.test"
 const SAMPLE_DATA: Record<string, object> = {
   signup: {
@@ -44,9 +44,11 @@ const SAMPLE_DATA: Record<string, object> = {
     confirmationUrl: SAMPLE_PROJECT_URL,
   },
   invite: {
-    siteName: SITE_NAME,
-    siteUrl: SAMPLE_PROJECT_URL,
     confirmationUrl: SAMPLE_PROJECT_URL,
+    firstName: 'Shirley',
+    recipientEmail: SAMPLE_EMAIL,
+    entityName: 'Partnership Readiness Standards Council (PRSC)',
+    roleLabel: 'Advisor',
   },
   email_change: {
     siteName: SITE_NAME,
