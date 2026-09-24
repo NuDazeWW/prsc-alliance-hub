@@ -106,12 +106,6 @@ export const saveMyProfile = createServerFn({ method: "POST" })
     const { error } = await context.supabase.from("portal_profiles").upsert(payload, { onConflict: "member_id" });
     if (error) throw error;
     if (data.submit) {
-      const { error: statusError } = await context.supabase
-        .from("portal_members")
-        .update({ package_status: "profile_received" })
-        .eq("id", member.id)
-        .eq("package_status", "awaiting_profile");
-      if (statusError) throw statusError;
       await context.supabase.from("portal_activity").insert({ member_id: member.id, actor_user_id: context.userId, event_type: "profile_submitted" });
     }
     return { ok: true, submitted: data.submit };
