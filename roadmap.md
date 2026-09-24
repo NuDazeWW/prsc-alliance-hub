@@ -14,5 +14,6 @@
 - [x] Replace clear-all deletion with selectable member and email records
 - [x] Correct invitation password handoff and remove false expired-link state
 - [x] Keep yellow portal buttons visible on hover
+- [x] Add a return-to-Welcome-Center option after profile submission
 - [ ] Connect access.prscstandards.org — /portal, /admin, /auth (confirmed)
 - [ ] Verify security isolation, email flows, responsive layouts, metadata, and public-site separation
