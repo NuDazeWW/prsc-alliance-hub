@@ -28,6 +28,7 @@ import { Route as ApiGeoRouteImport } from './routes/api/geo'
 import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/admin'
 import { Route as AuthenticatedPortalIndexRouteImport } from './routes/_authenticated/portal.index'
 import { Route as LovableEmailEventsRouteImport } from './routes/lovable/email/events'
+import { Route as ApiPublicInviteRemindersRouteImport } from './routes/api/public/invite-reminders'
 import { Route as AuthenticatedPortalQuestionsRouteImport } from './routes/_authenticated/portal.questions'
 import { Route as AuthenticatedPortalProfileRouteImport } from './routes/_authenticated/portal.profile'
 import { Route as LovableEmailAuthWebhookRouteImport } from './routes/lovable/email/auth/webhook'
@@ -129,6 +130,12 @@ const LovableEmailEventsRoute = LovableEmailEventsRouteImport.update({
   path: '/lovable/email/events',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicInviteRemindersRoute =
+  ApiPublicInviteRemindersRouteImport.update({
+    id: '/api/public/invite-reminders',
+    path: '/api/public/invite-reminders',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const AuthenticatedPortalQuestionsRoute =
   AuthenticatedPortalQuestionsRouteImport.update({
     id: '/portal/questions',
@@ -171,6 +178,7 @@ export interface FileRoutesByFullPath {
   '/vanguard/home': typeof VanguardHomeRoute
   '/portal/profile': typeof AuthenticatedPortalProfileRoute
   '/portal/questions': typeof AuthenticatedPortalQuestionsRoute
+  '/api/public/invite-reminders': typeof ApiPublicInviteRemindersRoute
   '/lovable/email/events': typeof LovableEmailEventsRoute
   '/portal/': typeof AuthenticatedPortalIndexRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
@@ -195,6 +203,7 @@ export interface FileRoutesByTo {
   '/vanguard/home': typeof VanguardHomeRoute
   '/portal/profile': typeof AuthenticatedPortalProfileRoute
   '/portal/questions': typeof AuthenticatedPortalQuestionsRoute
+  '/api/public/invite-reminders': typeof ApiPublicInviteRemindersRoute
   '/lovable/email/events': typeof LovableEmailEventsRoute
   '/portal': typeof AuthenticatedPortalIndexRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
@@ -221,6 +230,7 @@ export interface FileRoutesById {
   '/vanguard/home': typeof VanguardHomeRoute
   '/_authenticated/portal/profile': typeof AuthenticatedPortalProfileRoute
   '/_authenticated/portal/questions': typeof AuthenticatedPortalQuestionsRoute
+  '/api/public/invite-reminders': typeof ApiPublicInviteRemindersRoute
   '/lovable/email/events': typeof LovableEmailEventsRoute
   '/_authenticated/portal/': typeof AuthenticatedPortalIndexRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
@@ -247,6 +257,7 @@ export interface FileRouteTypes {
     | '/vanguard/home'
     | '/portal/profile'
     | '/portal/questions'
+    | '/api/public/invite-reminders'
     | '/lovable/email/events'
     | '/portal/'
     | '/lovable/email/auth/preview'
@@ -271,6 +282,7 @@ export interface FileRouteTypes {
     | '/vanguard/home'
     | '/portal/profile'
     | '/portal/questions'
+    | '/api/public/invite-reminders'
     | '/lovable/email/events'
     | '/portal'
     | '/lovable/email/auth/preview'
@@ -296,6 +308,7 @@ export interface FileRouteTypes {
     | '/vanguard/home'
     | '/_authenticated/portal/profile'
     | '/_authenticated/portal/questions'
+    | '/api/public/invite-reminders'
     | '/lovable/email/events'
     | '/_authenticated/portal/'
     | '/lovable/email/auth/preview'
@@ -319,6 +332,7 @@ export interface RootRouteChildren {
   GovernanceCharterRoute: typeof GovernanceCharterRoute
   GovernanceWrittenStandardsRoute: typeof GovernanceWrittenStandardsRoute
   VanguardHomeRoute: typeof VanguardHomeRoute
+  ApiPublicInviteRemindersRoute: typeof ApiPublicInviteRemindersRoute
   LovableEmailEventsRoute: typeof LovableEmailEventsRoute
   LovableEmailAuthPreviewRoute: typeof LovableEmailAuthPreviewRoute
   LovableEmailAuthWebhookRoute: typeof LovableEmailAuthWebhookRoute
@@ -459,6 +473,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LovableEmailEventsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/invite-reminders': {
+      id: '/api/public/invite-reminders'
+      path: '/api/public/invite-reminders'
+      fullPath: '/api/public/invite-reminders'
+      preLoaderRoute: typeof ApiPublicInviteRemindersRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/_authenticated/portal/questions': {
       id: '/_authenticated/portal/questions'
       path: '/portal/questions'
@@ -524,6 +545,7 @@ const rootRouteChildren: RootRouteChildren = {
   GovernanceCharterRoute: GovernanceCharterRoute,
   GovernanceWrittenStandardsRoute: GovernanceWrittenStandardsRoute,
   VanguardHomeRoute: VanguardHomeRoute,
+  ApiPublicInviteRemindersRoute: ApiPublicInviteRemindersRoute,
   LovableEmailEventsRoute: LovableEmailEventsRoute,
   LovableEmailAuthPreviewRoute: LovableEmailAuthPreviewRoute,
   LovableEmailAuthWebhookRoute: LovableEmailAuthWebhookRoute,
