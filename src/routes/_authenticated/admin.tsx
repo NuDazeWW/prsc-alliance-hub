@@ -25,12 +25,14 @@ import {
   getMemberDetail,
   importPortalMembers,
   invitePortalMember,
+  deletePortalMember,
   setMemberAccess,
   setMemberPackageStatus,
   updateInquiry,
 } from "@/lib/portal.functions";
 import {
   deleteEmailTemplate,
+  deleteEmailHistory,
   getEmailCenter,
   saveEmailTemplate,
   sendMemberEmail,
@@ -344,6 +346,33 @@ function Admin() {
       await overview.refetch();
     } catch (error) {
       setMemberBusy(error instanceof Error ? error.message : "Could not update the package status.");
+    }
+  }
+
+  async function removeMember(id: string, name: string) {
+    if (!window.confirm(`Permanently delete ${name} and all associated test data? This cannot be undone.`)) return;
+    if (preview) return setMemberBusy("Preview mode: member deletion is available once you are signed in.");
+    try {
+      await deletePortalMember({ data: { member_id: id } });
+      setRecipients((current) => current.filter((memberId) => memberId !== id));
+      if (detailId === id) setDetailId(null);
+      setMemberBusy(`${name} and all associated data were deleted.`);
+      await Promise.all([overview.refetch(), email.refetch()]);
+    } catch (error) {
+      setMemberBusy(error instanceof Error ? error.message : "Could not delete the member.");
+    }
+  }
+
+  async function clearEmailHistory(memberId?: string, name?: string) {
+    const target = name ? ` for ${name}` : "";
+    if (!window.confirm(`Permanently delete all email history${target}? This cannot be undone.`)) return;
+    if (preview) return setMemberBusy("Preview mode: email-history deletion is available once you are signed in.");
+    try {
+      await deleteEmailHistory({ data: memberId ? { member_id: memberId } : {} });
+      setMemberBusy(`Email history${target} was deleted.`);
+      await email.refetch();
+    } catch (error) {
+      setMemberBusy(error instanceof Error ? error.message : "Could not delete email history.");
     }
   }
 
@@ -968,14 +997,21 @@ function Admin() {
 
           <div className="flex flex-col gap-8">
             <section className="border border-gold/20 p-6 sm:p-8">
-              <div className="flex items-start justify-between gap-3">
+              <div className="flex flex-wrap items-start justify-between gap-3">
                 <h2 id="tracker" className="font-display text-3xl">
                   Members &amp; email history
                 </h2>
-                <InfoTip
-                  title="Members & email history"
-                  body="Every member with their designation, package status, the templates they have received, and the date of the last send. Check this before sending so no one gets the same email twice. A member showing “None yet” has never been emailed from this center."
-                />
+                <div className="flex items-center gap-2">
+                  {sends.length > 0 && (
+                    <Button type="button" variant="outline" size="sm" className="rounded-none" onClick={() => void clearEmailHistory()}>
+                      <Trash2 className="h-3.5 w-3.5" /> Clear email history
+                    </Button>
+                  )}
+                  <InfoTip
+                    title="Members & email history"
+                    body="Every member with their designation, package status, the templates they have received, and the date of the last send. Check this before sending so no one gets the same email twice. A member showing “None yet” has never been emailed from this center."
+                  />
+                </div>
               </div>
               <div className="mt-5 overflow-x-auto border border-gold/20">
                 <table className="w-full min-w-[560px] text-left text-base">
@@ -1060,6 +1096,26 @@ function Admin() {
                               {revoked ? <ShieldCheck className="h-3.5 w-3.5" /> : <ShieldOff className="h-3.5 w-3.5" />}
                               {revoked ? "Reactivate" : "Revoke access"}
                             </button>
+                            {all.length > 0 && (
+                              <Button
+                                type="button"
+                                variant="ghost"
+                                size="sm"
+                                className="h-auto justify-start rounded-none px-2.5 py-1.5 text-red-300/85 hover:bg-red-400/10 hover:text-red-300"
+                                onClick={() => void clearEmailHistory(m.id, `${m.first_name} ${m.last_name}`)}
+                              >
+                                <Trash2 className="h-3.5 w-3.5" /> Delete email history
+                              </Button>
+                            )}
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              size="sm"
+                              className="h-auto justify-start rounded-none px-2.5 py-1.5 text-red-300/85 hover:bg-red-400/10 hover:text-red-300"
+                              onClick={() => void removeMember(m.id, `${m.first_name} ${m.last_name}`)}
+                            >
+                              <Trash2 className="h-3.5 w-3.5" /> Delete member
+                            </Button>
                           </div>
                         </td>
                       </tr>
