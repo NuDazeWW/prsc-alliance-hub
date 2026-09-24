@@ -106,6 +106,18 @@ export const deleteEmailTemplate = createServerFn({ method: "POST" })
     return { ok: true };
   });
 
+export const deleteEmailHistory = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input) => z.object({ member_id: z.string().uuid().optional() }).parse(input))
+  .handler(async ({ context, data }) => {
+    await assertAdmin(context);
+    let query = context.supabase.from("portal_email_sends").delete();
+    query = data.member_id ? query.eq("member_id", data.member_id) : query.not("id", "is", null);
+    const { error } = await query;
+    if (error) throw error;
+    return { ok: true };
+  });
+
 const sendSchema = z.object({
   template_id: z.string().uuid().nullable().optional(),
   member_ids: z.array(z.string().uuid()).min(1).max(50),

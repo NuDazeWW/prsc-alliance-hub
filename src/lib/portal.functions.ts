@@ -307,6 +307,43 @@ export const setMemberAccess = createServerFn({ method: "POST" })
     return { ok: true };
   });
 
+export const deletePortalMember = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input) => z.object({ member_id: z.string().uuid() }).parse(input))
+  .handler(async ({ context, data }) => {
+    await assertAdmin(context);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { data: member, error: memberError } = await supabaseAdmin
+      .from("portal_members")
+      .select("user_id")
+      .eq("id", data.member_id)
+      .single();
+    if (memberError || !member) throw memberError ?? new Error("Member not found");
+    if (member.user_id === context.userId) throw new Error("The signed-in administrator cannot be deleted.");
+
+    const [{ data: profile }, { data: documents }] = await Promise.all([
+      supabaseAdmin.from("portal_profiles").select("headshot_path").eq("member_id", data.member_id).maybeSingle(),
+      supabaseAdmin.from("portal_documents").select("file_path").eq("member_id", data.member_id),
+    ]);
+    if (profile?.headshot_path) {
+      await supabaseAdmin.storage.from(HEADSHOT_BUCKET).remove([profile.headshot_path]);
+    }
+    const documentPaths = (documents ?? [])
+      .map((document: { file_path: string | null }) => document.file_path)
+      .filter((path: string | null): path is string => Boolean(path));
+    if (documentPaths.length) {
+      await supabaseAdmin.storage.from("member-documents").remove(documentPaths);
+    }
+
+    await supabaseAdmin.from("portal_activity").delete().eq("member_id", data.member_id);
+    const { error: deleteError } = await supabaseAdmin.from("portal_members").delete().eq("id", data.member_id);
+    if (deleteError) throw deleteError;
+    await supabaseAdmin.from("user_roles").delete().eq("user_id", member.user_id);
+    const { error: authError } = await supabaseAdmin.auth.admin.deleteUser(member.user_id);
+    if (authError) throw authError;
+    return { ok: true };
+  });
+
 export const setMemberPackageStatus = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input) =>
