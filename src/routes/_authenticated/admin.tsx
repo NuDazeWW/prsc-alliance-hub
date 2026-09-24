@@ -604,7 +604,7 @@ function Admin() {
                     className="min-h-40 text-base"
                   />
                 </label>
-                <Button className="rounded-none bg-gold text-base text-navy sm:col-span-2">Send invitation</Button>
+                <Button type="submit" className="rounded-none bg-gold text-base font-semibold text-navy opacity-100 hover:bg-gold/85 hover:text-navy focus-visible:bg-gold/85 active:bg-gold/75 sm:col-span-2">Send invitation</Button>
                 {status && <p className="text-base text-ivory/60 sm:col-span-2">{status}</p>}
               </form>
             </section>
