@@ -18,5 +18,6 @@
 - [x] Correct live profile status, submitted-profile review, document readiness, and inquiry confirmation
 - [x] Email the administrator when a member submits a profile and link to the next-step workflow
 - [x] Give administrators a complete per-member profile and portal-journey view
+- [x] Send members a branded confirmation email when their profile is received
 - [ ] Connect access.prscstandards.org — /portal, /admin, /auth (confirmed)
 - [ ] Verify security isolation, email flows, responsive layouts, metadata, and public-site separation
