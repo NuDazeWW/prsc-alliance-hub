@@ -200,9 +200,11 @@ function PortalHome() {
               </h2>
             </div>
             <div className="mt-4 flex flex-col items-start gap-2 border-t border-gold/15 pt-4">
-              <Link to="/portal/profile" className="inline-flex items-center gap-2 text-[13px] font-medium text-gold transition-colors hover:text-ivory">
-                <PenLine className="h-3.5 w-3.5" /> Update Private Profile
-              </Link>
+              {profileComplete && (
+                <Link to="/portal/profile" className="inline-flex items-center gap-2 text-[13px] font-medium text-gold transition-colors hover:text-ivory">
+                  <PenLine className="h-3.5 w-3.5" /> Update Private Profile
+                </Link>
+              )}
               <button
                 type="button"
                 onClick={() => setPanel("role")}
