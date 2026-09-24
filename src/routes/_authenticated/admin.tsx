@@ -1543,15 +1543,6 @@ function InfoTip({ title, body }: { title: string; body: string }) {
   );
 }
 
-function Stat({ icon: Icon, label, value }: { icon: any; label: string; value: number }) {
-  return (
-    <div className="bg-navy p-7">
-      <Icon className="h-5 w-5 text-gold" />
-      <p className="mt-6 font-display text-4xl">{value}</p>
-      <p className="mt-1 text-sm uppercase text-ivory/45">{label}</p>
-    </div>
-  );
-}
 
 function Field({ label, value }: { label: string; value: string | null | undefined }) {
   return (
