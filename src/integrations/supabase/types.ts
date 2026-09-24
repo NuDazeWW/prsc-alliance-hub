@@ -424,6 +424,7 @@ export type Database = {
           organization: string
           package_status: Database["public"]["Enums"]["portal_package_status"]
           professional_name: string | null
+          reminder_sent_at: string | null
           role: Database["public"]["Enums"]["app_role"]
           status: Database["public"]["Enums"]["portal_member_status"]
           title: string | null
@@ -444,6 +445,7 @@ export type Database = {
           organization: string
           package_status?: Database["public"]["Enums"]["portal_package_status"]
           professional_name?: string | null
+          reminder_sent_at?: string | null
           role: Database["public"]["Enums"]["app_role"]
           status?: Database["public"]["Enums"]["portal_member_status"]
           title?: string | null
@@ -464,6 +466,7 @@ export type Database = {
           organization?: string
           package_status?: Database["public"]["Enums"]["portal_package_status"]
           professional_name?: string | null
+          reminder_sent_at?: string | null
           role?: Database["public"]["Enums"]["app_role"]
           status?: Database["public"]["Enums"]["portal_member_status"]
           title?: string | null

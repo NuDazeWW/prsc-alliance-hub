@@ -213,11 +213,27 @@ export const submitPortalInquiry = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input) => inquirySchema.parse(input))
   .handler(async ({ context, data }) => {
-    const { data: member, error: memberError } = await context.supabase.from("portal_members").select("id").eq("user_id", context.userId).single();
+    const { data: member, error: memberError } = await context.supabase.from("portal_members").select("id, email, first_name").eq("user_id", context.userId).single();
     if (memberError || !member) throw new Error("Member profile unavailable");
     const { error } = await context.supabase.from("portal_inquiries").insert({ member_id: member.id, subject: data.subject, message: data.message });
     if (error) throw error;
     await context.supabase.from("portal_activity").insert({ member_id: member.id, actor_user_id: context.userId, event_type: "inquiry_submitted" });
+    const { sendPortalEmail, founderSignature } = await import("@/lib/portal-notify.server");
+    const firstName = member.first_name?.trim() || "there";
+    await sendPortalEmail(
+      member.email,
+      {
+        subject: "We've received your question",
+        eyebrow: "Message received",
+        heading: `Thank you, ${firstName}. Your question has been received.`,
+        body: `We've received your message "${data.subject}" and will respond to you privately and personally.\n\nYour message:\n${data.message}\n\nIf you'd like to add anything, simply reply to this email.`,
+        ctaLabel: "Return to Your Welcome Center",
+        ctaUrl: "https://access.prscstandards.org/portal",
+        ctaSubtext: "Your Welcome Center shows your current status and any documents released to you.",
+        signatures: founderSignature(),
+      },
+      "inquiry-member-autoreply",
+    );
     return { ok: true };
   });
 
@@ -593,7 +609,34 @@ export const createMemberDocument = createServerFn({ method: "POST" })
       created_by: context.userId,
     });
     if (error) throw error;
-    return { ok: true };
+    const { sendPortalEmail, founderSignature } = await import("@/lib/portal-notify.server");
+    let recipients: { email: string; first_name: string | null }[] = [];
+    if (data.member_id) {
+      const { data: m } = await context.supabase.from("portal_members").select("email, first_name").eq("id", data.member_id).maybeSingle();
+      if (m) recipients = [m];
+    } else {
+      const { data: ms } = await context.supabase.from("portal_members").select("email, first_name").eq("status", "active");
+      recipients = ms ?? [];
+    }
+    const actionText = data.category === "sign" ? "ready for your signature" : "ready for you to review";
+    for (const r of recipients) {
+      const firstName = r.first_name?.trim() || "there";
+      await sendPortalEmail(
+        r.email,
+        {
+          subject: "Your next-step documents are ready",
+          eyebrow: "Documents ready",
+          heading: `${firstName}, your next step is ready.`,
+          body: `A new document — "${data.title}" — is now ${actionText} in your private Welcome Center.\n\n${data.description ? data.description + "\n\n" : ""}Sign in and open "Your Documents" to continue.`,
+          ctaLabel: "Open Your Documents",
+          ctaUrl: "https://access.prscstandards.org/portal",
+          ctaSubtext: "Sign in with your email and the password you created.",
+          signatures: founderSignature(),
+        },
+        "documents-ready-member",
+      );
+    }
+    return { ok: true, notified: recipients.length };
   });
 
 export const deleteMemberDocument = createServerFn({ method: "POST" })

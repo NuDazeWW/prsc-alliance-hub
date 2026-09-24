@@ -1,0 +1,1 @@
+ALTER TABLE public.portal_members ADD COLUMN IF NOT EXISTS reminder_sent_at timestamptz;
