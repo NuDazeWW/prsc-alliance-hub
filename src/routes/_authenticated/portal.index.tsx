@@ -25,6 +25,7 @@ import {
 } from "lucide-react";
 
 import { acknowledgeDocument, getMyDocuments, getMyHeadshotUrl, getPortalSession } from "@/lib/portal.functions";
+import { StatusTimeline } from "@/components/portal/StatusTimeline";
 import { PortalShell } from "@/components/portal/PortalShell";
 import { isPreviewHost } from "@/routes/_authenticated/route";
 import heroRoad from "@/assets/portal-hero-road.jpg";
@@ -217,6 +218,12 @@ function PortalHome() {
                 <span className="uppercase tracking-wider text-ivory/55">Status:</span>
                 <span>{m.package_status.replaceAll("_", " ").replace(/\b\w/g, (c) => c.toUpperCase())}</span>
               </p>
+              <StatusTimeline
+                profileComplete={profileComplete}
+                packageStatus={m.package_status}
+                documentsReleased={documentsReleased}
+                allAcknowledged={documentsReleased && myDocs.every((d) => acknowledged.has(d.id))}
+              />
               <p className="mt-3 text-[13px] leading-6 text-ivory/60">
                 {profileComplete
                   ? documentsReleased
