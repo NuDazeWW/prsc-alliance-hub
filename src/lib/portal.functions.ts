@@ -45,10 +45,10 @@ export const getPortalSession = createServerFn({ method: "GET" })
     if (member) {
       const { data: profile } = await context.supabase
         .from("portal_profiles")
-        .select("id")
+        .select("submitted_at")
         .eq("member_id", member.id)
         .maybeSingle();
-      hasProfile = Boolean(profile);
+      hasProfile = Boolean(profile?.submitted_at);
     }
     return { member: member as PortalMember | null, isAdmin: roleNames.includes("admin"), hasProfile };
   });

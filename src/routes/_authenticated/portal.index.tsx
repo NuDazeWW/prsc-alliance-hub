@@ -128,6 +128,7 @@ function PortalHome() {
   const profileComplete = data?.hasProfile ?? false;
   const packageReady = m.package_status === "package_ready";
   const myDocs = documents.data?.documents ?? [];
+  const documentsReleased = myDocs.length > 0;
   const signDocs = myDocs.filter((d) => d.category === "sign");
   const readDocs = myDocs.filter((d) => d.category === "read");
   const acknowledged = new Set(documents.data?.acknowledged ?? []);
@@ -218,10 +219,12 @@ function PortalHome() {
               </p>
               <p className="mt-3 text-[13px] leading-6 text-ivory/60">
                 {profileComplete
-                  ? "Your profile is on file. Your documents are now open — sign and return, read and retain."
+                  ? documentsReleased
+                    ? "Your profile is on file. Your released documents are ready to review."
+                    : "Your profile has been received. Your individualized documents are being prepared."
                   : "Your documents unlock once your profile is complete."}
               </p>
-              {profileComplete ? (
+              {profileComplete && documentsReleased ? (
                 <button
                   type="button"
                   onClick={() => setPanel("documents")}
@@ -231,6 +234,10 @@ function PortalHome() {
                     Review Your Documents <ArrowRight className="h-4 w-4" />
                   </span>
                 </button>
+              ) : profileComplete ? (
+                <p className="mt-4 inline-flex items-center gap-2 text-[12px] uppercase tracking-[0.18em] text-gold/80">
+                  <span className="h-1.5 w-1.5 rounded-full bg-gold" /> Documents being prepared
+                </p>
               ) : (
                 <p className="mt-4 inline-flex items-center gap-2 text-[12px] uppercase tracking-[0.18em] text-ivory/45">
                   <Lock className="h-3.5 w-3.5 text-gold/70" /> Documents locked
@@ -561,10 +568,8 @@ function PortalHome() {
                 </div>
               ) : (
                 <>
-                  <p className="mt-5 max-w-[46rem] text-[15px] leading-7 text-ivory/70">
-                    Your individualized package includes two sets of documents: those to sign and return electronically, and
-                    those to read, initial, and retain for your records.
-                  </p>
+                  {documentsReleased ? <p className="mt-5 max-w-[46rem] text-[15px] leading-7 text-ivory/70">Your individualized package includes documents to sign and return electronically and documents to read, initial, and retain for your records.</p>:<div className="mt-8 border border-gold/25 bg-ivory/[.03] p-8 text-center"><FileText className="mx-auto h-7 w-7 text-gold"/><h3 className="mt-5 font-display text-[24px] leading-snug">Your documents are being prepared.</h3><p className="mx-auto mt-4 max-w-[34rem] text-[15px] leading-7 text-ivory/65">Your profile has been received. We will notify you when your individualized Board/Advisor documents have been released here.</p></div>}
+                  {documentsReleased&&<>
                   <div className="mt-9 grid gap-10 lg:grid-cols-2">
                     <div>
                       <div className="flex items-center gap-3">
@@ -673,6 +678,7 @@ function PortalHome() {
                       </div>
                     </div>
                   </div>
+                  </>}
                 </>
               )}
             </>
