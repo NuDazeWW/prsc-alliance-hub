@@ -12,7 +12,7 @@
 - [x] Add an exact invitation preview and administrator-only test-send workflow
 - [x] Add guarded deletion for test members and email history
 - [x] Replace clear-all deletion with selectable member and email records
-- [ ] Correct invitation password handoff and remove false expired-link state
-- [ ] Keep yellow portal buttons visible on hover
+- [x] Correct invitation password handoff and remove false expired-link state
+- [x] Keep yellow portal buttons visible on hover
 - [ ] Connect access.prscstandards.org — /portal, /admin, /auth (confirmed)
 - [ ] Verify security isolation, email flows, responsive layouts, metadata, and public-site separation

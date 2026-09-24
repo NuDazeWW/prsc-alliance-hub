@@ -25,7 +25,7 @@ export function PortalShell({
   const [alertsOpen, setAlertsOpen] = useState(false);
   async function signOut() {
     await supabase.auth.signOut();
-    await navigate({ to: "/auth", search: { redirect: "/portal", mode: undefined }, replace: true });
+    await navigate({ to: "/auth", search: { redirect: "/portal", mode: undefined, email: undefined, passwordCreated: undefined }, replace: true });
   }
 
   return (
