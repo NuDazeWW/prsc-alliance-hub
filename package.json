@@ -90,5 +90,10 @@
     "typescript-eslint": "^8.56.1",
     "vite": "^8.0.16",
     "vite-imagetools": "^10.0.1"
+  },
+  "pnpm": {
+    "overrides": {
+      "entities": "4.5.0"
+    }
   }
 }
