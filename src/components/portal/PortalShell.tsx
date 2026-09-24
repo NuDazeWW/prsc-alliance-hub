@@ -103,6 +103,23 @@ export function PortalShell({
                 )}
               </div>
             )}
+            {admin ? (
+              <div className="flex items-center gap-3">
+                <span className="grid h-10 w-10 shrink-0 place-items-center rounded-full border border-gold/55">
+                  <User className="h-[18px] w-[18px] text-gold" />
+                </span>
+                <span className="hidden text-[13px] font-semibold uppercase tracking-[0.18em] text-gold sm:inline">Admin</span>
+                <button
+                  type="button"
+                  onClick={signOut}
+                  aria-label="Sign out"
+                  title="Sign out"
+                  className="grid h-10 w-10 place-items-center rounded-full border border-gold/30 text-ivory/60 transition-colors hover:border-gold hover:text-gold"
+                >
+                  <LogOut className="h-[16px] w-[16px]" />
+                </button>
+              </div>
+            ) : (
             <div className="relative">
 
               <button
@@ -110,9 +127,17 @@ export function PortalShell({
                 onClick={() => setOpen((v) => !v)}
                 className="flex min-h-11 items-center gap-3 text-[14px] text-ivory/80 transition-colors hover:text-gold"
               >
-                <span className="grid h-10 w-10 shrink-0 place-items-center rounded-full border border-gold/55">
-                  <User className="h-[18px] w-[18px] text-gold" />
-                </span>
+                {avatarUrl ? (
+                  <img
+                    src={avatarUrl}
+                    alt={memberName ? `${memberName}'s photo` : "Your photo"}
+                    className="h-10 w-10 shrink-0 rounded-full border border-gold/55 object-cover"
+                  />
+                ) : (
+                  <span className="grid h-10 w-10 shrink-0 place-items-center rounded-full border border-gold/55">
+                    <User className="h-[18px] w-[18px] text-gold" />
+                  </span>
+                )}
                 <span className="hidden sm:inline">Welcome{memberName ? `, ${memberName}` : ""}</span>
                 <ChevronDown className="h-4 w-4" />
               </button>
@@ -142,6 +167,7 @@ export function PortalShell({
                 </div>
               )}
             </div>
+            )}
           </div>
         </div>
       </header>
