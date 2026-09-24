@@ -7,14 +7,19 @@ import { PortalMagicLinkEmail } from '@/emails/PortalMagicLinkEmail'
 import { PortalRecoveryEmail } from '@/emails/PortalRecoveryEmail'
 import { PortalEmailChangeEmail } from '@/emails/PortalEmailChangeEmail'
 import { PortalReauthenticationEmail } from '@/emails/PortalReauthenticationEmail'
+import {
+  INVITE_EMAIL_FROM,
+  INVITE_EMAIL_SENDER_DOMAIN,
+  INVITE_EMAIL_SITE_NAME,
+  INVITE_EMAIL_SUBJECT,
+  INVITE_ROLE_LABELS,
+} from '@/lib/invite-email-config'
 
 // Configuration
-const SITE_NAME = "PRSC Board & Advisor Center"
-const SENDER_DOMAIN = "notify.readinessterminal.com"
+const SITE_NAME = INVITE_EMAIL_SITE_NAME
+const SENDER_DOMAIN = INVITE_EMAIL_SENDER_DOMAIN
 
 const entityKeys = ['prsc', 'dis', 'both'] as const
-
-const roleLabels = { board_member: 'Board Member', advisor: 'Advisor' } as const
 
 // The SDK handler owns verification, dispatch, and retry semantics; this file
 // owns only the email decisions: subjects, templates, and per-type props.
@@ -24,7 +29,7 @@ export const Route = createFileRoute("/lovable/email/auth/webhook")({
       POST: ({ request }) => {
         const handler = createAuthEmailHandler({
           apiKey: process.env['LOVABLE_API_KEY']!,
-          from: `${SITE_NAME} <no-reply@readinessterminal.com>`,
+          from: INVITE_EMAIL_FROM,
           senderDomain: SENDER_DOMAIN,
           sendUrl: process.env['LOVABLE_SEND_URL'],
           emails: {
@@ -33,7 +38,7 @@ export const Route = createFileRoute("/lovable/email/auth/webhook")({
               render: (data) => React.createElement(PortalSignupEmail, { confirmationUrl: data.url }),
             },
             invite: {
-              subject: 'PRSC & DIS | Board & Advisor Center',
+              subject: INVITE_EMAIL_SUBJECT,
               render: async (data) => {
                 const callback = new URL(data.callback_url ?? data.url)
                 const { supabaseAdmin } = await import('@/integrations/supabase/client.server')
@@ -46,13 +51,13 @@ export const Route = createFileRoute("/lovable/email/auth/webhook")({
                 const callbackRole = callback.searchParams.get('role')
                 const entityValue = member?.entity ?? callbackEntity
                 const entity = entityKeys.find((value) => value === entityValue) ?? 'both'
-                const role = (member?.role ?? callbackRole) as keyof typeof roleLabels | undefined
+                const role = (member?.role ?? callbackRole) as keyof typeof INVITE_ROLE_LABELS | undefined
                 return React.createElement(InviteEmail, {
                   confirmationUrl: data.url,
                   recipientEmail: data.email,
                   firstName: member?.first_name ?? callback.searchParams.get('first_name') ?? 'there',
                   entity,
-                  roleLabel: role ? roleLabels[role] : 'Board Member or Advisor',
+                  roleLabel: role ? INVITE_ROLE_LABELS[role] : 'Board Member or Advisor',
                 })
               },
             },
