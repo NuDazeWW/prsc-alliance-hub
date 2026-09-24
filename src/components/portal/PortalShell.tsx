@@ -64,6 +64,16 @@ export function PortalShell({
             </nav>
           )}
           <div className="ml-auto flex h-10 items-center gap-4 pr-1 sm:gap-5 sm:pr-2 lg:ml-0 lg:border-l lg:border-gold/20 lg:pl-7 lg:pr-[clamp(1.5rem,2.5vw,3.5rem)]">
+            {stats.length > 0 && (
+              <div className="hidden items-center gap-[clamp(1rem,2vw,2.25rem)] pr-2 md:flex">
+                {stats.map((s) => (
+                  <div key={s.label} className="flex flex-col items-end leading-tight">
+                    <span className="font-display text-xl text-gold">{s.value}</span>
+                    <span className="text-[10px] uppercase tracking-[0.16em] text-ivory/50">{s.label}</span>
+                  </div>
+                ))}
+              </div>
+            )}
             {notifications.length > 0 && (
               <div className="relative">
                 <button
