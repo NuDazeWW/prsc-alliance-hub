@@ -826,7 +826,7 @@ function Admin() {
                     />
                     Send welcome invitations now
                   </label>
-                  <Button type="button" disabled={importing} className="rounded-none bg-gold text-base text-navy" onClick={runImport}>
+                  <Button type="button" disabled={importing} className="rounded-none bg-gold text-base text-navy hover:bg-gold-light hover:text-navy" onClick={runImport}>
                     {importing ? "Uploading…" : `Add ${importRows.length} member${importRows.length === 1 ? "" : "s"}`}
                   </Button>
                   <Button type="button" variant="ghost" className="rounded-none text-base text-ivory/60" onClick={clearImport}>
@@ -948,7 +948,7 @@ function Admin() {
                   <Button type="button" className="rounded-none border border-gold/40 bg-transparent text-base text-ivory hover:bg-gold/10 hover:text-gold" onClick={() => fileRef.current?.click()}>
                     <Upload className="mr-2 h-4 w-4" /> Upload content
                   </Button>
-                  <Button type="button" className="rounded-none bg-gold text-base text-navy" onClick={() => setPreviewOpen(true)}>
+                  <Button type="button" className="rounded-none bg-gold text-base text-navy hover:bg-gold-light hover:text-navy" onClick={() => setPreviewOpen(true)}>
                     <Eye className="mr-2 h-4 w-4" /> View in template
                   </Button>
                 </div>
@@ -1051,7 +1051,7 @@ function Admin() {
                 <Button type="button" className="rounded-none border border-gold/40 bg-transparent text-base text-ivory hover:bg-gold/10 hover:text-gold" onClick={saveDraft}>
                   Save template
                 </Button>
-                <Button type="button" disabled={sending} className="rounded-none bg-gold text-base text-navy" onClick={send}>
+                <Button type="button" disabled={sending} className="rounded-none bg-gold text-base text-navy hover:bg-gold-light hover:text-navy" onClick={send}>
                   {sending ? "Sending…" : `Send to ${recipients.length || 0} member(s)`}
                 </Button>
                 {emailStatus && <p className="text-base text-ivory/60">{emailStatus}</p>}
@@ -1404,7 +1404,7 @@ function Admin() {
               <div className="flex flex-wrap items-center justify-end gap-3">
                 {inviteTestStatus && <p aria-live="polite" className="mr-auto text-base text-ivory/70">{inviteTestStatus}</p>}
                 <Button type="button" className="rounded-none border border-gold/40 bg-transparent text-base text-ivory hover:bg-gold/10 hover:text-gold" onClick={() => setInvitePreviewOpen(false)}>Keep editing</Button>
-                <Button type="button" disabled={inviteTestSending || preview} className="rounded-none bg-gold text-base text-navy" onClick={() => void sendInviteTest()}>
+                <Button type="button" disabled={inviteTestSending || preview} className="rounded-none bg-gold text-base text-navy hover:bg-gold-light hover:text-navy" onClick={() => void sendInviteTest()}>
                   <Send className="mr-2 h-4 w-4" /> {inviteTestSending ? "Sending test…" : "Send test to admin"}
                 </Button>
               </div>
@@ -1430,7 +1430,7 @@ function Admin() {
               <Button type="button" className="rounded-none border border-gold/40 bg-transparent text-base text-ivory hover:bg-gold/10 hover:text-gold" onClick={() => setPreviewOpen(false)}>
                 Keep editing
               </Button>
-              <Button type="button" className="rounded-none bg-gold text-base text-navy" onClick={saveDraft}>
+              <Button type="button" className="rounded-none bg-gold text-base text-navy hover:bg-gold-light hover:text-navy" onClick={saveDraft}>
                 Save template
               </Button>
             </div>

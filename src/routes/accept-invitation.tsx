@@ -1,5 +1,5 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Eye, EyeOff, KeyRound, ShieldCheck } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { PrscMark } from "@/components/site/PrscMark";
@@ -30,32 +30,39 @@ function AcceptInvitationPage() {
   const [ready, setReady] = useState(false);
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState("Verifying your private invitation…");
+  const invitationEmail = useRef("");
 
   useEffect(() => {
     let active = true;
+    let timeout: number | undefined;
+    const confirmInvitation = (email?: string) => {
+      if (!active) return;
+      invitationEmail.current = email ?? invitationEmail.current;
+      setReady(true);
+      setMessage("");
+      if (timeout !== undefined) window.clearTimeout(timeout);
+    };
     const checkSession = async () => {
       const { data } = await supabase.auth.getSession();
       if (!active) return;
       if (data.session) {
-        setReady(true);
-        setMessage("");
+        confirmInvitation(data.session.user.email);
       }
     };
     void checkSession();
     const { data: listener } = supabase.auth.onAuthStateChange((event, session) => {
       if (!active || !session) return;
       if (event === "SIGNED_IN" || event === "PASSWORD_RECOVERY" || event === "INITIAL_SESSION") {
-        setReady(true);
-        setMessage("");
+        confirmInvitation(session.user.email);
       }
     });
-    const timeout = window.setTimeout(() => {
+    timeout = window.setTimeout(() => {
       if (!active) return;
       setMessage("This invitation link has expired or has already been used. Please contact info@readinessterminal.com for a new invitation.");
     }, 4000);
     return () => {
       active = false;
-      window.clearTimeout(timeout);
+      if (timeout !== undefined) window.clearTimeout(timeout);
       listener.subscription.unsubscribe();
     };
   }, []);
@@ -76,7 +83,14 @@ function AcceptInvitationPage() {
       const { error } = await supabase.auth.updateUser({ password });
       if (error) throw error;
       await clearPortalLoginFailures();
-      await navigate({ to: "/portal", replace: true });
+      const email = invitationEmail.current;
+      const { error: signOutError } = await supabase.auth.signOut();
+      if (signOutError) throw signOutError;
+      await navigate({
+        to: "/auth",
+        search: { email, passwordCreated: true, redirect: "/portal" },
+        replace: true,
+      });
     } catch (error) {
       setMessage(error instanceof Error ? error.message : "We could not save your password. Please request a new invitation.");
     } finally {
@@ -104,13 +118,13 @@ function AcceptInvitationPage() {
               <KeyRound className="mb-5 h-7 w-7 text-gold" />
               <p className="text-[11px] uppercase tracking-[0.22em] text-gold">Invitation accepted</p>
               <h2 className="mt-3 font-display text-4xl">Create your password</h2>
-              <p className="mt-4 text-sm leading-6 text-ivory/55">Choose a private password with at least 12 characters. You’ll enter the Welcome Center immediately afterward.</p>
+              <p className="mt-4 text-sm leading-6 text-ivory/55">Choose a private password with at least 12 characters. After it is created, sign in with your invitation email and new password.</p>
               {ready ? (
                 <form onSubmit={submit} className="mt-9 space-y-5">
                   <PasswordField label="New password" value={password} onChange={setPassword} visible={showPassword} onToggle={() => setShowPassword((value) => !value)} autoComplete="new-password" />
                   <PasswordField label="Confirm new password" value={confirmation} onChange={setConfirmation} visible={showPassword} autoComplete="new-password" />
                   {message && <p role="status" className="border-l-2 border-gold pl-3 text-sm text-ivory/75">{message}</p>}
-                  <Button disabled={busy} className="h-12 w-full rounded-none bg-gold text-navy hover:bg-gold-light">{busy ? "Securing your access…" : "Create password & enter"}</Button>
+                  <Button disabled={busy} className="h-12 w-full rounded-none bg-gold text-navy hover:bg-gold-light hover:text-navy">{busy ? "Creating your password…" : "Create password & continue to sign in"}</Button>
                 </form>
               ) : (
                 <p role="status" className="mt-9 border-l-2 border-gold pl-3 text-sm leading-6 text-ivory/75">{message}</p>

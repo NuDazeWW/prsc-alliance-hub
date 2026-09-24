@@ -9,7 +9,12 @@ import { getPortalSession } from "@/lib/portal.functions";
 import { clearPortalLoginFailures, signInToPortal } from "@/lib/portal-auth.functions";
 
 export const Route = createFileRoute("/auth")({
-  validateSearch: (search: Record<string, unknown>) => ({ redirect: typeof search.redirect === "string" && search.redirect.startsWith("/") ? search.redirect : "/portal", mode: search.mode === "setup" ? "setup" : undefined }),
+  validateSearch: (search: Record<string, unknown>) => ({
+    redirect: typeof search.redirect === "string" && search.redirect.startsWith("/") ? search.redirect : "/portal",
+    mode: search.mode === "setup" ? "setup" : undefined,
+    email: typeof search.email === "string" ? search.email : undefined,
+    passwordCreated: search.passwordCreated === true || search.passwordCreated === "true" ? true : undefined,
+  }),
   head: () => ({ meta: [
     { title: "Private Center Access | PRSC" }, { name: "description", content: "Secure access for invited PRSC and DIS board members and advisors." },
     { name: "robots", content: "noindex,nofollow,noarchive" }, { property: "og:title", content: "Private Center Access | PRSC" },
@@ -22,7 +27,7 @@ function AuthPage() {
   const search = Route.useSearch();
   const navigate = useNavigate();
   const [mode, setMode] = useState<"signin" | "reset" | "setup">(search.mode === "setup" ? "setup" : "signin");
-  const [email, setEmail] = useState(""); const [password, setPassword] = useState(""); const [message, setMessage] = useState(""); const [busy, setBusy] = useState(false);
+  const [email, setEmail] = useState(search.email ?? ""); const [password, setPassword] = useState(""); const [message, setMessage] = useState(search.passwordCreated ? "Your password was created. Sign in below with your invitation email and new password." : ""); const [busy, setBusy] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   useEffect(() => {
     const isRecovery = search.mode === "setup" || (typeof window !== "undefined" && /type=(recovery|invite)/.test(window.location.hash));
@@ -90,7 +95,7 @@ function AuthPage() {
               {mode !== "setup" && <label className="block text-xs uppercase text-ivory/60">Email address<Input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required autoComplete="email" className="mt-2 h-12 border-ivory/20 bg-transparent text-ivory" /></label>}
               {mode !== "reset" && <label className="block text-xs uppercase text-ivory/60">Password<span className="relative mt-2 block"><Input type={showPassword ? "text" : "password"} value={password} onChange={(e) => setPassword(e.target.value)} required minLength={mode === "setup" ? 12 : undefined} autoComplete={mode === "setup" ? "new-password" : "current-password"} className="h-12 border-ivory/20 bg-transparent pr-12 text-ivory" /><Button type="button" variant="ghost" size="icon" onClick={() => setShowPassword((visible) => !visible)} aria-label={showPassword ? "Hide password" : "Show password"} title={showPassword ? "Hide password" : "Show password"} className="absolute right-1 top-1 h-10 w-10 text-ivory/60 hover:bg-ivory/10 hover:text-gold">{showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}</Button></span></label>}
               {message && <p role="status" className="border-l-2 border-gold pl-3 text-sm text-ivory/75">{message}</p>}
-              <Button disabled={busy} className="h-12 w-full rounded-none bg-gold text-navy hover:bg-gold-light">{busy ? "Please wait…" : mode === "reset" ? "Send instructions" : mode === "setup" ? "Set password & enter" : "Enter the center"}</Button>
+              <Button disabled={busy} className="h-12 w-full rounded-none bg-gold text-navy hover:bg-gold-light hover:text-navy">{busy ? "Please wait…" : mode === "reset" ? "Send instructions" : mode === "setup" ? "Set password & enter" : "Sign in to the center"}</Button>
             </form>
             <Button type="button" variant="ghost" onClick={() => { setMessage(""); setPassword(""); setShowPassword(false); setMode(mode === "reset" ? "signin" : "reset"); }} className="mt-6 h-auto px-0 text-sm text-ivory/55 hover:bg-transparent hover:text-gold"><Mail className="h-4 w-4" />{mode === "reset" ? "Return to sign in" : "Forgot your password?"}</Button>
           </div>
