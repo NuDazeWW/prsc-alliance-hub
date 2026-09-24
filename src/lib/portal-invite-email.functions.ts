@@ -49,7 +49,13 @@ export const sendInviteEmailTest = createServerFn({ method: "POST" })
       import("@/lib/email-templates/invite"),
       import("@lovable.dev/email-js"),
     ]);
+    const { data: inviteCopy } = await context.supabase
+      .from("portal_email_templates")
+      .select("subject, eyebrow, heading, body, cta_label, cta_subtext, signatures")
+      .eq("system_key", "invite")
+      .maybeSingle();
     const element = React.createElement(InviteEmail, {
+      copy: inviteCopy,
       confirmationUrl: INVITE_EMAIL_PREVIEW_URL,
       firstName: data.first_name,
       recipientEmail: data.email.toLowerCase(),
@@ -67,7 +73,7 @@ export const sendInviteEmailTest = createServerFn({ method: "POST" })
         from: INVITE_EMAIL_FROM,
         sender_domain: INVITE_EMAIL_SENDER_DOMAIN,
         reply_to: INVITE_EMAIL_REPLY_TO,
-        subject: INVITE_EMAIL_SUBJECT,
+        subject: inviteCopy?.subject || INVITE_EMAIL_SUBJECT,
         html,
         text,
         label: "admin-invitation-test",

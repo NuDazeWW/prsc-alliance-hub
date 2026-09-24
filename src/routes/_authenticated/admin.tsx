@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
-import { useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { render } from "@react-email/render";
 import {
   Activity,
@@ -100,6 +100,22 @@ const demoOverview: any = {
 
 const demoEmailCenter: { templates: EmailTemplate[]; sends: EmailSend[] } = {
   templates: [
+    {
+      id: "44444444-4444-4444-8444-444444444444",
+      system_key: "invite",
+      name: "Invitation (sent automatically)",
+      subject: "PRSC & DIS | Board & Advisor Center",
+      description: "Sent automatically when you invite a member. Tokens: {{first_name}}, {{entity_full}}, {{entity}}, {{role}}.",
+      eyebrow: "Private invitation",
+      heading: "Welcome, {{first_name}}!",
+      body: "It's been a while since we spoke!\n\nYou're receiving this invitation because we aligned on your role at {{entity_full}} as a {{role}}.\n\nA great deal has happened behind the scenes. We've reached an important next stage—including DIS officially entering investor prospecting—and we're excited to reconnect and bring you into what comes next.\n\nWe've created a private {{entity}} Board & Advisor Welcome Center where you can quickly:\n\n• Get reacquainted with {{entity}} and see where we are today\n• Review why we're excited to have you involved\n• Provide a few details we need to prepare your individualized Board/Advisor package\n• Send us any questions before your formal materials are delivered\n\nWe're excited to reconnect and officially welcome you into this next chapter.",
+      cta_label: "Access Your Private Welcome Center →",
+      cta_url: null,
+      cta_subtext: "After you click the button, you'll create your own private password on the secure invitation page. No password will be sent by email. Once your password is set, you'll enter the Welcome Center immediately.",
+      signatures: "Shirley Johnson|Founder, Partnership Readiness Standards Council / Decision Intelligence Systems",
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+    },
     {
       id: "33333333-3333-4333-8333-333333333333",
       name: "Welcome & Access",
@@ -263,6 +279,8 @@ function Admin() {
   const inviteFormRef = useRef<HTMLFormElement>(null);
   const [draft, setDraft] = useState<Draft>(emptyDraft);
   const [emailStatus, setEmailStatus] = useState("");
+  const [demoTemplates, setDemoTemplates] = useState<EmailTemplate[] | null>(null);
+  const [inviteComposeHtml, setInviteComposeHtml] = useState("");
   const [previewOpen, setPreviewOpen] = useState(false);
   const [recipients, setRecipients] = useState<string[]>([]);
   const [sending, setSending] = useState(false);
@@ -397,7 +415,9 @@ function Admin() {
   }
 
   const members: any[] = overview.data?.members ?? [];
-  const templates: EmailTemplate[] = email.data?.templates ?? [];
+  const templates: EmailTemplate[] = (preview && demoTemplates) || email.data?.templates || [];
+  const inviteTemplate = templates.find((t) => t.system_key === "invite") ?? null;
+  const editingInvite = !!inviteTemplate && draft.id === inviteTemplate.id;
   const sends: EmailSend[] = email.data?.sends ?? [];
 
   const sendsByMember = useMemo(() => {
@@ -486,6 +506,7 @@ function Admin() {
           recipientEmail={inviteDraft.email}
           entity={inviteDraft.entity}
           roleLabel={INVITE_ROLE_LABELS[inviteDraft.role]}
+          copy={inviteTemplate}
         />,
       );
       setInvitePreviewHtml(html);
@@ -535,16 +556,26 @@ function Admin() {
       return;
     }
     if (preview) {
-      setEmailStatus("Preview mode: templates are saved once you are signed in.");
+      const now = new Date().toISOString();
+      const id = draft.id || crypto.randomUUID();
+      const base = templates.find((t) => t.id === id);
+      const next: EmailTemplate = { ...(base ?? { created_at: now, system_key: null }), ...draft, id, updated_at: now } as EmailTemplate;
+      setDemoTemplates(base ? templates.map((t) => (t.id === id ? next : t)) : [...templates, next]);
+      setDraft((d) => ({ ...d, id }));
+      setEmailStatus(`“${draft.name}” saved (preview only — changes save permanently on the live admin page).`);
+      setPreviewOpen(false);
       return;
     }
     try {
       const res = await saveEmailTemplate({ data: { ...draft, id: draft.id || undefined } });
       setDraft((d) => ({ ...d, id: res.id }));
-      setEmailStatus("Template saved.");
+      setEmailStatus(`“${draft.name}” saved.`);
+      setPreviewOpen(false);
       await email.refetch();
     } catch (error) {
-      setEmailStatus(error instanceof Error ? error.message : "Could not save the template.");
+      const message = error instanceof Error ? error.message : "Could not save the template.";
+      setEmailStatus(message);
+
     }
   }
 
@@ -602,7 +633,27 @@ function Admin() {
 
   const previewMember = members.find((m) => m.id === recipients[0]) ?? members[0];
   const tokens = previewMember ? buildMemberTokens(previewMember) : {};
-  const previewHtml = renderBrandedEmail({
+  useEffect(() => {
+    if (!editingInvite) return;
+    let alive = true;
+    const m = previewMember;
+    const entity = (["prsc", "dis", "both"].includes(m?.entity) ? m.entity : "both") as "prsc" | "dis" | "both";
+    render(
+      <InviteEmail
+        confirmationUrl={INVITE_EMAIL_PREVIEW_URL}
+        firstName={m?.first_name ?? "Shirley"}
+        recipientEmail={m?.email ?? "member@example.com"}
+        entity={entity}
+        roleLabel={INVITE_ROLE_LABELS[m?.role as keyof typeof INVITE_ROLE_LABELS] ?? "Advisor"}
+        copy={draft}
+      />,
+    ).then((html) => alive && setInviteComposeHtml(html));
+    return () => {
+      alive = false;
+    };
+  }, [editingInvite, draft, previewMember]);
+
+  const previewHtml = editingInvite && inviteComposeHtml ? inviteComposeHtml : renderBrandedEmail({
     subject: applyTokens(draft.subject || "Subject line", tokens),
     eyebrow: applyTokens(draft.eyebrow, tokens),
     heading: applyTokens(draft.heading, tokens),
@@ -843,6 +894,9 @@ function Admin() {
                         Sent {sends.filter((s) => s.template_id === t.id && s.status === "sent").length}×
                       </span>
                     </button>
+                    {t.system_key ? (
+                      <span className="mt-1 rounded-full border border-gold/40 px-2 py-0.5 text-[10px] uppercase tracking-[0.12em] text-gold">Auto</span>
+                    ) : (
                     <button
                       type="button"
                       aria-label={`Remove ${t.name}`}
@@ -851,6 +905,7 @@ function Admin() {
                     >
                       <Trash2 className="h-4 w-4" />
                     </button>
+                    )}
                   </li>
                 ))}
               </ul>

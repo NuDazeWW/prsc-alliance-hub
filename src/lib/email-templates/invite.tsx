@@ -11,6 +11,27 @@ export interface InviteEmailProps {
   recipientEmail: string
   entity?: InviteEntity
   roleLabel?: string
+  copy?: InviteEmailCopy | null
+}
+
+export interface InviteEmailCopy {
+  eyebrow?: string | null
+  heading?: string | null
+  body?: string | null
+  cta_label?: string | null
+  cta_subtext?: string | null
+  signatures?: string | null
+}
+
+function fillInviteTokens(value: string, tokens: Record<string, string>) {
+  return value.replace(/\{\{\s*(\w+)\s*\}\}/g, (m, k) => tokens[k] ?? m)
+}
+
+function renderInline(line: string) {
+  const phrase = 'Send us any questions'
+  const i = line.indexOf(phrase)
+  if (i < 0) return line
+  return <>{line.slice(0, i)}<Link href="mailto:info@readinessterminal.com" style={questionLink}>{phrase}</Link>{line.slice(i + phrase.length)}</>
 }
 
 const APP_ORIGIN = 'https://access.prscstandards.org'
@@ -37,11 +58,55 @@ export const InviteEmail = ({
   recipientEmail,
   entity = 'both',
   roleLabel = 'Board Member or Advisor',
+  copy,
 }: InviteEmailProps) => {
   const inviteeName = capitalizeInviteName(firstName) || 'There'
   const selectedEntity = inviteEntityCopy[entity]
   const showPrsc = entity === 'prsc' || entity === 'both'
   const showDis = entity === 'dis' || entity === 'both'
+  if (copy?.body?.trim()) {
+    const tokens = { first_name: inviteeName, full_name: inviteeName, entity_full: selectedEntity.full, entity: selectedEntity.short, role: roleLabel, email: recipientEmail }
+    const fill = (v?: string | null, d = '') => fillInviteTokens(v?.trim() || d, tokens)
+    const blocks = fill(copy.body).split(/\n\s*\n/).map((b) => b.split('\n').map((l) => l.trim()).filter(Boolean)).filter((b) => b.length)
+    const [sigName, ...sigTitle] = (copy.signatures?.trim() || 'Shirley Johnson|Founder').split('|')
+    return <Html lang="en" dir="ltr">
+      <Head />
+      <Preview>Your private PRSC &amp; DIS Board &amp; Advisor Center invitation</Preview>
+      <Body style={main}>
+        <Container style={container}>
+          <Section style={masthead}>
+            <Row style={logoRow}>
+              {showPrsc && <Column style={logoColumn}><Img src={`${APP_ORIGIN}${prscLogo.url}`} width="196" alt="Partnership Readiness Standards Council" style={prscLogoStyle} /></Column>}
+              {showDis && <Column style={logoColumn}><Img src={`${APP_ORIGIN}${disLogo.url}`} width="196" alt="Decision Intelligence Systems" style={disLogoStyle} /></Column>}
+            </Row>
+            <Text style={centerName}>Private Board &amp; Advisor Center</Text>
+          </Section>
+          <Section style={content}>
+            <Text style={eyebrow}>{fill(copy.eyebrow, 'Private invitation')}</Text>
+            <Heading style={h1}>{fill(copy.heading, 'Welcome, {{first_name}}!')}</Heading>
+            {blocks.map((lines, bi) => {
+              const isList = lines.every((l) => /^[•\-*]\s/.test(l))
+              if (isList) return <Section key={bi} style={list}>{lines.map((l, li) => <Text key={li} style={listItem}>• {renderInline(l.replace(/^[•\-*]\s+/, ''))}</Text>)}</Section>
+              const isLast = bi === blocks.length - 1
+              return <React.Fragment key={bi}>
+                {isLast && blocks.length > 1 && <><Button style={button} href={confirmationUrl}>{fill(copy.cta_label, 'Access Your Private Welcome Center →')}</Button>
+                  {copy.cta_subtext?.trim() && <Text style={instruction}>{fill(copy.cta_subtext)}</Text>}</>}
+                <Text style={bi === 0 ? lead : text}>{lines.map((l, li) => <React.Fragment key={li}>{li > 0 && <br />}{renderInline(l)}</React.Fragment>)}</Text>
+              </React.Fragment>
+            })}
+            {blocks.length <= 1 && <><Button style={button} href={confirmationUrl}>{fill(copy.cta_label, 'Access Your Private Welcome Center →')}</Button>
+              {copy.cta_subtext?.trim() && <Text style={instruction}>{fill(copy.cta_subtext)}</Text>}</>}
+            <Text style={signoff}>Warmly,</Text>
+            <Text style={signature}>{sigName.trim()}</Text>
+            <Text style={signatureTitle}>{sigTitle.join('|').split(',').map((part, i) => <React.Fragment key={i}>{i > 0 && <br />}{part.trim()}</React.Fragment>)}</Text>
+          </Section>
+          <Section style={securityFooter}>
+            <Text style={securityText}>This invitation was sent specifically to <Link href={`mailto:${recipientEmail}`} style={footerLink}>{recipientEmail}</Link> in connection with your previously discussed PRSC/DIS Board or Advisor role. If you have questions about this invitation before accessing the portal, contact us at <Link href="mailto:info@readinessterminal.com" style={footerLink}>info@readinessterminal.com</Link>.</Text>
+          </Section>
+        </Container>
+      </Body>
+    </Html>
+  }
 
   return <Html lang="en" dir="ltr">
     <Head />

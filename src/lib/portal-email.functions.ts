@@ -15,6 +15,7 @@ export type EmailTemplate = {
   cta_url: string | null;
   cta_subtext: string | null;
   signatures: string | null;
+  system_key?: string | null;
   created_at: string;
   updated_at: string;
 };
