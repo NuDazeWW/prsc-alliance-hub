@@ -2,6 +2,7 @@ import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { getRequest } from "@tanstack/react-start/server";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+import { renderBrandedEmail, renderBrandedEmailText } from "@/lib/branded-email";
 
 type PortalMember = {
   id: string; user_id: string; email: string; first_name: string; last_name: string;
@@ -84,7 +85,11 @@ export const saveMyProfile = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input) => profileSchema.parse(input))
   .handler(async ({ context, data }) => {
-    const { data: member, error: memberError } = await context.supabase.from("portal_members").select("id").eq("user_id", context.userId).single();
+    const { data: member, error: memberError } = await context.supabase
+      .from("portal_members")
+      .select("id, email, first_name, last_name, entity, role")
+      .eq("user_id", context.userId)
+      .single();
     if (memberError || !member) throw new Error("Member profile unavailable");
     const payload = {
       member_id: member.id,
@@ -107,6 +112,41 @@ export const saveMyProfile = createServerFn({ method: "POST" })
     if (error) throw error;
     if (data.submit) {
       await context.supabase.from("portal_activity").insert({ member_id: member.id, actor_user_id: context.userId, event_type: "profile_submitted" });
+      const apiKey = process.env["LOVABLE_API_KEY"];
+      if (apiKey) {
+        const fullName = `${member.first_name ?? ""} ${member.last_name ?? ""}`.trim() || member.email;
+        const roleLabel = member.role === "board_member" ? "Board Member" : "Advisor";
+        const entityLabel = member.entity === "both" ? "PRSC and DIS" : String(member.entity).toUpperCase();
+        const subject = `Profile submitted — ${fullName}`;
+        const email = {
+          subject,
+          eyebrow: "Profile received",
+          heading: `${fullName} has submitted their profile`,
+          body: `${fullName} (${entityLabel} · ${roleLabel}) has completed and submitted their private profile.\n\nThe profile is now marked Profile Received. Review their answers and load the next-step documents in the administrator center.\n\nPreferred email: ${data.preferred_email}\nPreferred phone: ${data.preferred_phone || "Not provided"}\nContact requested: ${data.contact_requested ? "Yes" : "No"}`,
+          ctaLabel: "Review Profile & Prepare Next Step",
+          ctaUrl: "https://access.prscstandards.org/admin",
+          ctaSubtext: "Open the member record, review the submitted profile, then upload or release the appropriate documents.",
+          signatures: [],
+        };
+        try {
+          const { sendLovableEmail } = await import("@lovable.dev/email-js");
+          await sendLovableEmail(
+            {
+              to: "admin@readinessterminal.com",
+              from: "PRSC Board & Advisor Center <no-reply@readinessterminal.com>",
+              sender_domain: "notify.readinessterminal.com",
+              reply_to: "info@readinessterminal.com",
+              subject,
+              html: renderBrandedEmail(email),
+              text: renderBrandedEmailText(email),
+              label: "profile-submitted-admin-alert",
+            },
+            { apiKey, sendUrl: process.env["LOVABLE_SEND_URL"] },
+          );
+        } catch (notificationError) {
+          console.error("Profile submission admin notification failed", notificationError);
+        }
+      }
     }
     return { ok: true, submitted: data.submit };
   });
