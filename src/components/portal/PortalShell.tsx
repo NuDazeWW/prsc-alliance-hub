@@ -1,6 +1,6 @@
 import { useState } from "react";
-import { Link, useNavigate } from "@tanstack/react-router";
-import { Bell, ChevronDown, LogOut, User } from "lucide-react";
+import { useNavigate } from "@tanstack/react-router";
+import { Bell, LogOut, User } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { PrscMark } from "@/components/site/PrscMark";
 
@@ -13,7 +13,7 @@ export function PortalShell({
   admin = false,
   nav = [],
   memberName,
-  avatarUrl,
+  memberProgress,
   notifications = [],
   stats = [],
 }: {
@@ -21,12 +21,11 @@ export function PortalShell({
   admin?: boolean;
   nav?: NavItem[];
   memberName?: string;
-  avatarUrl?: string | null;
+  memberProgress?: React.ReactNode;
   notifications?: PortalNotification[];
   stats?: PortalStat[];
 }) {
   const navigate = useNavigate();
-  const [open, setOpen] = useState(false);
   const [alertsOpen, setAlertsOpen] = useState(false);
   async function signOut() {
     await supabase.auth.signOut();
@@ -36,7 +35,7 @@ export function PortalShell({
   return (
     <div className="flex min-h-screen w-full flex-col overflow-x-hidden bg-[linear-gradient(135deg,var(--color-navy-deep),var(--color-navy)_52%,var(--color-midnight))] text-ivory">
       <header className="sticky top-0 z-40 border-b border-gold/15 bg-navy/95 backdrop-blur">
-        <div className="grid h-[82px] w-full grid-cols-[minmax(0,1fr)_auto] items-center gap-4 px-5 sm:h-[92px] sm:px-7 lg:h-[clamp(96px,6vw,116px)] lg:grid-cols-[20%_1fr_auto] lg:gap-8 lg:px-0">
+        <div className={`grid w-full grid-cols-[minmax(0,1fr)_auto] items-center gap-x-4 px-5 sm:px-7 lg:grid-cols-[20%_1fr_auto] lg:gap-x-8 lg:px-0 ${memberProgress && !admin ? "min-h-[82px] py-3 sm:min-h-[92px] lg:min-h-[132px] lg:py-3" : "h-[82px] sm:h-[92px] lg:h-[clamp(96px,6vw,116px)]"}`}>
           <a
             href={admin ? "/admin" : "/portal"}
             aria-label="Private center home"
@@ -63,6 +62,11 @@ export function PortalShell({
               })}
             </nav>
           )}
+          {!admin && memberProgress && (
+            <div className="order-3 col-span-2 mt-2 min-w-0 overflow-x-auto border-t border-gold/15 pt-3 lg:order-none lg:col-span-1 lg:mt-0 lg:border-t-0 lg:pt-0">
+              {memberProgress}
+            </div>
+          )}
           <div className="ml-auto flex h-10 items-center gap-4 pr-1 sm:gap-5 sm:pr-2 lg:ml-0 lg:border-l lg:border-gold/20 lg:pl-7 lg:pr-[clamp(1.5rem,2.5vw,3.5rem)]">
             {stats.length > 0 && (
               <div className="hidden items-center gap-[clamp(1rem,2vw,2.25rem)] pr-2 md:flex">
@@ -80,7 +84,6 @@ export function PortalShell({
                   type="button"
                   onClick={() => {
                     setAlertsOpen((v) => !v);
-                    setOpen(false);
                   }}
                   aria-label={`${notifications.length} items need attention`}
                   className="relative grid h-10 w-10 place-items-center rounded-full border border-gold/40 text-gold transition-colors hover:border-gold hover:bg-gold/10"
@@ -130,53 +133,18 @@ export function PortalShell({
                 </button>
               </div>
             ) : (
-            <div className="relative">
-
-              <button
-                type="button"
-                onClick={() => setOpen((v) => !v)}
-                className="flex min-h-11 items-center gap-3 text-[14px] text-ivory/80 transition-colors hover:text-gold"
-              >
-                {avatarUrl ? (
-                  <img
-                    src={avatarUrl}
-                    alt={memberName ? `${memberName}'s photo` : "Your photo"}
-                    className="h-10 w-10 shrink-0 rounded-full border border-gold/55 object-cover"
-                  />
-                ) : (
-                  <span className="grid h-10 w-10 shrink-0 place-items-center rounded-full border border-gold/55">
-                    <User className="h-[18px] w-[18px] text-gold" />
-                  </span>
-                )}
-                <span className="hidden sm:inline">Welcome{memberName ? `, ${memberName}` : ""}</span>
-                <ChevronDown className="h-4 w-4" />
-              </button>
-              {open && (
-                <div className="absolute right-0 top-12 w-52 border border-gold/25 bg-navy-deep p-2 shadow-xl">
-                  <Link
-                    to="/portal/profile"
-                    className="block px-3 py-2 text-sm text-ivory/75 hover:bg-ivory/5 hover:text-gold"
-                    onClick={() => setOpen(false)}
-                  >
-                    Private profile
-                  </Link>
-                  <Link
-                    to="/portal/questions"
-                    className="block px-3 py-2 text-sm text-ivory/75 hover:bg-ivory/5 hover:text-gold"
-                    onClick={() => setOpen(false)}
-                  >
-                    Send a message
-                  </Link>
-                  <button
-                    type="button"
-                    onClick={signOut}
-                    className="flex w-full items-center gap-2 px-3 py-2 text-left text-sm text-ivory/75 hover:bg-ivory/5 hover:text-gold"
-                  >
-                    <LogOut className="h-4 w-4" /> Sign out
-                  </button>
-                </div>
-              )}
-            </div>
+              <div className="flex items-center gap-3 sm:gap-5">
+                <span className="hidden whitespace-nowrap text-[13px] text-ivory/75 sm:inline">
+                  Welcome{memberName ? `, ${memberName}` : ""}
+                </span>
+                <button
+                  type="button"
+                  onClick={signOut}
+                  className="inline-flex min-h-10 items-center gap-2 whitespace-nowrap text-[12px] text-ivory/55 transition-colors hover:text-gold"
+                >
+                  <LogOut className="h-3.5 w-3.5" /> Sign out
+                </button>
+              </div>
             )}
           </div>
         </div>

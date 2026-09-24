@@ -146,7 +146,38 @@ function PortalHome() {
 
 
   return (
-    <PortalShell memberName={name} avatarUrl={headshot.data?.url ?? null}>
+    <PortalShell
+      memberName={name}
+      memberProgress={
+        <div className="min-w-[620px] lg:min-w-0">
+          <div className="mb-2 flex items-center justify-between gap-4">
+            <div className="flex min-w-0 items-center gap-3">
+              <p className="whitespace-nowrap text-[9px] uppercase tracking-[0.18em] text-gold">Your Next Step</p>
+              <span className="h-3 w-px bg-gold/25" />
+              <p className="truncate text-[11px] text-ivory/55">
+                {profileComplete
+                  ? documentsReleased
+                    ? "Your documents are ready to review."
+                    : "Your profile is received; your documents are being prepared."
+                  : "Complete your private profile to begin."}
+              </p>
+            </div>
+            {profileComplete && documentsReleased && (
+              <button type="button" onClick={() => setPanel("documents")} className="shrink-0 text-[10px] uppercase tracking-[0.14em] text-gold hover:text-ivory">
+                Review documents
+              </button>
+            )}
+          </div>
+          <StatusTimeline
+            horizontal
+            profileComplete={profileComplete}
+            packageStatus={m.package_status}
+            documentsReleased={documentsReleased}
+            allAcknowledged={documentsReleased && myDocs.every((d) => acknowledged.has(d.id))}
+          />
+        </div>
+      }
+    >
       <div className="grid w-full lg:grid-cols-[20%_80%]">
         {/* Sidebar */}
         <aside className="border-b border-gold/15 px-7 py-7 lg:border-b-0 lg:border-r lg:px-0 lg:pb-14 lg:pt-0">
@@ -171,13 +202,18 @@ function PortalHome() {
                 </h2>
                 <p className="mt-2 text-[14px] leading-5 text-ivory/65">{m.title || (m.role === "advisor" ? "Selected Advisor" : "Board Member")}</p>
                 <p className="text-[14px] leading-5 text-ivory/65">{entityWord}</p>
-                <button
-                  type="button"
-                  onClick={() => setPanel("role")}
-                  className="mt-2 inline-flex items-center gap-2 text-[13px] font-medium text-gold transition-colors hover:text-ivory"
-                >
-                  Role Details <ArrowRight className="h-3.5 w-3.5" />
-                </button>
+                <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-2">
+                  <Link to="/portal/profile" className="inline-flex items-center gap-2 text-[13px] font-medium text-gold transition-colors hover:text-ivory">
+                    <PenLine className="h-3.5 w-3.5" /> Update Private Profile
+                  </Link>
+                  <button
+                    type="button"
+                    onClick={() => setPanel("role")}
+                    className="inline-flex items-center gap-2 text-[13px] font-medium text-gold transition-colors hover:text-ivory"
+                  >
+                    Role Details <ArrowRight className="h-3.5 w-3.5" />
+                  </button>
+                </div>
               </div>
             </div>
           </div>
@@ -208,50 +244,6 @@ function PortalHome() {
           </nav>
 
           <div className="lg:px-[12.5%]">
-            <div className="my-6 h-px bg-gold/20" />
-
-            <div className="border border-gold/20 bg-[linear-gradient(145deg,var(--color-midnight),var(--color-navy))] p-[clamp(1.15rem,1.5vw,1.75rem)]">
-              <p className="text-[10px] uppercase tracking-[0.22em] text-gold">Your Next Step</p>
-              <h3 className="mt-2 font-display text-[clamp(1.15rem,1.3vw,1.5rem)] leading-snug">Board/Advisor Package</h3>
-              <p className="mt-3 flex items-center gap-2 text-[13px] text-gold">
-                <span className="h-1.5 w-1.5 rounded-full bg-gold shadow-[0_0_7px_var(--color-gold)]" />
-                <span className="uppercase tracking-wider text-ivory/55">Status:</span>
-                <span>{m.package_status.replaceAll("_", " ").replace(/\b\w/g, (c) => c.toUpperCase())}</span>
-              </p>
-              <StatusTimeline
-                profileComplete={profileComplete}
-                packageStatus={m.package_status}
-                documentsReleased={documentsReleased}
-                allAcknowledged={documentsReleased && myDocs.every((d) => acknowledged.has(d.id))}
-              />
-              <p className="mt-3 text-[13px] leading-6 text-ivory/60">
-                {profileComplete
-                  ? documentsReleased
-                    ? "Your profile is on file. Your released documents are ready to review."
-                    : "Your profile has been received. Your individualized documents are being prepared."
-                  : "Your documents unlock once your profile is complete."}
-              </p>
-              {profileComplete && documentsReleased ? (
-                <button
-                  type="button"
-                  onClick={() => setPanel("documents")}
-                  className="cta-glow-outline mt-4 inline-flex items-center gap-3 rounded-full px-5 py-2.5 text-[13px] transition-all"
-                >
-                  <span className="relative z-10 flex items-center gap-3">
-                    Review Your Documents <ArrowRight className="h-4 w-4" />
-                  </span>
-                </button>
-              ) : profileComplete ? (
-                <p className="mt-4 inline-flex items-center gap-2 text-[12px] uppercase tracking-[0.18em] text-gold/80">
-                  <span className="h-1.5 w-1.5 rounded-full bg-gold" /> Documents being prepared
-                </p>
-              ) : (
-                <p className="mt-4 inline-flex items-center gap-2 text-[12px] uppercase tracking-[0.18em] text-ivory/45">
-                  <Lock className="h-3.5 w-3.5 text-gold/70" /> Documents locked
-                </p>
-              )}
-            </div>
-
             <div className="my-6 h-px bg-gold/20" />
 
             <p className="text-[10px] uppercase tracking-[0.22em] text-ivory/45">Need help?</p>
