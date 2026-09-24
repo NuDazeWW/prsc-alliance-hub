@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
-import { useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { render } from "@react-email/render";
 import {
   Activity,
@@ -563,19 +563,19 @@ function Admin() {
       setDemoTemplates(base ? templates.map((t) => (t.id === id ? next : t)) : [...templates, next]);
       setDraft((d) => ({ ...d, id }));
       setEmailStatus(`“${draft.name}” saved (preview only — changes save permanently on the live admin page).`);
-      toast.success("Template saved");
+      setPreviewOpen(false);
       return;
     }
     try {
       const res = await saveEmailTemplate({ data: { ...draft, id: draft.id || undefined } });
       setDraft((d) => ({ ...d, id: res.id }));
       setEmailStatus(`“${draft.name}” saved.`);
-      toast.success("Template saved");
+      setPreviewOpen(false);
       await email.refetch();
     } catch (error) {
       const message = error instanceof Error ? error.message : "Could not save the template.";
       setEmailStatus(message);
-      toast.error(message);
+
     }
   }
 
