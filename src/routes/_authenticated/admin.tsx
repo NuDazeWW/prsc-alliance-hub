@@ -104,7 +104,7 @@ const demoEmailCenter: { templates: EmailTemplate[]; sends: EmailSend[] } = {
       body: "Welcome to the future of Partnership Readiness.\n\nWe’re building something special at {{entity_full}}, and we’re thrilled to have you as part of what comes next.\n\nWe’re pleased to share an important milestone: DIS has officially moved into investor prospecting.\n\nAs a {{role_label}}, your experience, perspective, and guidance will play an important role in our future success. Within the next 8–10 business days, you’ll receive your {{package_label}} package outlining your role, commitment, opportunity, and other key details for your review and alignment.\n\nWe know—it’s been a while since we’ve connected! Click below for a quick update on where we are, why we’re excited to partner with you, and to submit a few pre-package details or any questions you may have.\n\nIt’s been an exciting—and at times challenging—journey to get here. We’re looking forward to this next chapter and to disrupting the brand partnership industry together.",
       cta_label: "Welcome aboard",
       cta_url: "https://access.prscstandards.org/portal",
-      cta_subtext: "Your password will be sent to this same email upon entry.",
+      cta_subtext: "Your private invitation link will let you create your own password securely.",
       signatures: "Shirley Johnson, Founder & CEO\nBobbie Laurel, Co-Founder & Chief Operations Officer\nDave Nussbaum, Chief Information Officer",
       created_at: new Date().toISOString(),
       updated_at: new Date().toISOString(),
