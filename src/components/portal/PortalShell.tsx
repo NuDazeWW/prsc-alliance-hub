@@ -62,13 +62,23 @@ export function PortalShell({
               })}
             </nav>
           )}
+          {admin && stats.length > 0 && (
+            <div className="hidden h-full min-w-0 items-center justify-end gap-[clamp(1rem,2vw,2.25rem)] lg:flex">
+              {stats.map((s) => (
+                <div key={s.label} className="flex flex-col items-end leading-tight">
+                  <span className="font-display text-xl text-gold">{s.value}</span>
+                  <span className="text-[10px] uppercase tracking-[0.16em] text-ivory/50">{s.label}</span>
+                </div>
+              ))}
+            </div>
+          )}
           {!admin && memberProgress && (
             <div className="order-3 col-span-2 mt-2 min-w-0 border-t border-gold/15 pt-3 lg:order-none lg:col-span-1 lg:mt-0 lg:overflow-x-auto lg:border-t-0 lg:pt-0">
               {memberProgress}
             </div>
           )}
           <div className="col-start-2 ml-auto flex h-10 items-center gap-4 pr-1 sm:gap-5 sm:pr-2 lg:col-start-3 lg:border-l lg:border-gold/20 lg:pl-7 lg:pr-[clamp(1.5rem,2.5vw,3.5rem)]">
-            {stats.length > 0 && (
+            {!admin && stats.length > 0 && (
               <div className="hidden items-center gap-[clamp(1rem,2vw,2.25rem)] pr-2 md:flex">
                 {stats.map((s) => (
                   <div key={s.label} className="flex flex-col items-end leading-tight">
