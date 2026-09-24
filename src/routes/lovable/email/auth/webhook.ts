@@ -7,13 +7,26 @@ import { MagicLinkEmail } from '@/lib/email-templates/magic-link'
 import { RecoveryEmail } from '@/lib/email-templates/recovery'
 import { EmailChangeEmail } from '@/lib/email-templates/email-change'
 import { ReauthenticationEmail } from '@/lib/email-templates/reauthentication'
+import { PortalSignupEmail } from '@/emails/PortalSignupEmail'
+import { PortalMagicLinkEmail } from '@/emails/PortalMagicLinkEmail'
+import { PortalRecoveryEmail } from '@/emails/PortalRecoveryEmail'
+import { PortalEmailChangeEmail } from '@/emails/PortalEmailChangeEmail'
+import { PortalReauthenticationEmail } from '@/emails/PortalReauthenticationEmail'
 
 // Configuration
-const SITE_NAME = "PRSC Standards Hub"
+const SITE_NAME = "PRSC Board & Advisor Center"
 const SENDER_DOMAIN = "notify.readinessterminal.com"
 const ROOT_DOMAIN = "readinessterminal.com"
 const FROM_DOMAIN = "notify.readinessterminal.com"
 const SITE_URL = `https://${ROOT_DOMAIN}`
+
+const entityLabels = {
+  prsc: 'Partnership Readiness Standards Council (PRSC)',
+  dis: 'Decision Intelligence Systems (DIS)',
+  both: 'Partnership Readiness Standards Council (PRSC) / Decision Intelligence Systems (DIS)',
+} as const
+
+const roleLabels = { board_member: 'Board Member', advisor: 'Advisor' } as const
 
 // The SDK handler owns verification, dispatch, and retry semantics; this file
 // owns only the email decisions: subjects, templates, and per-type props.
@@ -23,60 +36,49 @@ export const Route = createFileRoute("/lovable/email/auth/webhook")({
       POST: ({ request }) => {
         const handler = createAuthEmailHandler({
           apiKey: process.env['LOVABLE_API_KEY']!,
-          from: `${SITE_NAME} <noreply@${FROM_DOMAIN}>`,
+          from: `${SITE_NAME} <no-reply@readinessterminal.com>`,
           senderDomain: SENDER_DOMAIN,
           sendUrl: process.env['LOVABLE_SEND_URL'],
           emails: {
             signup: {
-              subject: 'Confirm your email',
-              render: (data) =>
-                React.createElement(SignupEmail, {
-                  siteName: SITE_NAME,
-                  siteUrl: SITE_URL,
-                  recipient: data.email,
-                  confirmationUrl: data.url,
-                }),
+              subject: 'Confirm your PRSC private center email',
+              render: (data) => React.createElement(PortalSignupEmail, { confirmationUrl: data.url }),
             },
             invite: {
-              subject: "You've been invited",
-              render: (data) =>
-                React.createElement(InviteEmail, {
-                  siteName: SITE_NAME,
-                  siteUrl: SITE_URL,
+              subject: 'PRSC & DIS | Board & Advisor Center',
+              render: async (data) => {
+                const { supabaseAdmin } = await import('@/integrations/supabase/client.server')
+                const { data: member } = await supabaseAdmin
+                  .from('portal_members')
+                  .select('first_name, entity, role')
+                  .eq('email', data.email.toLowerCase())
+                  .maybeSingle()
+                const entity = member?.entity as keyof typeof entityLabels | undefined
+                const role = member?.role as keyof typeof roleLabels | undefined
+                return React.createElement(InviteEmail, {
                   confirmationUrl: data.url,
-                }),
+                  recipientEmail: data.email,
+                  firstName: member?.first_name ?? 'there',
+                  entityName: entity ? entityLabels[entity] : entityLabels.both,
+                  roleLabel: role ? roleLabels[role] : 'Board Member or Advisor',
+                })
+              },
             },
             magiclink: {
-              subject: 'Your login link',
-              render: (data) =>
-                React.createElement(MagicLinkEmail, {
-                  siteName: SITE_NAME,
-                  confirmationUrl: data.url,
-                }),
+              subject: 'Sign in to the PRSC private center',
+              render: (data) => React.createElement(PortalMagicLinkEmail, { confirmationUrl: data.url }),
             },
             recovery: {
-              subject: 'Reset your password',
-              render: (data) =>
-                React.createElement(RecoveryEmail, {
-                  siteName: SITE_NAME,
-                  confirmationUrl: data.url,
-                }),
+              subject: 'Reset your PRSC private center password',
+              render: (data) => React.createElement(PortalRecoveryEmail, { confirmationUrl: data.url }),
             },
             email_change: {
-              subject: 'Confirm your new email',
-              render: (data) =>
-                React.createElement(EmailChangeEmail, {
-                  siteName: SITE_NAME,
-                  oldEmail: data.old_email ?? '',
-                  email: data.email,
-                  newEmail: data.new_email ?? '',
-                  confirmationUrl: data.url,
-                }),
+              subject: 'Confirm your new PRSC private center email',
+              render: (data) => React.createElement(PortalEmailChangeEmail, { confirmationUrl: data.url }),
             },
             reauthentication: {
-              subject: 'Your verification code',
-              render: (data) =>
-                React.createElement(ReauthenticationEmail, { token: data.token ?? '' }),
+              subject: 'Your PRSC private center verification code',
+              render: (data) => React.createElement(PortalReauthenticationEmail, { token: data.token ?? '' }),
             },
           },
         })
