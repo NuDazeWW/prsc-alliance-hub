@@ -12,11 +12,7 @@ import { PortalReauthenticationEmail } from '@/emails/PortalReauthenticationEmai
 const SITE_NAME = "PRSC Board & Advisor Center"
 const SENDER_DOMAIN = "notify.readinessterminal.com"
 
-const entityLabels = {
-  prsc: 'Partnership Readiness Standards Council (PRSC)',
-  dis: 'Decision Intelligence Systems (DIS)',
-  both: 'Partnership Readiness Standards Council (PRSC) / Decision Intelligence Systems (DIS)',
-} as const
+const entityKeys = ['prsc', 'dis', 'both'] as const
 
 const roleLabels = { board_member: 'Board Member', advisor: 'Advisor' } as const
 
@@ -48,13 +44,14 @@ export const Route = createFileRoute("/lovable/email/auth/webhook")({
                   .maybeSingle()
                 const callbackEntity = callback.searchParams.get('entity')
                 const callbackRole = callback.searchParams.get('role')
-                const entity = (member?.entity ?? callbackEntity) as keyof typeof entityLabels | undefined
+                const entityValue = member?.entity ?? callbackEntity
+                const entity = entityKeys.find((value) => value === entityValue) ?? 'both'
                 const role = (member?.role ?? callbackRole) as keyof typeof roleLabels | undefined
                 return React.createElement(InviteEmail, {
                   confirmationUrl: data.url,
                   recipientEmail: data.email,
                   firstName: member?.first_name ?? callback.searchParams.get('first_name') ?? 'there',
-                  entityName: entity ? entityLabels[entity] : entityLabels.both,
+                  entity,
                   roleLabel: role ? roleLabels[role] : 'Board Member or Advisor',
                 })
               },
