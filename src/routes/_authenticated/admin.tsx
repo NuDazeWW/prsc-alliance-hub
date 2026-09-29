@@ -785,13 +785,14 @@ function Admin() {
                 </select>
                 <div className="grid gap-3 border border-gold/20 p-4 sm:col-span-2">
                   <span className="text-base font-medium text-ivory/90">Draft “Why You” with AI (optional)</span>
-                  <span className="text-sm leading-6 text-ivory/55">Paste their LinkedIn link and copy their About and Experience text. You review the draft before sending.</span>
-                  <Input value={aiLinkedin} onChange={(e) => setAiLinkedin(e.target.value)} placeholder="LinkedIn profile link" className="text-base" />
-                  <Textarea value={aiBackground} onChange={(e) => setAiBackground(e.target.value)} placeholder="Paste their LinkedIn About and Experience text here" className="min-h-28 text-base" />
+                  <span className="text-sm leading-6 text-ivory/55">Step 1: open their LinkedIn profile and copy their About and Experience sections. Step 2: paste that text into the box below. Step 3: click Draft with AI — the “Why this candidate was chosen” field fills in for you to review and edit before sending.</span>
+                  <Input value={aiLinkedin} onChange={(e) => setAiLinkedin(e.target.value)} placeholder="LinkedIn profile link (optional)" className="text-base" />
+                  <Textarea value={aiBackground} onChange={(e) => setAiBackground(e.target.value)} placeholder="Paste the member’s LinkedIn About and Experience text here (required for AI drafting)" className="min-h-28 text-base" />
                   <div className="flex flex-wrap items-center gap-3">
-                    <Button type="button" variant="outline" disabled={aiDrafting} className="rounded-none text-base" onClick={() => void runAiDraft()}>
+                    <Button type="button" variant="outline" disabled={aiDrafting || aiBackground.trim().length < 40} className="rounded-none text-base" onClick={() => void runAiDraft()}>
                       {aiDrafting ? "Drafting…" : "Draft with AI"}
                     </Button>
+                    {aiBackground.trim().length < 40 && !aiStatus && <span className="text-sm text-ivory/60">Paste their About/Experience text above to enable drafting.</span>}
                     {aiStatus && <span className="text-sm text-ivory/60">{aiStatus}</span>}
                   </div>
                 </div>
