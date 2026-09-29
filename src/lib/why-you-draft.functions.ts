@@ -25,6 +25,21 @@ export const draftWhyYou = createServerFn({ method: "POST" })
   .handler(async ({ context, data }) => {
     const { data: admin } = await context.supabase.from("user_roles").select("role").eq("user_id", context.userId).eq("role", "admin").maybeSingle();
     if (!admin) throw new Error("Unauthorized");
+    return generateDraft(data);
+  });
+
+// Builder-preview only: the preview is not signed in, so allow drafting only on preview/local hosts.
+export const draftWhyYouPreview = createServerFn({ method: "POST" })
+  .inputValidator((input) => schema.parse(input))
+  .handler(async ({ data }) => {
+    const { getRequest } = await import("@tanstack/react-start/server");
+    const host = new URL(getRequest().url).hostname;
+    const ok = host === "localhost" || host === "127.0.0.1" || /(^|\.)id-preview--[^.]+\.lovable\.app$/.test(host) || host.endsWith(".lovableproject.com");
+    if (!ok) throw new Error("Unauthorized");
+    return generateDraft(data);
+  });
+
+async function generateDraft(data: z.infer<typeof schema>) {
     const key = process.env.LOVABLE_API_KEY;
     if (!key) throw new Error("AI drafting is not configured.");
 
@@ -86,4 +101,4 @@ export const draftWhyYou = createServerFn({ method: "POST" })
     }
     if (refused || !text.trim()) throw new Error("The AI declined to write this draft. Please write it manually.");
     return { draft: text.trim().slice(0, 2000) };
-  });
+  }

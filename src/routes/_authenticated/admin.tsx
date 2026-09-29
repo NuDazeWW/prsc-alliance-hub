@@ -31,7 +31,7 @@ import {
   setMemberPackageStatus,
   updateInquiry,
 } from "@/lib/portal.functions";
-import { draftWhyYou } from "@/lib/why-you-draft.functions";
+import { draftWhyYou, draftWhyYouPreview } from "@/lib/why-you-draft.functions";
 import {
   deleteEmailTemplate,
   deleteEmailHistory,
@@ -310,10 +310,9 @@ function Admin() {
   const runAiDraft = async () => {
     if (aiDrafting) return;
     if (aiBackground.trim().length < 40) return setAiStatus("Paste at least a few lines of their About or Experience text.");
-    if (preview) return setAiStatus("Preview mode: AI drafting works on the live admin page once you are signed in.");
     setAiDrafting(true); setAiStatus("");
     try {
-      const { draft: text } = await draftWhyYou({ data: {
+      const { draft: text } = await (preview ? draftWhyYouPreview : draftWhyYou)({ data: {
         first_name: inviteDraft.first_name, last_name: inviteDraft.last_name, organization: inviteDraft.organization,
         title: inviteDraft.title, entity: inviteDraft.entity, role: inviteDraft.role,
         linkedin_url: aiLinkedin, background: aiBackground,
