@@ -19,7 +19,7 @@ export function StatusTimeline({
   const prepared = reviewed && (packageStatus === "package_ready" || documentsReleased);
   const steps: { label: string; note: string; state: State }[] = [
     {
-      label: "Profile submitted",
+      label: profileComplete ? "Profile submitted" : "Submit your profile",
       note: profileComplete ? "Received and on file." : "Complete your profile to begin.",
       state: profileComplete ? "done" : "current",
     },
