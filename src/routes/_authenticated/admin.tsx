@@ -31,6 +31,7 @@ import {
   setMemberPackageStatus,
   updateInquiry,
 } from "@/lib/portal.functions";
+import { draftWhyYou } from "@/lib/why-you-draft.functions";
 import {
   deleteEmailTemplate,
   deleteEmailHistory,
@@ -302,6 +303,27 @@ function Admin() {
 
   const [status, setStatus] = useState("");
   const [inviteDraft, setInviteDraft] = useState<InviteEmailReview>(emptyInvite);
+  const [aiLinkedin, setAiLinkedin] = useState("");
+  const [aiBackground, setAiBackground] = useState("");
+  const [aiDrafting, setAiDrafting] = useState(false);
+  const [aiStatus, setAiStatus] = useState("");
+  const runAiDraft = async () => {
+    if (aiDrafting) return;
+    if (aiBackground.trim().length < 40) return setAiStatus("Paste at least a few lines of their About or Experience text.");
+    if (preview) return setAiStatus("Preview mode: AI drafting works on the live admin page once you are signed in.");
+    setAiDrafting(true); setAiStatus("");
+    try {
+      const { draft: text } = await draftWhyYou({ data: {
+        first_name: inviteDraft.first_name, last_name: inviteDraft.last_name, organization: inviteDraft.organization,
+        title: inviteDraft.title, entity: inviteDraft.entity, role: inviteDraft.role,
+        linkedin_url: aiLinkedin, background: aiBackground,
+      } });
+      setInviteDraft((d) => ({ ...d, why_you: text }));
+      setAiStatus("Draft added below. Review and edit before sending.");
+    } catch (err) {
+      setAiStatus((err as Error).message || "The draft could not be created.");
+    } finally { setAiDrafting(false); }
+  };
   const [invitePreviewOpen, setInvitePreviewOpen] = useState(false);
   const [invitePreviewHtml, setInvitePreviewHtml] = useState("");
   const [inviteTestStatus, setInviteTestStatus] = useState("");
@@ -762,6 +784,18 @@ function Admin() {
                   <option value="board_member">Board member</option>
                   <option value="advisor">Advisor</option>
                 </select>
+                <div className="grid gap-3 border border-gold/20 p-4 sm:col-span-2">
+                  <span className="text-base font-medium text-ivory/90">Draft “Why You” with AI (optional)</span>
+                  <span className="text-sm leading-6 text-ivory/55">Paste their LinkedIn link and copy their About and Experience text. You review the draft before sending.</span>
+                  <Input value={aiLinkedin} onChange={(e) => setAiLinkedin(e.target.value)} placeholder="LinkedIn profile link" className="text-base" />
+                  <Textarea value={aiBackground} onChange={(e) => setAiBackground(e.target.value)} placeholder="Paste their LinkedIn About and Experience text here" className="min-h-28 text-base" />
+                  <div className="flex flex-wrap items-center gap-3">
+                    <Button type="button" variant="outline" disabled={aiDrafting} className="rounded-none text-base" onClick={() => void runAiDraft()}>
+                      {aiDrafting ? "Drafting…" : "Draft with AI"}
+                    </Button>
+                    {aiStatus && <span className="text-sm text-ivory/60">{aiStatus}</span>}
+                  </div>
+                </div>
                 <label className="sm:col-span-2">
                   <span className="mb-2 block text-base font-medium text-ivory/90">Why this candidate was chosen</span>
                   <span className="mb-3 block text-sm leading-6 text-ivory/55">
