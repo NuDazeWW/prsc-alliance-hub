@@ -10,7 +10,7 @@ const schema = z.object({
   entity: z.enum(["prsc", "dis", "both"]),
   role: z.enum(["board_member", "advisor"]),
   linkedin_url: z.string().trim().max(300),
-  background: z.string().trim().min(40, "Paste at least a few lines of their About or Experience text.").max(8000),
+  background: z.string().trim().max(8000).default(""),
 });
 
 const ENTITY: Record<string, string> = {
@@ -44,8 +44,8 @@ async function generateDraft(data: z.infer<typeof schema>) {
     if (!key) throw new Error("AI drafting is not configured.");
 
     const role = data.role === "board_member" ? "Board Member" : "Advisor";
-    const instructions = `You write private, personal notes from Shirley Johnson, Founder, explaining to an invited ${role} why they were chosen. Write 90–140 words, second person ("you"), warm, confident, executive tone, no hype, no bullet points, no greeting or signature. Link specific details of their background to the work of ${ENTITY[data.entity]}. Use only facts present in the provided background; never invent employers, titles, or achievements. Return only the note.`;
-    const input = `Candidate: ${data.first_name} ${data.last_name}\nTitle: ${data.title || "n/a"}\nOrganization: ${data.organization || "n/a"}\nLinkedIn: ${data.linkedin_url || "n/a"}\n\nBackground (from their LinkedIn About/Experience):\n${data.background}`;
+    const instructions = `You write private, personal notes from Shirley Johnson, Founder, explaining to an invited ${role} why they were chosen. Write 90–140 words, second person ("you"), warm, confident, executive tone, no hype, no bullet points, no greeting or signature. Link specific details of their background to the work of ${ENTITY[data.entity]}. Use only facts provided (name, title, organization, background). If background is missing, draw on what their title and organization imply about their expertise, without inventing specific employers, achievements, or history. Return only the note.`;
+    const input = `Candidate: ${data.first_name} ${data.last_name}\nTitle: ${data.title || "n/a"}\nOrganization: ${data.organization || "n/a"}\nLinkedIn: ${data.linkedin_url || "n/a"}\n\nBackground (from their LinkedIn About/Experience):\n${data.background || "Not provided."}`;
 
     const res = await fetch("https://ai.gateway.lovable.dev/v1/responses", {
       method: "POST",
