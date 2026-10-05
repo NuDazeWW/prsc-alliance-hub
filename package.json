@@ -93,7 +93,8 @@
   },
   "pnpm": {
     "overrides": {
-      "entities": "4.5.0"
+      "entities": "4.5.0",
+      "@tanstack/router-core": "1.171.34"
     }
   }
 }
