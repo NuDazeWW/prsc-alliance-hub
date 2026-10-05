@@ -9,74 +9,38 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as TheStandardRouteImport } from './routes/the-standard'
-import { Route as StandardV1RouteImport } from './routes/standard-v1'
-import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
-import { Route as RequestBriefingRouteImport } from './routes/request-briefing'
-import { Route as ReadinessVanguardRouteImport } from './routes/readiness-vanguard'
-import { Route as GovernanceRouteImport } from './routes/governance'
-import { Route as FaqRouteImport } from './routes/faq'
-import { Route as CertificationRouteImport } from './routes/certification'
-import { Route as AuthRouteImport } from './routes/auth'
-import { Route as AcceptInvitationRouteImport } from './routes/accept-invitation'
-import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as IndexRouteImport } from './routes/index'
-import { Route as VanguardHomeRouteImport } from './routes/vanguard.home'
-import { Route as GovernanceWrittenStandardsRouteImport } from './routes/governance_.written-standards'
-import { Route as GovernanceCharterRouteImport } from './routes/governance_.charter'
-import { Route as ApiGeoRouteImport } from './routes/api/geo'
+import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
+import { Route as AcceptInvitationRouteImport } from './routes/accept-invitation'
+import { Route as AuthRouteImport } from './routes/auth'
+import { Route as CertificationRouteImport } from './routes/certification'
+import { Route as FaqRouteImport } from './routes/faq'
+import { Route as GovernanceRouteImport } from './routes/governance'
+import { Route as ReadinessVanguardRouteImport } from './routes/readiness-vanguard'
+import { Route as RequestBriefingRouteImport } from './routes/request-briefing'
+import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
+import { Route as StandardV1RouteImport } from './routes/standard-v1'
+import { Route as TheStandardRouteImport } from './routes/the-standard'
 import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/admin'
+import { Route as ApiGeoRouteImport } from './routes/api/geo'
+import { Route as GovernanceCharterRouteImport } from './routes/governance_.charter'
+import { Route as GovernanceWrittenStandardsRouteImport } from './routes/governance_.written-standards'
+import { Route as VanguardHomeRouteImport } from './routes/vanguard.home'
 import { Route as AuthenticatedPortalIndexRouteImport } from './routes/_authenticated/portal.index'
-import { Route as LovableEmailEventsRouteImport } from './routes/lovable/email/events'
-import { Route as ApiPublicInviteRemindersRouteImport } from './routes/api/public/invite-reminders'
-import { Route as AuthenticatedPortalQuestionsRouteImport } from './routes/_authenticated/portal.questions'
 import { Route as AuthenticatedPortalProfileRouteImport } from './routes/_authenticated/portal.profile'
-import { Route as LovableEmailAuthWebhookRouteImport } from './routes/lovable/email/auth/webhook'
+import { Route as AuthenticatedPortalQuestionsRouteImport } from './routes/_authenticated/portal.questions'
+import { Route as ApiPublicInviteRemindersRouteImport } from './routes/api/public/invite-reminders'
+import { Route as LovableEmailEventsRouteImport } from './routes/lovable/email/events'
 import { Route as LovableEmailAuthPreviewRouteImport } from './routes/lovable/email/auth/preview'
+import { Route as LovableEmailAuthWebhookRouteImport } from './routes/lovable/email/auth/webhook'
 
-const TheStandardRoute = TheStandardRouteImport.update({
-  id: '/the-standard',
-  path: '/the-standard',
+const IndexRoute = IndexRouteImport.update({
+  id: '/',
+  path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const StandardV1Route = StandardV1RouteImport.update({
-  id: '/standard-v1',
-  path: '/standard-v1',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
-  id: '/sitemap.xml',
-  path: '/sitemap.xml',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const RequestBriefingRoute = RequestBriefingRouteImport.update({
-  id: '/request-briefing',
-  path: '/request-briefing',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ReadinessVanguardRoute = ReadinessVanguardRouteImport.update({
-  id: '/readiness-vanguard',
-  path: '/readiness-vanguard',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const GovernanceRoute = GovernanceRouteImport.update({
-  id: '/governance',
-  path: '/governance',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const FaqRoute = FaqRouteImport.update({
-  id: '/faq',
-  path: '/faq',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const CertificationRoute = CertificationRouteImport.update({
-  id: '/certification',
-  path: '/certification',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AuthRoute = AuthRouteImport.update({
-  id: '/auth',
-  path: '/auth',
+const AuthenticatedRouteRoute = AuthenticatedRouteRouteImport.update({
+  id: '/_authenticated',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AcceptInvitationRoute = AcceptInvitationRouteImport.update({
@@ -84,18 +48,64 @@ const AcceptInvitationRoute = AcceptInvitationRouteImport.update({
   path: '/accept-invitation',
   getParentRoute: () => rootRouteImport,
 } as any)
-const AuthenticatedRouteRoute = AuthenticatedRouteRouteImport.update({
-  id: '/_authenticated',
+const AuthRoute = AuthRouteImport.update({
+  id: '/auth',
+  path: '/auth',
   getParentRoute: () => rootRouteImport,
 } as any)
-const IndexRoute = IndexRouteImport.update({
-  id: '/',
-  path: '/',
+const CertificationRoute = CertificationRouteImport.update({
+  id: '/certification',
+  path: '/certification',
   getParentRoute: () => rootRouteImport,
 } as any)
-const VanguardHomeRoute = VanguardHomeRouteImport.update({
-  id: '/vanguard/home',
-  path: '/vanguard/home',
+const FaqRoute = FaqRouteImport.update({
+  id: '/faq',
+  path: '/faq',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const GovernanceRoute = GovernanceRouteImport.update({
+  id: '/governance',
+  path: '/governance',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ReadinessVanguardRoute = ReadinessVanguardRouteImport.update({
+  id: '/readiness-vanguard',
+  path: '/readiness-vanguard',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const RequestBriefingRoute = RequestBriefingRouteImport.update({
+  id: '/request-briefing',
+  path: '/request-briefing',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
+  id: '/sitemap.xml',
+  path: '/sitemap.xml',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const StandardV1Route = StandardV1RouteImport.update({
+  id: '/standard-v1',
+  path: '/standard-v1',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TheStandardRoute = TheStandardRouteImport.update({
+  id: '/the-standard',
+  path: '/the-standard',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthenticatedAdminRoute = AuthenticatedAdminRouteImport.update({
+  id: '/admin',
+  path: '/admin',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const ApiGeoRoute = ApiGeoRouteImport.update({
+  id: '/api/geo',
+  path: '/api/geo',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const GovernanceCharterRoute = GovernanceCharterRouteImport.update({
+  id: '/governance_/charter',
+  path: '/governance/charter',
   getParentRoute: () => rootRouteImport,
 } as any)
 const GovernanceWrittenStandardsRoute =
@@ -104,42 +114,15 @@ const GovernanceWrittenStandardsRoute =
     path: '/governance/written-standards',
     getParentRoute: () => rootRouteImport,
   } as any)
-const GovernanceCharterRoute = GovernanceCharterRouteImport.update({
-  id: '/governance_/charter',
-  path: '/governance/charter',
+const VanguardHomeRoute = VanguardHomeRouteImport.update({
+  id: '/vanguard/home',
+  path: '/vanguard/home',
   getParentRoute: () => rootRouteImport,
-} as any)
-const ApiGeoRoute = ApiGeoRouteImport.update({
-  id: '/api/geo',
-  path: '/api/geo',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AuthenticatedAdminRoute = AuthenticatedAdminRouteImport.update({
-  id: '/admin',
-  path: '/admin',
-  getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const AuthenticatedPortalIndexRoute =
   AuthenticatedPortalIndexRouteImport.update({
     id: '/portal/',
     path: '/portal/',
-    getParentRoute: () => AuthenticatedRouteRoute,
-  } as any)
-const LovableEmailEventsRoute = LovableEmailEventsRouteImport.update({
-  id: '/lovable/email/events',
-  path: '/lovable/email/events',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ApiPublicInviteRemindersRoute =
-  ApiPublicInviteRemindersRouteImport.update({
-    id: '/api/public/invite-reminders',
-    path: '/api/public/invite-reminders',
-    getParentRoute: () => rootRouteImport,
-  } as any)
-const AuthenticatedPortalQuestionsRoute =
-  AuthenticatedPortalQuestionsRouteImport.update({
-    id: '/portal/questions',
-    path: '/portal/questions',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
 const AuthenticatedPortalProfileRoute =
@@ -148,14 +131,31 @@ const AuthenticatedPortalProfileRoute =
     path: '/portal/profile',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
-const LovableEmailAuthWebhookRoute = LovableEmailAuthWebhookRouteImport.update({
-  id: '/lovable/email/auth/webhook',
-  path: '/lovable/email/auth/webhook',
+const AuthenticatedPortalQuestionsRoute =
+  AuthenticatedPortalQuestionsRouteImport.update({
+    id: '/portal/questions',
+    path: '/portal/questions',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const ApiPublicInviteRemindersRoute =
+  ApiPublicInviteRemindersRouteImport.update({
+    id: '/api/public/invite-reminders',
+    path: '/api/public/invite-reminders',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const LovableEmailEventsRoute = LovableEmailEventsRouteImport.update({
+  id: '/lovable/email/events',
+  path: '/lovable/email/events',
   getParentRoute: () => rootRouteImport,
 } as any)
 const LovableEmailAuthPreviewRoute = LovableEmailAuthPreviewRouteImport.update({
   id: '/lovable/email/auth/preview',
   path: '/lovable/email/auth/preview',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LovableEmailAuthWebhookRoute = LovableEmailAuthWebhookRouteImport.update({
+  id: '/lovable/email/auth/webhook',
+  path: '/lovable/email/auth/webhook',
   getParentRoute: () => rootRouteImport,
 } as any)
 
@@ -340,74 +340,11 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/the-standard': {
-      id: '/the-standard'
-      path: '/the-standard'
-      fullPath: '/the-standard'
-      preLoaderRoute: typeof TheStandardRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/standard-v1': {
-      id: '/standard-v1'
-      path: '/standard-v1'
-      fullPath: '/standard-v1'
-      preLoaderRoute: typeof StandardV1RouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/sitemap.xml': {
-      id: '/sitemap.xml'
-      path: '/sitemap.xml'
-      fullPath: '/sitemap.xml'
-      preLoaderRoute: typeof SitemapDotxmlRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/request-briefing': {
-      id: '/request-briefing'
-      path: '/request-briefing'
-      fullPath: '/request-briefing'
-      preLoaderRoute: typeof RequestBriefingRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/readiness-vanguard': {
-      id: '/readiness-vanguard'
-      path: '/readiness-vanguard'
-      fullPath: '/readiness-vanguard'
-      preLoaderRoute: typeof ReadinessVanguardRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/governance': {
-      id: '/governance'
-      path: '/governance'
-      fullPath: '/governance'
-      preLoaderRoute: typeof GovernanceRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/faq': {
-      id: '/faq'
-      path: '/faq'
-      fullPath: '/faq'
-      preLoaderRoute: typeof FaqRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/certification': {
-      id: '/certification'
-      path: '/certification'
-      fullPath: '/certification'
-      preLoaderRoute: typeof CertificationRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/auth': {
-      id: '/auth'
-      path: '/auth'
-      fullPath: '/auth'
-      preLoaderRoute: typeof AuthRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/accept-invitation': {
-      id: '/accept-invitation'
-      path: '/accept-invitation'
-      fullPath: '/accept-invitation'
-      preLoaderRoute: typeof AcceptInvitationRouteImport
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_authenticated': {
@@ -417,39 +354,74 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedRouteRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/': {
-      id: '/'
-      path: '/'
-      fullPath: '/'
-      preLoaderRoute: typeof IndexRouteImport
+    '/accept-invitation': {
+      id: '/accept-invitation'
+      path: '/accept-invitation'
+      fullPath: '/accept-invitation'
+      preLoaderRoute: typeof AcceptInvitationRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/vanguard/home': {
-      id: '/vanguard/home'
-      path: '/vanguard/home'
-      fullPath: '/vanguard/home'
-      preLoaderRoute: typeof VanguardHomeRouteImport
+    '/auth': {
+      id: '/auth'
+      path: '/auth'
+      fullPath: '/auth'
+      preLoaderRoute: typeof AuthRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/governance_/written-standards': {
-      id: '/governance_/written-standards'
-      path: '/governance/written-standards'
-      fullPath: '/governance/written-standards'
-      preLoaderRoute: typeof GovernanceWrittenStandardsRouteImport
+    '/certification': {
+      id: '/certification'
+      path: '/certification'
+      fullPath: '/certification'
+      preLoaderRoute: typeof CertificationRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/governance_/charter': {
-      id: '/governance_/charter'
-      path: '/governance/charter'
-      fullPath: '/governance/charter'
-      preLoaderRoute: typeof GovernanceCharterRouteImport
+    '/faq': {
+      id: '/faq'
+      path: '/faq'
+      fullPath: '/faq'
+      preLoaderRoute: typeof FaqRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/api/geo': {
-      id: '/api/geo'
-      path: '/api/geo'
-      fullPath: '/api/geo'
-      preLoaderRoute: typeof ApiGeoRouteImport
+    '/governance': {
+      id: '/governance'
+      path: '/governance'
+      fullPath: '/governance'
+      preLoaderRoute: typeof GovernanceRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/readiness-vanguard': {
+      id: '/readiness-vanguard'
+      path: '/readiness-vanguard'
+      fullPath: '/readiness-vanguard'
+      preLoaderRoute: typeof ReadinessVanguardRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/request-briefing': {
+      id: '/request-briefing'
+      path: '/request-briefing'
+      fullPath: '/request-briefing'
+      preLoaderRoute: typeof RequestBriefingRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/sitemap.xml': {
+      id: '/sitemap.xml'
+      path: '/sitemap.xml'
+      fullPath: '/sitemap.xml'
+      preLoaderRoute: typeof SitemapDotxmlRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/standard-v1': {
+      id: '/standard-v1'
+      path: '/standard-v1'
+      fullPath: '/standard-v1'
+      preLoaderRoute: typeof StandardV1RouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/the-standard': {
+      id: '/the-standard'
+      path: '/the-standard'
+      fullPath: '/the-standard'
+      preLoaderRoute: typeof TheStandardRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_authenticated/admin': {
@@ -459,32 +431,39 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/api/geo': {
+      id: '/api/geo'
+      path: '/api/geo'
+      fullPath: '/api/geo'
+      preLoaderRoute: typeof ApiGeoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/governance_/charter': {
+      id: '/governance_/charter'
+      path: '/governance/charter'
+      fullPath: '/governance/charter'
+      preLoaderRoute: typeof GovernanceCharterRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/governance_/written-standards': {
+      id: '/governance_/written-standards'
+      path: '/governance/written-standards'
+      fullPath: '/governance/written-standards'
+      preLoaderRoute: typeof GovernanceWrittenStandardsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/vanguard/home': {
+      id: '/vanguard/home'
+      path: '/vanguard/home'
+      fullPath: '/vanguard/home'
+      preLoaderRoute: typeof VanguardHomeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/_authenticated/portal/': {
       id: '/_authenticated/portal/'
       path: '/portal'
       fullPath: '/portal/'
       preLoaderRoute: typeof AuthenticatedPortalIndexRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
-    }
-    '/lovable/email/events': {
-      id: '/lovable/email/events'
-      path: '/lovable/email/events'
-      fullPath: '/lovable/email/events'
-      preLoaderRoute: typeof LovableEmailEventsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/public/invite-reminders': {
-      id: '/api/public/invite-reminders'
-      path: '/api/public/invite-reminders'
-      fullPath: '/api/public/invite-reminders'
-      preLoaderRoute: typeof ApiPublicInviteRemindersRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/_authenticated/portal/questions': {
-      id: '/_authenticated/portal/questions'
-      path: '/portal/questions'
-      fullPath: '/portal/questions'
-      preLoaderRoute: typeof AuthenticatedPortalQuestionsRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/portal/profile': {
@@ -494,11 +473,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedPortalProfileRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/lovable/email/auth/webhook': {
-      id: '/lovable/email/auth/webhook'
-      path: '/lovable/email/auth/webhook'
-      fullPath: '/lovable/email/auth/webhook'
-      preLoaderRoute: typeof LovableEmailAuthWebhookRouteImport
+    '/_authenticated/portal/questions': {
+      id: '/_authenticated/portal/questions'
+      path: '/portal/questions'
+      fullPath: '/portal/questions'
+      preLoaderRoute: typeof AuthenticatedPortalQuestionsRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/api/public/invite-reminders': {
+      id: '/api/public/invite-reminders'
+      path: '/api/public/invite-reminders'
+      fullPath: '/api/public/invite-reminders'
+      preLoaderRoute: typeof ApiPublicInviteRemindersRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/lovable/email/events': {
+      id: '/lovable/email/events'
+      path: '/lovable/email/events'
+      fullPath: '/lovable/email/events'
+      preLoaderRoute: typeof LovableEmailEventsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/lovable/email/auth/preview': {
@@ -506,6 +499,13 @@ declare module '@tanstack/react-router' {
       path: '/lovable/email/auth/preview'
       fullPath: '/lovable/email/auth/preview'
       preLoaderRoute: typeof LovableEmailAuthPreviewRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/lovable/email/auth/webhook': {
+      id: '/lovable/email/auth/webhook'
+      path: '/lovable/email/auth/webhook'
+      fullPath: '/lovable/email/auth/webhook'
+      preLoaderRoute: typeof LovableEmailAuthWebhookRouteImport
       parentRoute: typeof rootRouteImport
     }
   }
