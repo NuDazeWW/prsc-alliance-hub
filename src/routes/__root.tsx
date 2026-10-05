@@ -85,7 +85,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient; host
     const h = host.split(":")[0].toLowerCase();
     const path = location.pathname;
     const qs = location.searchStr ?? "";
-    const isPrivatePath = /^\/(portal|admin|auth)(\/|$)/.test(path);
+    const isPrivatePath = /^\/(portal|admin|auth|accept-invitation)(\/|$)/.test(path);
     const isSystemPath = /^\/(api|lovable)(\/|$)/.test(path);
     if (!isSystemPath) {
       // Private address: only the private center; public pages go to the .com site.
@@ -226,7 +226,7 @@ function RootComponent() {
   const { queryClient, host } = Route.useRouteContext();
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const isPortalHost = PORTAL_HOSTS.has(host);
-  const isPrivate = isPortalHost || pathname.startsWith("/portal") || pathname.startsWith("/admin") || pathname.startsWith("/auth");
+  const isPrivate = isPortalHost || pathname.startsWith("/portal") || pathname.startsWith("/admin") || pathname.startsWith("/auth") || pathname.startsWith("/accept-invitation");
   const isChrome = !pathname.startsWith("/vanguard/") && !isPrivate;
   return (
     <QueryClientProvider client={queryClient}>
