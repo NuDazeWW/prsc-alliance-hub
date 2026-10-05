@@ -285,7 +285,7 @@ function parseMemberList(text: string): { rows: StagedRow[]; errors: string[] } 
     if (!role) return errors.push(`${label}: role must be Board member or Advisor.`);
     const why = (record["why_you"] ?? "").trim();
     const background = (record["background"] ?? "").trim().slice(0, 8000);
-    if (why.length < 20 && background.length < 40) return errors.push(`${label}: add a “why you” note (20+ characters) or LinkedIn background (40+ characters) to draft one.`);
+    void 0;
 
     rows.push({
       first_name: record["first_name"], last_name: record["last_name"], email: record["email"],
@@ -328,7 +328,6 @@ function Admin() {
   const [aiStatus, setAiStatus] = useState("");
   const runAiDraft = async () => {
     if (aiDrafting) return;
-    if (aiBackground.trim().length < 40) return setAiStatus("Paste at least a few lines of their About or Experience text.");
     setAiDrafting(true); setAiStatus("");
     try {
       const { draft: text } = await (preview ? draftWhyYouPreview : draftWhyYou)({ data: {
@@ -405,7 +404,7 @@ function Admin() {
   }
 
   async function draftAllNotes() {
-    const targets = importRows.map((r, i) => ({ r, i })).filter(({ r }) => r.why_you.trim().length < 20 && r.background.trim().length >= 40);
+    const targets = importRows.map((r, i) => ({ r, i })).filter(({ r }) => r.why_you.trim().length < 20);
     setBatchDrafting(true);
     let done = 0, failed = 0;
     for (const { r, i } of targets) {
@@ -848,10 +847,9 @@ function Admin() {
                   <Input value={aiLinkedin} onChange={(e) => setAiLinkedin(e.target.value)} placeholder="LinkedIn profile link (optional)" className="text-base" />
                   <Textarea value={aiBackground} onChange={(e) => setAiBackground(e.target.value)} placeholder="Paste the member’s LinkedIn About and Experience text here (required for AI drafting)" className="min-h-28 text-base" />
                   <div className="flex flex-wrap items-center gap-3">
-                    <Button type="button" variant="outline" disabled={aiDrafting || aiBackground.trim().length < 40} className="rounded-none text-base" onClick={() => void runAiDraft()}>
+                    <Button type="button" variant="outline" disabled={aiDrafting} className="rounded-none text-base" onClick={() => void runAiDraft()}>
                       {aiDrafting ? "Drafting…" : "Draft with AI"}
                     </Button>
-                    {aiBackground.trim().length < 40 && !aiStatus && <span className="text-sm text-ivory/60">Paste their About/Experience text above to enable drafting.</span>}
                     {aiStatus && <span className="text-sm text-ivory/60">{aiStatus}</span>}
                   </div>
                 </div>
@@ -887,7 +885,7 @@ function Admin() {
                 </div>
                 <InfoTip
                   title="Upload a member list"
-                  body="Add many board members and advisors at once from a spreadsheet saved as CSV. Paste each person's LinkedIn About/Experience text into the background column and leave why_you blank — then click Generate AI notes for all. Review and edit each note, then add everyone and send all invitations in one click."
+                  body="Add many board members and advisors at once from a spreadsheet saved as CSV. Background text is optional — the AI can draft from name, title, and organization. Leave why_you blank — then click Generate AI notes for all. Review and edit each note, then add everyone and send all invitations in one click."
                 />
               </div>
 
@@ -918,8 +916,8 @@ function Admin() {
 
               {importRows.length > 0 && (
                 <div className="mt-6 flex flex-wrap items-center gap-3">
-                  <Button type="button" variant="outline" disabled={batchDrafting || !importRows.some((r) => r.why_you.trim().length < 20 && r.background.trim().length >= 40)} className="rounded-none text-base" onClick={() => void draftAllNotes()}>
-                    {batchDrafting ? "Drafting…" : `Generate AI notes for all (${importRows.filter((r) => r.why_you.trim().length < 20 && r.background.trim().length >= 40).length})`}
+                  <Button type="button" variant="outline" disabled={batchDrafting || !importRows.some((r) => r.why_you.trim().length < 20)} className="rounded-none text-base" onClick={() => void draftAllNotes()}>
+                    {batchDrafting ? "Drafting…" : `Generate AI notes for all (${importRows.filter((r) => r.why_you.trim().length < 20).length})`}
                   </Button>
                   {batchProgress && <span className="text-base text-ivory/60">{batchProgress}</span>}
                 </div>
@@ -935,7 +933,7 @@ function Admin() {
                         <span className="text-ivory/60">{[r.title, r.organization].filter(Boolean).join(", ")}</span>
                         <span className="uppercase text-gold">{r.entity}</span>
                         <span className="text-ivory/60">{r.role === "advisor" ? "Advisor" : "Board member"}</span>
-                        <Button type="button" variant="outline" size="sm" disabled={batchDrafting || rowDrafting === r.email || r.background.trim().length < 40} className="ml-auto rounded-none" onClick={() => void draftRow(i)}>
+                        <Button type="button" variant="outline" size="sm" disabled={batchDrafting || rowDrafting === r.email} className="ml-auto rounded-none" onClick={() => void draftRow(i)}>
                           {rowDrafting === r.email ? "Drafting…" : r.why_you.trim() ? "Regenerate" : "Draft with AI"}
                         </Button>
                       </div>
@@ -943,7 +941,7 @@ function Admin() {
                         value={r.why_you}
                         onChange={(e) => updateImportRow(i, { why_you: e.target.value })}
                         rows={4}
-                        placeholder={r.background.trim().length >= 40 ? "Click Generate to draft this note from their LinkedIn background." : "Add a background column in the spreadsheet or write the note here."}
+                        placeholder={"Click Draft with AI to write this note from their name, title, and organization (plus background if provided)."}
                         className="mt-3 w-full border border-ivory/15 bg-transparent p-3 text-base leading-7 text-ivory/85 focus:border-gold/50 focus:outline-none"
                       />
                       {r.why_you.trim().length > 0 && r.why_you.trim().length < 20 && <p className="mt-1 text-sm text-amber-300/80">Needs at least 20 characters.</p>}
