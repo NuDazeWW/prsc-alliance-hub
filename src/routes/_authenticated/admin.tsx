@@ -285,7 +285,6 @@ function parseMemberList(text: string): { rows: StagedRow[]; errors: string[] } 
     if (!role) return errors.push(`${label}: role must be Board member or Advisor.`);
     const why = (record["why_you"] ?? "").trim();
     const background = (record["background"] ?? "").trim().slice(0, 8000);
-    void 0;
 
     rows.push({
       first_name: record["first_name"], last_name: record["last_name"], email: record["email"],
