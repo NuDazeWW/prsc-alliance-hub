@@ -8,6 +8,7 @@ import {
   HeadContent,
   Scripts,
   redirect,
+  type ErrorComponentProps,
 } from "@tanstack/react-router";
 import { useEffect, type ReactNode } from "react";
 
@@ -51,7 +52,8 @@ function NotFoundComponent() {
   );
 }
 
-function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
+function ErrorComponent({ error: rawError, reset }: ErrorComponentProps) {
+  const error = rawError as Error;
   console.error(error);
   const router = useRouter();
   useEffect(() => {
@@ -197,7 +199,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient; host
 });
 
 function RootShell({ children }: { children: ReactNode }) {
-  const host = Route.useRouteContext({ select: (s) => s.host }) ?? "";
+  const host = useRouterState({ select: (s) => (s.matches[0]?.context as { host?: string } | undefined)?.host }) ?? "";
   const isPortalHost = PORTAL_HOSTS.has(host);
   return (
     <html lang="en">
@@ -223,7 +225,7 @@ function RootShell({ children }: { children: ReactNode }) {
 }
 
 function RootComponent() {
-  const { queryClient, host } = Route.useRouteContext();
+  const { queryClient, host } = useRouterState({ select: (s) => s.matches[0]?.context as { queryClient: QueryClient; host: string } });
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const isPortalHost = PORTAL_HOSTS.has(host);
   const isPrivate = isPortalHost || pathname.startsWith("/portal") || pathname.startsWith("/admin") || pathname.startsWith("/auth") || pathname.startsWith("/accept-invitation");

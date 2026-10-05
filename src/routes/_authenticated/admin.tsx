@@ -197,6 +197,7 @@ type MemberRow = {
   first_name: string; last_name: string; email: string; organization: string;
   title: string; entity: "prsc" | "dis" | "both"; role: "board_member" | "advisor"; why_you: string;
 };
+type StagedRow = MemberRow & { linkedin_url: string; background: string };
 
 const emptyInvite: InviteEmailReview = {
   first_name: "",
@@ -209,8 +210,8 @@ const emptyInvite: InviteEmailReview = {
   why_you: "",
 };
 
-const LIST_HEADERS = "first_name,last_name,email,organization,title,entity,role,why_you";
-const LIST_TEMPLATE = `${LIST_HEADERS}\nJane,Doe,jane@example.com,Example Group,Managing Partner,both,advisor,"Two sentences on why this person was chosen."\n`;
+const LIST_HEADERS = "first_name,last_name,email,organization,title,entity,role,linkedin_url,background,why_you";
+const LIST_TEMPLATE = `${LIST_HEADERS}\nJane,Doe,jane@example.com,Example Group,Managing Partner,both,advisor,https://www.linkedin.com/in/janedoe,"Paste their LinkedIn About and Experience text here. Leave why_you blank to have it drafted.",\n`;
 
 function splitCsvLine(line: string) {
   const out: string[] = [];
@@ -230,12 +231,25 @@ function splitCsvLine(line: string) {
   return out.map((v) => v.trim());
 }
 
+// Split CSV into records, keeping line breaks inside quoted cells (pasted LinkedIn text often has them).
+function splitCsvRecords(text: string) {
+  const records: string[] = [];
+  let cur = "";
+  let quoted = false;
+  for (const ch of text.replace(/\r\n?/g, "\n")) {
+    if (ch === '"') quoted = !quoted;
+    if (ch === "\n" && !quoted) { records.push(cur); cur = ""; } else cur += ch;
+  }
+  records.push(cur);
+  return records.filter((l) => l.trim().length > 0);
+}
+
 function normalizeKey(key: string) {
   return key.trim().toLowerCase().replace(/[^a-z]+/g, "_").replace(/^_|_$/g, "");
 }
 
-function parseMemberList(text: string): { rows: MemberRow[]; errors: string[] } {
-  const lines = text.split(/\r?\n/).filter((l) => l.trim().length > 0);
+function parseMemberList(text: string): { rows: StagedRow[]; errors: string[] } {
+  const lines = splitCsvRecords(text);
   const errors: string[] = [];
   if (lines.length < 2) return { rows: [], errors: ["The file needs a header row and at least one member."] };
 
@@ -244,13 +258,15 @@ function parseMemberList(text: string): { rows: MemberRow[]; errors: string[] } 
     first: "first_name", firstname: "first_name", last: "last_name", lastname: "last_name",
     email_address: "email", company: "organization", org: "organization",
     designation: "entity", entity_designation: "entity", why: "why_you", why_they_were_chosen: "why_you",
+    linkedin: "linkedin_url", linkedin_profile: "linkedin_url",
+    bio: "background", about: "background", experience: "background", linkedin_bio: "background", linkedin_background: "background",
   };
   const keys = headers.map((h) => alias[h] ?? h);
-  const required = ["first_name", "last_name", "email", "organization", "entity", "role", "why_you"];
+  const required = ["first_name", "last_name", "email", "organization", "entity", "role"];
   const missing = required.filter((r) => !keys.includes(r));
   if (missing.length) return { rows: [], errors: [`Missing column${missing.length > 1 ? "s" : ""}: ${missing.join(", ")}`] };
 
-  const rows: MemberRow[] = [];
+  const rows: StagedRow[] = [];
   lines.slice(1).forEach((line, index) => {
     const cells = splitCsvLine(line);
     const record: Record<string, string> = {};
@@ -267,12 +283,15 @@ function parseMemberList(text: string): { rows: MemberRow[]; errors: string[] } 
     if (!record["organization"]) return errors.push(`${label}: organization is required.`);
     if (!entity) return errors.push(`${label}: designation must be PRSC, DIS, or Both.`);
     if (!role) return errors.push(`${label}: role must be Board member or Advisor.`);
-    if ((record["why_you"] ?? "").trim().length < 20) return errors.push(`${label}: “why you” needs at least 20 characters.`);
+    const why = (record["why_you"] ?? "").trim();
+    const background = (record["background"] ?? "").trim().slice(0, 8000);
+    if (why.length < 20 && background.length < 40) return errors.push(`${label}: add a “why you” note (20+ characters) or LinkedIn background (40+ characters) to draft one.`);
 
     rows.push({
       first_name: record["first_name"], last_name: record["last_name"], email: record["email"],
       organization: record["organization"], title: record["title"] ?? "",
-      entity, role, why_you: record["why_you"].trim(),
+      entity, role, why_you: why,
+      linkedin_url: (record["linkedin_url"] ?? "").slice(0, 300), background,
     });
   });
 
@@ -342,7 +361,10 @@ function Admin() {
   const [selectedEmailIds, setSelectedEmailIds] = useState<string[]>([]);
   const [inquiryDraft, setInquiryDraft] = useState<Record<string, string>>({});
   const listRef = useRef<HTMLInputElement>(null);
-  const [importRows, setImportRows] = useState<MemberRow[]>([]);
+  const [importRows, setImportRows] = useState<StagedRow[]>([]);
+  const [batchDrafting, setBatchDrafting] = useState(false);
+  const [batchProgress, setBatchProgress] = useState("");
+  const [rowDrafting, setRowDrafting] = useState("");
   const [importErrors, setImportErrors] = useState<string[]>([]);
   const [importStatus, setImportStatus] = useState("");
   const [importResults, setImportResults] = useState<{ email: string; ok: boolean; message: string }[]>([]);
@@ -362,6 +384,42 @@ function Admin() {
     );
   }
 
+  function updateImportRow(i: number, patch: Partial<StagedRow>) {
+    setImportRows((rows) => rows.map((r, idx) => (idx === i ? { ...r, ...patch } : r)));
+  }
+
+  async function draftNote(r: StagedRow) {
+    const { draft: text } = await (preview ? draftWhyYouPreview : draftWhyYou)({ data: {
+      first_name: r.first_name, last_name: r.last_name, organization: r.organization, title: r.title,
+      entity: r.entity, role: r.role, linkedin_url: r.linkedin_url, background: r.background,
+    } });
+    return text;
+  }
+
+  async function draftRow(i: number) {
+    const r = importRows[i];
+    setRowDrafting(r.email);
+    try { updateImportRow(i, { why_you: await draftNote(r) }); }
+    catch (err) { setBatchProgress(`${r.first_name}: ${(err as Error).message}`); }
+    finally { setRowDrafting(""); }
+  }
+
+  async function draftAllNotes() {
+    const targets = importRows.map((r, i) => ({ r, i })).filter(({ r }) => r.why_you.trim().length < 20 && r.background.trim().length >= 40);
+    setBatchDrafting(true);
+    let done = 0, failed = 0;
+    for (const { r, i } of targets) {
+      setBatchProgress(`Drafting note ${done + failed + 1} of ${targets.length} for ${r.first_name} ${r.last_name}…`);
+      try { const text = await draftNote(r); updateImportRow(i, { why_you: text }); done += 1; }
+      catch (err) {
+        failed += 1;
+        if (/credits|Too many/.test((err as Error).message)) { setBatchProgress((err as Error).message); break; }
+      }
+    }
+    setBatchDrafting(false);
+    setBatchProgress(`${done} note${done === 1 ? "" : "s"} drafted${failed ? `, ${failed} failed — use Draft with AI to retry` : ""}. Review each before sending.`);
+  }
+
   async function runImport() {
     if (!importRows.length) return;
     if (preview) {
@@ -370,7 +428,8 @@ function Admin() {
     }
     setImporting(true);
     try {
-      const res = await importPortalMembers({ data: { rows: importRows, send_invitations: sendOnImport } });
+      const rows: MemberRow[] = importRows.map(({ linkedin_url: _l, background: _b, ...rest }) => rest);
+      const res = await importPortalMembers({ data: { rows, send_invitations: sendOnImport } });
       setImportResults(res.results);
       setImportStatus(`${res.added} added${res.failed ? `, ${res.failed} could not be added` : ""}.`);
       setImportRows([]);
@@ -828,13 +887,14 @@ function Admin() {
                 </div>
                 <InfoTip
                   title="Upload a member list"
-                  body="Add several board members and advisors at once from a spreadsheet saved as CSV. Download the template, fill in one row per person, then upload it. Everyone is reviewed before anything is saved. Leave the invitation box unchecked to add people quietly now and send their welcome emails later from Compose & Send."
+                  body="Add many board members and advisors at once from a spreadsheet saved as CSV. Paste each person's LinkedIn About/Experience text into the background column and leave why_you blank — then click Generate AI notes for all. Review and edit each note, then add everyone and send all invitations in one click."
                 />
               </div>
 
               <p className="mt-5 text-base leading-7 text-ivory/60">
-                One row per person, with columns for first name, last name, email, organization, title, designation
-                (PRSC, DIS, or Both), role (Board member or Advisor), and the private “why you” note.
+                One row per person: first name, last name, email, organization, title, designation (PRSC, DIS, or Both),
+                role (Board member or Advisor), LinkedIn URL, LinkedIn background, and an optional “why you” note — leave
+                it blank to have it drafted for you.
               </p>
 
               <div className="mt-6 flex flex-wrap items-center gap-3">
@@ -857,22 +917,38 @@ function Admin() {
               </div>
 
               {importRows.length > 0 && (
-                <div className="mt-6 border border-gold/15">
-                  <div className="max-h-64 overflow-y-auto">
-                    <table className="w-full text-base">
-                      <tbody>
-                        {importRows.map((r) => (
-                          <tr key={r.email} className="border-b border-ivory/10 last:border-b-0">
-                            <td className="px-4 py-2.5">{r.first_name} {r.last_name}</td>
-                            <td className="px-4 py-2.5 text-ivory/60">{r.email}</td>
-                            <td className="px-4 py-2.5 text-ivory/60">{r.organization}</td>
-                            <td className="px-4 py-2.5 uppercase text-gold">{r.entity}</td>
-                            <td className="px-4 py-2.5 text-ivory/60">{r.role === "advisor" ? "Advisor" : "Board member"}</td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
+                <div className="mt-6 flex flex-wrap items-center gap-3">
+                  <Button type="button" variant="outline" disabled={batchDrafting || !importRows.some((r) => r.why_you.trim().length < 20 && r.background.trim().length >= 40)} className="rounded-none text-base" onClick={() => void draftAllNotes()}>
+                    {batchDrafting ? "Drafting…" : `Generate AI notes for all (${importRows.filter((r) => r.why_you.trim().length < 20 && r.background.trim().length >= 40).length})`}
+                  </Button>
+                  {batchProgress && <span className="text-base text-ivory/60">{batchProgress}</span>}
+                </div>
+              )}
+
+              {importRows.length > 0 && (
+                <div className="mt-6 space-y-4">
+                  {importRows.map((r, i) => (
+                    <div key={r.email} className="border border-gold/15 p-4">
+                      <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-base">
+                        <span className="font-medium">{r.first_name} {r.last_name}</span>
+                        <span className="text-ivory/60">{r.email}</span>
+                        <span className="text-ivory/60">{[r.title, r.organization].filter(Boolean).join(", ")}</span>
+                        <span className="uppercase text-gold">{r.entity}</span>
+                        <span className="text-ivory/60">{r.role === "advisor" ? "Advisor" : "Board member"}</span>
+                        <Button type="button" variant="outline" size="sm" disabled={batchDrafting || rowDrafting === r.email || r.background.trim().length < 40} className="ml-auto rounded-none" onClick={() => void draftRow(i)}>
+                          {rowDrafting === r.email ? "Drafting…" : r.why_you.trim() ? "Regenerate" : "Draft with AI"}
+                        </Button>
+                      </div>
+                      <textarea
+                        value={r.why_you}
+                        onChange={(e) => updateImportRow(i, { why_you: e.target.value })}
+                        rows={4}
+                        placeholder={r.background.trim().length >= 40 ? "Click Generate to draft this note from their LinkedIn background." : "Add a background column in the spreadsheet or write the note here."}
+                        className="mt-3 w-full border border-ivory/15 bg-transparent p-3 text-base leading-7 text-ivory/85 focus:border-gold/50 focus:outline-none"
+                      />
+                      {r.why_you.trim().length > 0 && r.why_you.trim().length < 20 && <p className="mt-1 text-sm text-amber-300/80">Needs at least 20 characters.</p>}
+                    </div>
+                  ))}
                 </div>
               )}
 
@@ -895,8 +971,8 @@ function Admin() {
                     />
                     Send welcome invitations now
                   </label>
-                  <Button type="button" disabled={importing} className="rounded-none bg-gold text-base text-navy hover:bg-gold-light hover:text-navy" onClick={runImport}>
-                    {importing ? "Uploading…" : `Add ${importRows.length} member${importRows.length === 1 ? "" : "s"}`}
+                  <Button type="button" disabled={importing || batchDrafting || importRows.some((r) => r.why_you.trim().length < 20)} className="rounded-none bg-gold text-base text-navy hover:bg-gold-light hover:text-navy" onClick={runImport}>
+                    {importing ? "Uploading…" : `${sendOnImport ? "Add & invite" : "Add"} ${importRows.length} member${importRows.length === 1 ? "" : "s"}`}
                   </Button>
                   <Button type="button" variant="ghost" className="rounded-none text-base text-ivory/60" onClick={clearImport}>
                     <Trash2 className="mr-2 h-4 w-4" /> Discard
