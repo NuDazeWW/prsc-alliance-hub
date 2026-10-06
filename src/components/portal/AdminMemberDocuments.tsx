@@ -8,6 +8,9 @@ import {
   deleteMemberDocument,
   listDocumentsForAdmin,
   releaseMemberDocuments,
+  confirmExternalSignature,
+  prepareSignedCopy,
+  sendSignedCopy,
 } from "@/lib/portal.functions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -108,6 +111,39 @@ export function AdminMemberDocuments({ memberId, memberName, preview }: Props) {
     }
   }
 
+  const [composer, setComposer] = useState<null | { ackId: string; previewUrl: string | null; to: string; subject: string; body: string; sending: boolean; msg: string }>(null);
+  const [working, setWorking] = useState<string>("");
+  const requested = new Set<string>((docs.data as any)?.hardCopyRequests ?? []);
+  const contact = (docs.data as any)?.contact ?? { email: "", firstName: "" };
+  async function toggleExternal(documentId: string, confirmed: boolean) {
+    if (preview) return setStatus("Preview mode: check-offs save on the live admin page.");
+    setWorking(documentId);
+    try { await confirmExternalSignature({ data: { member_id: memberId, document_id: documentId, confirmed } }); await docs.refetch(); }
+    catch (e) { setStatus(e instanceof Error ? e.message : "Could not update"); }
+    finally { setWorking(""); }
+  }
+  async function openComposer(ackId: string, docTitle: string) {
+    if (preview) return setStatus("Preview mode: signed copies are prepared on the live admin page.");
+    setWorking(ackId);
+    try {
+      const r = await prepareSignedCopy({ data: { ack_id: ackId } });
+      const first = contact.firstName || memberName.split(" ")[0] || "there";
+      setComposer({
+        ackId, previewUrl: r.previewUrl, to: contact.email, sending: false, msg: "",
+        subject: `Your signed copy: ${docTitle}`,
+        body: `Hi ${first},\n\nAs requested, here is your signed copy of ${docTitle}. It includes a signature certificate showing your name, initials, and the date and time you completed it in the portal.\n\nPlease keep it for your records. If you have any questions, just reply to info@readinessterminal.com.`,
+      });
+    } catch (e) { setStatus(e instanceof Error ? e.message : "Could not prepare the signed copy"); }
+    finally { setWorking(""); }
+  }
+  async function sendComposer() {
+    if (!composer) return;
+    setComposer({ ...composer, sending: true, msg: "" });
+    try {
+      await sendSignedCopy({ data: { ack_id: composer.ackId, to: composer.to, subject: composer.subject, body: composer.body } });
+      setComposer(null); setStatus("Signed copy emailed."); await docs.refetch();
+    } catch (e) { setComposer({ ...composer, sending: false, msg: e instanceof Error ? e.message : "Could not send" }); }
+  }
   const list = docs.data?.documents ?? [];
   const acks = docs.data?.acknowledgements ?? [];
   const selectCls =
@@ -250,6 +286,23 @@ export function AdminMemberDocuments({ memberId, memberName, preview }: Props) {
                 )}
                 {ack?.signature_data && <img src={ack.signature_data} alt={`Signature of ${ack.signed_name}`} className="mt-2 h-16 bg-ivory p-1" />}
                 {!ack && d.action !== "boldsign" && d.action !== "docusign" && <p className="mt-1 text-base text-ivory/45">Not completed yet</p>}
+                {(d.action === "boldsign" || d.action === "docusign") && (
+                  <label className="mt-2 flex items-center gap-2 text-base text-ivory/80">
+                    <input type="checkbox" className="h-4 w-4 accent-[var(--gold)]" disabled={working === d.id}
+                      checked={ack?.kind === "external_confirmed"}
+                      onChange={(e) => toggleExternal(d.id, e.target.checked)} />
+                    Signed in BoldSign (confirmed by admin)
+                  </label>
+                )}
+                {ack && ack.kind !== "external_confirmed" && d.file_path && requested.has(d.id) && (
+                  <div className="mt-2 flex flex-wrap items-center gap-3">
+                    <span className="text-base text-gold">Member requested a copy</span>
+                    {ack.signed_copy_sent_at && <span className="text-base text-ivory/55">Sent {new Date(ack.signed_copy_sent_at).toLocaleDateString()}</span>}
+                    <Button type="button" variant="outline" size="sm" disabled={working === ack.id} onClick={() => openComposer(ack.id, d.title)}>
+                      {working === ack.id ? "Preparing…" : ack.signed_copy_sent_at ? "Send signed copy again" : "Prepare & email signed copy"}
+                    </Button>
+                  </div>
+                )}
               </div>
               <button
                 type="button"
@@ -263,6 +316,21 @@ export function AdminMemberDocuments({ memberId, memberName, preview }: Props) {
           );
         })}
       </div>
+      {composer && (
+        <div className="mt-6 border border-gold/30 bg-navy-deep/60 p-5">
+          <p className="text-base uppercase tracking-widest text-gold">Email signed copy</p>
+          {composer.previewUrl && <a href={composer.previewUrl} target="_blank" rel="noreferrer" className="mt-2 inline-block text-base text-gold underline">Open the signed PDF to check it</a>}
+          <label className="mt-4 block text-base text-ivory/70">To<Input className="mt-1" value={composer.to} onChange={(e) => setComposer({ ...composer, to: e.target.value })} /></label>
+          <label className="mt-3 block text-base text-ivory/70">Subject<Input className="mt-1" value={composer.subject} onChange={(e) => setComposer({ ...composer, subject: e.target.value })} /></label>
+          <label className="mt-3 block text-base text-ivory/70">Message<Textarea rows={7} className="mt-1" value={composer.body} onChange={(e) => setComposer({ ...composer, body: e.target.value })} /></label>
+          <p className="mt-2 text-base text-ivory/55">The signed PDF is included as a secure download button (valid 7 days).</p>
+          {composer.msg && <p className="mt-2 text-base text-destructive">{composer.msg}</p>}
+          <div className="mt-4 flex gap-3">
+            <Button type="button" disabled={composer.sending || !composer.to} onClick={sendComposer}>{composer.sending ? "Sending…" : "Send to member"}</Button>
+            <Button type="button" variant="outline" onClick={() => setComposer(null)}>Cancel</Button>
+          </div>
+        </div>
+      )}
     </section>
   );
 }

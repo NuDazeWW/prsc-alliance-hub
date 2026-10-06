@@ -139,6 +139,7 @@ export type Database = {
       portal_document_acknowledgements: {
         Row: {
           acknowledged_at: string
+          confirmed_by: string | null
           consent: boolean
           document_id: string
           id: string
@@ -147,11 +148,14 @@ export type Database = {
           kind: string
           member_id: string
           signature_data: string | null
+          signed_copy_path: string | null
+          signed_copy_sent_at: string | null
           signed_name: string | null
           user_agent: string | null
         }
         Insert: {
           acknowledged_at?: string
+          confirmed_by?: string | null
           consent?: boolean
           document_id: string
           id?: string
@@ -160,11 +164,14 @@ export type Database = {
           kind?: string
           member_id: string
           signature_data?: string | null
+          signed_copy_path?: string | null
+          signed_copy_sent_at?: string | null
           signed_name?: string | null
           user_agent?: string | null
         }
         Update: {
           acknowledged_at?: string
+          confirmed_by?: string | null
           consent?: boolean
           document_id?: string
           id?: string
@@ -173,6 +180,8 @@ export type Database = {
           kind?: string
           member_id?: string
           signature_data?: string | null
+          signed_copy_path?: string | null
+          signed_copy_sent_at?: string | null
           signed_name?: string | null
           user_agent?: string | null
         }

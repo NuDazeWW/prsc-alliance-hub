@@ -1,0 +1,3 @@
+ALTER TABLE public.portal_document_acknowledgements DROP CONSTRAINT IF EXISTS portal_document_acknowledgements_kind_check;
+ALTER TABLE public.portal_document_acknowledgements ADD CONSTRAINT portal_document_acknowledgements_kind_check CHECK (kind IN ('acknowledged','signed','external_confirmed'));
+ALTER TABLE public.portal_document_acknowledgements ADD COLUMN IF NOT EXISTS confirmed_by uuid, ADD COLUMN IF NOT EXISTS signed_copy_path text, ADD COLUMN IF NOT EXISTS signed_copy_sent_at timestamptz;

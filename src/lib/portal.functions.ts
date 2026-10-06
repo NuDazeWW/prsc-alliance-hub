@@ -591,8 +591,8 @@ async function maybeCompletePackage(member: { id: string; email: string; first_n
   if (!docs.length) return;
   const { data: acks } = await supabaseAdmin.from("portal_document_acknowledgements").select("document_id").eq("member_id", member.id);
   const done = new Set((acks ?? []).map((a: { document_id: string }) => a.document_id));
-  // BoldSign/DocuSign documents are completed outside the portal; only in-portal actions gate completion.
-  const required = docs.filter((d) => d.action !== "boldsign" && d.action !== "docusign");
+  // BoldSign/DocuSign documents count once the admin manually confirms them.
+  const required = docs;
   if (!required.every((d) => done.has(d.id))) return;
   await supabaseAdmin
     .from("portal_members")
@@ -732,10 +732,24 @@ export const listDocumentsForAdmin = createServerFn({ method: "GET" })
     }
     let ackQuery = context.supabase
       .from("portal_document_acknowledgements")
-      .select("document_id, member_id, initials, kind, signed_name, signature_data, ip_address, acknowledged_at");
+      .select("id, document_id, member_id, initials, kind, signed_name, signature_data, ip_address, acknowledged_at, signed_copy_path, signed_copy_sent_at");
     if (data.member_id) ackQuery = ackQuery.eq("member_id", data.member_id);
     const { data: acks } = await ackQuery;
+    let hardCopyRequests: string[] = [];
+    if (data.member_id) {
+      const { data: reqs } = await context.supabase
+        .from("portal_activity").select("metadata").eq("member_id", data.member_id).eq("event_type", "hard_copy_requested");
+      hardCopyRequests = (reqs ?? []).map((r: any) => r.metadata?.document_id).filter(Boolean);
+    }
+    let contact = { email: "", firstName: "" };
+    if (data.member_id) {
+      const { data: m } = await context.supabase.from("portal_members").select("email, first_name").eq("id", data.member_id).maybeSingle();
+      const { data: pr } = await context.supabase.from("portal_profiles").select("preferred_email").eq("member_id", data.member_id).maybeSingle();
+      contact = { email: pr?.preferred_email || m?.email || "", firstName: m?.first_name?.trim() || "" };
+    }
     return {
+      hardCopyRequests,
+      contact,
       documents,
       acknowledgements: acks ?? [],
       releasedAt: member?.documents_released_at ?? null,
@@ -828,6 +842,109 @@ export const deleteMemberDocument = createServerFn({ method: "POST" })
     await assertAdmin(context);
     const { error } = await context.supabase.from("portal_documents").delete().eq("id", data.id);
     if (error) throw error;
+    return { ok: true };
+  });
+
+export const confirmExternalSignature = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input) => z.object({ member_id: z.string().uuid(), document_id: z.string().uuid(), confirmed: z.boolean() }).parse(input))
+  .handler(async ({ context, data }) => {
+    await assertAdmin(context);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    if (!data.confirmed) {
+      await supabaseAdmin.from("portal_document_acknowledgements").delete()
+        .eq("member_id", data.member_id).eq("document_id", data.document_id).eq("kind", "external_confirmed");
+      await supabaseAdmin.from("portal_members").update({ documents_completed_at: null }).eq("id", data.member_id);
+      return { ok: true };
+    }
+    const { error } = await supabaseAdmin.from("portal_document_acknowledgements").insert({
+      document_id: data.document_id, member_id: data.member_id, initials: "ADMIN",
+      kind: "external_confirmed", consent: true, confirmed_by: context.userId,
+    });
+    if (error && error.code !== "23505") throw error;
+    await supabaseAdmin.from("portal_activity").insert({
+      member_id: data.member_id, actor_user_id: context.userId,
+      event_type: "boldsign_confirmed", metadata: { document_id: data.document_id },
+    });
+    const { data: member } = await supabaseAdmin.from("portal_members")
+      .select("id, email, first_name, last_name, entity, role, documents_completed_at").eq("id", data.member_id).single();
+    if (member) await maybeCompletePackage(member as any);
+    return { ok: true };
+  });
+
+export const prepareSignedCopy = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input) => z.object({ ack_id: z.string().uuid() }).parse(input))
+  .handler(async ({ context, data }) => {
+    await assertAdmin(context);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { data: ack } = await supabaseAdmin.from("portal_document_acknowledgements").select("*").eq("id", data.ack_id).single();
+    if (!ack) throw new Error("Completion record not found");
+    const { data: doc } = await supabaseAdmin.from("portal_documents").select("*").eq("id", ack.document_id).single();
+    if (!doc?.file_path) throw new Error("This document has no portal PDF to copy");
+    const { data: member } = await supabaseAdmin.from("portal_members").select("email, first_name, last_name").eq("id", ack.member_id).single();
+    const { data: file, error: dlErr } = await supabaseAdmin.storage.from(DOCUMENT_BUCKET).download(doc.file_path);
+    if (dlErr || !file) throw new Error("Could not load the original PDF");
+    const { PDFDocument, StandardFonts, rgb } = await import("pdf-lib");
+    const pdf = await PDFDocument.load(await file.arrayBuffer(), { ignoreEncryption: true });
+    const font = await pdf.embedFont(StandardFonts.Helvetica);
+    const bold = await pdf.embedFont(StandardFonts.HelveticaBold);
+    const page = pdf.addPage([612, 792]);
+    const navy = rgb(0.06, 0.1, 0.2);
+    const clean = (t: string) => t.replace(/[^\x20-\x7E]/g, "-");
+    let y = 720;
+    const line = (t: string, f = font, size = 11) => { page.drawText(clean(t), { x: 60, y, size, font: f, color: navy }); y -= size + 10; };
+    line("Signature Certificate", bold, 20); y -= 6;
+    line("Partnership Readiness Standards Council / Decision Intelligence Systems", font, 10); y -= 14;
+    const fullName = `${member?.first_name ?? ""} ${member?.last_name ?? ""}`.trim();
+    line(`Document: ${doc.title}`);
+    line(`Member: ${fullName} (${member?.email ?? ""})`);
+    line(`Action: ${ack.kind === "signed" ? "Signed electronically in the portal" : "Read and acknowledged in the portal"}`);
+    if (ack.signed_name) line(`Signed name: ${ack.signed_name}`);
+    line(`Initials: ${ack.initials}`);
+    line(`Date and time (UTC): ${new Date(ack.acknowledged_at).toISOString().replace("T", " ").slice(0, 19)}`);
+    if (ack.ip_address) line(`IP address: ${ack.ip_address}`);
+    if (ack.consent) line("Consent to sign electronically: Yes");
+    if (ack.signature_data?.startsWith("data:image/png;base64,")) {
+      const png = await pdf.embedPng(ack.signature_data.split(",")[1]);
+      const scale = Math.min(240 / png.width, 90 / png.height);
+      y -= 100;
+      page.drawText("Signature:", { x: 60, y: y + 100, size: 11, font: bold, color: navy });
+      page.drawImage(png, { x: 60, y, width: png.width * scale, height: png.height * scale });
+    }
+    const bytes = await pdf.save();
+    const path = `${ack.member_id}/signed/${ack.id}.pdf`;
+    const { error: upErr } = await supabaseAdmin.storage.from(DOCUMENT_BUCKET)
+      .upload(path, new Blob([bytes as BlobPart], { type: "application/pdf" }), { upsert: true, contentType: "application/pdf" });
+    if (upErr) throw upErr;
+    await supabaseAdmin.from("portal_document_acknowledgements").update({ signed_copy_path: path }).eq("id", ack.id);
+    const { data: signed } = await supabaseAdmin.storage.from(DOCUMENT_BUCKET).createSignedUrl(path, 900);
+    return { ok: true, previewUrl: signed?.signedUrl ?? null };
+  });
+
+export const sendSignedCopy = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input) => z.object({
+    ack_id: z.string().uuid(),
+    to: z.string().trim().email(),
+    subject: z.string().trim().min(1).max(200),
+    body: z.string().trim().min(1).max(4000),
+  }).parse(input))
+  .handler(async ({ context, data }) => {
+    await assertAdmin(context);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { data: ack } = await supabaseAdmin.from("portal_document_acknowledgements").select("id, member_id, signed_copy_path").eq("id", data.ack_id).single();
+    if (!ack?.signed_copy_path) throw new Error("Prepare the signed copy first");
+    const { data: signed } = await supabaseAdmin.storage.from(DOCUMENT_BUCKET).createSignedUrl(ack.signed_copy_path, 60 * 60 * 24 * 7, { download: true });
+    if (!signed?.signedUrl) throw new Error("Could not create the download link");
+    const { sendPortalEmail, founderSignature } = await import("@/lib/portal-notify.server");
+    await sendPortalEmail(data.to, {
+      subject: data.subject, eyebrow: "Your signed copy", heading: data.subject, body: data.body,
+      ctaLabel: "Download Your Signed Copy", ctaUrl: signed.signedUrl,
+      ctaSubtext: "This secure link expires in 7 days.", signatures: founderSignature(),
+    }, "signed-copy-member");
+    await supabaseAdmin.from("portal_document_acknowledgements").update({ signed_copy_sent_at: new Date().toISOString() }).eq("id", ack.id);
+    await supabaseAdmin.from("portal_activity").insert({ member_id: ack.member_id, actor_user_id: context.userId, event_type: "signed_copy_sent", metadata: { ack_id: ack.id } });
     return { ok: true };
   });
 
