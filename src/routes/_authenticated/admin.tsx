@@ -1600,12 +1600,12 @@ function Admin() {
             </div>
 
             <div className="border-t border-gold/20 px-5 py-4 sm:px-7">
-              <p className="mb-3 text-sm text-ivory/50">The access button is disabled in this preview. A test sends only to admin@readinessterminal.com and does not create a member.</p>
+              <p className="mb-3 text-sm text-ivory/50">The access button is disabled in this preview. A test goes to the email entered above and does not create an account. Use Send invitation for a working link.</p>
               <div className="flex flex-wrap items-center justify-end gap-3">
                 {inviteTestStatus && <p aria-live="polite" className="mr-auto text-base text-ivory/70">{inviteTestStatus}</p>}
                 <Button type="button" className="rounded-none border border-gold/40 bg-transparent text-base text-ivory hover:bg-gold/10 hover:text-gold" onClick={() => setInvitePreviewOpen(false)}>Keep editing</Button>
                 <Button type="button" disabled={inviteTestSending || preview} className="rounded-none bg-gold text-base text-navy hover:bg-gold-light hover:text-navy" onClick={() => void sendInviteTest()}>
-                  <Send className="mr-2 h-4 w-4" /> {inviteTestSending ? "Sending test…" : "Send test to admin"}
+                  <Send className="mr-2 h-4 w-4" /> {inviteTestSending ? "Sending test…" : "Send test to this email"}
                 </Button>
               </div>
             </div>

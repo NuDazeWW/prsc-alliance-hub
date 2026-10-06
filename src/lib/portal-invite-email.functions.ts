@@ -69,7 +69,7 @@ export const sendInviteEmailTest = createServerFn({ method: "POST" })
 
     const result = await sendLovableEmail(
       {
-        to: ADMIN_EMAIL,
+        to: data.email.toLowerCase(),
         from: INVITE_EMAIL_FROM,
         sender_domain: INVITE_EMAIL_SENDER_DOMAIN,
         reply_to: INVITE_EMAIL_REPLY_TO,
