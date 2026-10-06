@@ -636,7 +636,12 @@ export type Database = {
       }
     }
     Enums: {
-      app_role: "admin" | "board_member" | "advisor"
+      app_role:
+        | "admin"
+        | "board_member"
+        | "advisor"
+        | "prsc_board_dis_advisor"
+        | "prsc_advisor_dis_board"
       portal_entity: "prsc" | "dis" | "both"
       portal_inquiry_status: "open" | "resolved"
       portal_member_status: "invited" | "active" | "revoked"
@@ -772,7 +777,13 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
-      app_role: ["admin", "board_member", "advisor"],
+      app_role: [
+        "admin",
+        "board_member",
+        "advisor",
+        "prsc_board_dis_advisor",
+        "prsc_advisor_dis_board",
+      ],
       portal_entity: ["prsc", "dis", "both"],
       portal_inquiry_status: ["open", "resolved"],
       portal_member_status: ["invited", "active", "revoked"],
