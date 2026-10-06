@@ -501,26 +501,60 @@ export const updateInquiry = createServerFn({ method: "POST" })
 /* ---------------- Member documents ---------------- */
 
 const DOCUMENT_BUCKET = "member-documents";
+const ADMIN_EMAIL = "admin@readinessterminal.com";
 
 export type PortalDocumentRecord = {
   id: string;
   member_id: string | null;
   category: "sign" | "read";
-  action: "docusign" | "download" | "acknowledge";
+  action: "docusign" | "download" | "acknowledge" | "esign" | "boldsign";
   title: string;
   description: string;
   external_url: string | null;
   file_path: string | null;
   sort_order: number;
   created_at: string;
+  audience_entity: "prsc" | "dis" | "both" | null;
+  audience_role: "board_member" | "advisor" | null;
 };
+
+export type PortalCompletion = {
+  document_id: string;
+  kind: "acknowledged" | "signed";
+  initials: string;
+  signed_name: string | null;
+  acknowledged_at: string;
+};
+
+type DocMember = { id: string; entity: string; role: string };
+
+function appliesTo(doc: PortalDocumentRecord, m: DocMember) {
+  if (doc.member_id) return doc.member_id === m.id;
+  if (doc.audience_entity && doc.audience_entity !== "both" && m.entity !== "both" && doc.audience_entity !== m.entity) return false;
+  if (doc.audience_entity === "both" && m.entity !== "both") return false;
+  if (doc.audience_role) {
+    const mixed = m.role === "prsc_board_dis_advisor" || m.role === "prsc_advisor_dis_board";
+    if (!mixed && doc.audience_role !== m.role) return false;
+  }
+  return true;
+}
+
+async function applicableDocuments(supabase: any, member: DocMember) {
+  const { data } = await supabase
+    .from("portal_documents")
+    .select("*")
+    .or(`member_id.is.null,member_id.eq.${member.id}`)
+    .order("sort_order", { ascending: true })
+    .order("created_at", { ascending: true });
+  return ((data ?? []) as PortalDocumentRecord[]).filter((d) => appliesTo(d, member));
+}
 
 async function signDocumentUrls(documents: PortalDocumentRecord[]) {
   const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
   return Promise.all(
     documents.map(async (doc) => {
       if (!doc.file_path) return { ...doc, url: doc.external_url };
-      const { data } = await supabaseAdmin.storage.from(DOCUMENT_BUCKET).createSignedUrl(doc.file_path, 3600);
+      const { data } = await supabaseAdmin.storage.from(DOCUMENT_BUCKET).createSignedUrl(doc.file_path, 900);
       return { ...doc, url: data?.signedUrl ?? null };
     }),
   );
@@ -530,42 +564,151 @@ export const getMyDocuments = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
     const { data: member } = await context.supabase
-      .from("portal_members").select("id").eq("user_id", context.userId).maybeSingle();
-    if (!member) return { memberId: null, documents: [], acknowledged: [] as string[] };
-    const { data: documents } = await context.supabase
-      .from("portal_documents")
-      .select("*")
-      .or(`member_id.is.null,member_id.eq.${member.id}`)
-      .order("sort_order", { ascending: true })
-      .order("created_at", { ascending: true });
+      .from("portal_members").select("id, entity, role, documents_released_at").eq("user_id", context.userId).maybeSingle();
+    if (!member) return { memberId: null, released: false, documents: [], acknowledged: [] as string[], completions: [] as PortalCompletion[] };
+    if (!member.documents_released_at) {
+      return { memberId: member.id as string, released: false, documents: [], acknowledged: [] as string[], completions: [] as PortalCompletion[] };
+    }
+    const docs = await applicableDocuments(context.supabase, member as DocMember);
     const { data: acks } = await context.supabase
-      .from("portal_document_acknowledgements").select("document_id").eq("member_id", member.id);
+      .from("portal_document_acknowledgements")
+      .select("document_id, kind, initials, signed_name, acknowledged_at")
+      .eq("member_id", member.id);
+    const completions = (acks ?? []) as PortalCompletion[];
     return {
       memberId: member.id as string,
-      documents: await signDocumentUrls((documents ?? []) as PortalDocumentRecord[]),
-      acknowledged: (acks ?? []).map((a: { document_id: string }) => a.document_id),
+      released: true,
+      documents: await signDocumentUrls(docs),
+      acknowledged: completions.map((a) => a.document_id),
+      completions,
     };
   });
+
+async function maybeCompletePackage(member: { id: string; email: string; first_name: string | null; last_name: string | null; entity: string; role: string; documents_completed_at: string | null }) {
+  const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+  if (member.documents_completed_at) return;
+  const docs = await applicableDocuments(supabaseAdmin, member);
+  if (!docs.length) return;
+  const { data: acks } = await supabaseAdmin.from("portal_document_acknowledgements").select("document_id").eq("member_id", member.id);
+  const done = new Set((acks ?? []).map((a: { document_id: string }) => a.document_id));
+  // BoldSign/DocuSign documents are completed outside the portal; only in-portal actions gate completion.
+  const required = docs.filter((d) => d.action !== "boldsign" && d.action !== "docusign");
+  if (!required.every((d) => done.has(d.id))) return;
+  await supabaseAdmin
+    .from("portal_members")
+    .update({ documents_completed_at: new Date().toISOString(), package_status: "package_ready" })
+    .eq("id", member.id);
+  const { sendPortalEmail, founderSignature } = await import("@/lib/portal-notify.server");
+  const fullName = `${member.first_name ?? ""} ${member.last_name ?? ""}`.trim() || member.email;
+  const list = required.map((d) => `• ${d.title} — ${d.category === "sign" ? "signed" : "acknowledged"}`).join("\n");
+  await sendPortalEmail(
+    ADMIN_EMAIL,
+    {
+      subject: `Documents complete: ${fullName}`,
+      eyebrow: "Package complete",
+      heading: `${fullName} has completed every document.`,
+      body: `All released documents are now complete:\n\n${list}\n\nOpen the member record to review signatures and initials.`,
+      ctaLabel: "Open Administrator Center",
+      ctaUrl: "https://access.prscstandards.org/admin",
+    },
+    "documents-complete-admin",
+  );
+  await sendPortalEmail(
+    member.email,
+    {
+      subject: "Thank you — your documents are complete",
+      eyebrow: "Package complete",
+      heading: `Thank you, ${member.first_name?.trim() || "there"}.`,
+      body: "We've received every document in your package. There's nothing more you need to do right now.\n\nYour signed and acknowledged documents remain available inside your private Welcome Center. If you'd like a hard copy, use the Request a hard copy button on any document.",
+      ctaLabel: "Return to Your Welcome Center",
+      ctaUrl: "https://access.prscstandards.org/portal",
+      signatures: founderSignature(),
+    },
+    "documents-complete-member",
+  );
+}
 
 export const acknowledgeDocument = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input) =>
-    z.object({ document_id: z.string().uuid(), initials: z.string().trim().min(1).max(8) }).parse(input),
+    z
+      .object({
+        document_id: z.string().uuid(),
+        initials: z.string().trim().min(1).max(8),
+        kind: z.enum(["acknowledged", "signed"]).default("acknowledged"),
+        signed_name: z.string().trim().max(160).optional(),
+        signature_data: z.string().max(200000).optional(),
+        consent: z.boolean().default(false),
+      })
+      .parse(input),
   )
   .handler(async ({ context, data }) => {
     const { data: member, error: memberError } = await context.supabase
-      .from("portal_members").select("id").eq("user_id", context.userId).single();
+      .from("portal_members")
+      .select("id, email, first_name, last_name, entity, role, documents_released_at, documents_completed_at")
+      .eq("user_id", context.userId)
+      .single();
     if (memberError || !member) throw new Error("Member profile unavailable");
-    const { error } = await context.supabase
-      .from("portal_document_acknowledgements")
-      .upsert(
-        { document_id: data.document_id, member_id: member.id, initials: data.initials.toUpperCase() },
-        { onConflict: "document_id,member_id" },
-      );
-    if (error) throw error;
+    if (!member.documents_released_at) throw new Error("Documents have not been released yet");
+    const docs = await applicableDocuments(context.supabase, member as DocMember);
+    const doc = docs.find((d) => d.id === data.document_id);
+    if (!doc) throw new Error("Document unavailable");
+    if (data.kind === "signed") {
+      if (!data.signed_name || data.signed_name.length < 2) throw new Error("Type your full legal name to sign");
+      if (!data.signature_data?.startsWith("data:image/png;base64,")) throw new Error("Add your signature");
+      if (!data.consent) throw new Error("Please agree to sign electronically");
+    }
+    const request = getRequest();
+    const ip = request.headers.get("cf-connecting-ip") ?? request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? null;
+    const { error } = await context.supabase.from("portal_document_acknowledgements").insert({
+      document_id: data.document_id,
+      member_id: member.id,
+      initials: data.initials.toUpperCase(),
+      kind: data.kind,
+      signed_name: data.kind === "signed" ? data.signed_name : null,
+      signature_data: data.kind === "signed" ? data.signature_data : null,
+      consent: data.consent,
+      ip_address: ip,
+      user_agent: request.headers.get("user-agent")?.slice(0, 400) ?? null,
+    });
+    if (error && error.code !== "23505") throw error;
     await context.supabase.from("portal_activity").insert({
       member_id: member.id, actor_user_id: context.userId,
-      event_type: "document_acknowledged", metadata: { document_id: data.document_id },
+      event_type: data.kind === "signed" ? "document_signed" : "document_acknowledged",
+      metadata: { document_id: data.document_id, title: doc.title },
+    });
+    await maybeCompletePackage(member as any);
+    return { ok: true };
+  });
+
+export const requestHardCopy = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input) => z.object({ document_id: z.string().uuid(), note: z.string().trim().max(600).default("") }).parse(input))
+  .handler(async ({ context, data }) => {
+    const { data: member } = await context.supabase
+      .from("portal_members").select("id, email, first_name, last_name, entity, role, documents_released_at").eq("user_id", context.userId).single();
+    if (!member?.documents_released_at) throw new Error("Documents unavailable");
+    const doc = (await applicableDocuments(context.supabase, member as DocMember)).find((d) => d.id === data.document_id);
+    if (!doc) throw new Error("Document unavailable");
+    const { data: profile } = await context.supabase
+      .from("portal_profiles").select("preferred_email, preferred_phone").eq("member_id", member.id).maybeSingle();
+    const fullName = `${member.first_name ?? ""} ${member.last_name ?? ""}`.trim() || member.email;
+    const { sendPortalEmail } = await import("@/lib/portal-notify.server");
+    await sendPortalEmail(
+      ADMIN_EMAIL,
+      {
+        subject: `Hard copy requested: ${doc.title}`,
+        eyebrow: "Hard copy request",
+        heading: `${fullName} requested a hard copy.`,
+        body: `Document: ${doc.title}\nMember: ${fullName} (${member.email})\nPreferred email: ${profile?.preferred_email || member.email}\nPreferred phone: ${profile?.preferred_phone || "Not provided"}${data.note ? `\n\nNote from the member:\n${data.note}` : ""}\n\nPlease send a hard copy of this document to the member.`,
+        ctaLabel: "Open Administrator Center",
+        ctaUrl: "https://access.prscstandards.org/admin",
+      },
+      "hard-copy-request-admin",
+    );
+    await context.supabase.from("portal_activity").insert({
+      member_id: member.id, actor_user_id: context.userId,
+      event_type: "hard_copy_requested", metadata: { document_id: doc.id, title: doc.title },
     });
     return { ok: true };
   });
@@ -575,13 +718,29 @@ export const listDocumentsForAdmin = createServerFn({ method: "GET" })
   .inputValidator((input) => z.object({ member_id: z.string().uuid().nullable().optional() }).parse(input ?? {}))
   .handler(async ({ context, data }) => {
     await assertAdmin(context);
-    let query = context.supabase.from("portal_documents").select("*").order("created_at", { ascending: false });
-    if (data.member_id) query = query.or(`member_id.is.null,member_id.eq.${data.member_id}`);
-    const { data: documents, error } = await query;
-    if (error) throw error;
-    const { data: acks } = await context.supabase
-      .from("portal_document_acknowledgements").select("document_id, member_id, initials, acknowledged_at");
-    return { documents: (documents ?? []) as PortalDocumentRecord[], acknowledgements: acks ?? [] };
+    let member: (DocMember & { documents_released_at: string | null; documents_completed_at: string | null }) | null = null;
+    let documents: PortalDocumentRecord[];
+    if (data.member_id) {
+      const { data: m } = await context.supabase
+        .from("portal_members").select("id, entity, role, documents_released_at, documents_completed_at").eq("id", data.member_id).maybeSingle();
+      member = m;
+      documents = m ? await applicableDocuments(context.supabase, m) : [];
+    } else {
+      const { data: all, error } = await context.supabase.from("portal_documents").select("*").order("created_at", { ascending: false });
+      if (error) throw error;
+      documents = (all ?? []) as PortalDocumentRecord[];
+    }
+    let ackQuery = context.supabase
+      .from("portal_document_acknowledgements")
+      .select("document_id, member_id, initials, kind, signed_name, signature_data, ip_address, acknowledged_at");
+    if (data.member_id) ackQuery = ackQuery.eq("member_id", data.member_id);
+    const { data: acks } = await ackQuery;
+    return {
+      documents,
+      acknowledgements: acks ?? [],
+      releasedAt: member?.documents_released_at ?? null,
+      completedAt: member?.documents_completed_at ?? null,
+    };
   });
 
 export const createMemberDocument = createServerFn({ method: "POST" })
@@ -591,17 +750,20 @@ export const createMemberDocument = createServerFn({ method: "POST" })
       .object({
         member_id: z.string().uuid().nullable(),
         category: z.enum(["sign", "read"]),
-        action: z.enum(["docusign", "download", "acknowledge"]),
+        action: z.enum(["docusign", "download", "acknowledge", "esign", "boldsign"]),
         title: z.string().trim().min(1).max(200),
         description: z.string().trim().max(600).default(""),
         external_url: z.string().trim().url().max(600).nullable().optional(),
         file_path: z.string().trim().max(400).nullable().optional(),
+        audience_entity: entitySchema.nullable().optional(),
+        audience_role: z.enum(["board_member", "advisor"]).nullable().optional(),
       })
       .parse(input),
   )
   .handler(async ({ context, data }) => {
     await assertAdmin(context);
-    if (!data.external_url && !data.file_path) throw new Error("Provide a signing link or upload a file");
+    if (!data.external_url && !data.file_path) throw new Error("Upload a file or add a BoldSign link");
+    if ((data.action === "esign" || data.action === "acknowledge") && !data.file_path) throw new Error("Upload the file so members can read it in the portal");
     const { error } = await context.supabase.from("portal_documents").insert({
       member_id: data.member_id,
       category: data.category,
@@ -610,37 +772,53 @@ export const createMemberDocument = createServerFn({ method: "POST" })
       description: data.description,
       external_url: data.external_url || null,
       file_path: data.file_path || null,
+      audience_entity: data.member_id ? null : data.audience_entity ?? null,
+      audience_role: data.member_id ? null : data.audience_role ?? null,
       created_by: context.userId,
     });
     if (error) throw error;
+    return { ok: true };
+  });
+
+export const releaseMemberDocuments = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input) => z.object({ member_id: z.string().uuid() }).parse(input))
+  .handler(async ({ context, data }) => {
+    await assertAdmin(context);
+    const { data: member } = await context.supabase
+      .from("portal_members").select("id, email, first_name, entity, role, package_status").eq("id", data.member_id).single();
+    if (!member) throw new Error("Member not found");
+    const docs = await applicableDocuments(context.supabase, member as DocMember);
+    if (!docs.length) throw new Error("Add at least one document before releasing");
+    const { error } = await context.supabase
+      .from("portal_members")
+      .update({
+        documents_released_at: new Date().toISOString(),
+        documents_reminder_sent_at: null,
+        documents_completed_at: null,
+        package_status: "in_preparation",
+      })
+      .eq("id", member.id);
+    if (error) throw error;
+    const toSign = docs.filter((d) => d.category === "sign").length;
+    const toRead = docs.length - toSign;
+    const parts = [toSign ? `${toSign} to review and sign` : "", toRead ? `${toRead} to read and acknowledge` : ""].filter(Boolean).join(" and ");
     const { sendPortalEmail, founderSignature } = await import("@/lib/portal-notify.server");
-    let recipients: { email: string; first_name: string | null }[] = [];
-    if (data.member_id) {
-      const { data: m } = await context.supabase.from("portal_members").select("email, first_name").eq("id", data.member_id).maybeSingle();
-      if (m) recipients = [m];
-    } else {
-      const { data: ms } = await context.supabase.from("portal_members").select("email, first_name").eq("status", "active");
-      recipients = ms ?? [];
-    }
-    const actionText = data.category === "sign" ? "ready for your signature" : "ready for you to review";
-    for (const r of recipients) {
-      const firstName = r.first_name?.trim() || "there";
-      await sendPortalEmail(
-        r.email,
-        {
-          subject: "Your next-step documents are ready",
-          eyebrow: "Documents ready",
-          heading: `${firstName}, your next step is ready.`,
-          body: `A new document — "${data.title}" — is now ${actionText} in your private Welcome Center.\n\n${data.description ? data.description + "\n\n" : ""}Sign in and open "Your Documents" to continue.`,
-          ctaLabel: "Open Your Documents",
-          ctaUrl: "https://access.prscstandards.org/portal",
-          ctaSubtext: "Sign in with your email and the password you created.",
-          signatures: founderSignature(),
-        },
-        "documents-ready-member",
-      );
-    }
-    return { ok: true, notified: recipients.length };
+    await sendPortalEmail(
+      member.email,
+      {
+        subject: "Action needed: your documents are ready",
+        eyebrow: "Documents ready",
+        heading: `${member.first_name?.trim() || "There"}, your documents are ready.`,
+        body: `Your individualized package is now available in your private Welcome Center: ${docs.length} document${docs.length === 1 ? "" : "s"} — ${parts}.\n\nEverything is completed inside the portal. Open each document, read it, then initial or sign right there. It only takes a few minutes.`,
+        ctaLabel: "Review & Sign Your Documents",
+        ctaUrl: "https://access.prscstandards.org/portal",
+        ctaSubtext: "Sign in with your email and the password you created.",
+        signatures: founderSignature(),
+      },
+      "documents-ready-member",
+    );
+    return { ok: true, count: docs.length };
   });
 
 export const deleteMemberDocument = createServerFn({ method: "POST" })

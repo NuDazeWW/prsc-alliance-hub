@@ -139,24 +139,42 @@ export type Database = {
       portal_document_acknowledgements: {
         Row: {
           acknowledged_at: string
+          consent: boolean
           document_id: string
           id: string
           initials: string
+          ip_address: string | null
+          kind: string
           member_id: string
+          signature_data: string | null
+          signed_name: string | null
+          user_agent: string | null
         }
         Insert: {
           acknowledged_at?: string
+          consent?: boolean
           document_id: string
           id?: string
           initials: string
+          ip_address?: string | null
+          kind?: string
           member_id: string
+          signature_data?: string | null
+          signed_name?: string | null
+          user_agent?: string | null
         }
         Update: {
           acknowledged_at?: string
+          consent?: boolean
           document_id?: string
           id?: string
           initials?: string
+          ip_address?: string | null
+          kind?: string
           member_id?: string
+          signature_data?: string | null
+          signed_name?: string | null
+          user_agent?: string | null
         }
         Relationships: [
           {
@@ -178,6 +196,8 @@ export type Database = {
       portal_documents: {
         Row: {
           action: string
+          audience_entity: string | null
+          audience_role: string | null
           category: string
           created_at: string
           created_by: string | null
@@ -192,6 +212,8 @@ export type Database = {
         }
         Insert: {
           action: string
+          audience_entity?: string | null
+          audience_role?: string | null
           category: string
           created_at?: string
           created_by?: string | null
@@ -206,6 +228,8 @@ export type Database = {
         }
         Update: {
           action?: string
+          audience_entity?: string | null
+          audience_role?: string | null
           category?: string
           created_at?: string
           created_by?: string | null
@@ -413,6 +437,9 @@ export type Database = {
       portal_members: {
         Row: {
           created_at: string
+          documents_completed_at: string | null
+          documents_released_at: string | null
+          documents_reminder_sent_at: string | null
           email: string
           entity: Database["public"]["Enums"]["portal_entity"]
           first_access_at: string | null
@@ -434,6 +461,9 @@ export type Database = {
         }
         Insert: {
           created_at?: string
+          documents_completed_at?: string | null
+          documents_released_at?: string | null
+          documents_reminder_sent_at?: string | null
           email: string
           entity: Database["public"]["Enums"]["portal_entity"]
           first_access_at?: string | null
@@ -455,6 +485,9 @@ export type Database = {
         }
         Update: {
           created_at?: string
+          documents_completed_at?: string | null
+          documents_released_at?: string | null
+          documents_reminder_sent_at?: string | null
           email?: string
           entity?: Database["public"]["Enums"]["portal_entity"]
           first_access_at?: string | null
