@@ -331,7 +331,7 @@ function PortalHome() {
               <div className="flex min-w-0 flex-col justify-center">
                 <p className="text-[10px] uppercase tracking-[0.24em] text-gold">
                   Why You <span className="mx-2 text-gold/40">|</span>
-                  <span className="text-ivory/70">{m.title || (m.role === "advisor" ? "Selected Advisor" : "Board Member")}</span>
+                  <span className="text-ivory/70">{m.title || selectedLabel(m.role)}</span>
                   <span className="mx-2 text-gold/40">·</span>
                   <span className="text-ivory/70">{entityWord}</span>
                 </p>
@@ -367,7 +367,7 @@ function PortalHome() {
                   </DialogTitle>
                 </DialogHeader>
                 <p className="mt-5 font-display text-[clamp(1.35rem,1.8vw,2rem)] leading-tight text-gold">
-                  {m.title || (m.role === "advisor" ? "Selected Advisor" : "Board Member")}
+                  {m.title || selectedLabel(m.role)}
                 </p>
                 {m.organization && (
                   <p className="mt-3 text-[16px] leading-7 text-ivory/70">{m.organization}</p>
@@ -386,7 +386,7 @@ function PortalHome() {
                   <div>
                     <dt className="text-[10px] uppercase tracking-[0.22em] text-ivory/45">Capacity</dt>
                     <dd className="mt-2 font-display text-2xl text-ivory">
-                      {m.role === "advisor" ? "Advisor" : "Board Member"}
+                      {capacityLabel(m.role)}
                     </dd>
                   </div>
                   {m.organization && (
