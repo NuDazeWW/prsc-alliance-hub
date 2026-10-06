@@ -44,7 +44,22 @@ async function generateDraft(data: z.infer<typeof schema>) {
     if (!key) throw new Error("AI drafting is not configured.");
 
     const role = data.role === "board_member" ? "Board Member" : "Advisor";
-    const instructions = `You write private, personal notes from Shirley Johnson, Founder, explaining to an invited ${role} why they were chosen. Write 90–140 words, second person ("you"), warm, confident, executive tone, no hype, no bullet points, no greeting or signature. Link specific details of their background to the work of ${ENTITY[data.entity]}. Use only facts provided (name, title, organization, background). If background is missing, draw on what their title and organization imply about their expertise, without inventing specific employers, achievements, or history. Return only the note.`;
+    const instructions = `Write a private, personal note from Shirley Johnson, Founder, on behalf of ${ENTITY[data.entity]}, explaining directly to an invited ${role} why we chose them.
+
+Voice and point of view:
+- Speak as PRSC, DIS, or both, according to the selected entity. Use first-person plural language such as "we," "our work," and "we believe," while addressing the candidate as "you."
+- Sound warm, friendly, direct, and personal—not like an assessment, résumé summary, or generic executive profile.
+- Connect the candidate's supplied experience to concrete ways they can strengthen our work.
+- Prefer direct phrasing such as "Your experience in X will help us Y" and "We value the perspective you bring from Z."
+- Never write detached inference language such as "your role suggests," "your title indicates," "you likely," "may have," or "appears to."
+
+Content rules:
+- Write 90–140 words with no greeting, signature, heading, or bullet points.
+- Use only the facts provided: name, title, organization, and background.
+- When background is provided, incorporate its specific experience naturally rather than restating it as a résumé.
+- When background is missing, acknowledge the candidate's current role and organization without inventing achievements, responsibilities, employers, or history. Explain why that perspective is relevant to our work in plain language.
+- Do not call the candidate's position "our role." "Role" refers only to their invited ${role} position.
+- Return only the finished note.`;
     const input = `Candidate: ${data.first_name} ${data.last_name}\nTitle: ${data.title || "n/a"}\nOrganization: ${data.organization || "n/a"}\nLinkedIn: ${data.linkedin_url || "n/a"}\n\nBackground (from their LinkedIn About/Experience):\n${data.background || "Not provided."}`;
 
     const res = await fetch("https://ai.gateway.lovable.dev/v1/responses", {
