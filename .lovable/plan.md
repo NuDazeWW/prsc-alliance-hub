@@ -45,4 +45,4 @@ Free, no extra account, and the member never leaves the private portal. We recor
 - Timeline and package status advance automatically: released -> In Preparation done, all complete -> Package Complete.
 
 ## Question for you
-Should completed documents also be emailed to the member as a link to their signed copy, or only available inside the portal?
+Decided: documents are available only inside the portal (or BoldSign). Members can't download them or sign them anywhere else. Each document gets a **Request a hard copy** button. It emails the admin with the member's name and the document title so the admin can send a copy, and the member sees a "Request sent" confirmation.
