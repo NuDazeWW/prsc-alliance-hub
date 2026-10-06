@@ -825,8 +825,8 @@ function Admin() {
           <p className="text-base text-ivory/45">Member access, submissions, and inquiries</p>
         </div>
 
-        <div className="mt-10 grid items-start gap-6 xl:grid-cols-3">
-          <div className="flex flex-col gap-8">
+        <div className="mt-10 grid items-start gap-6 xl:grid-cols-2">
+          <div className="flex min-w-0 flex-col gap-8">
             <section className="border border-gold/20 p-6 sm:p-8">
               <div className="flex items-start justify-between gap-3">
                 <div className="flex items-center gap-3">
@@ -844,12 +844,12 @@ function Admin() {
                 <Input name="email" type="email" value={inviteDraft.email} onChange={(e) => setInviteDraft({ ...inviteDraft, email: e.target.value })} placeholder="Email" required className="text-base" />
                 <Input name="organization" value={inviteDraft.organization} onChange={(e) => setInviteDraft({ ...inviteDraft, organization: e.target.value })} placeholder="Organization" required className="text-base" />
                 <Input name="title" value={inviteDraft.title} onChange={(e) => setInviteDraft({ ...inviteDraft, title: e.target.value })} placeholder="Title" required className="text-base" />
-                <select name="entity" value={inviteDraft.entity} onChange={(e) => { const entity = e.target.value as InviteEmailReview["entity"]; setInviteDraft({ ...inviteDraft, entity, role: entity !== "both" && inviteDraft.role.startsWith("prsc_") ? "board_member" : inviteDraft.role }); }} required className="h-9 rounded-md border border-input bg-navy px-3 text-base">
+                <select name="entity" value={inviteDraft.entity} onChange={(e) => { const entity = e.target.value as InviteEmailReview["entity"]; setInviteDraft({ ...inviteDraft, entity, role: entity !== "both" && inviteDraft.role.startsWith("prsc_") ? "board_member" : inviteDraft.role }); }} required className="h-9 w-full min-w-0 rounded-md border border-input bg-navy px-3 text-base">
                   <option value="prsc">PRSC</option>
                   <option value="dis">DIS</option>
                   <option value="both">Both</option>
                 </select>
-                <select name="role" value={inviteDraft.role} onChange={(e) => { const role = e.target.value as InviteEmailReview["role"]; setInviteDraft({ ...inviteDraft, role, entity: role.startsWith("prsc_") ? "both" : inviteDraft.entity }); }} required className="h-9 rounded-md border border-input bg-navy px-3 text-base">
+                <select name="role" value={inviteDraft.role} onChange={(e) => { const role = e.target.value as InviteEmailReview["role"]; setInviteDraft({ ...inviteDraft, role, entity: role.startsWith("prsc_") ? "both" : inviteDraft.entity }); }} required className="h-9 w-full min-w-0 rounded-md border border-input bg-navy px-3 text-base">
                   <option value="board_member">Board member</option>
                   <option value="advisor">Advisor</option>
                   <option value="prsc_board_dis_advisor">PRSC Board member + DIS Advisor</option>
@@ -1079,7 +1079,7 @@ function Admin() {
             </aside>
           </div>
 
-          <div>
+          <div className="min-w-0">
             <section id="email-center" className="border border-gold/20 p-6 sm:p-8">
               <div className="flex flex-wrap items-center justify-between gap-3">
                 <div className="flex items-center gap-3">
@@ -1216,13 +1216,13 @@ function Admin() {
             </section>
           </div>
 
-          <div className="flex flex-col gap-8">
+          <div className="flex min-w-0 flex-col gap-8 xl:col-span-2">
             <section className="border border-gold/20 p-6 sm:p-8">
-              <div className="flex flex-wrap items-start justify-between gap-3">
+              <div className="flex flex-wrap items-center justify-between gap-3">
                 <h2 id="tracker" className="font-display text-3xl">
-                  Members &amp; email history
+                  Members
                 </h2>
-                <div className="flex items-center gap-2">
+                <div className="flex flex-wrap items-center justify-end gap-2">
                   <Button
                     type="button"
                     variant="outline"
@@ -1244,11 +1244,40 @@ function Admin() {
                     <Trash2 className="h-3.5 w-3.5" /> Delete selected members ({selectedMemberIds.length})
                   </Button>
                   <InfoTip
-                    title="Members & email history"
+                    title="Members"
                     body="Select only the member or individual email records you want to remove, then use the matching Delete selected action. Member deletion also removes that person’s associated test data."
                   />
                 </div>
               </div>
+
+              <div className="mt-5 border border-gold/25 bg-ivory/[.03] p-4 sm:p-5">
+                <p className="flex items-start gap-2.5 text-base leading-relaxed text-ivory/80">
+                  <Info className="mt-1 h-4 w-4 shrink-0 text-gold" />
+                  <span>
+                    <strong className="font-medium text-gold">Start by clicking a member&rsquo;s name.</strong>{" "}
+                    That opens their record, where you read what they submitted, add and release documents, and follow every initial, signature and copy request.
+                  </span>
+                </p>
+                <p className="mt-4 border-t border-gold/15 pt-4 text-xs uppercase tracking-[0.18em] text-ivory/45">
+                  In this section you can
+                </p>
+                <ul className="mt-3 grid gap-x-8 gap-y-2.5 text-base leading-snug text-ivory/75 sm:grid-cols-2 lg:grid-cols-3">
+                  {[
+                    "Open a member record — click their name or “View profile”",
+                    "Read submitted profile answers and their journey activity",
+                    "Add documents, release them, and track initials and signatures",
+                    "Set package status from the dropdown in each row",
+                    "Revoke or reactivate a member’s sign-in access",
+                    "Tick members or individual email records, then delete just those",
+                  ].map((item) => (
+                    <li key={item} className="flex items-start gap-2.5">
+                      <span className="mt-2 h-1.5 w-1.5 shrink-0 bg-gold" />
+                      <span>{item}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+
               <div className="mt-5 overflow-x-auto border border-gold/20">
                 <table className="w-full min-w-[560px] text-left text-base">
                 <thead className="bg-ivory/5 text-xs uppercase text-gold">
