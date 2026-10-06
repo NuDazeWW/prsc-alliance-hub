@@ -37,7 +37,7 @@ function AcceptInvitationPage() {
     let timeout: number | undefined;
     const confirmInvitation = (email?: string) => {
       if (!active) return;
-      invitationEmail.current = email ?? invitationEmail.current;
+      setInvitationEmail((current) => email ?? current);
       setReady(true);
       setMessage("");
       if (timeout !== undefined) window.clearTimeout(timeout);
@@ -83,7 +83,7 @@ function AcceptInvitationPage() {
       const { error } = await supabase.auth.updateUser({ password });
       if (error) throw error;
       await clearPortalLoginFailures();
-      const email = invitationEmail.current;
+      const email = invitationEmail;
       const { error: signOutError } = await supabase.auth.signOut();
       if (signOutError) throw signOutError;
       await navigate({
