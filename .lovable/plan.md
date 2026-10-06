@@ -18,7 +18,7 @@ Profile submitted -> Admin notified (exists)
 **Admin side**
 - **Document library**: upload a PDF once (e.g. Board Agreement, Confidentiality, Code of Conduct), set its type (Acknowledge or Sign) and who it applies to by default (PRSC / DIS / Both, Board / Advisor).
 - **Auto-assign**: when a profile is submitted, the matching library documents are prepared for that member automatically as drafts. Admin can add/remove before release.
-- **Release button**: documents stay hidden until the admin releases them; releasing sends the email.
+- **Release button**: documents stay hidden until the admin releases them in the portal. Releasing automatically emails the member to say action is needed, with a button to sign in and complete their documents.
 - **Tracking per member**: Not opened / Opened / Acknowledged / Signed, with date, time, and initials or signature shown; download of the signed copy.
 - **Reminder**: if documents are still incomplete after 3 days, one automatic reminder email.
 
