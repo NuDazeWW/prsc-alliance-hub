@@ -35,7 +35,7 @@ Profile submitted -> Admin notified (exists)
 4. Package complete (to member) — thank-you confirmation.
 
 ## Why in-portal signing instead of DocuSign
-Free, no extra account, and the member never leaves the private portal. We record a legally useful audit trail (name, signature, time, IP, browser, document version fingerprint) and produce a signed PDF with a signature certificate page. DocuSign links remain available as an option per document for anything requiring a third-party signing service.
+Free, no extra account, and the member never leaves the private portal. We record a legally useful audit trail (name, signature, time, IP, browser, document version fingerprint) and produce a signed PDF with a signature certificate page. BoldSign links remain available as an option per document for anything requiring a third-party signing service.
 
 ## Technical details
 - New tables: `portal_document_library` (template docs) and extend `portal_documents` with `library_id`, `released_at`, `status`; new `portal_document_signatures` (member_id, document_id, signed_name, signature image path, initials, ip, user_agent, file_sha256, signed_at). RLS: member reads/inserts own rows only; admin full access.
