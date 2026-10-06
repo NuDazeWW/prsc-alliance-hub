@@ -915,7 +915,7 @@ export const prepareSignedCopy = createServerFn({ method: "POST" })
     const bytes = await pdf.save();
     const path = `${ack.member_id}/signed/${ack.id}.pdf`;
     const { error: upErr } = await supabaseAdmin.storage.from(DOCUMENT_BUCKET)
-      .upload(path, new Blob([bytes], { type: "application/pdf" }), { upsert: true, contentType: "application/pdf" });
+      .upload(path, new Blob([bytes as BlobPart], { type: "application/pdf" }), { upsert: true, contentType: "application/pdf" });
     if (upErr) throw upErr;
     await supabaseAdmin.from("portal_document_acknowledgements").update({ signed_copy_path: path }).eq("id", ack.id);
     const { data: signed } = await supabaseAdmin.storage.from(DOCUMENT_BUCKET).createSignedUrl(path, 900);
