@@ -1280,15 +1280,21 @@ function Admin() {
                     return (
                       <tr key={m.id} className="border-t border-ivory/10 align-top">
                         <td className="p-4">
-                          <label className="flex cursor-pointer items-start gap-3">
-                            <input
-                              type="checkbox"
-                              aria-label={`Select ${m.first_name} ${m.last_name}`}
-                              checked={selectedMemberIds.includes(m.id)}
-                              onChange={(e) => setSelectedMemberIds((current) => e.target.checked ? [...current, m.id] : current.filter((id) => id !== m.id))}
-                              className="mt-1 h-4 w-4 shrink-0 accent-[var(--color-gold)]"
-                            />
-                            <span>
+                          <div className="flex items-start gap-3">
+                            <label className="flex cursor-pointer items-start pt-1">
+                              <input
+                                type="checkbox"
+                                aria-label={`Select ${m.first_name} ${m.last_name}`}
+                                checked={selectedMemberIds.includes(m.id)}
+                                onChange={(e) => setSelectedMemberIds((current) => e.target.checked ? [...current, m.id] : current.filter((id) => id !== m.id))}
+                                className="h-4 w-4 shrink-0 accent-[var(--color-gold)]"
+                              />
+                            </label>
+                            <button
+                              type="button"
+                              onClick={() => setDetailId(m.id)}
+                              className="text-left underline decoration-gold/30 underline-offset-4 transition-colors hover:text-gold"
+                            >
                               <strong className="font-medium">
                                 {m.first_name} {m.last_name}
                               </strong>
@@ -1296,8 +1302,8 @@ function Admin() {
                               <span className={`mt-1 inline-block text-xs uppercase tracking-[0.14em] ${revoked ? "text-red-300/80" : "text-ivory/40"}`}>
                                 Access: {m.status}
                               </span>
-                            </span>
-                          </label>
+                            </button>
+                          </div>
                         </td>
                         <td className="uppercase">{m.entity}</td>
                         <td className="py-4 pr-3">
