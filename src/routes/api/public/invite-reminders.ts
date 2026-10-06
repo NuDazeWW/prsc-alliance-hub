@@ -56,6 +56,31 @@ export const Route = createFileRoute("/api/public/invite-reminders")({
           await supabaseAdmin.from("portal_members").update({ reminder_sent_at: new Date().toISOString() }).eq("id", m.id);
           sent++;
         }
+        const { data: docPending } = await supabaseAdmin
+          .from("portal_members")
+          .select("id, email, first_name")
+          .not("documents_released_at", "is", null)
+          .is("documents_completed_at", null)
+          .is("documents_reminder_sent_at", null)
+          .lt("documents_released_at", cutoff)
+          .limit(50);
+        for (const m of docPending ?? []) {
+          await sendPortalEmail(
+            m.email,
+            {
+              subject: "A reminder: your documents are waiting",
+              eyebrow: "Gentle reminder",
+              heading: `${m.first_name?.trim() || "There"}, your documents are still waiting.`,
+              body: "A few days ago we released your individualized documents in your private Welcome Center. A few are still open.\n\nSign in, open Your Documents, and read, initial, or sign each one right in the portal.",
+              ctaLabel: "Review & Sign Your Documents",
+              ctaUrl: "https://access.prscstandards.org/portal",
+              signatures: founderSignature(),
+            },
+            "documents-reminder",
+          );
+          await supabaseAdmin.from("portal_members").update({ documents_reminder_sent_at: new Date().toISOString() }).eq("id", m.id);
+          sent++;
+        }
         return Response.json({ ok: true, sent });
       },
     },
