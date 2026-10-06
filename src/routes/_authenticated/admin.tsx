@@ -307,7 +307,14 @@ function downloadListTemplate() {
 }
 
 function Admin() {
-  const preview = isPreviewHost();
+  const [hasSession, setHasSession] = useState(false);
+  useEffect(() => {
+    void supabase.auth.getSession().then(({ data }) => setHasSession(!!data.session));
+    const { data: sub } = supabase.auth.onAuthStateChange((_e, session) => setHasSession(!!session));
+    return () => sub.subscription.unsubscribe();
+  }, []);
+  // Test mode only when viewing an unsigned builder preview; signed-in admins always run real actions.
+  const preview = isPreviewHost() && !hasSession;
   const overview = useQuery({
     queryKey: ["portal-admin"],
     queryFn: () => (preview ? Promise.resolve(demoOverview) : getAdminOverview()),
