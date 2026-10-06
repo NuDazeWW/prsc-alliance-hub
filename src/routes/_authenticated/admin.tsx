@@ -1218,9 +1218,9 @@ function Admin() {
 
           <div className="flex flex-col gap-8">
             <section className="border border-gold/20 p-6 sm:p-8">
-              <div className="flex flex-wrap items-start justify-between gap-3">
+              <div className="flex flex-wrap items-center justify-between gap-3">
                 <h2 id="tracker" className="font-display text-3xl">
-                  Members &amp; email history
+                  Members
                 </h2>
                 <div className="flex items-center gap-2">
                   <Button
@@ -1244,11 +1244,40 @@ function Admin() {
                     <Trash2 className="h-3.5 w-3.5" /> Delete selected members ({selectedMemberIds.length})
                   </Button>
                   <InfoTip
-                    title="Members & email history"
+                    title="Members"
                     body="Select only the member or individual email records you want to remove, then use the matching Delete selected action. Member deletion also removes that person’s associated test data."
                   />
                 </div>
               </div>
+
+              <div className="mt-5 border border-gold/25 bg-ivory/[.03] p-4 sm:p-5">
+                <p className="flex items-start gap-2.5 text-base leading-relaxed text-ivory/80">
+                  <Info className="mt-1 h-4 w-4 shrink-0 text-gold" />
+                  <span>
+                    <strong className="font-medium text-gold">Start by clicking a member&rsquo;s name.</strong>{" "}
+                    That opens their record, where you read what they submitted, add and release documents, and follow every initial, signature and copy request.
+                  </span>
+                </p>
+                <p className="mt-4 border-t border-gold/15 pt-4 text-xs uppercase tracking-[0.18em] text-ivory/45">
+                  In this section you can
+                </p>
+                <ul className="mt-3 grid gap-x-8 gap-y-2.5 text-base leading-snug text-ivory/75 sm:grid-cols-2">
+                  {[
+                    "Open a member record — click their name or “View profile”",
+                    "Read submitted profile answers and their journey activity",
+                    "Add documents, release them, and track initials and signatures",
+                    "Set package status from the dropdown in each row",
+                    "Revoke or reactivate a member’s sign-in access",
+                    "Tick members or individual email records, then delete just those",
+                  ].map((item) => (
+                    <li key={item} className="flex items-start gap-2.5">
+                      <span className="mt-2 h-1.5 w-1.5 shrink-0 bg-gold" />
+                      <span>{item}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+
               <div className="mt-5 overflow-x-auto border border-gold/20">
                 <table className="w-full min-w-[560px] text-left text-base">
                 <thead className="bg-ivory/5 text-xs uppercase text-gold">
