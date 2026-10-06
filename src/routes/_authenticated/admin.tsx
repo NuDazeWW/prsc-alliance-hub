@@ -826,7 +826,7 @@ function Admin() {
         </div>
 
         <div className="mt-10 grid items-start gap-6 xl:grid-cols-2">
-          <div className="flex flex-col gap-8">
+          <div className="flex min-w-0 flex-col gap-8">
             <section className="border border-gold/20 p-6 sm:p-8">
               <div className="flex items-start justify-between gap-3">
                 <div className="flex items-center gap-3">
@@ -844,12 +844,12 @@ function Admin() {
                 <Input name="email" type="email" value={inviteDraft.email} onChange={(e) => setInviteDraft({ ...inviteDraft, email: e.target.value })} placeholder="Email" required className="text-base" />
                 <Input name="organization" value={inviteDraft.organization} onChange={(e) => setInviteDraft({ ...inviteDraft, organization: e.target.value })} placeholder="Organization" required className="text-base" />
                 <Input name="title" value={inviteDraft.title} onChange={(e) => setInviteDraft({ ...inviteDraft, title: e.target.value })} placeholder="Title" required className="text-base" />
-                <select name="entity" value={inviteDraft.entity} onChange={(e) => { const entity = e.target.value as InviteEmailReview["entity"]; setInviteDraft({ ...inviteDraft, entity, role: entity !== "both" && inviteDraft.role.startsWith("prsc_") ? "board_member" : inviteDraft.role }); }} required className="h-9 rounded-md border border-input bg-navy px-3 text-base">
+                <select name="entity" value={inviteDraft.entity} onChange={(e) => { const entity = e.target.value as InviteEmailReview["entity"]; setInviteDraft({ ...inviteDraft, entity, role: entity !== "both" && inviteDraft.role.startsWith("prsc_") ? "board_member" : inviteDraft.role }); }} required className="h-9 w-full min-w-0 rounded-md border border-input bg-navy px-3 text-base">
                   <option value="prsc">PRSC</option>
                   <option value="dis">DIS</option>
                   <option value="both">Both</option>
                 </select>
-                <select name="role" value={inviteDraft.role} onChange={(e) => { const role = e.target.value as InviteEmailReview["role"]; setInviteDraft({ ...inviteDraft, role, entity: role.startsWith("prsc_") ? "both" : inviteDraft.entity }); }} required className="h-9 rounded-md border border-input bg-navy px-3 text-base">
+                <select name="role" value={inviteDraft.role} onChange={(e) => { const role = e.target.value as InviteEmailReview["role"]; setInviteDraft({ ...inviteDraft, role, entity: role.startsWith("prsc_") ? "both" : inviteDraft.entity }); }} required className="h-9 w-full min-w-0 rounded-md border border-input bg-navy px-3 text-base">
                   <option value="board_member">Board member</option>
                   <option value="advisor">Advisor</option>
                   <option value="prsc_board_dis_advisor">PRSC Board member + DIS Advisor</option>
@@ -1216,7 +1216,7 @@ function Admin() {
             </section>
           </div>
 
-          <div className="flex flex-col gap-8 xl:col-span-2">
+          <div className="flex min-w-0 flex-col gap-8 xl:col-span-2">
             <section className="border border-gold/20 p-6 sm:p-8">
               <div className="flex flex-wrap items-center justify-between gap-3">
                 <h2 id="tracker" className="font-display text-3xl">
