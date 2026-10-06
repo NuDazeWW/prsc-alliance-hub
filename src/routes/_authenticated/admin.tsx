@@ -825,7 +825,7 @@ function Admin() {
           <p className="text-base text-ivory/45">Member access, submissions, and inquiries</p>
         </div>
 
-        <div className="mt-10 grid items-start gap-6 xl:grid-cols-3">
+        <div className="mt-10 grid items-start gap-6 xl:grid-cols-2">
           <div className="flex flex-col gap-8">
             <section className="border border-gold/20 p-6 sm:p-8">
               <div className="flex items-start justify-between gap-3">
@@ -1216,7 +1216,7 @@ function Admin() {
             </section>
           </div>
 
-          <div className="flex flex-col gap-8">
+          <div className="flex flex-col gap-8 xl:col-span-2">
             <section className="border border-gold/20 p-6 sm:p-8">
               <div className="flex flex-wrap items-center justify-between gap-3">
                 <h2 id="tracker" className="font-display text-3xl">
@@ -1261,7 +1261,7 @@ function Admin() {
                 <p className="mt-4 border-t border-gold/15 pt-4 text-xs uppercase tracking-[0.18em] text-ivory/45">
                   In this section you can
                 </p>
-                <ul className="mt-3 grid gap-x-8 gap-y-2.5 text-base leading-snug text-ivory/75 sm:grid-cols-2">
+                <ul className="mt-3 grid gap-x-8 gap-y-2.5 text-base leading-snug text-ivory/75 sm:grid-cols-2 lg:grid-cols-3">
                   {[
                     "Open a member record — click their name or “View profile”",
                     "Read submitted profile answers and their journey activity",
