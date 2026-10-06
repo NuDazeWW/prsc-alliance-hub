@@ -48,11 +48,15 @@ const ENTITY_FULL: Record<string, string> = {
 const ROLE_LABEL: Record<string, string> = {
   board_member: "Board Member",
   advisor: "Advisor",
+  prsc_board_dis_advisor: "Board Member (PRSC) and Advisor (DIS)",
+  prsc_advisor_dis_board: "Advisor (PRSC) and Board Member (DIS)",
 };
 
 const PACKAGE_LABEL: Record<string, string> = {
   board_member: "Board",
   advisor: "Advisor",
+  prsc_board_dis_advisor: "Board & Advisor",
+  prsc_advisor_dis_board: "Board & Advisor",
 };
 
 export function buildMemberTokens(member: {

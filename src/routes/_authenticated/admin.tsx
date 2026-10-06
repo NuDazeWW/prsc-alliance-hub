@@ -195,7 +195,7 @@ type Draft = typeof emptyDraft;
 
 type MemberRow = {
   first_name: string; last_name: string; email: string; organization: string;
-  title: string; entity: "prsc" | "dis" | "both"; role: "board_member" | "advisor"; why_you: string;
+  title: string; entity: "prsc" | "dis" | "both"; role: "board_member" | "advisor" | "prsc_board_dis_advisor" | "prsc_advisor_dis_board"; why_you: string;
 };
 type StagedRow = MemberRow & { linkedin_url: string; background: string };
 
@@ -831,7 +831,7 @@ function Admin() {
                 <Input name="email" type="email" value={inviteDraft.email} onChange={(e) => setInviteDraft({ ...inviteDraft, email: e.target.value })} placeholder="Email" required className="text-base" />
                 <Input name="organization" value={inviteDraft.organization} onChange={(e) => setInviteDraft({ ...inviteDraft, organization: e.target.value })} placeholder="Organization" required className="text-base" />
                 <Input name="title" value={inviteDraft.title} onChange={(e) => setInviteDraft({ ...inviteDraft, title: e.target.value })} placeholder="Title" required className="text-base" />
-                <select name="entity" value={inviteDraft.entity} onChange={(e) => setInviteDraft({ ...inviteDraft, entity: e.target.value as InviteEmailReview["entity"] })} required className="h-9 rounded-md border border-input bg-navy px-3 text-base">
+                <select name="entity" value={inviteDraft.entity} onChange={(e) => { const entity = e.target.value as InviteEmailReview["entity"]; setInviteDraft({ ...inviteDraft, entity, role: entity !== "both" && inviteDraft.role.startsWith("prsc_") ? "board_member" : inviteDraft.role }); }} required className="h-9 rounded-md border border-input bg-navy px-3 text-base">
                   <option value="prsc">PRSC</option>
                   <option value="dis">DIS</option>
                   <option value="both">Both</option>
@@ -839,6 +839,10 @@ function Admin() {
                 <select name="role" value={inviteDraft.role} onChange={(e) => setInviteDraft({ ...inviteDraft, role: e.target.value as InviteEmailReview["role"] })} required className="h-9 rounded-md border border-input bg-navy px-3 text-base">
                   <option value="board_member">Board member</option>
                   <option value="advisor">Advisor</option>
+                  {inviteDraft.entity === "both" && <>
+                    <option value="prsc_board_dis_advisor">PRSC Board member + DIS Advisor</option>
+                    <option value="prsc_advisor_dis_board">PRSC Advisor + DIS Board member</option>
+                  </>}
                 </select>
                 <div className="grid gap-3 border border-gold/20 p-4 sm:col-span-2">
                   <span className="text-base font-medium text-ivory/90">Draft “Why You” with AI (optional)</span>
@@ -931,7 +935,7 @@ function Admin() {
                         <span className="text-ivory/60">{r.email}</span>
                         <span className="text-ivory/60">{[r.title, r.organization].filter(Boolean).join(", ")}</span>
                         <span className="uppercase text-gold">{r.entity}</span>
-                        <span className="text-ivory/60">{r.role === "advisor" ? "Advisor" : "Board member"}</span>
+                        <span className="text-ivory/60">{INVITE_ROLE_LABELS[r.role]}</span>
                         <Button type="button" variant="outline" size="sm" disabled={batchDrafting || rowDrafting === r.email} className="ml-auto rounded-none" onClick={() => void draftRow(i)}>
                           {rowDrafting === r.email ? "Drafting…" : r.why_you.trim() ? "Regenerate" : "Draft with AI"}
                         </Button>

@@ -7,7 +7,7 @@ import { renderBrandedEmail, renderBrandedEmailText } from "@/lib/branded-email"
 type PortalMember = {
   id: string; user_id: string; email: string; first_name: string; last_name: string;
   professional_name: string | null; organization: string; title: string | null;
-  entity: "prsc" | "dis" | "both"; role: "board_member" | "advisor";
+  entity: "prsc" | "dis" | "both"; role: "board_member" | "advisor" | "prsc_board_dis_advisor" | "prsc_advisor_dis_board";
   why_you: string; status: "invited" | "active" | "revoked";
   package_status: "awaiting_profile" | "in_preparation" | "profile_received" | "package_ready";
   invited_at: string; first_access_at: string | null; last_access_at: string | null;
@@ -23,7 +23,7 @@ type PortalProfile = {
   submitted_at: string | null; updated_at: string;
 };
 
-const roleSchema = z.enum(["board_member", "advisor"]);
+const roleSchema = z.enum(["board_member", "advisor", "prsc_board_dis_advisor", "prsc_advisor_dis_board"]);
 const entitySchema = z.enum(["prsc", "dis", "both"]);
 const permissionSchema = z.enum(["yes", "discuss", "no"]);
 
@@ -115,7 +115,7 @@ export const saveMyProfile = createServerFn({ method: "POST" })
       const apiKey = process.env["LOVABLE_API_KEY"];
       if (apiKey) {
         const fullName = `${member.first_name ?? ""} ${member.last_name ?? ""}`.trim() || member.email;
-        const roleLabel = member.role === "board_member" ? "Board Member" : "Advisor";
+        const roleLabel = ({ board_member: "Board Member", advisor: "Advisor", prsc_board_dis_advisor: "Board Member (PRSC) and Advisor (DIS)", prsc_advisor_dis_board: "Advisor (PRSC) and Board Member (DIS)" } as Record<string, string>)[member.role] ?? "Advisor";
         const entityLabel = member.entity === "both" ? "PRSC and DIS" : String(member.entity).toUpperCase();
         const subject = `Profile submitted — ${fullName}`;
         const email = {
