@@ -212,7 +212,7 @@ const emptyInvite: InviteEmailReview = {
 };
 
 const LIST_HEADERS = "first_name,last_name,email,organization,title,entity,role,linkedin_url,background,why_you";
-const LIST_TEMPLATE = `${LIST_HEADERS}\nJane,Doe,jane@example.com,Example Group,Managing Partner,both,advisor,https://www.linkedin.com/in/janedoe,"Paste their LinkedIn About and Experience text here. Leave why_you blank to have it drafted.",\n`;
+const LIST_TEMPLATE = `${LIST_HEADERS}\nJane,Doe,jane@example.com,Example Group,Managing Partner,both,prsc_board_dis_advisor,https://www.linkedin.com/in/janedoe,"Paste their LinkedIn About and Experience text here. Leave why_you blank to have it drafted.",\n`;
 
 function splitCsvLine(line: string) {
   const out: string[] = [];
@@ -277,13 +277,18 @@ function parseMemberList(text: string): { rows: StagedRow[]; errors: string[] } 
     const entityRaw = record["entity"]?.toLowerCase();
     const entity = entityRaw === "prsc" || entityRaw === "dis" || entityRaw === "both" ? entityRaw : null;
     const roleRaw = record["role"]?.toLowerCase().replace(/[\s-]+/g, "_");
-    const role = roleRaw === "advisor" ? "advisor" : roleRaw === "board_member" || roleRaw === "board" ? "board_member" : null;
+    const mixed: Record<string, Row["role"]> = {
+      prsc_board_dis_advisor: "prsc_board_dis_advisor", prsc_board_member_dis_advisor: "prsc_board_dis_advisor", "prsc_board_+_dis_advisor": "prsc_board_dis_advisor",
+      prsc_advisor_dis_board: "prsc_advisor_dis_board", prsc_advisor_dis_board_member: "prsc_advisor_dis_board", "prsc_advisor_+_dis_board": "prsc_advisor_dis_board",
+    };
+    const role = roleRaw === "advisor" ? "advisor" : roleRaw === "board_member" || roleRaw === "board" ? "board_member" : roleRaw ? mixed[roleRaw] ?? null : null;
 
     if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(record["email"] ?? "")) return errors.push(`${label}: a valid email is required.`);
     if (!record["first_name"] || !record["last_name"]) return errors.push(`${label}: first and last name are required.`);
     if (!record["organization"]) return errors.push(`${label}: organization is required.`);
     if (!entity) return errors.push(`${label}: designation must be PRSC, DIS, or Both.`);
-    if (!role) return errors.push(`${label}: role must be Board member or Advisor.`);
+    if (!role) return errors.push(`${label}: role must be board_member, advisor, prsc_board_dis_advisor, or prsc_advisor_dis_board.`);
+    if (role.startsWith("prsc_") && entity !== "both") return errors.push(`${label}: mixed PRSC/DIS roles require designation Both.`);
     const why = (record["why_you"] ?? "").trim();
     const background = (record["background"] ?? "").trim().slice(0, 8000);
 
@@ -844,13 +849,11 @@ function Admin() {
                   <option value="dis">DIS</option>
                   <option value="both">Both</option>
                 </select>
-                <select name="role" value={inviteDraft.role} onChange={(e) => setInviteDraft({ ...inviteDraft, role: e.target.value as InviteEmailReview["role"] })} required className="h-9 rounded-md border border-input bg-navy px-3 text-base">
+                <select name="role" value={inviteDraft.role} onChange={(e) => { const role = e.target.value as InviteEmailReview["role"]; setInviteDraft({ ...inviteDraft, role, entity: role.startsWith("prsc_") ? "both" : inviteDraft.entity }); }} required className="h-9 rounded-md border border-input bg-navy px-3 text-base">
                   <option value="board_member">Board member</option>
                   <option value="advisor">Advisor</option>
-                  {inviteDraft.entity === "both" && <>
-                    <option value="prsc_board_dis_advisor">PRSC Board member + DIS Advisor</option>
-                    <option value="prsc_advisor_dis_board">PRSC Advisor + DIS Board member</option>
-                  </>}
+                  <option value="prsc_board_dis_advisor">PRSC Board member + DIS Advisor</option>
+                  <option value="prsc_advisor_dis_board">PRSC Advisor + DIS Board member</option>
                 </select>
                 <div className="grid gap-3 border border-gold/20 p-4 sm:col-span-2">
                   <span className="text-base font-medium text-ivory/90">Draft “Why You” with AI (optional)</span>
