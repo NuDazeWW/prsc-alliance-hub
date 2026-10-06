@@ -1,5 +1,5 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { Eye, EyeOff, KeyRound, ShieldCheck } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { PrscMark } from "@/components/site/PrscMark";
@@ -30,7 +30,7 @@ function AcceptInvitationPage() {
   const [ready, setReady] = useState(false);
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState("Verifying your private invitation…");
-  const invitationEmail = useRef("");
+  const [invitationEmail, setInvitationEmail] = useState("");
 
   useEffect(() => {
     let active = true;
