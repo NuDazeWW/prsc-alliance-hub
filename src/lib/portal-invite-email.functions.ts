@@ -19,7 +19,7 @@ const testInviteSchema = z.object({
   organization: z.string().trim().min(1).max(180),
   title: z.string().trim().min(1).max(160),
   entity: z.enum(["prsc", "dis", "both"]),
-  role: z.enum(["board_member", "advisor"]),
+  role: z.enum(["board_member", "advisor", "prsc_board_dis_advisor", "prsc_advisor_dis_board"]),
   why_you: z.string().trim().min(20).max(2000),
 });
 

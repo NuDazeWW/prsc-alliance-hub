@@ -8,7 +8,7 @@ const schema = z.object({
   organization: z.string().trim().max(180),
   title: z.string().trim().max(160),
   entity: z.enum(["prsc", "dis", "both"]),
-  role: z.enum(["board_member", "advisor"]),
+  role: z.enum(["board_member", "advisor", "prsc_board_dis_advisor", "prsc_advisor_dis_board"]),
   linkedin_url: z.string().trim().max(300),
   background: z.string().trim().max(8000).default(""),
 });
@@ -43,7 +43,8 @@ async function generateDraft(data: z.infer<typeof schema>) {
     const key = process.env.LOVABLE_API_KEY;
     if (!key) throw new Error("AI drafting is not configured.");
 
-    const role = data.role === "board_member" ? "Board Member" : "Advisor";
+    const { INVITE_ROLE_LABELS } = await import("@/lib/invite-email-config");
+    const role = INVITE_ROLE_LABELS[data.role];
     const instructions = `Write a private, personal note from Shirley Johnson, Founder, on behalf of ${ENTITY[data.entity]}, explaining directly to an invited ${role} why we chose them.
 
 Voice and point of view:
