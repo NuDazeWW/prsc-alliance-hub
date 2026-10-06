@@ -140,6 +140,8 @@ export const saveMyProfile = createServerFn({ method: "POST" })
               html: renderBrandedEmail(email),
               text: renderBrandedEmailText(email),
               label: "profile-submitted-admin-alert",
+              purpose: "transactional",
+              idempotency_key: `profile-submitted-admin-${member.id}-${crypto.randomUUID()}`,
             },
             { apiKey, sendUrl: process.env["LOVABLE_SEND_URL"] },
           );
@@ -171,6 +173,8 @@ export const saveMyProfile = createServerFn({ method: "POST" })
               html: renderBrandedEmail(confirmation),
               text: renderBrandedEmailText(confirmation),
               label: "profile-submitted-member-confirmation",
+              purpose: "transactional",
+              idempotency_key: `profile-submitted-member-${member.id}-${crypto.randomUUID()}`,
             },
             { apiKey, sendUrl: process.env["LOVABLE_SEND_URL"] },
           );

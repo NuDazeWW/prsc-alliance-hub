@@ -17,6 +17,8 @@ export async function sendPortalEmail(to: string, email: BrandedEmail, label: st
         html: renderBrandedEmail(email),
         text: renderBrandedEmailText(email),
         label,
+        purpose: "transactional",
+        idempotency_key: `${label}-${to.toLowerCase()}-${crypto.randomUUID()}`,
       },
       { apiKey, sendUrl: process.env["LOVABLE_SEND_URL"] },
     );
