@@ -121,6 +121,12 @@ function AcceptInvitationPage() {
               <p className="mt-4 text-sm leading-6 text-ivory/55">Choose a private password with at least 12 characters. After it is created, sign in with your invitation email and new password.</p>
               {ready ? (
                 <form onSubmit={submit} className="mt-9 space-y-5">
+                  <label className="block text-xs uppercase text-ivory/60">
+                    Your invitation email
+                    <span className="mt-2 block">
+                      <Input type="email" value={invitationEmail} readOnly disabled aria-readonly="true" autoComplete="username" className="h-12 border-ivory/20 bg-ivory/5 text-ivory/70" />
+                    </span>
+                  </label>
                   <PasswordField label="New password" value={password} onChange={setPassword} visible={showPassword} onToggle={() => setShowPassword((value) => !value)} autoComplete="new-password" />
                   <PasswordField label="Confirm new password" value={confirmation} onChange={setConfirmation} visible={showPassword} autoComplete="new-password" />
                   {message && <p role="status" className="border-l-2 border-gold pl-3 text-sm text-ivory/75">{message}</p>}
