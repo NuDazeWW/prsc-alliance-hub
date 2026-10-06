@@ -277,7 +277,7 @@ function parseMemberList(text: string): { rows: StagedRow[]; errors: string[] } 
     const entityRaw = record["entity"]?.toLowerCase();
     const entity = entityRaw === "prsc" || entityRaw === "dis" || entityRaw === "both" ? entityRaw : null;
     const roleRaw = record["role"]?.toLowerCase().replace(/[\s-]+/g, "_");
-    const mixed: Record<string, Row["role"]> = {
+    const mixed: Record<string, MemberRow["role"]> = {
       prsc_board_dis_advisor: "prsc_board_dis_advisor", prsc_board_member_dis_advisor: "prsc_board_dis_advisor", "prsc_board_+_dis_advisor": "prsc_board_dis_advisor",
       prsc_advisor_dis_board: "prsc_advisor_dis_board", prsc_advisor_dis_board_member: "prsc_advisor_dis_board", "prsc_advisor_+_dis_board": "prsc_advisor_dis_board",
     };
@@ -905,7 +905,7 @@ function Admin() {
 
               <p className="mt-5 text-base leading-7 text-ivory/60">
                 One row per person: first name, last name, email, organization, title, designation (PRSC, DIS, or Both),
-                role (Board member or Advisor), LinkedIn URL, LinkedIn background, and an optional “why you” note — leave
+                role (board_member, advisor, or for Both: prsc_board_dis_advisor / prsc_advisor_dis_board), LinkedIn URL, LinkedIn background, and an optional “why you” note — leave
                 it blank to have it drafted for you.
               </p>
 
