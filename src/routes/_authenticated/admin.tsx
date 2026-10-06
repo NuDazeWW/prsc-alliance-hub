@@ -1079,7 +1079,7 @@ function Admin() {
             </aside>
           </div>
 
-          <div>
+          <div className="min-w-0">
             <section id="email-center" className="border border-gold/20 p-6 sm:p-8">
               <div className="flex flex-wrap items-center justify-between gap-3">
                 <div className="flex items-center gap-3">
