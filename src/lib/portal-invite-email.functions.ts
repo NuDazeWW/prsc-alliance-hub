@@ -77,6 +77,8 @@ export const sendInviteEmailTest = createServerFn({ method: "POST" })
         html,
         text,
         label: "admin-invitation-test",
+        purpose: "transactional",
+        idempotency_key: `admin-invitation-test-${data.email.toLowerCase()}-${crypto.randomUUID()}`,
       },
       {
         apiKey,
