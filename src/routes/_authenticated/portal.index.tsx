@@ -25,6 +25,7 @@ import {
 } from "lucide-react";
 
 import { acknowledgeDocument, getMyDocuments, getMyHeadshotUrl, getPortalSession } from "@/lib/portal.functions";
+import { INVITE_ROLE_LABELS } from "@/lib/invite-email-config";
 import { StatusTimeline } from "@/components/portal/StatusTimeline";
 import { PortalShell } from "@/components/portal/PortalShell";
 import { isPreviewHost } from "@/routes/_authenticated/route";
@@ -46,6 +47,12 @@ export const Route = createFileRoute("/_authenticated/portal/")({
 });
 
 const entityLabel = { prsc: "PRSC", dis: "DIS", both: "PRSC / DIS" } as const;
+
+const capacityLabel = (role: string) =>
+  INVITE_ROLE_LABELS[role as keyof typeof INVITE_ROLE_LABELS] ?? "Board Member";
+
+const selectedLabel = (role: string) =>
+  role === "advisor" ? "Selected Advisor" : role === "board_member" ? "Board Member" : capacityLabel(role);
 
 const demoMember = {
   id: "demo",
