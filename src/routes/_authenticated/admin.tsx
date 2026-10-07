@@ -1432,7 +1432,7 @@ function Admin() {
                         <td className="py-4 pr-3">
                           <span className={`inline-block border px-2 py-1 text-xs uppercase tracking-[0.12em] ${st.tone}`}>{st.label}</span>
                           {st.detail && <span className="mt-1 block text-sm text-ivory/55">{st.detail}</span>}
-                          {st.progress && (
+                          {st.progress > 0 && (
                             <span className="mt-2 block h-1.5 w-28 bg-ivory/10"><span className="block h-full bg-gold" style={{ width: `${st.progress}%` }} /></span>
                           )}
                         </td>
