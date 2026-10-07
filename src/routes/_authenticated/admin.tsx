@@ -53,7 +53,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { InviteEmail, capitalizeInviteName, inviteEntityCopy } from "@/lib/email-templates/invite";
 import { INVITE_EMAIL_PREVIEW_URL, INVITE_EMAIL_REPLY_TO, INVITE_EMAIL_SUBJECT, INVITE_ROLE_LABELS } from "@/lib/invite-email-config";
-import { sendInviteEmailTest, type InviteEmailReview } from "@/lib/portal-invite-email.functions";
+import type { InviteEmailReview } from "@/lib/portal-invite-email.functions";
 import { PORTAL_EXPERIENCE_QUESTIONS, PORTAL_PERMISSION_LABELS, PORTAL_PROFILE_STAGES, PORTAL_VISIBILITY_PERMISSIONS } from "@/lib/portal-profile-fields";
 
 export const Route = createFileRoute("/_authenticated/admin")({
@@ -357,8 +357,6 @@ function Admin() {
   };
   const [invitePreviewOpen, setInvitePreviewOpen] = useState(false);
   const [invitePreviewHtml, setInvitePreviewHtml] = useState("");
-  const [inviteTestStatus, setInviteTestStatus] = useState("");
-  const [inviteTestSending, setInviteTestSending] = useState(false);
   const inviteFormRef = useRef<HTMLFormElement>(null);
   const [draft, setDraft] = useState<Draft>(emptyDraft);
   const [emailStatus, setEmailStatus] = useState("");
@@ -628,7 +626,6 @@ function Admin() {
     const form = inviteFormRef.current;
     if (!form?.reportValidity()) return;
     setStatus("");
-    setInviteTestStatus("");
     try {
       const html = await render(
         <InviteEmail
@@ -647,22 +644,6 @@ function Admin() {
     }
   }
 
-  async function sendInviteTest() {
-    if (preview) {
-      setInviteTestStatus("Test delivery is available after signing in on the live admin page.");
-      return;
-    }
-    setInviteTestSending(true);
-    setInviteTestStatus("");
-    try {
-      const result = await sendInviteEmailTest({ data: inviteDraft });
-      setInviteTestStatus(`Test sent to ${result.sentTo}. No member was created.`);
-    } catch (error) {
-      setInviteTestStatus(error instanceof Error ? error.message : "The invitation test could not be sent.");
-    } finally {
-      setInviteTestSending(false);
-    }
-  }
 
   async function onUpload(file: File) {
     const text = await file.text();
