@@ -53,7 +53,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { InviteEmail, capitalizeInviteName, inviteEntityCopy } from "@/lib/email-templates/invite";
 import { INVITE_EMAIL_PREVIEW_URL, INVITE_EMAIL_REPLY_TO, INVITE_EMAIL_SUBJECT, INVITE_ROLE_LABELS } from "@/lib/invite-email-config";
-import { sendInviteEmailTest, type InviteEmailReview } from "@/lib/portal-invite-email.functions";
+import type { InviteEmailReview } from "@/lib/portal-invite-email.functions";
 import { PORTAL_EXPERIENCE_QUESTIONS, PORTAL_PERMISSION_LABELS, PORTAL_PROFILE_STAGES, PORTAL_VISIBILITY_PERMISSIONS } from "@/lib/portal-profile-fields";
 
 export const Route = createFileRoute("/_authenticated/admin")({
@@ -357,8 +357,6 @@ function Admin() {
   };
   const [invitePreviewOpen, setInvitePreviewOpen] = useState(false);
   const [invitePreviewHtml, setInvitePreviewHtml] = useState("");
-  const [inviteTestStatus, setInviteTestStatus] = useState("");
-  const [inviteTestSending, setInviteTestSending] = useState(false);
   const inviteFormRef = useRef<HTMLFormElement>(null);
   const [draft, setDraft] = useState<Draft>(emptyDraft);
   const [emailStatus, setEmailStatus] = useState("");
@@ -628,7 +626,6 @@ function Admin() {
     const form = inviteFormRef.current;
     if (!form?.reportValidity()) return;
     setStatus("");
-    setInviteTestStatus("");
     try {
       const html = await render(
         <InviteEmail
@@ -647,22 +644,6 @@ function Admin() {
     }
   }
 
-  async function sendInviteTest() {
-    if (preview) {
-      setInviteTestStatus("Test delivery is available after signing in on the live admin page.");
-      return;
-    }
-    setInviteTestSending(true);
-    setInviteTestStatus("");
-    try {
-      const result = await sendInviteEmailTest({ data: inviteDraft });
-      setInviteTestStatus(`Test sent to ${result.sentTo}. No member was created.`);
-    } catch (error) {
-      setInviteTestStatus(error instanceof Error ? error.message : "The invitation test could not be sent.");
-    } finally {
-      setInviteTestSending(false);
-    }
-  }
 
   async function onUpload(file: File) {
     const text = await file.text();
@@ -1904,13 +1885,9 @@ function Admin() {
             </div>
 
             <div className="border-t border-gold/20 px-5 py-4 sm:px-7">
-              <p className="mb-3 text-sm text-ivory/50">The access button is disabled in this preview. A test goes to the email entered above and does not create an account. Use Send invitation for a working link.</p>
+              <p className="mb-3 text-sm text-ivory/50">This is how the invitation will look. Use Send invitation to deliver it with a working access link.</p>
               <div className="flex flex-wrap items-center justify-end gap-3">
-                {inviteTestStatus && <p aria-live="polite" className="mr-auto text-base text-ivory/70">{inviteTestStatus}</p>}
-                <Button type="button" className="rounded-none border border-gold/40 bg-transparent text-base text-ivory hover:bg-gold/10 hover:text-gold" onClick={() => setInvitePreviewOpen(false)}>Keep editing</Button>
-                <Button type="button" disabled={inviteTestSending || preview} className="rounded-none bg-gold text-base text-navy hover:bg-gold-light hover:text-navy" onClick={() => void sendInviteTest()}>
-                  <Send className="mr-2 h-4 w-4" /> {inviteTestSending ? "Sending test…" : "Send test to this email"}
-                </Button>
+                <Button type="button" className="rounded-none bg-gold text-base text-navy hover:bg-gold-light hover:text-navy" onClick={() => setInvitePreviewOpen(false)}>Keep editing</Button>
               </div>
             </div>
           </div>
