@@ -1156,7 +1156,7 @@ function Admin() {
                     body="Write or edit an email here. Upload Content loads a .txt, .md, or .html file into the body. Use {{first_name}}, {{full_name}}, {{entity}}, {{role}}, and similar tokens — they personalize automatically per recipient. View in Template shows the exact branded email before anything is sent. Select recipients below, then Save Template to keep it or Send to deliver it. Members who already received the loaded template are flagged to prevent duplicates."
                   />
                 </div>
-                <div className="flex items-center gap-2">
+                <div className="flex w-full flex-wrap items-center gap-2 sm:w-auto">
                   <input
                     ref={fileRef}
                     type="file"
@@ -1168,10 +1168,10 @@ function Admin() {
                       e.target.value = "";
                     }}
                   />
-                  <Button type="button" className="rounded-none border border-gold/40 bg-transparent text-base text-ivory hover:bg-gold/10 hover:text-gold" onClick={() => fileRef.current?.click()}>
+                  <Button type="button" className="w-full rounded-none border border-gold/40 bg-transparent text-base text-ivory hover:bg-gold/10 hover:text-gold sm:w-auto" onClick={() => fileRef.current?.click()}>
                     <Upload className="mr-2 h-4 w-4" /> Upload content
                   </Button>
-                  <Button type="button" className="rounded-none bg-gold text-base text-navy hover:bg-gold-light hover:text-navy" onClick={() => setPreviewOpen(true)}>
+                  <Button type="button" className="w-full rounded-none bg-gold text-base text-navy hover:bg-gold-light hover:text-navy sm:w-auto" onClick={() => setPreviewOpen(true)}>
                     <Eye className="mr-2 h-4 w-4" /> View in template
                   </Button>
                 </div>
@@ -1367,7 +1367,7 @@ function Admin() {
               </div>
               <p className="mt-2 text-sm text-ivory/45">Showing {filteredMembers.length} of {members.length} members</p>
 
-              <div className="mt-3 overflow-x-auto border border-gold/20">
+              <div className="mt-3 hidden overflow-x-auto border border-gold/20 sm:block">
                 <table className="w-full min-w-[760px] text-left text-base">
                 <thead className="bg-ivory/5 text-xs uppercase text-gold">
                   <tr>
