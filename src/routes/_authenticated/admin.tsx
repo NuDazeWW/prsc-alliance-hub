@@ -755,7 +755,6 @@ function Admin() {
       setEmailStatus(failed ? `${res.results.length - failed} sent, ${failed} failed.` : `Sent to ${res.results.length} member(s).`);
       setRecipients([]);
       setDraft(emptyDraft);
-      setEditingInvite(false);
       await email.refetch();
     } catch (error) {
       setEmailStatus(error instanceof Error ? error.message : "Sending failed.");
