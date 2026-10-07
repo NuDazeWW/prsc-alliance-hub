@@ -31,8 +31,14 @@ function AcceptInvitationPage() {
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState("Verifying your private invitation…");
   const [invitationEmail, setInvitationEmail] = useState("");
+  const [testOnly, setTestOnly] = useState(false);
 
   useEffect(() => {
+    if (new URLSearchParams(window.location.search).has("preview-only")) {
+      setTestOnly(true);
+      setMessage("");
+      return;
+    }
     let active = true;
     let timeout: number | undefined;
     const confirmInvitation = (email?: string) => {
@@ -119,7 +125,17 @@ function AcceptInvitationPage() {
               <p className="text-[11px] uppercase tracking-[0.22em] text-gold">Invitation accepted</p>
               <h2 className="mt-3 font-display text-4xl">Create your password</h2>
               <p className="mt-4 text-sm leading-6 text-ivory/55">Choose a private password with at least 12 characters. After it is created, sign in with your invitation email and new password.</p>
-              {ready ? (
+              {testOnly ? (
+                <div className="mt-9 space-y-4 border border-gold/30 bg-ivory/[.03] p-5">
+                  <p className="text-[11px] uppercase tracking-[0.22em] text-gold">Test invitation</p>
+                  <p className="text-base leading-7 text-ivory/80">
+                    The button in your test email worked. Test emails show exactly what an invitee receives, but they don't create an account, so there's no password to set here.
+                  </p>
+                  <p className="text-base leading-7 text-ivory/65">
+                    In a real invitation, this page opens ready for the invitee: their invitation email is filled in and they create their password. To try the full journey, use <strong className="font-medium text-ivory">Send invitation</strong> in the Administrator Center.
+                  </p>
+                </div>
+              ) : ready ? (
                 <form onSubmit={submit} className="mt-9 space-y-5">
                   <label className="block text-xs uppercase text-ivory/60">
                     Your invitation email
