@@ -897,6 +897,7 @@ export const releaseMemberDocuments = createServerFn({ method: "POST" })
       },
       "documents-ready-member",
     );
+    await context.supabase.from("portal_activity").insert({ member_id: member.id, actor_user_id: context.userId, event_type: "documents_released", metadata: { count: docs.length } });
     return { ok: true, count: docs.length };
   });
 
@@ -920,6 +921,7 @@ export const confirmExternalSignature = createServerFn({ method: "POST" })
       await supabaseAdmin.from("portal_document_acknowledgements").delete()
         .eq("member_id", data.member_id).eq("document_id", data.document_id).eq("kind", "external_confirmed");
       await supabaseAdmin.from("portal_members").update({ documents_completed_at: null }).eq("id", data.member_id);
+      await supabaseAdmin.from("portal_activity").insert({ member_id: data.member_id, actor_user_id: context.userId, event_type: "boldsign_unconfirmed", metadata: { document_id: data.document_id } });
       return { ok: true };
     }
     const { error } = await supabaseAdmin.from("portal_document_acknowledgements").insert({
