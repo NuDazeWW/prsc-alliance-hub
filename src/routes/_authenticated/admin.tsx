@@ -1156,7 +1156,7 @@ function Admin() {
                     body="Write or edit an email here. Upload Content loads a .txt, .md, or .html file into the body. Use {{first_name}}, {{full_name}}, {{entity}}, {{role}}, and similar tokens — they personalize automatically per recipient. View in Template shows the exact branded email before anything is sent. Select recipients below, then Save Template to keep it or Send to deliver it. Members who already received the loaded template are flagged to prevent duplicates."
                   />
                 </div>
-                <div className="flex items-center gap-2">
+                <div className="flex w-full flex-wrap items-center gap-2 sm:w-auto">
                   <input
                     ref={fileRef}
                     type="file"
@@ -1168,10 +1168,10 @@ function Admin() {
                       e.target.value = "";
                     }}
                   />
-                  <Button type="button" className="rounded-none border border-gold/40 bg-transparent text-base text-ivory hover:bg-gold/10 hover:text-gold" onClick={() => fileRef.current?.click()}>
+                  <Button type="button" className="w-full rounded-none border border-gold/40 bg-transparent text-base text-ivory hover:bg-gold/10 hover:text-gold sm:w-auto" onClick={() => fileRef.current?.click()}>
                     <Upload className="mr-2 h-4 w-4" /> Upload content
                   </Button>
-                  <Button type="button" className="rounded-none bg-gold text-base text-navy hover:bg-gold-light hover:text-navy" onClick={() => setPreviewOpen(true)}>
+                  <Button type="button" className="w-full rounded-none bg-gold text-base text-navy hover:bg-gold-light hover:text-navy sm:w-auto" onClick={() => setPreviewOpen(true)}>
                     <Eye className="mr-2 h-4 w-4" /> View in template
                   </Button>
                 </div>
@@ -1367,7 +1367,7 @@ function Admin() {
               </div>
               <p className="mt-2 text-sm text-ivory/45">Showing {filteredMembers.length} of {members.length} members</p>
 
-              <div className="mt-3 overflow-x-auto border border-gold/20">
+              <div className="mt-3 hidden overflow-x-auto border border-gold/20 sm:block">
                 <table className="w-full min-w-[760px] text-left text-base">
                 <thead className="bg-ivory/5 text-xs uppercase text-gold">
                   <tr>
@@ -1518,6 +1518,134 @@ function Admin() {
                   })}
                 </tbody>
               </table>
+              </div>
+
+              <div className="mt-3 space-y-3 sm:hidden">
+                {filteredMembers.length === 0 && (
+                  <p className="border border-gold/20 p-4 text-ivory/50">No members match these filters.</p>
+                )}
+                {filteredMembers.map((m: any) => {
+                  const st = stageOf(m);
+                  const all = sendsByMember.get(m.id) ?? [];
+                  const list = all.filter((s) => s.status === "sent");
+                  const failed = all.filter((s) => s.status !== "sent");
+                  const revoked = m.status === "revoked";
+                  return (
+                    <article key={m.id} className="border border-gold/20 p-4">
+                      <div className="flex items-start gap-3">
+                        <input
+                          type="checkbox"
+                          aria-label={`Select ${m.first_name} ${m.last_name}`}
+                          checked={selectedMemberIds.includes(m.id)}
+                          onChange={(e) => setSelectedMemberIds((current) => e.target.checked ? [...current, m.id] : current.filter((id) => id !== m.id))}
+                          className="mt-1 h-4 w-4 shrink-0 accent-[var(--color-gold)]"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => setDetailId(m.id)}
+                          className="min-w-0 flex-1 text-left underline decoration-gold/30 underline-offset-4 transition-colors hover:text-gold"
+                        >
+                          <strong className="font-medium">
+                            {m.first_name} {m.last_name}
+                          </strong>
+                          <span className="block break-all text-sm text-ivory/40">{m.email}</span>
+                          <span className={`mt-1 inline-block text-xs uppercase tracking-[0.14em] ${revoked ? "text-red-300/80" : "text-ivory/40"}`}>
+                            Access: {m.status}
+                          </span>
+                        </button>
+                        <span className="shrink-0 uppercase text-ivory/70">{m.entity}</span>
+                      </div>
+
+                      <div className="mt-3 border-t border-ivory/10 pt-3">
+                        <span className={`inline-block border px-2 py-1 text-xs uppercase tracking-[0.12em] ${st.tone}`}>{st.label}</span>
+                        {st.detail && <span className="mt-1 block text-sm text-ivory/55">{st.detail}</span>}
+                        {st.progress > 0 && (
+                          <span className="mt-2 block h-1.5 w-full bg-ivory/10"><span className="block h-full bg-gold" style={{ width: `${st.progress}%` }} /></span>
+                        )}
+                      </div>
+
+                      <div className="mt-3">
+                        <label className="mb-1 block text-xs uppercase tracking-[0.14em] text-ivory/45">Package status</label>
+                        <select
+                          value={m.package_status}
+                          onChange={(e) => void changePackage(m.id, e.target.value)}
+                          className="h-10 w-full min-w-0 rounded-md border border-input bg-navy px-2 text-base"
+                        >
+                          <option value="awaiting_profile">Awaiting profile</option>
+                          <option value="in_preparation">In preparation</option>
+                          <option value="profile_received">Profile received</option>
+                          <option value="package_ready">Package ready</option>
+                        </select>
+                      </div>
+
+                      <div className="mt-3">
+                        <label className="mb-1 block text-xs uppercase tracking-[0.14em] text-ivory/45">Emails received</label>
+                        {all.length === 0 ? (
+                          <span className="text-sm text-ivory/40">None yet</span>
+                        ) : (
+                          <span className="flex flex-col gap-2">
+                            {all.map((sendRecord) => (
+                              <label key={sendRecord.id} className="flex cursor-pointer items-start gap-2 border border-gold/20 px-2 py-1.5 text-xs text-ivory/75">
+                                <input
+                                  type="checkbox"
+                                  aria-label={`Select email ${sendRecord.template_name} to ${m.first_name} ${m.last_name}`}
+                                  checked={selectedEmailIds.includes(sendRecord.id)}
+                                  onChange={(e) => setSelectedEmailIds((current) => e.target.checked ? [...current, sendRecord.id] : current.filter((id) => id !== sendRecord.id))}
+                                  className="mt-0.5 h-3.5 w-3.5 shrink-0 accent-[var(--color-gold)]"
+                                />
+                                {sendRecord.status === "sent" ? <CheckCircle2 className="mt-0.5 h-3 w-3 shrink-0 text-gold" /> : <AlertTriangle className="mt-0.5 h-3 w-3 shrink-0 text-red-300/85" />}
+                                <span>
+                                  <span className="block">{sendRecord.template_name}</span>
+                                  <span className="block text-ivory/40">{new Date(sendRecord.created_at).toLocaleDateString()}</span>
+                                </span>
+                              </label>
+                            ))}
+                          </span>
+                        )}
+                        {failed.length > 0 && (
+                          <span className="mt-1.5 flex items-center gap-1.5 text-xs text-red-300/85">
+                            <AlertTriangle className="h-3 w-3" /> {failed.length} failed send{failed.length > 1 ? "s" : ""}
+                          </span>
+                        )}
+                        <span className="mt-1 block text-xs text-ivory/35">
+                          Last sent: {list[0] ? new Date(list[0].created_at).toLocaleDateString() : "—"}
+                        </span>
+                      </div>
+
+                      <div className="mt-3 flex flex-col gap-2">
+                        <button
+                          type="button"
+                          onClick={() => setDetailId(m.id)}
+                          className="flex items-center justify-center gap-1.5 border border-gold/40 px-2.5 py-2 text-sm text-gold transition-colors hover:bg-gold/10"
+                        >
+                          <Eye className="h-3.5 w-3.5" /> View profile
+                        </button>
+                        {st.nudge && !revoked && (
+                          <button
+                            type="button"
+                            disabled={nudging === m.id}
+                            onClick={() => void nudge(m)}
+                            className="flex items-center justify-center gap-1.5 border border-gold/40 px-2.5 py-2 text-sm text-gold transition-colors hover:bg-gold/10 disabled:opacity-50"
+                          >
+                            <Send className="h-3.5 w-3.5" /> {nudging === m.id ? "Sending…" : "Nudge now"}
+                          </button>
+                        )}
+                        <button
+                          type="button"
+                          onClick={() => void changeAccess(m.id, revoked ? "active" : "revoked")}
+                          className={`flex items-center justify-center gap-1.5 border px-2.5 py-2 text-sm transition-colors ${
+                            revoked
+                              ? "border-ivory/25 text-ivory/70 hover:border-gold/40 hover:text-gold"
+                              : "border-red-400/35 text-red-300/85 hover:bg-red-400/10"
+                          }`}
+                        >
+                          {revoked ? <ShieldCheck className="h-3.5 w-3.5" /> : <ShieldOff className="h-3.5 w-3.5" />}
+                          {revoked ? "Reactivate" : "Revoke access"}
+                        </button>
+                      </div>
+                    </article>
+                  );
+                })}
               </div>
               {memberBusy && <p className="mt-3 text-base text-ivory/60">{memberBusy}</p>}
             </section>
