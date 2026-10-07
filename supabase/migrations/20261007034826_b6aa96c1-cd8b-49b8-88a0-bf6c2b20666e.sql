@@ -1,0 +1,2 @@
+ALTER TABLE public.portal_activity DROP CONSTRAINT IF EXISTS portal_activity_event_type_check;
+ALTER TABLE public.portal_activity ADD CONSTRAINT portal_activity_event_type_check CHECK (event_type ~ '^[a-z_]{2,60}$');
