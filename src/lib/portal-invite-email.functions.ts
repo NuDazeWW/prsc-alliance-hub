@@ -87,5 +87,5 @@ export const sendInviteEmailTest = createServerFn({ method: "POST" })
     );
 
     if (!result.success) throw new Error("The invitation test could not be delivered.");
-    return { ok: true, sentTo: ADMIN_EMAIL };
+    return { ok: true, sentTo: data.email.toLowerCase() };
   });
