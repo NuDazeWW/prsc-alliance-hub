@@ -343,12 +343,77 @@ export const getAdminOverview = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
     await assertAdmin(context);
-    const [{ data: members }, { data: inquiries }, { data: activity }] = await Promise.all([
+    const [{ data: members }, { data: inquiries }, { data: activity }, { data: profiles }, { data: acks }] = await Promise.all([
       context.supabase.from("portal_members").select("*").order("invited_at", { ascending: false }),
       context.supabase.from("portal_inquiries").select("*").order("created_at", { ascending: false }),
-      context.supabase.from("portal_activity").select("*").order("created_at", { ascending: false }).limit(50),
+      context.supabase.from("portal_activity").select("*").order("created_at", { ascending: false }).limit(200),
+      context.supabase.from("portal_profiles").select("member_id, current_stage, submitted_at, updated_at, preferred_name, professional_role, current_organization, preferred_email, preferred_phone, experience_answers, visibility_instructions, restriction_status, restriction_details, final_notes, questions"),
+      context.supabase.from("portal_document_acknowledgements").select("member_id, document_id"),
     ]);
-    return { members: (members ?? []) as PortalMember[], inquiries: inquiries ?? [], activity: activity ?? [] };
+    const list = (members ?? []) as (PortalMember & { documents_released_at?: string | null; documents_completed_at?: string | null })[];
+    const docProgress: Record<string, { total: number; done: number }> = {};
+    await Promise.all(list.map(async (m) => {
+      if (!m.documents_released_at) return;
+      const docs = await applicableDocuments(context.supabase, m as unknown as DocMember);
+      const done = new Set((acks ?? []).filter((a: any) => a.member_id === m.id).map((a: any) => a.document_id));
+      docProgress[m.id] = { total: docs.length, done: docs.filter((d) => done.has(d.id)).length };
+    }));
+    return { members: list, inquiries: inquiries ?? [], activity: activity ?? [], profiles: profiles ?? [], docProgress };
+  });
+
+export const nudgeMember = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input) => z.object({ member_id: z.string().uuid() }).parse(input))
+  .handler(async ({ context, data }) => {
+    await assertAdmin(context);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { sendPortalEmail, founderSignature } = await import("@/lib/portal-notify.server");
+    const { data: m } = await supabaseAdmin.from("portal_members")
+      .select("id, email, first_name, entity, role, status, first_access_at, documents_released_at, documents_completed_at")
+      .eq("id", data.member_id).single();
+    if (!m) throw new Error("Member not found");
+    if (m.status === "revoked") throw new Error("This member's access is revoked");
+    const first = m.first_name?.trim() || "there";
+    let kind: string;
+    if (!m.first_access_at) {
+      const redirectTo = new URL("https://access.prscstandards.org/accept-invitation");
+      redirectTo.searchParams.set("first_name", m.first_name ?? "");
+      redirectTo.searchParams.set("entity", m.entity);
+      redirectTo.searchParams.set("role", m.role);
+      const { data: link, error } = await supabaseAdmin.auth.admin.generateLink({ type: "magiclink", email: m.email, options: { redirectTo: redirectTo.toString() } });
+      if (error || !link?.properties?.action_link) throw new Error("Could not create a fresh invitation link");
+      await sendPortalEmail(m.email, {
+        subject: "A reminder: your private Welcome Center is waiting", eyebrow: "Gentle reminder",
+        heading: `${first}, your Welcome Center is ready for you.`,
+        body: "We invited you into the private Board & Advisor Welcome Center and wanted to make sure the note reached you.\n\nIt only takes a few minutes: create your password, get reacquainted with where we are today, and share the few details we need to prepare your individualized package.",
+        ctaLabel: "Access Your Private Welcome Center →", ctaUrl: link.properties.action_link,
+        ctaSubtext: "This secure link lets you create your own password. No password is emailed.",
+        signatures: founderSignature(),
+      }, "nudge-invite");
+      kind = "invitation";
+    } else if (m.documents_released_at && !m.documents_completed_at) {
+      await sendPortalEmail(m.email, {
+        subject: "A reminder: your documents are waiting", eyebrow: "Gentle reminder",
+        heading: `${first}, a few documents are still open.`,
+        body: "Your individualized documents are ready in your private Welcome Center.\n\nSign in, open Your Documents, and read, initial, or sign each one right in the portal.",
+        ctaLabel: "Review & Sign Your Documents", ctaUrl: "https://access.prscstandards.org/portal",
+        signatures: founderSignature(),
+      }, "nudge-documents");
+      kind = "documents";
+    } else {
+      const { data: p } = await supabaseAdmin.from("portal_profiles").select("submitted_at").eq("member_id", m.id).maybeSingle();
+      if (p?.submitted_at) throw new Error("Nothing is waiting on this member right now");
+      await sendPortalEmail(m.email, {
+        subject: "A reminder: your private profile", eyebrow: "Gentle reminder",
+        heading: `${first}, your profile is almost there.`,
+        body: "Your progress is saved. When you have a few minutes, sign in and finish your private profile so we can prepare your individualized package.",
+        ctaLabel: "Complete Your Profile", ctaUrl: "https://access.prscstandards.org/portal/profile",
+        signatures: founderSignature(),
+      }, "nudge-profile");
+      kind = "profile";
+    }
+    await supabaseAdmin.from("portal_activity").insert({ member_id: m.id, actor_user_id: context.userId, event_type: "nudge_sent", metadata: { kind } });
+    return { ok: true, kind };
   });
 
 export const getMemberDetail = createServerFn({ method: "GET" })
@@ -832,6 +897,7 @@ export const releaseMemberDocuments = createServerFn({ method: "POST" })
       },
       "documents-ready-member",
     );
+    await context.supabase.from("portal_activity").insert({ member_id: member.id, actor_user_id: context.userId, event_type: "documents_released", metadata: { count: docs.length } });
     return { ok: true, count: docs.length };
   });
 
@@ -855,6 +921,7 @@ export const confirmExternalSignature = createServerFn({ method: "POST" })
       await supabaseAdmin.from("portal_document_acknowledgements").delete()
         .eq("member_id", data.member_id).eq("document_id", data.document_id).eq("kind", "external_confirmed");
       await supabaseAdmin.from("portal_members").update({ documents_completed_at: null }).eq("id", data.member_id);
+      await supabaseAdmin.from("portal_activity").insert({ member_id: data.member_id, actor_user_id: context.userId, event_type: "boldsign_unconfirmed", metadata: { document_id: data.document_id } });
       return { ok: true };
     }
     const { error } = await supabaseAdmin.from("portal_document_acknowledgements").insert({

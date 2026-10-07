@@ -7,6 +7,7 @@ import {
   Activity,
   AlertTriangle,
   CheckCircle2,
+  Download,
   Clock3,
   Eye,
   FileText,
@@ -28,6 +29,7 @@ import {
   importPortalMembers,
   invitePortalMember,
   deletePortalMember,
+  nudgeMember,
   setMemberAccess,
   setMemberPackageStatus,
   updateInquiry,
@@ -368,6 +370,11 @@ function Admin() {
   const fileRef = useRef<HTMLInputElement>(null);
   const [detailId, setDetailId] = useState<string | null>(null);
   const [memberBusy, setMemberBusy] = useState("");
+  const [nudging, setNudging] = useState("");
+  const [memberSearch, setMemberSearch] = useState("");
+  const [filterEntity, setFilterEntity] = useState("");
+  const [filterRole, setFilterRole] = useState("");
+  const [filterStage, setFilterStage] = useState("");
   const [selectedMemberIds, setSelectedMemberIds] = useState<string[]>([]);
   const [selectedEmailIds, setSelectedEmailIds] = useState<string[]>([]);
   const [inquiryDraft, setInquiryDraft] = useState<Record<string, string>>({});
@@ -804,6 +811,65 @@ function Admin() {
     );
 
   const d = overview.data;
+  const profilesById = new Map<string, any>(((d as any).profiles ?? []).map((p: any) => [p.member_id, p]));
+  const docProgress: Record<string, { total: number; done: number }> = (d as any).docProgress ?? {};
+  const stageOf = (m: any) => {
+    const p = profilesById.get(m.id);
+    const prog = docProgress[m.id];
+    if (m.status === "revoked") return { key: "revoked", label: "Access revoked", detail: "", tone: "border-red-400/35 text-red-300/85", nudge: false, progress: 0 };
+    if (!m.first_access_at && !p) return { key: "invited", label: "Invited", detail: "Hasn't signed in yet", tone: "border-ivory/25 text-ivory/70", nudge: true, progress: 0 };
+    if (!p?.submitted_at) return { key: "in_progress", label: "Profile in progress", detail: p ? `Step ${Math.min(p.current_stage ?? 1, 4)} of 4` : "Not started", tone: "border-gold/40 text-gold", nudge: true, progress: p ? Math.round((Math.min(p.current_stage ?? 1, 4) / 4) * 100) : 0 };
+    if (!m.documents_released_at) return { key: "submitted", label: "Profile submitted", detail: "Ready for documents", tone: "border-gold/60 text-gold", nudge: false, progress: 0 };
+    if (m.documents_completed_at) return { key: "complete", label: "Complete", detail: prog ? `${prog.done} of ${prog.total} documents` : "", tone: "border-gold bg-gold/15 text-gold", nudge: false, progress: 100 };
+    return { key: "documents", label: "Documents open", detail: prog ? `${prog.done} of ${prog.total} complete` : "Released", tone: "border-gold/40 text-gold", nudge: true, progress: prog && prog.total ? Math.round((prog.done / prog.total) * 100) : 0 };
+  };
+  const q = memberSearch.trim().toLowerCase();
+  const filteredMembers = d.members.filter((m: any) => {
+    if (filterEntity && m.entity !== filterEntity) return false;
+    if (filterRole) {
+      const roles = m.role === "prsc_board_dis_advisor" || m.role === "prsc_advisor_dis_board" ? ["board_member", "advisor"] : [m.role];
+      if (!roles.includes(filterRole)) return false;
+    }
+    if (filterStage && stageOf(m).key !== filterStage) return false;
+    if (q && ![m.first_name, m.last_name, m.email, m.organization].join(" ").toLowerCase().includes(q)) return false;
+    return true;
+  });
+  const nudge = async (m: any) => {
+    if (preview) { setMemberBusy("Preview mode: Nudge now sends from the live admin page."); return; }
+    if (!confirm(`Send ${m.first_name} ${m.last_name} a reminder email now?`)) return;
+    setNudging(m.id);
+    try {
+      const r = await nudgeMember({ data: { member_id: m.id } });
+      setMemberBusy(`Reminder sent to ${m.first_name} (${r.kind}).`);
+      await overview.refetch();
+    } catch (err) {
+      setMemberBusy((err as Error).message || "The reminder could not be sent.");
+    } finally { setNudging(""); }
+  };
+  const exportCsv = () => {
+    const esc = (v: unknown) => `"${String(v ?? "").replaceAll('"', '""')}"`;
+    const date = (v: string | null | undefined) => (v ? new Date(v).toISOString().slice(0, 10) : "");
+    const header = ["First name", "Last name", "Email", "Organization", "Title", "Company", "Role", "Access", "Stage", "Invited", "Last sign-in", "Profile submitted", "Documents done", "Documents total", "Documents completed",
+      "Preferred name", "Professional role", "Current organization", "Preferred email", "Preferred phone",
+      ...PORTAL_EXPERIENCE_QUESTIONS, ...PORTAL_VISIBILITY_PERMISSIONS, "Restrictions", "Restriction details", "Final notes", "Questions"];
+    const rows = filteredMembers.map((m: any) => {
+      const p = profilesById.get(m.id) ?? {};
+      const prog = docProgress[m.id];
+      const ans = p.experience_answers ?? {};
+      const vis = p.visibility_instructions ?? {};
+      return [m.first_name, m.last_name, m.email, m.organization, m.title, String(m.entity).toUpperCase(), INVITE_ROLE_LABELS[m.role as keyof typeof INVITE_ROLE_LABELS] ?? m.role, m.status, stageOf(m).label,
+        date(m.invited_at), date(m.last_access_at), date(p.submitted_at), prog?.done ?? "", prog?.total ?? "", date(m.documents_completed_at),
+        p.preferred_name, p.professional_role, p.current_organization, p.preferred_email, p.preferred_phone,
+        ...PORTAL_EXPERIENCE_QUESTIONS.map((_, i) => ans[`q${i + 1}`] ?? ""),
+        ...PORTAL_VISIBILITY_PERMISSIONS.map((_, i) => PORTAL_PERMISSION_LABELS[vis[`p${i + 1}`]] ?? ""),
+        p.restriction_status, p.restriction_details, p.final_notes, p.questions].map(esc).join(",");
+    });
+    const blob = new Blob(["\ufeff" + [header.map(esc).join(","), ...rows].join("\r\n")], { type: "text/csv;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url; a.download = `members-${new Date().toISOString().slice(0, 10)}.csv`; a.click();
+    URL.revokeObjectURL(url);
+  };
 
   return (
     <PortalShell
@@ -1278,8 +1344,31 @@ function Admin() {
                 </ul>
               </div>
 
-              <div className="mt-5 overflow-x-auto border border-gold/20">
-                <table className="w-full min-w-[560px] text-left text-base">
+              <div className="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-[2fr_1fr_1fr_1fr_auto]">
+                <Input value={memberSearch} onChange={(e) => setMemberSearch(e.target.value)} placeholder="Search name, email or organization" className="min-w-0 text-base" aria-label="Search members" />
+                <select aria-label="Filter by company" value={filterEntity} onChange={(e) => setFilterEntity(e.target.value)} className="h-10 w-full min-w-0 border border-input bg-navy px-2 text-base">
+                  <option value="">All companies</option><option value="prsc">PRSC</option><option value="dis">DIS</option><option value="both">Both</option>
+                </select>
+                <select aria-label="Filter by role" value={filterRole} onChange={(e) => setFilterRole(e.target.value)} className="h-10 w-full min-w-0 border border-input bg-navy px-2 text-base">
+                  <option value="">All roles</option><option value="board_member">Board members</option><option value="advisor">Advisors</option>
+                </select>
+                <select aria-label="Filter by stage" value={filterStage} onChange={(e) => setFilterStage(e.target.value)} className="h-10 w-full min-w-0 border border-input bg-navy px-2 text-base">
+                  <option value="">All stages</option>
+                  <option value="invited">Invited — not signed in</option>
+                  <option value="in_progress">Profile in progress</option>
+                  <option value="submitted">Profile submitted</option>
+                  <option value="documents">Documents open</option>
+                  <option value="complete">Complete</option>
+                  <option value="revoked">Access revoked</option>
+                </select>
+                <Button type="button" variant="outline" className="rounded-none" onClick={exportCsv}>
+                  <Download className="h-4 w-4" /> Export CSV
+                </Button>
+              </div>
+              <p className="mt-2 text-sm text-ivory/45">Showing {filteredMembers.length} of {members.length} members</p>
+
+              <div className="mt-3 overflow-x-auto border border-gold/20">
+                <table className="w-full min-w-[760px] text-left text-base">
                 <thead className="bg-ivory/5 text-xs uppercase text-gold">
                   <tr>
                     <th className="p-4">
@@ -1295,13 +1384,18 @@ function Admin() {
                       </label>
                     </th>
                     <th>Designation</th>
+                    <th className="pr-3">Where they are</th>
                     <th>Package status</th>
                     <th>Emails received</th>
                     <th className="pr-4">Actions</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {d.members.map((m: any) => {
+                  {filteredMembers.length === 0 && (
+                    <tr><td colSpan={6} className="p-4 text-ivory/50">No members match these filters.</td></tr>
+                  )}
+                  {filteredMembers.map((m: any) => {
+                    const st = stageOf(m);
                     const all = sendsByMember.get(m.id) ?? [];
                     const list = all.filter((s) => s.status === "sent");
                     const failed = all.filter((s) => s.status !== "sent");
@@ -1335,6 +1429,13 @@ function Admin() {
                           </div>
                         </td>
                         <td className="uppercase">{m.entity}</td>
+                        <td className="py-4 pr-3">
+                          <span className={`inline-block border px-2 py-1 text-xs uppercase tracking-[0.12em] ${st.tone}`}>{st.label}</span>
+                          {st.detail && <span className="mt-1 block text-sm text-ivory/55">{st.detail}</span>}
+                          {st.progress > 0 && (
+                            <span className="mt-2 block h-1.5 w-28 bg-ivory/10"><span className="block h-full bg-gold" style={{ width: `${st.progress}%` }} /></span>
+                          )}
+                        </td>
                         <td className="py-4 pr-3">
                           <select
                             value={m.package_status}
@@ -1388,6 +1489,16 @@ function Admin() {
                             >
                               <Eye className="h-3.5 w-3.5" /> View profile
                             </button>
+                            {st.nudge && !revoked && (
+                              <button
+                                type="button"
+                                disabled={nudging === m.id}
+                                onClick={() => void nudge(m)}
+                                className="flex items-center gap-1.5 border border-gold/40 px-2.5 py-1.5 text-sm text-gold transition-colors hover:bg-gold/10 disabled:opacity-50"
+                              >
+                                <Send className="h-3.5 w-3.5" /> {nudging === m.id ? "Sending…" : "Nudge now"}
+                              </button>
+                            )}
                             <button
                               type="button"
                               onClick={() => void changeAccess(m.id, revoked ? "active" : "revoked")}
@@ -1468,6 +1579,35 @@ function Admin() {
                   );
                 })
               )}
+              </div>
+            </section>
+
+            <section className="border border-gold/20 p-6 sm:p-8">
+              <div className="flex items-start justify-between gap-3">
+                <h2 id="activity-log" className="font-display text-3xl">Activity log</h2>
+                <InfoTip title="Activity log" body="A dated record of key steps: invitations, profile submissions, documents released, signatures, BoldSign check-offs, signed copies sent, and reminders you sent. Kept for your records in case anything is ever questioned." />
+              </div>
+              <div className="mt-5 max-h-[28rem] overflow-y-auto border border-gold/15">
+                {d.activity.filter((a: any) => a.event_type).length === 0 ? (
+                  <p className="p-4 text-base text-ivory/45">No activity recorded yet.</p>
+                ) : (
+                  <ul className="divide-y divide-ivory/10">
+                    {d.activity.filter((a: any) => a.event_type).map((a: any) => {
+                      const who = members.find((x) => x.id === a.member_id);
+                      const byAdmin = a.actor_user_id && who && a.actor_user_id !== who.user_id;
+                      return (
+                        <li key={a.id} className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1 px-4 py-3">
+                          <span className="min-w-0 text-base text-ivory/80">
+                            {activityLabel(a.event_type)}
+                            {a.event_type === "nudge_sent" && a.metadata?.kind ? ` (${a.metadata.kind})` : ""}
+                            <span className="text-ivory/45"> · {who ? `${who.first_name} ${who.last_name}` : "Member"}{byAdmin ? " · by admin" : ""}</span>
+                          </span>
+                          <span className="shrink-0 text-sm text-ivory/45">{new Date(a.created_at).toLocaleString()}</span>
+                        </li>
+                      );
+                    })}
+                  </ul>
+                )}
               </div>
             </section>
           </div>
@@ -1728,6 +1868,15 @@ function activityLabel(eventType: string) {
     package_status_changed: "Package status updated",
     document_added: "Document added",
     document_acknowledged: "Document viewed and initialed",
+    documents_released: "Documents released",
+    boldsign_confirmed: "BoldSign signature confirmed",
+    boldsign_unconfirmed: "BoldSign check-off removed",
+    signed_copy_sent: "Signed copy emailed",
+    nudge_sent: "Reminder sent",
+    invited: "Invited",
+    invite_resent: "Invitation re-sent",
+    accessed: "Signed in",
+    profile_saved: "Profile progress saved",
   };
   return labels[eventType] ?? eventType.replaceAll("_", " ").replace(/^./, (letter) => letter.toUpperCase());
 }

@@ -136,6 +136,12 @@ function PortalHome() {
   const signDocs = myDocs.filter((d) => d.category === "sign");
   const readDocs = myDocs.filter((d) => d.category === "read");
   const acknowledged = new Set(documents.data?.acknowledged ?? []);
+  const signLeft = signDocs.filter((d) => !acknowledged.has(d.id)).length;
+  const readLeft = readDocs.filter((d) => !acknowledged.has(d.id)).length;
+  const allDone = documentsReleased && signLeft + readLeft === 0;
+  const docSummary = allDone
+    ? `All ${myDocs.length} documents complete — thank you.`
+    : `${myDocs.length - signLeft - readLeft} of ${myDocs.length} complete · ${[signLeft ? `${signLeft} to sign` : "", readLeft ? `${readLeft} to acknowledge` : ""].filter(Boolean).join(", ")}`;
 
 
   const sideNav = [
@@ -157,19 +163,23 @@ function PortalHome() {
             <div className="flex min-w-0 items-center gap-3">
               <p className="whitespace-nowrap text-[9px] uppercase tracking-[0.18em] text-gold">Your Next Step</p>
               <span className="h-3 w-px bg-gold/25" />
-              <p className="hidden truncate text-[11px] text-ivory/55 sm:block">
+              <p className="truncate text-[11px] text-ivory/55">
                 {profileComplete
                   ? documentsReleased
-                    ? "Your documents are ready to review."
+                    ? docSummary
                     : "Your profile is received; your documents are being prepared."
                   : "Complete your private profile to begin."}
               </p>
             </div>
-            {profileComplete && documentsReleased && (
+            {profileComplete && documentsReleased && (allDone ? (
+              <Link to="/portal/summary" className="shrink-0 text-[10px] uppercase tracking-[0.14em] text-gold hover:text-ivory">
+                View your summary
+              </Link>
+            ) : (
               <button type="button" onClick={() => setPanel("documents")} className="shrink-0 text-[10px] uppercase tracking-[0.14em] text-gold hover:text-ivory">
                 Review documents
               </button>
-            )}
+            ))}
           </div>
           <StatusTimeline
             horizontal
