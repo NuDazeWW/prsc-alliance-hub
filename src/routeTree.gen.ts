@@ -30,6 +30,7 @@ import { Route as AuthenticatedPortalIndexRouteImport } from './routes/_authenti
 import { Route as AuthenticatedPortalProfileRouteImport } from './routes/_authenticated/portal.profile'
 import { Route as AuthenticatedPortalQuestionsRouteImport } from './routes/_authenticated/portal.questions'
 import { Route as AuthenticatedPortalSummaryRouteImport } from './routes/_authenticated/portal.summary'
+import { Route as ApiPublicBoldsignWebhookRouteImport } from './routes/api/public/boldsign-webhook'
 import { Route as ApiPublicInviteRemindersRouteImport } from './routes/api/public/invite-reminders'
 import { Route as LovableEmailEventsRouteImport } from './routes/lovable/email/events'
 import { Route as LovableEmailAuthPreviewRouteImport } from './routes/lovable/email/auth/preview'
@@ -144,6 +145,12 @@ const AuthenticatedPortalSummaryRoute =
     path: '/portal/summary',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const ApiPublicBoldsignWebhookRoute =
+  ApiPublicBoldsignWebhookRouteImport.update({
+    id: '/api/public/boldsign-webhook',
+    path: '/api/public/boldsign-webhook',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ApiPublicInviteRemindersRoute =
   ApiPublicInviteRemindersRouteImport.update({
     id: '/api/public/invite-reminders',
@@ -186,6 +193,7 @@ export interface FileRoutesByFullPath {
   '/portal/profile': typeof AuthenticatedPortalProfileRoute
   '/portal/questions': typeof AuthenticatedPortalQuestionsRoute
   '/portal/summary': typeof AuthenticatedPortalSummaryRoute
+  '/api/public/boldsign-webhook': typeof ApiPublicBoldsignWebhookRoute
   '/api/public/invite-reminders': typeof ApiPublicInviteRemindersRoute
   '/lovable/email/events': typeof LovableEmailEventsRoute
   '/portal/': typeof AuthenticatedPortalIndexRoute
@@ -212,6 +220,7 @@ export interface FileRoutesByTo {
   '/portal/profile': typeof AuthenticatedPortalProfileRoute
   '/portal/questions': typeof AuthenticatedPortalQuestionsRoute
   '/portal/summary': typeof AuthenticatedPortalSummaryRoute
+  '/api/public/boldsign-webhook': typeof ApiPublicBoldsignWebhookRoute
   '/api/public/invite-reminders': typeof ApiPublicInviteRemindersRoute
   '/lovable/email/events': typeof LovableEmailEventsRoute
   '/portal': typeof AuthenticatedPortalIndexRoute
@@ -240,6 +249,7 @@ export interface FileRoutesById {
   '/_authenticated/portal/profile': typeof AuthenticatedPortalProfileRoute
   '/_authenticated/portal/questions': typeof AuthenticatedPortalQuestionsRoute
   '/_authenticated/portal/summary': typeof AuthenticatedPortalSummaryRoute
+  '/api/public/boldsign-webhook': typeof ApiPublicBoldsignWebhookRoute
   '/api/public/invite-reminders': typeof ApiPublicInviteRemindersRoute
   '/lovable/email/events': typeof LovableEmailEventsRoute
   '/_authenticated/portal/': typeof AuthenticatedPortalIndexRoute
@@ -268,6 +278,7 @@ export interface FileRouteTypes {
     | '/portal/profile'
     | '/portal/questions'
     | '/portal/summary'
+    | '/api/public/boldsign-webhook'
     | '/api/public/invite-reminders'
     | '/lovable/email/events'
     | '/portal/'
@@ -294,6 +305,7 @@ export interface FileRouteTypes {
     | '/portal/profile'
     | '/portal/questions'
     | '/portal/summary'
+    | '/api/public/boldsign-webhook'
     | '/api/public/invite-reminders'
     | '/lovable/email/events'
     | '/portal'
@@ -321,6 +333,7 @@ export interface FileRouteTypes {
     | '/_authenticated/portal/profile'
     | '/_authenticated/portal/questions'
     | '/_authenticated/portal/summary'
+    | '/api/public/boldsign-webhook'
     | '/api/public/invite-reminders'
     | '/lovable/email/events'
     | '/_authenticated/portal/'
@@ -345,6 +358,7 @@ export interface RootRouteChildren {
   GovernanceCharterRoute: typeof GovernanceCharterRoute
   GovernanceWrittenStandardsRoute: typeof GovernanceWrittenStandardsRoute
   VanguardHomeRoute: typeof VanguardHomeRoute
+  ApiPublicBoldsignWebhookRoute: typeof ApiPublicBoldsignWebhookRoute
   ApiPublicInviteRemindersRoute: typeof ApiPublicInviteRemindersRoute
   LovableEmailEventsRoute: typeof LovableEmailEventsRoute
   LovableEmailAuthPreviewRoute: typeof LovableEmailAuthPreviewRoute
@@ -500,6 +514,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedPortalSummaryRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/api/public/boldsign-webhook': {
+      id: '/api/public/boldsign-webhook'
+      path: '/api/public/boldsign-webhook'
+      fullPath: '/api/public/boldsign-webhook'
+      preLoaderRoute: typeof ApiPublicBoldsignWebhookRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/invite-reminders': {
       id: '/api/public/invite-reminders'
       path: '/api/public/invite-reminders'
@@ -567,6 +588,7 @@ const rootRouteChildren: RootRouteChildren = {
   GovernanceCharterRoute: GovernanceCharterRoute,
   GovernanceWrittenStandardsRoute: GovernanceWrittenStandardsRoute,
   VanguardHomeRoute: VanguardHomeRoute,
+  ApiPublicBoldsignWebhookRoute: ApiPublicBoldsignWebhookRoute,
   ApiPublicInviteRemindersRoute: ApiPublicInviteRemindersRoute,
   LovableEmailEventsRoute: LovableEmailEventsRoute,
   LovableEmailAuthPreviewRoute: LovableEmailAuthPreviewRoute,
