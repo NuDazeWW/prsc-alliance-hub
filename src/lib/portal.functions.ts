@@ -649,7 +649,7 @@ export const getMyDocuments = createServerFn({ method: "GET" })
     };
   });
 
-async function maybeCompletePackage(member: { id: string; email: string; first_name: string | null; last_name: string | null; entity: string; role: string; documents_completed_at: string | null }) {
+export async function maybeCompletePackage(member: { id: string; email: string; first_name: string | null; last_name: string | null; entity: string; role: string; documents_completed_at: string | null }) {
   const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
   if (member.documents_completed_at) return;
   const docs = await applicableDocuments(supabaseAdmin, member);
