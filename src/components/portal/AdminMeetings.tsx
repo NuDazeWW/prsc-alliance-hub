@@ -59,6 +59,7 @@ export function AdminMeetings() {
   const [location, setLocation] = useState("");
   const [virtualLink, setVirtualLink] = useState("");
   const [duration, setDuration] = useState(60);
+  const [respondBy, setRespondBy] = useState("");
   const [slotInputs, setSlotInputs] = useState<string[]>(["", "", ""]);
   const [invited, setInvited] = useState<string[]>([]);
 
@@ -101,6 +102,7 @@ export function AdminMeetings() {
           location: location.trim() || undefined,
           virtual_link: virtualLink.trim() || undefined,
           duration_minutes: duration,
+          respond_by: respondBy ? new Date(respondBy).toISOString() : undefined,
           slots: validSlots.map((s) => ({ starts_at: new Date(s).toISOString() })),
           invited_member_ids: invited,
         },
@@ -111,6 +113,7 @@ export function AdminMeetings() {
       setLocation("");
       setVirtualLink("");
       setSlotInputs(["", "", ""]);
+      setRespondBy("");
       await refresh();
     } catch (e) {
       toast.error(e instanceof Error ? e.message : "Could not create the meeting");
@@ -186,6 +189,10 @@ export function AdminMeetings() {
               onChange={(e) => setDuration(Number(e.target.value) || 60)}
               className={inputCls}
             />
+          </label>
+          <label className="block">
+            <span className="mb-1 block text-[11px] uppercase tracking-[0.14em] text-gold/80">Respond by (optional)</span>
+            <input type="datetime-local" value={respondBy} onChange={(e) => setRespondBy(e.target.value)} className={inputCls} />
           </label>
           {format === "virtual" ? (
             <label className="block sm:col-span-2">

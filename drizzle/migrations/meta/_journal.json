@@ -36,6 +36,13 @@
       "when": 1791955681765,
       "tag": "0004_fix_committee_role_and_member_response_delete",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1791956311546,
+      "tag": "0005_meeting_polls_respond_by",
+      "breakpoints": true
     }
   ]
 }

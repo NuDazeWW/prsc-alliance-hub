@@ -228,6 +228,7 @@ export type Database = {
           invited_member_ids: string[]
           location: string | null
           meeting_type: string
+          respond_by: string | null
           status: string
           title: string
           updated_at: string
@@ -245,6 +246,7 @@ export type Database = {
           invited_member_ids?: string[]
           location?: string | null
           meeting_type: string
+          respond_by?: string | null
           status?: string
           title: string
           updated_at?: string
@@ -262,6 +264,7 @@ export type Database = {
           invited_member_ids?: string[]
           location?: string | null
           meeting_type?: string
+          respond_by?: string | null
           status?: string
           title?: string
           updated_at?: string

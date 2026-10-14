@@ -27,6 +27,7 @@ import {
 
 import { MemberDocuments } from "@/components/portal/MemberDocuments";
 import { MemberMeetings } from "@/components/portal/MemberMeetings";
+import { getMyMeetings } from "@/lib/meetings.functions";
 import { getMyDocuments, getMyHeadshotUrl, getPortalSession } from "@/lib/portal.functions";
 import { INVITE_ROLE_LABELS } from "@/lib/invite-email-config";
 import { StatusTimeline } from "@/components/portal/StatusTimeline";
@@ -97,6 +98,12 @@ function PortalHome() {
     queryFn: () => getMyDocuments().catch(() => null),
     retry: false,
     enabled: Boolean(data?.member && data?.hasProfile),
+  });
+  const meetings = useQuery({
+    queryKey: ["my-meetings"],
+    queryFn: () => getMyMeetings().catch(() => null),
+    retry: false,
+    enabled: Boolean(data?.member),
   });
   const queryClient = useQueryClient();
   const navigate = useNavigate();
@@ -196,7 +203,7 @@ function PortalHome() {
     >
       <div className="grid w-full lg:grid-cols-[20%_80%]">
         {/* Sidebar */}
-        <aside className="border-b border-gold/15 px-7 py-7 lg:border-b-0 lg:border-r lg:px-0 lg:pb-14 lg:pt-0">
+        <aside className="order-2 border-b border-gold/15 px-7 lg:order-none py-7 lg:border-b-0 lg:border-r lg:px-0 lg:pb-14 lg:pt-0">
           <div className="lg:px-[12.5%] lg:pt-[clamp(1.5rem,2vw,2.25rem)]">
             <p className="text-[11px] uppercase tracking-[0.22em] text-gold/80">Your Welcome Center</p>
             <div className="mt-5 flex items-center gap-4">
@@ -269,7 +276,24 @@ function PortalHome() {
         </aside>
 
         {/* Main */}
-        <main className="flex min-w-0 flex-col justify-between pb-2">
+        <main className="order-1 flex min-w-0 flex-col justify-between pb-2 lg:order-none">
+          {(() => {
+            const pendingMeetings = (meetings.data?.polls ?? []).filter((p: any) => p.status === "open" && p.my_responses.length === 0).length;
+            const items: { label: string; onClick: () => void }[] = [];
+            if (documentsReleased && !allDone) items.push({ label: `${signLeft + readLeft} document${signLeft + readLeft === 1 ? "" : "s"} need${signLeft + readLeft === 1 ? "s" : ""} your attention`, onClick: () => setPanel("documents") });
+            if (pendingMeetings) items.push({ label: `${pendingMeetings} meeting${pendingMeetings === 1 ? "" : "s"} awaiting your availability`, onClick: () => setPanel("meetings") });
+            if (!items.length) return null;
+            return (
+              <div className="mx-7 mt-6 flex flex-col gap-2 border border-gold/40 bg-gold/[.07] px-5 py-4 sm:mx-10 sm:flex-row sm:flex-wrap sm:items-center sm:gap-4 lg:mx-[3.5%]">
+                <span className="text-[11px] uppercase tracking-[0.2em] text-gold">Action needed</span>
+                {items.map((it) => (
+                  <button key={it.label} type="button" onClick={it.onClick} className="text-left text-sm text-ivory underline decoration-gold/50 underline-offset-4 hover:text-gold">
+                    {it.label} →
+                  </button>
+                ))}
+              </div>
+            );
+          })()}
           {/* Hero */}
           <section id="overview" className="relative overflow-hidden px-7 pb-5 pt-9 sm:px-10 lg:px-[3.5%] lg:pb-[clamp(1.5rem,2vw,2.75rem)] lg:pt-[clamp(3.25rem,4.2vw,5.5rem)]">
 

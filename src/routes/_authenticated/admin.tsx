@@ -878,13 +878,21 @@ function Admin() {
           <p className="text-base text-ivory/45">Member access, submissions, and inquiries</p>
         </div>
 
+        <nav aria-label="Jump to section" className="sticky top-0 z-20 -mx-4 mt-6 flex gap-2 overflow-x-auto border-b border-gold/15 bg-navy/95 px-4 py-3 backdrop-blur sm:-mx-6 sm:px-6 lg:-mx-8 lg:px-8">
+          {[["invite", "Invite"], ["email-center", "Compose"], ["tracker", "Members"], ["inquiries", "Inquiries"], ["meetings", "Meetings"], ["activity-log", "Activity"]].map(([id, label]) => (
+            <a key={id} href={`#${id}`} onClick={(e) => { e.preventDefault(); document.getElementById(id)?.scrollIntoView({ behavior: "smooth", block: "start" }); }} className="shrink-0 rounded-full border border-gold/30 px-4 py-1.5 text-sm text-ivory/80 transition-colors hover:border-gold hover:text-gold">
+              {label}
+            </a>
+          ))}
+        </nav>
+
         <div className="mt-10 grid items-start gap-6 xl:grid-cols-2">
           <div className="flex min-w-0 flex-col gap-8">
             <section className="border border-gold/20 p-6 sm:p-8">
               <div className="flex items-start justify-between gap-3">
                 <div className="flex items-center gap-3">
                   <MailPlus className="h-5 w-5 text-gold" />
-                  <h2 className="font-display text-3xl">Invite a member</h2>
+                  <h2 id="invite" className="scroll-mt-20 font-display text-3xl">Invite a member</h2>
                 </div>
                 <InfoTip
                   title="Invite a member"
@@ -909,6 +917,15 @@ function Admin() {
                   <option value="prsc_advisor_dis_board">PRSC Advisor + DIS Board member</option>
                   <option value="methodology_committee">Methodology Committee member</option>
                 </select>
+                {(() => {
+                  const dup = members.find((m) => m.email?.toLowerCase() === inviteDraft.email.trim().toLowerCase());
+                  return dup && inviteDraft.email.trim() ? (
+                    <p className="border border-amber-400/40 bg-amber-500/10 px-4 py-3 text-sm text-amber-200 sm:col-span-2">
+                      {dup.first_name} {dup.last_name} is already a member with this email. Sending again gives them a fresh invitation link and updates their details.
+                    </p>
+                  ) : null;
+                })()}
+                {inviteDraft.role !== "methodology_committee" && (
                 <label className="flex cursor-pointer items-center gap-3 border border-gold/20 px-4 py-3 sm:col-span-2">
                   <input
                     type="checkbox"
@@ -918,6 +935,7 @@ function Admin() {
                   />
                   <span className="text-base text-ivory/85">Also appoint to the Methodology Committee <span className="text-ivory/45">— they will be included in committee meetings</span></span>
                 </label>
+                )}
                 <div className="grid gap-3 border border-gold/20 p-4 sm:col-span-2">
                   <span className="text-base font-medium text-ivory/90">Draft “Why You” with AI (optional)</span>
                   <span className="text-sm leading-6 text-ivory/55">Fill in their name, title, and organization above, then click Draft with AI — the “Why this candidate was chosen” field fills in for you to review. For a more personal note, optionally paste their LinkedIn About and Experience text below.</span>

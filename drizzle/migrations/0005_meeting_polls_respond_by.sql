@@ -1,0 +1,1 @@
+ALTER TABLE public.meeting_polls ADD COLUMN IF NOT EXISTS respond_by timestamptz;
