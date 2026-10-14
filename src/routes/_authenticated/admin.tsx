@@ -48,6 +48,7 @@ import { applyTokens, buildMemberTokens, parseSignatures, renderBrandedEmail } f
 import { PortalShell, type PortalNotification } from "@/components/portal/PortalShell";
 import { AdminMemberDocuments } from "@/components/portal/AdminMemberDocuments";
 import { isPreviewHost } from "@/routes/_authenticated/route";
+import { AdminMeetings } from "@/components/portal/AdminMeetings";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";

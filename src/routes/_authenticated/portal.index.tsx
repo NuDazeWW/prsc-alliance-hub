@@ -6,6 +6,7 @@ import {
   ArrowRight,
   BarChart3,
   BookOpen,
+  CalendarDays,
   Check,
   Cog,
   Download,
@@ -25,6 +26,7 @@ import {
 } from "lucide-react";
 
 import { MemberDocuments } from "@/components/portal/MemberDocuments";
+import { MemberMeetings } from "@/components/portal/MemberMeetings";
 import { getMyDocuments, getMyHeadshotUrl, getPortalSession } from "@/lib/portal.functions";
 import { INVITE_ROLE_LABELS } from "@/lib/invite-email-config";
 import { StatusTimeline } from "@/components/portal/StatusTimeline";
@@ -98,7 +100,7 @@ function PortalHome() {
   });
   const queryClient = useQueryClient();
   const navigate = useNavigate();
-  const [panel, setPanel] = useState<"role" | "prsc" | "dis" | "documents" | "questions" | null>(null);
+  const [panel, setPanel] = useState<"role" | "prsc" | "dis" | "documents" | "questions" | "meetings" | null>(null);
   useEffect(() => {
     if (data?.isAdmin) navigate({ to: "/admin", replace: true });
   }, [data, navigate]);
@@ -147,6 +149,7 @@ function PortalHome() {
   const sideNav = [
     { label: "Overview", href: "#overview", icon: Home, active: true, onSelect: undefined as (() => void) | undefined },
     { label: "Your Documents", href: "#documents", icon: profileComplete ? FileSignature : Lock, active: false, onSelect: () => setPanel("documents") },
+    { label: "Meetings", href: "#meetings", icon: CalendarDays, active: false, onSelect: () => setPanel("meetings") },
     ...(showPrsc ? [{ label: "Refresh on PRSC", href: "#prsc", icon: ScrollText, active: false, onSelect: () => setPanel("prsc") }] : []),
     ...(showDis ? [{ label: "Learn about DIS", href: "#dis", icon: FileText, active: false, onSelect: () => setPanel("dis") }] : []),
   ];
@@ -363,6 +366,19 @@ function PortalHome() {
 
       <Dialog open={panel !== null} onOpenChange={(open) => !open && setPanel(null)}>
         <DialogContent className="max-h-[86vh] w-[min(94vw,980px)] max-w-none overflow-y-auto border-gold/30 bg-[linear-gradient(145deg,var(--color-midnight),var(--color-navy))] p-8 text-ivory shadow-2xl lg:p-[clamp(2rem,2.7vw,3.25rem)]">
+          {panel === "meetings" && (
+            <div>
+              <DialogHeader className="space-y-0 text-left">
+                <p className="text-[10px] uppercase tracking-[0.24em] text-gold">Meetings &amp; Briefings</p>
+                <DialogTitle className="mt-4 font-display text-[clamp(2rem,2.6vw,2.9rem)] font-normal leading-[1.1]">
+                  Your meeting calendar
+                </DialogTitle>
+              </DialogHeader>
+              <div className="mt-8">
+                <MemberMeetings />
+              </div>
+            </div>
+          )}
           {panel === "role" && (
             <div className="grid gap-9 lg:grid-cols-[1.35fr_1fr] lg:gap-14">
               <div className="min-w-0">
