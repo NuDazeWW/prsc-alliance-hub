@@ -1707,6 +1707,18 @@ function Admin() {
 
             <section className="border border-gold/20 p-6 sm:p-8">
               <div className="flex items-start justify-between gap-3">
+                <h2 id="meetings" className="font-display text-3xl">Meetings &amp; calendar</h2>
+                <InfoTip
+                  title="Meetings & calendar"
+                  body="Propose a board, advisory, or methodology committee meeting with a few time options. The right members are pre-selected by meeting type — committee meetings go only to Methodology Committee members. Everyone invited gets an email asking for their availability; their answers appear in the grid below. When a time works, click Confirm next to it and each member receives a confirmation email with an add-to-calendar file. Members who haven't answered after two days get an automatic reminder."
+                />
+              </div>
+              <div className="mt-7">
+                <AdminMeetings />
+              </div>
+            </section>
+            <section className="border border-gold/20 p-6 sm:p-8">
+              <div className="flex items-start justify-between gap-3">
                 <h2 id="activity-log" className="font-display text-3xl">Activity log</h2>
                 <InfoTip title="Activity log" body="A dated record of key steps: invitations, profile submissions, documents released, signatures, BoldSign check-offs, signed copies sent, and reminders you sent. Kept for your records in case anything is ever questioned." />
               </div>
