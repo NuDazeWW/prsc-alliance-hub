@@ -101,6 +101,174 @@ export type Database = {
         }
         Relationships: []
       }
+      meeting_poll_notes: {
+        Row: {
+          member_id: string
+          note: string | null
+          poll_id: string
+          responded_at: string
+        }
+        Insert: {
+          member_id: string
+          note?: string | null
+          poll_id: string
+          responded_at?: string
+        }
+        Update: {
+          member_id?: string
+          note?: string | null
+          poll_id?: string
+          responded_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "meeting_poll_notes_member_id_fkey"
+            columns: ["member_id"]
+            isOneToOne: false
+            referencedRelation: "portal_members"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "meeting_poll_notes_poll_id_fkey"
+            columns: ["poll_id"]
+            isOneToOne: false
+            referencedRelation: "meeting_polls"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      meeting_poll_responses: {
+        Row: {
+          availability: string
+          created_at: string
+          id: string
+          member_id: string
+          poll_id: string
+          slot_id: string
+        }
+        Insert: {
+          availability: string
+          created_at?: string
+          id?: string
+          member_id: string
+          poll_id: string
+          slot_id: string
+        }
+        Update: {
+          availability?: string
+          created_at?: string
+          id?: string
+          member_id?: string
+          poll_id?: string
+          slot_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "meeting_poll_responses_member_id_fkey"
+            columns: ["member_id"]
+            isOneToOne: false
+            referencedRelation: "portal_members"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "meeting_poll_responses_poll_id_fkey"
+            columns: ["poll_id"]
+            isOneToOne: false
+            referencedRelation: "meeting_polls"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "meeting_poll_responses_slot_id_fkey"
+            columns: ["slot_id"]
+            isOneToOne: false
+            referencedRelation: "meeting_poll_slots"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      meeting_poll_slots: {
+        Row: {
+          created_at: string
+          id: string
+          poll_id: string
+          starts_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          poll_id: string
+          starts_at: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          poll_id?: string
+          starts_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "meeting_poll_slots_poll_id_fkey"
+            columns: ["poll_id"]
+            isOneToOne: false
+            referencedRelation: "meeting_polls"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      meeting_polls: {
+        Row: {
+          auto_nudge_sent_at: string | null
+          confirmed_slot_id: string | null
+          created_at: string
+          created_by: string | null
+          description: string | null
+          duration_minutes: number
+          format: string
+          id: string
+          invited_member_ids: string[]
+          location: string | null
+          meeting_type: string
+          status: string
+          title: string
+          updated_at: string
+          virtual_link: string | null
+        }
+        Insert: {
+          auto_nudge_sent_at?: string | null
+          confirmed_slot_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          duration_minutes?: number
+          format?: string
+          id?: string
+          invited_member_ids?: string[]
+          location?: string | null
+          meeting_type: string
+          status?: string
+          title: string
+          updated_at?: string
+          virtual_link?: string | null
+        }
+        Update: {
+          auto_nudge_sent_at?: string | null
+          confirmed_slot_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          duration_minutes?: number
+          format?: string
+          id?: string
+          invited_member_ids?: string[]
+          location?: string | null
+          meeting_type?: string
+          status?: string
+          title?: string
+          updated_at?: string
+          virtual_link?: string | null
+        }
+        Relationships: []
+      }
       portal_activity: {
         Row: {
           actor_user_id: string | null
@@ -455,6 +623,7 @@ export type Database = {
           first_name: string
           id: string
           invited_at: string
+          is_methodology_committee: boolean
           last_access_at: string | null
           last_name: string
           organization: string
@@ -479,6 +648,7 @@ export type Database = {
           first_name: string
           id?: string
           invited_at?: string
+          is_methodology_committee?: boolean
           last_access_at?: string | null
           last_name: string
           organization: string
@@ -503,6 +673,7 @@ export type Database = {
           first_name?: string
           id?: string
           invited_at?: string
+          is_methodology_committee?: boolean
           last_access_at?: string | null
           last_name?: string
           organization?: string
