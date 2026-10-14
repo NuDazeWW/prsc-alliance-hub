@@ -855,6 +855,7 @@ export type Database = {
         | "advisor"
         | "prsc_board_dis_advisor"
         | "prsc_advisor_dis_board"
+        | "methodology_committee"
       portal_entity: "prsc" | "dis" | "both"
       portal_inquiry_status: "open" | "resolved"
       portal_member_status: "invited" | "active" | "revoked"
@@ -996,6 +997,7 @@ export const Constants = {
         "advisor",
         "prsc_board_dis_advisor",
         "prsc_advisor_dis_board",
+        "methodology_committee",
       ],
       portal_entity: ["prsc", "dis", "both"],
       portal_inquiry_status: ["open", "resolved"],

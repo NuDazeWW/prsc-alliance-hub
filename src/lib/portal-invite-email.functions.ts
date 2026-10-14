@@ -7,7 +7,7 @@ const inviteReviewSchema = z.object({
   organization: z.string().trim().min(1).max(180),
   title: z.string().trim().min(1).max(160),
   entity: z.enum(["prsc", "dis", "both"]),
-  role: z.enum(["board_member", "advisor", "prsc_board_dis_advisor", "prsc_advisor_dis_board"]),
+  role: z.enum(["board_member", "advisor", "prsc_board_dis_advisor", "prsc_advisor_dis_board", "methodology_committee"]),
   why_you: z.string().trim().min(20).max(2000),
   is_methodology_committee: z.boolean().optional(),
 });

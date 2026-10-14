@@ -39,7 +39,7 @@ function memberName(m: any) {
 function autoAudience(members: any[], type: string) {
   return members
     .filter((m) => {
-      if (type === "methodology") return m.is_methodology_committee;
+      if (type === "methodology") return m.is_methodology_committee || m.role === "methodology_committee";
       if (type === "board") return m.role === "board_member" || m.role === "prsc_board_dis_advisor" || m.role === "prsc_advisor_dis_board";
       return m.role === "advisor" || m.role === "prsc_board_dis_advisor" || m.role === "prsc_advisor_dis_board";
     })
