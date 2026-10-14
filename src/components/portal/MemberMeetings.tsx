@@ -114,6 +114,17 @@ export function MemberMeetings() {
               )}{" "}
               · {p.duration_minutes} minutes · times shown in your local time zone
             </p>
+            {p.respond_by && (
+              <p className={`mt-2 text-xs ${new Date(p.respond_by).getTime() < Date.now() ? "text-rose-300" : "text-gold"}`}>
+                Please respond by {fmt(p.respond_by)}
+                {(() => { const days = Math.ceil((new Date(p.respond_by).getTime() - Date.now()) / 86400000); return days > 0 ? ` · ${days} day${days === 1 ? "" : "s"} left` : " · deadline passed"; })()}
+              </p>
+            )}
+            {p.my_responses.length > 0 && (
+              <p className="mt-2 inline-flex items-center gap-1 rounded-full border border-emerald-400/40 bg-emerald-500/10 px-3 py-1 text-xs text-emerald-200">
+                <Check className="h-3 w-3" /> Responses received{p.my_responded_at ? ` ${new Date(p.my_responded_at).toLocaleString(undefined, { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" })}` : ""} — you can update them below
+              </p>
+            )}
             <div className="mt-4 space-y-3">
               {p.slots.map((s: any) => (
                 <div key={s.id} className="flex flex-col gap-2 rounded-md border border-ivory/10 p-3 sm:flex-row sm:items-center sm:justify-between">
@@ -157,7 +168,7 @@ export function MemberMeetings() {
               className="mt-3 bg-gold text-navy hover:bg-gold/90"
             >
               <Check className="mr-2 h-4 w-4" />
-              {saving === p.id ? "Sending…" : answeredCount === p.slots.length ? "Send my availability" : `Send my availability (${answeredCount}/${p.slots.length} marked)`}
+              {(() => { const verb = p.my_responses.length > 0 ? "Update my availability" : "Send my availability"; return saving === p.id ? "Sending…" : answeredCount === p.slots.length ? verb : `${verb} (${answeredCount}/${p.slots.length} marked)`; })()}
             </Button>
           </div>
         );

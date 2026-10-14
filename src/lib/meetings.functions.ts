@@ -56,6 +56,7 @@ const createPollSchema = z.object({
   location: z.string().trim().max(300).optional(),
   virtual_link: z.string().trim().max(500).optional(),
   duration_minutes: z.number().int().min(15).max(480),
+  respond_by: z.string().refine((v) => !Number.isNaN(Date.parse(v)), "Invalid date").optional(),
   slots: z.array(slotSchema).min(1).max(12),
   invited_member_ids: z.array(z.string().uuid()).min(1),
 });
@@ -78,6 +79,7 @@ export const createMeetingPoll = createServerFn({ method: "POST" })
         location: data.format === "in_person" ? data.location || null : null,
         virtual_link: data.format === "virtual" ? data.virtual_link || null : null,
         duration_minutes: data.duration_minutes,
+        respond_by: data.respond_by ?? null,
         status: "open",
         invited_member_ids: data.invited_member_ids,
         created_by: context.userId,
@@ -112,7 +114,7 @@ export const createMeetingPoll = createServerFn({ method: "POST" })
           subject: `Please share your availability: ${data.title}`,
           eyebrow: typeLabel,
           heading: `${m.first_name?.trim() || "Hello"}, we are scheduling the next ${typeLabel.toLowerCase()}.`,
-          body: `Because everyone carries a full corporate calendar, we are proposing a few time options and asking each member to mark what works.\n\n${data.description ? `${data.description}\n\n` : ""}${where}\nDuration: ${data.duration_minutes} minutes\n\nProposed times (shown in New York time):\n${slotLines}\n\nOpen your private Welcome Center to mark each option Available, If needed, or Unavailable — it takes under a minute.`,
+          body: `Because everyone carries a full corporate calendar, we are proposing a few time options and asking each member to mark what works.\n\n${data.description ? `${data.description}\n\n` : ""}${where}\nDuration: ${data.duration_minutes} minutes\n\nProposed times (shown here in New York time — your Welcome Center shows them in your own time zone):\n${slotLines}\n\n${data.respond_by ? `Please respond by ${formatSlot(data.respond_by)}.\n\n` : ""}Open your private Welcome Center to mark each option Available, If needed, or Unavailable — it takes under a minute.`,
           ctaLabel: "Share Your Availability",
           ctaUrl: PORTAL_URL,
           signatures: founderSignature(),
@@ -283,6 +285,7 @@ export const getMyMeetings = createServerFn({ method: "GET" })
         slots: (slots ?? []).filter((s: any) => s.poll_id === p.id),
         my_responses: (responses ?? []).filter((r: any) => r.poll_id === p.id),
         my_note: (notes ?? []).find((n: any) => n.poll_id === p.id)?.note ?? "",
+        my_responded_at: (notes ?? []).find((n: any) => n.poll_id === p.id)?.responded_at ?? null,
       })),
     );
     return { polls: withTokens, member_id: member.id };
