@@ -27,6 +27,7 @@ import {
 
 import { MemberDocuments } from "@/components/portal/MemberDocuments";
 import { MemberMeetings } from "@/components/portal/MemberMeetings";
+import { getMyMeetings } from "@/lib/meetings.functions";
 import { getMyDocuments, getMyHeadshotUrl, getPortalSession } from "@/lib/portal.functions";
 import { INVITE_ROLE_LABELS } from "@/lib/invite-email-config";
 import { StatusTimeline } from "@/components/portal/StatusTimeline";
@@ -97,6 +98,12 @@ function PortalHome() {
     queryFn: () => getMyDocuments().catch(() => null),
     retry: false,
     enabled: Boolean(data?.member && data?.hasProfile),
+  });
+  const meetings = useQuery({
+    queryKey: ["my-meetings"],
+    queryFn: () => getMyMeetings().catch(() => null),
+    retry: false,
+    enabled: Boolean(data?.member),
   });
   const queryClient = useQueryClient();
   const navigate = useNavigate();
