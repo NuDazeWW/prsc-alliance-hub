@@ -246,6 +246,7 @@ const inviteSchema = z.object({
   last_name: z.string().trim().min(1).max(80), organization: z.string().trim().min(1).max(180),
   title: z.string().trim().max(160), entity: entitySchema, role: roleSchema,
   why_you: z.string().trim().min(20).max(2000),
+  is_methodology_committee: z.boolean().optional(),
 });
 function portalInviteRedirect(member: { first_name: string; entity: string; role: string }) {
   const url = new URL("https://access.prscstandards.org/accept-invitation");
@@ -269,6 +270,7 @@ export const invitePortalMember = createServerFn({ method: "POST" })
       user_id: invitation.user.id, email: data.email.toLowerCase(), first_name: data.first_name,
       last_name: data.last_name, organization: data.organization, title: data.title || null,
       entity: data.entity, role: data.role, why_you: data.why_you, status: "invited",
+      is_methodology_committee: data.is_methodology_committee ?? false,
     }, { onConflict: "email" });
     if (memberError) throw memberError;
     const { error: roleError } = await supabaseAdmin.from("user_roles").upsert({ user_id: invitation.user.id, role: data.role }, { onConflict: "user_id,role" });
@@ -319,6 +321,7 @@ export const importPortalMembers = createServerFn({ method: "POST" })
           user_id: userId, email, first_name: row.first_name, last_name: row.last_name,
           organization: row.organization, title: row.title || null, entity: row.entity,
           role: row.role, why_you: row.why_you, status: "invited",
+          is_methodology_committee: row.is_methodology_committee ?? false,
         }, { onConflict: "email" });
         if (memberError) throw memberError;
 

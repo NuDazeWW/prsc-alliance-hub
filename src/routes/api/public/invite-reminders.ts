@@ -81,6 +81,47 @@ export const Route = createFileRoute("/api/public/invite-reminders")({
           await supabaseAdmin.from("portal_members").update({ documents_reminder_sent_at: new Date().toISOString() }).eq("id", m.id);
           sent++;
         }
+        const nudgeCutoff = new Date(Date.now() - 48 * 3600000).toISOString();
+        const { data: openPolls } = await supabaseAdmin
+          .from("meeting_polls")
+          .select("id, title, meeting_type, invited_member_ids")
+          .eq("status", "open")
+          .is("auto_nudge_sent_at", null)
+          .lt("created_at", nudgeCutoff)
+          .limit(20);
+        for (const poll of openPolls ?? []) {
+          const { data: responses } = await supabaseAdmin
+            .from("meeting_poll_responses")
+            .select("member_id")
+            .eq("poll_id", poll.id);
+          const answered = new Set((responses ?? []).map((r: { member_id: string }) => r.member_id));
+          const pendingIds = (poll.invited_member_ids as string[]).filter((id) => !answered.has(id));
+          if (!pendingIds.length) {
+            await supabaseAdmin.from("meeting_polls").update({ auto_nudge_sent_at: new Date().toISOString() }).eq("id", poll.id);
+            continue;
+          }
+          const { data: pendingMembers } = await supabaseAdmin
+            .from("portal_members")
+            .select("id, email, first_name")
+            .in("id", pendingIds);
+          for (const m of pendingMembers ?? []) {
+            await sendPortalEmail(
+              m.email,
+              {
+                subject: `Quick reminder: your availability for ${poll.title}`,
+                eyebrow: "Gentle reminder",
+                heading: `${m.first_name?.trim() || "Hello"}, we are still collecting availability.`,
+                body: `We are finding a time for "${poll.title}" and your answer is one of the few still outstanding.\n\nIt takes under a minute — open your private Welcome Center, go to Meetings, and mark each proposed time Available, If needed, or Unavailable.`,
+                ctaLabel: "Share Your Availability",
+                ctaUrl: "https://access.prscstandards.org/portal",
+                signatures: founderSignature(),
+              },
+              "meeting-poll-nudge",
+            );
+            sent++;
+          }
+          await supabaseAdmin.from("meeting_polls").update({ auto_nudge_sent_at: new Date().toISOString() }).eq("id", poll.id);
+        }
         return Response.json({ ok: true, sent });
       },
     },

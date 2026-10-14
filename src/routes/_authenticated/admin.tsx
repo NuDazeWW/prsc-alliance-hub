@@ -48,6 +48,7 @@ import { applyTokens, buildMemberTokens, parseSignatures, renderBrandedEmail } f
 import { PortalShell, type PortalNotification } from "@/components/portal/PortalShell";
 import { AdminMemberDocuments } from "@/components/portal/AdminMemberDocuments";
 import { isPreviewHost } from "@/routes/_authenticated/route";
+import { AdminMeetings } from "@/components/portal/AdminMeetings";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -199,6 +200,7 @@ type Draft = typeof emptyDraft;
 type MemberRow = {
   first_name: string; last_name: string; email: string; organization: string;
   title: string; entity: "prsc" | "dis" | "both"; role: "board_member" | "advisor" | "prsc_board_dis_advisor" | "prsc_advisor_dis_board"; why_you: string;
+  is_methodology_committee?: boolean;
 };
 type StagedRow = MemberRow & { linkedin_url: string; background: string };
 
@@ -211,10 +213,11 @@ const emptyInvite: InviteEmailReview = {
   entity: "prsc",
   role: "board_member",
   why_you: "",
+  is_methodology_committee: false,
 };
 
-const LIST_HEADERS = "first_name,last_name,email,organization,title,entity,role,linkedin_url,background,why_you";
-const LIST_TEMPLATE = `${LIST_HEADERS}\nJane,Doe,jane@example.com,Example Group,Managing Partner,both,prsc_board_dis_advisor,https://www.linkedin.com/in/janedoe,"Paste their LinkedIn About and Experience text here. Leave why_you blank to have it drafted.",\n`;
+const LIST_HEADERS = "first_name,last_name,email,organization,title,entity,role,methodology_committee,linkedin_url,background,why_you";
+const LIST_TEMPLATE = `${LIST_HEADERS}\nJane,Doe,jane@example.com,Example Group,Managing Partner,both,prsc_board_dis_advisor,yes,https://www.linkedin.com/in/janedoe,"Paste their LinkedIn About and Experience text here. Leave why_you blank to have it drafted.",\n`;
 
 function splitCsvLine(line: string) {
   const out: string[] = [];
@@ -263,6 +266,7 @@ function parseMemberList(text: string): { rows: StagedRow[]; errors: string[] } 
     designation: "entity", entity_designation: "entity", why: "why_you", why_they_were_chosen: "why_you",
     linkedin: "linkedin_url", linkedin_profile: "linkedin_url",
     bio: "background", about: "background", experience: "background", linkedin_bio: "background", linkedin_background: "background",
+    committee: "methodology_committee", methodology: "methodology_committee", is_methodology_committee: "methodology_committee",
   };
   const keys = headers.map((h) => alias[h] ?? h);
   const required = ["first_name", "last_name", "email", "organization", "entity", "role"];
@@ -298,6 +302,7 @@ function parseMemberList(text: string): { rows: StagedRow[]; errors: string[] } 
       first_name: record["first_name"], last_name: record["last_name"], email: record["email"],
       organization: record["organization"], title: record["title"] ?? "",
       entity, role, why_you: why,
+      is_methodology_committee: /^(yes|true|1|y)$/i.test((record["methodology_committee"] ?? "").trim()),
       linkedin_url: (record["linkedin_url"] ?? "").slice(0, 300), background,
     });
   });
@@ -903,6 +908,15 @@ function Admin() {
                   <option value="prsc_board_dis_advisor">PRSC Board member + DIS Advisor</option>
                   <option value="prsc_advisor_dis_board">PRSC Advisor + DIS Board member</option>
                 </select>
+                <label className="flex cursor-pointer items-center gap-3 border border-gold/20 px-4 py-3 sm:col-span-2">
+                  <input
+                    type="checkbox"
+                    checked={inviteDraft.is_methodology_committee ?? false}
+                    onChange={(e) => setInviteDraft({ ...inviteDraft, is_methodology_committee: e.target.checked })}
+                    className="h-4 w-4 accent-[#d4af37]"
+                  />
+                  <span className="text-base text-ivory/85">Also appoint to the Methodology Committee <span className="text-ivory/45">— they will be included in committee meetings</span></span>
+                </label>
                 <div className="grid gap-3 border border-gold/20 p-4 sm:col-span-2">
                   <span className="text-base font-medium text-ivory/90">Draft “Why You” with AI (optional)</span>
                   <span className="text-sm leading-6 text-ivory/55">Fill in their name, title, and organization above, then click Draft with AI — the “Why this candidate was chosen” field fills in for you to review. For a more personal note, optionally paste their LinkedIn About and Experience text below.</span>
@@ -1692,6 +1706,18 @@ function Admin() {
               </div>
             </section>
 
+            <section className="border border-gold/20 p-6 sm:p-8">
+              <div className="flex items-start justify-between gap-3">
+                <h2 id="meetings" className="font-display text-3xl">Meetings &amp; calendar</h2>
+                <InfoTip
+                  title="Meetings & calendar"
+                  body="Propose a board, advisory, or methodology committee meeting with a few time options. The right members are pre-selected by meeting type — committee meetings go only to Methodology Committee members. Everyone invited gets an email asking for their availability; their answers appear in the grid below. When a time works, click Confirm next to it and each member receives a confirmation email with an add-to-calendar file. Members who haven't answered after two days get an automatic reminder."
+                />
+              </div>
+              <div className="mt-7">
+                <AdminMeetings />
+              </div>
+            </section>
             <section className="border border-gold/20 p-6 sm:p-8">
               <div className="flex items-start justify-between gap-3">
                 <h2 id="activity-log" className="font-display text-3xl">Activity log</h2>
