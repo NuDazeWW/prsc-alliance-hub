@@ -29,6 +29,13 @@
       "when": 1791954864743,
       "tag": "0003_lock_down_vanguard_seat_tally",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1791955681765,
+      "tag": "0004_fix_committee_role_and_member_response_delete",
+      "breakpoints": true
     }
   ]
 }
