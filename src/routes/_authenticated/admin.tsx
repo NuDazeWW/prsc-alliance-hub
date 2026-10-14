@@ -199,7 +199,7 @@ type Draft = typeof emptyDraft;
 
 type MemberRow = {
   first_name: string; last_name: string; email: string; organization: string;
-  title: string; entity: "prsc" | "dis" | "both"; role: "board_member" | "advisor" | "prsc_board_dis_advisor" | "prsc_advisor_dis_board"; why_you: string;
+  title: string; entity: "prsc" | "dis" | "both"; role: "board_member" | "advisor" | "prsc_board_dis_advisor" | "prsc_advisor_dis_board" | "methodology_committee"; why_you: string;
   is_methodology_committee?: boolean;
 };
 type StagedRow = MemberRow & { linkedin_url: string; background: string };
@@ -287,13 +287,13 @@ function parseMemberList(text: string): { rows: StagedRow[]; errors: string[] } 
       prsc_board_dis_advisor: "prsc_board_dis_advisor", prsc_board_member_dis_advisor: "prsc_board_dis_advisor", "prsc_board_+_dis_advisor": "prsc_board_dis_advisor",
       prsc_advisor_dis_board: "prsc_advisor_dis_board", prsc_advisor_dis_board_member: "prsc_advisor_dis_board", "prsc_advisor_+_dis_board": "prsc_advisor_dis_board",
     };
-    const role = roleRaw === "advisor" ? "advisor" : roleRaw === "board_member" || roleRaw === "board" ? "board_member" : roleRaw ? mixed[roleRaw] ?? null : null;
+    const role = roleRaw === "advisor" ? "advisor" : roleRaw === "board_member" || roleRaw === "board" ? "board_member" : roleRaw === "methodology_committee" || roleRaw === "committee" || roleRaw === "methodology_committee_member" ? "methodology_committee" : roleRaw ? mixed[roleRaw] ?? null : null;
 
     if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(record["email"] ?? "")) return errors.push(`${label}: a valid email is required.`);
     if (!record["first_name"] || !record["last_name"]) return errors.push(`${label}: first and last name are required.`);
     if (!record["organization"]) return errors.push(`${label}: organization is required.`);
     if (!entity) return errors.push(`${label}: designation must be PRSC, DIS, or Both.`);
-    if (!role) return errors.push(`${label}: role must be board_member, advisor, prsc_board_dis_advisor, or prsc_advisor_dis_board.`);
+    if (!role) return errors.push(`${label}: role must be board_member, advisor, methodology_committee, prsc_board_dis_advisor, or prsc_advisor_dis_board.`);
     if (role.startsWith("prsc_") && entity !== "both") return errors.push(`${label}: mixed PRSC/DIS roles require designation Both.`);
     const why = (record["why_you"] ?? "").trim();
     const background = (record["background"] ?? "").trim().slice(0, 8000);
@@ -907,6 +907,7 @@ function Admin() {
                   <option value="advisor">Advisor</option>
                   <option value="prsc_board_dis_advisor">PRSC Board member + DIS Advisor</option>
                   <option value="prsc_advisor_dis_board">PRSC Advisor + DIS Board member</option>
+                  <option value="methodology_committee">Methodology Committee member</option>
                 </select>
                 <label className="flex cursor-pointer items-center gap-3 border border-gold/20 px-4 py-3 sm:col-span-2">
                   <input

@@ -8,7 +8,7 @@ const schema = z.object({
   organization: z.string().trim().max(180),
   title: z.string().trim().max(160),
   entity: z.enum(["prsc", "dis", "both"]),
-  role: z.enum(["board_member", "advisor", "prsc_board_dis_advisor", "prsc_advisor_dis_board"]),
+  role: z.enum(["board_member", "advisor", "prsc_board_dis_advisor", "prsc_advisor_dis_board", "methodology_committee"]),
   linkedin_url: z.string().trim().max(300),
   background: z.string().trim().max(8000).default(""),
 });

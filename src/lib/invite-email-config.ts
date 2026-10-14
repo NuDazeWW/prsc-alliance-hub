@@ -10,4 +10,5 @@ export const INVITE_ROLE_LABELS = {
   advisor: "Advisor",
   prsc_board_dis_advisor: "Board Member (PRSC) and Advisor (DIS)",
   prsc_advisor_dis_board: "Advisor (PRSC) and Board Member (DIS)",
+  methodology_committee: "Methodology Committee Member",
 } as const;

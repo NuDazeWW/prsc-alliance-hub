@@ -23,7 +23,7 @@ type PortalProfile = {
   submitted_at: string | null; updated_at: string;
 };
 
-const roleSchema = z.enum(["board_member", "advisor", "prsc_board_dis_advisor", "prsc_advisor_dis_board"]);
+const roleSchema = z.enum(["board_member", "advisor", "prsc_board_dis_advisor", "prsc_advisor_dis_board", "methodology_committee"]);
 const entitySchema = z.enum(["prsc", "dis", "both"]);
 const permissionSchema = z.enum(["yes", "discuss", "no"]);
 

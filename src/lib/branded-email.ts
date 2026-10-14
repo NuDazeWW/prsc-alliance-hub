@@ -50,6 +50,7 @@ const ROLE_LABEL: Record<string, string> = {
   advisor: "Advisor",
   prsc_board_dis_advisor: "Board Member (PRSC) and Advisor (DIS)",
   prsc_advisor_dis_board: "Advisor (PRSC) and Board Member (DIS)",
+  methodology_committee: "Methodology Committee Member",
 };
 
 const PACKAGE_LABEL: Record<string, string> = {
@@ -57,6 +58,7 @@ const PACKAGE_LABEL: Record<string, string> = {
   advisor: "Advisor",
   prsc_board_dis_advisor: "Board & Advisor",
   prsc_advisor_dis_board: "Board & Advisor",
+  methodology_committee: "Methodology Committee",
 };
 
 export function buildMemberTokens(member: {
