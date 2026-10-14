@@ -8,6 +8,13 @@
       "when": 1791938839648,
       "tag": "0000_meetings_and_committee",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1791940915850,
+      "tag": "0001_methodology_committee_and_meeting_poll_access",
+      "breakpoints": true
     }
   ]
 }
