@@ -892,7 +892,7 @@ function Admin() {
               <div className="flex items-start justify-between gap-3">
                 <div className="flex items-center gap-3">
                   <MailPlus className="h-5 w-5 text-gold" />
-                  <h2 className="font-display text-3xl">Invite a member</h2>
+                  <h2 id="invite" className="scroll-mt-20 font-display text-3xl">Invite a member</h2>
                 </div>
                 <InfoTip
                   title="Invite a member"

@@ -65,9 +65,9 @@ export function PortalShell({
           {admin && stats.length > 0 && (
             <div className="hidden h-full min-w-0 items-center justify-end gap-[clamp(1rem,2vw,2.25rem)] lg:flex">
               {stats.map((s) => (
-                <div key={s.label} className="flex flex-col items-end leading-tight">
-                  <span className="font-display text-xl text-gold">{s.value}</span>
-                  <span className="text-[10px] uppercase tracking-[0.16em] text-ivory/50">{s.label}</span>
+                <div key={s.label} className="flex items-baseline gap-2 leading-tight">
+                  <span className="font-display text-3xl text-gold">{s.value}</span>
+                  <span className="text-xs uppercase tracking-[0.14em] text-ivory/75">{s.label}</span>
                 </div>
               ))}
             </div>
