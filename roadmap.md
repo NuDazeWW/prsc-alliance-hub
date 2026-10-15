@@ -24,3 +24,5 @@
 - [ ] Verify security isolation, email flows, responsive layouts, metadata, and public-site separation
 - [x] In-portal document reading, signing, release emails, reminders, completion emails, and hard copy requests
 - [x] Status board, filters, Nudge now, CSV export, activity log, member doc progress, completion summary
+
+- [x] Show "Refresh on PRSC" and "Learn about DIS" sidebar links to every member (were hidden by entity)

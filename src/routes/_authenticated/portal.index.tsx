@@ -135,8 +135,9 @@ function PortalHome() {
   const m = member;
   const name = m.professional_name || m.first_name;
   const initials = `${(m.first_name || "").charAt(0)}${(m.last_name || "").charAt(0)}`.toUpperCase();
-  const showPrsc = m.entity !== "dis";
-  const showDis = m.entity !== "prsc";
+  // Every member can read about both organizations, regardless of designation.
+  const showPrsc = true;
+  const showDis = true;
   const entityWord = entityLabel[m.entity];
   const profileComplete = data?.hasProfile ?? false;
   const packageReady = m.package_status === "package_ready";
