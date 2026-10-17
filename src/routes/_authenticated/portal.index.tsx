@@ -157,7 +157,7 @@ function PortalHome() {
   const sideNav = [
     { label: "Overview", href: "#overview", icon: Home, active: true, onSelect: undefined as (() => void) | undefined },
     { label: "Your Documents", href: "#documents", icon: profileComplete ? FileSignature : Lock, active: false, onSelect: () => setPanel("documents") },
-    { label: "Meetings", href: "#meetings", icon: CalendarDays, active: false, onSelect: () => setPanel("meetings") },
+    { label: "Meetings", href: "#meetings", icon: CalendarDays, active: false, onSelect: () => document.getElementById("meetings")?.scrollIntoView({ behavior: "smooth" }) },
     ...(showPrsc ? [{ label: "Refresh on PRSC", href: "#prsc", icon: ScrollText, active: false, onSelect: () => setPanel("prsc") }] : []),
     ...(showDis ? [{ label: "Learn about DIS", href: "#dis", icon: FileText, active: false, onSelect: () => setPanel("dis") }] : []),
   ];
@@ -282,7 +282,7 @@ function PortalHome() {
             const pendingMeetings = (meetings.data?.polls ?? []).filter((p: any) => p.status === "open" && p.my_responses.length === 0).length;
             const items: { label: string; onClick: () => void }[] = [];
             if (documentsReleased && !allDone) items.push({ label: `${signLeft + readLeft} document${signLeft + readLeft === 1 ? "" : "s"} need${signLeft + readLeft === 1 ? "s" : ""} your attention`, onClick: () => setPanel("documents") });
-            if (pendingMeetings) items.push({ label: `${pendingMeetings} meeting${pendingMeetings === 1 ? "" : "s"} awaiting your availability`, onClick: () => setPanel("meetings") });
+            if (pendingMeetings) items.push({ label: `${pendingMeetings} meeting${pendingMeetings === 1 ? "" : "s"} awaiting your availability`, onClick: () => document.getElementById("meetings")?.scrollIntoView({ behavior: "smooth" }) });
             if (!items.length) return null;
             return (
               <div className="mx-7 mt-6 flex flex-col gap-2 border border-gold/40 bg-gold/[.07] px-5 py-4 sm:mx-10 sm:flex-row sm:flex-wrap sm:items-center sm:gap-4 lg:mx-[3.5%]">
@@ -382,6 +382,18 @@ function PortalHome() {
                   <br />
                   Brighter opportunities.
                 </p>
+              </div>
+            </div>
+          </section>
+
+          {/* Meetings & calendar */}
+          <section id="meetings" className="scroll-mt-6 px-7 pb-6 pt-6 sm:px-10 lg:px-[2.5%]">
+            <div className="border border-gold/25 bg-[linear-gradient(135deg,var(--color-midnight),var(--color-navy))] p-6 sm:p-8">
+              <p className="text-[10px] uppercase tracking-[0.24em] text-gold">Meetings &amp; Calendar</p>
+              <h2 className="mt-3 font-display text-[clamp(1.75rem,2.2vw,2.4rem)] leading-tight">Your meeting calendar</h2>
+              <p className="mt-2 text-sm text-ivory/60">Mark your availability for proposed dates, check confirmed meetings, and add them to your calendar.</p>
+              <div className="mt-6">
+                <MemberMeetings hideIntro />
               </div>
             </div>
           </section>

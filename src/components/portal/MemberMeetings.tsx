@@ -27,7 +27,7 @@ function fmt(iso: string) {
   });
 }
 
-export function MemberMeetings() {
+export function MemberMeetings({ hideWhenEmpty = false, hideIntro = false }: { hideWhenEmpty?: boolean; hideIntro?: boolean } = {}) {
   const [polls, setPolls] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState<string | null>(null);
@@ -79,20 +79,23 @@ export function MemberMeetings() {
     }
   }
 
-  if (loading) return <p className="text-sm text-ivory/50">Loading meetings…</p>;
+  if (loading) return hideWhenEmpty ? null : <p className="text-sm text-ivory/50">Loading meetings…</p>;
 
   const open = polls.filter((p) => p.status === "open");
   const confirmed = polls.filter((p) => p.status === "confirmed");
+  if (hideWhenEmpty && open.length === 0 && confirmed.length === 0) return null;
 
   return (
     <div className="space-y-8">
-      <div>
-        <h3 className="font-display text-xl text-ivory">Meetings &amp; availability</h3>
-        <p className="mt-1 text-sm text-ivory/55">
-          When a meeting is proposed, mark each time option below. Confirmed meetings appear here with a one-click
-          calendar download.
-        </p>
-      </div>
+      {!hideIntro && (
+        <div>
+          <h3 className="font-display text-xl text-ivory">Meetings &amp; availability</h3>
+          <p className="mt-1 text-sm text-ivory/55">
+            When a meeting is proposed, mark each time option below. Confirmed meetings appear here with a one-click
+            calendar download.
+          </p>
+        </div>
+      )}
 
       {open.length === 0 && confirmed.length === 0 && (
         <p className="text-sm text-ivory/50">No meetings are scheduled for you yet.</p>
