@@ -3,6 +3,36 @@ import { CalendarDays, Check, Clock, Download, MapPin, Video } from "lucide-reac
 import { toast } from "sonner";
 import { getMyMeetings, submitMyAvailability } from "@/lib/meetings.functions";
 import { Button } from "@/components/ui/button";
+import { isPreviewHost } from "@/routes/_authenticated/route";
+
+function demoPolls() {
+  const at = (days: number, hour: number) => {
+    const d = new Date();
+    d.setDate(d.getDate() + days);
+    d.setHours(hour, 0, 0, 0);
+    return d.toISOString();
+  };
+  return [
+    {
+      id: "demo-poll",
+      status: "open",
+      meeting_type: "board",
+      title: "Inaugural Board Meeting",
+      description: "Sample meeting shown in preview only.",
+      format: "virtual",
+      location: null,
+      duration_minutes: 60,
+      respond_by: at(10, 17),
+      slots: [
+        { id: "demo-1", starts_at: at(14, 10) },
+        { id: "demo-2", starts_at: at(15, 13) },
+        { id: "demo-3", starts_at: at(16, 15) },
+      ],
+      my_responses: [],
+      my_note: "",
+    },
+  ];
+}
 
 const TYPE_LABEL: Record<string, string> = {
   board: "Official Board Meeting",
@@ -37,7 +67,14 @@ export function MemberMeetings({ hideWhenEmpty = false, hideIntro = false }: { h
   async function refresh() {
     setLoading(true);
     try {
-      const res = await getMyMeetings();
+      let res: { polls: any[] };
+      try {
+        res = await getMyMeetings();
+        if (isPreviewHost() && res.polls.length === 0) res = { polls: demoPolls() };
+      } catch (err) {
+        if (!isPreviewHost()) throw err;
+        res = { polls: demoPolls() };
+      }
       setPolls(res.polls);
       const d: Record<string, Record<string, string>> = {};
       const n: Record<string, string> = {};
@@ -66,6 +103,9 @@ export function MemberMeetings({ hideWhenEmpty = false, hideIntro = false }: { h
       .map((s: any) => ({ slot_id: s.id, availability: answers[s.id] as any }));
     if (responses.length !== poll.slots.length) {
       return toast.error("Please mark every proposed time before sending");
+    }
+    if (String(poll.id).startsWith("demo-")) {
+      return toast.success("Preview only: your availability would be sent");
     }
     setSaving(poll.id);
     try {
