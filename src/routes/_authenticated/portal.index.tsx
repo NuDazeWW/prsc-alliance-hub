@@ -157,7 +157,7 @@ function PortalHome() {
   const sideNav = [
     { label: "Overview", href: "#overview", icon: Home, active: true, onSelect: undefined as (() => void) | undefined },
     { label: "Your Documents", href: "#documents", icon: profileComplete ? FileSignature : Lock, active: false, onSelect: () => setPanel("documents") },
-    { label: "Meetings", href: "#meetings", icon: CalendarDays, active: false, onSelect: () => setPanel("meetings") },
+    { label: "Meetings", href: "#meetings", icon: CalendarDays, active: false, onSelect: () => document.getElementById("meetings")?.scrollIntoView({ behavior: "smooth" }) },
     ...(showPrsc ? [{ label: "Refresh on PRSC", href: "#prsc", icon: ScrollText, active: false, onSelect: () => setPanel("prsc") }] : []),
     ...(showDis ? [{ label: "Learn about DIS", href: "#dis", icon: FileText, active: false, onSelect: () => setPanel("dis") }] : []),
   ];
@@ -282,7 +282,7 @@ function PortalHome() {
             const pendingMeetings = (meetings.data?.polls ?? []).filter((p: any) => p.status === "open" && p.my_responses.length === 0).length;
             const items: { label: string; onClick: () => void }[] = [];
             if (documentsReleased && !allDone) items.push({ label: `${signLeft + readLeft} document${signLeft + readLeft === 1 ? "" : "s"} need${signLeft + readLeft === 1 ? "s" : ""} your attention`, onClick: () => setPanel("documents") });
-            if (pendingMeetings) items.push({ label: `${pendingMeetings} meeting${pendingMeetings === 1 ? "" : "s"} awaiting your availability`, onClick: () => setPanel("meetings") });
+            if (pendingMeetings) items.push({ label: `${pendingMeetings} meeting${pendingMeetings === 1 ? "" : "s"} awaiting your availability`, onClick: () => document.getElementById("meetings")?.scrollIntoView({ behavior: "smooth" }) });
             if (!items.length) return null;
             return (
               <div className="mx-7 mt-6 flex flex-col gap-2 border border-gold/40 bg-gold/[.07] px-5 py-4 sm:mx-10 sm:flex-row sm:flex-wrap sm:items-center sm:gap-4 lg:mx-[3.5%]">

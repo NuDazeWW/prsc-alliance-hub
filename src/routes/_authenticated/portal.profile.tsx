@@ -1,4 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { MemberMeetings } from "@/components/portal/MemberMeetings";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useRef, useState } from "react";
 import { ArrowLeft, ArrowRight, Check, Save, Upload } from "lucide-react";
