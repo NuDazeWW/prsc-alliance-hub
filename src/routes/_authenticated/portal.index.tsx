@@ -386,6 +386,18 @@ function PortalHome() {
             </div>
           </section>
 
+          {/* Meetings & calendar */}
+          <section id="meetings" className="scroll-mt-6 px-7 pb-6 pt-6 sm:px-10 lg:px-[2.5%]">
+            <div className="border border-gold/25 bg-[linear-gradient(135deg,var(--color-midnight),var(--color-navy))] p-6 sm:p-8">
+              <p className="text-[10px] uppercase tracking-[0.24em] text-gold">Meetings &amp; Calendar</p>
+              <h2 className="mt-3 font-display text-[clamp(1.75rem,2.2vw,2.4rem)] leading-tight">Your meeting calendar</h2>
+              <p className="mt-2 text-sm text-ivory/60">Mark your availability for proposed dates, check confirmed meetings, and add them to your calendar.</p>
+              <div className="mt-6">
+                <MemberMeetings hideIntro />
+              </div>
+            </div>
+          </section>
+
         </main>
       </div>
 
