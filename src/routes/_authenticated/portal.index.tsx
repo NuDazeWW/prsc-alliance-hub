@@ -359,8 +359,20 @@ function PortalHome() {
             </div>
           </section>
 
+          {/* Meetings & calendar */}
+          <section id="meetings" className="scroll-mt-6 px-7 pb-6 pt-2 sm:px-10 lg:px-[2.5%]">
+            <div className="border border-gold/25 bg-[linear-gradient(135deg,var(--color-midnight),var(--color-navy))] p-6 sm:p-8">
+              <p className="text-[10px] uppercase tracking-[0.24em] text-gold">Meetings &amp; Calendar</p>
+              <h2 className="mt-3 font-display text-[clamp(1.75rem,2.2vw,2.4rem)] leading-tight">Your meeting calendar</h2>
+              <p className="mt-2 text-sm text-ivory/60">Mark your availability for proposed dates, check confirmed meetings, and add them to your calendar.</p>
+              <div className="mt-6">
+                <MemberMeetings hideIntro />
+              </div>
+            </div>
+          </section>
+
           {/* Why you */}
-          <section id="role" className="flex-1 px-7 pb-2 sm:px-10 lg:px-[2.5%]">
+          <section id="role" className="flex-1 px-7 pb-8 sm:px-10 lg:px-[2.5%]">
             <div className="grid h-full min-h-0 items-stretch gap-6 border border-gold/25 bg-[linear-gradient(135deg,var(--color-midnight),var(--color-navy))] p-6 sm:p-8 lg:grid-cols-[2fr_1fr] lg:gap-8 lg:px-[clamp(1.75rem,2.6vw,3rem)] lg:py-[clamp(2.5rem,3.6vw,4.75rem)]">
               <div className="flex min-w-0 flex-col justify-center">
                 <p className="text-[10px] uppercase tracking-[0.24em] text-gold">
@@ -382,18 +394,6 @@ function PortalHome() {
                   <br />
                   Brighter opportunities.
                 </p>
-              </div>
-            </div>
-          </section>
-
-          {/* Meetings & calendar */}
-          <section id="meetings" className="scroll-mt-6 px-7 pb-6 pt-6 sm:px-10 lg:px-[2.5%]">
-            <div className="border border-gold/25 bg-[linear-gradient(135deg,var(--color-midnight),var(--color-navy))] p-6 sm:p-8">
-              <p className="text-[10px] uppercase tracking-[0.24em] text-gold">Meetings &amp; Calendar</p>
-              <h2 className="mt-3 font-display text-[clamp(1.75rem,2.2vw,2.4rem)] leading-tight">Your meeting calendar</h2>
-              <p className="mt-2 text-sm text-ivory/60">Mark your availability for proposed dates, check confirmed meetings, and add them to your calendar.</p>
-              <div className="mt-6">
-                <MemberMeetings hideIntro />
               </div>
             </div>
           </section>
