@@ -7,6 +7,7 @@ export type Block =
   | { kind: "p"; text: string }
   | { kind: "quote"; text: string }
   | { kind: "list"; title?: string; items: string[] }
+  | { kind: "soon"; items: string[] }
   | { kind: "label"; text: string }
   | { kind: "relationship" }
   | { kind: "dimensions" }
@@ -17,7 +18,15 @@ export type Block =
   | { kind: "flywheel" }
   | { kind: "pairs"; rows: { term: string; text: string }[] };
 
-export type Topic = { id: string; title: string; heading: string; tone: Tone; blocks: Block[] };
+export type Topic = { id: string; title: string; heading: string; tone: Tone; blocks: Block[]; links?: string[] };
+
+export const SITE_LINKS = [
+  { id: "score", label: "PRSC Readiness Score™ — The Standard", href: "/the-standard" },
+  { id: "governance", label: "Governance", href: "/governance" },
+  { id: "charter", label: "Governance Charter", href: "/governance/charter" },
+  { id: "standards", label: "Written Standards", href: "/governance/written-standards" },
+  { id: "vanguard", label: "The Readiness Vanguard™", href: "/readiness-vanguard" },
+];
 export type TopicGroup = { id: string; letter: string; title: string; topics: Topic[] };
 
 export const HUB_TITLE = "Welcome to the PRSC & DIS Orientation Hub";
@@ -260,6 +269,7 @@ export const GROUPS: TopicGroup[] = [
     topics: [
       {
         id: "prsc",
+        links: ["governance", "charter"],
         title: "What PRSC Is",
         heading: "PRSC tells motorsport what “ready” means.",
         tone: "prsc",
@@ -301,6 +311,7 @@ export const GROUPS: TopicGroup[] = [
       },
       {
         id: "score",
+        links: ["score"],
         title: "What the Score Is—and Is Not",
         heading: "One private score. One clearer starting point.",
         tone: "prsc",
@@ -332,6 +343,7 @@ export const GROUPS: TopicGroup[] = [
       },
       {
         id: "dimensions",
+        links: ["score", "standards"],
         title: "What the Score Looks At",
         heading: "Six simple questions—not just race results.",
         tone: "prsc",
@@ -426,6 +438,7 @@ export const GROUPS: TopicGroup[] = [
       },
       {
         id: "trust",
+        links: ["governance", "standards"],
         title: "Why the Score Can Be Trusted",
         heading: "Governance, privacy, and independence are part of the product.",
         tone: "prsc",
@@ -474,6 +487,7 @@ export const GROUPS: TopicGroup[] = [
     topics: [
       {
         id: "vanguard",
+        links: ["vanguard"],
         title: "The Readiness Vanguard™",
         heading: "The first 25 teams and drivers.",
         tone: "prsc",
@@ -534,6 +548,7 @@ export const GROUPS: TopicGroup[] = [
     topics: [
       {
         id: "why-governance",
+        links: ["governance", "charter"],
         title: "Why Governance Matters",
         heading: "Trust, relevance, and responsible scale.",
         tone: "prsc",
@@ -575,6 +590,7 @@ export const GROUPS: TopicGroup[] = [
       },
       {
         id: "committee",
+        links: ["standards", "governance"],
         title: "The Methodology Committee",
         heading: "The Methodology Committee protects the integrity of the PRSC Readiness Standard™ and the PRSC Readiness Score™.",
         tone: "prsc",
@@ -606,7 +622,8 @@ export const GROUPS: TopicGroup[] = [
         heading: "For board and advisor reference.",
         tone: "bridge",
         blocks: [
-          { kind: "list", items: [
+          { kind: "p", text: "Reference materials will be added here as they are finalized." },
+          { kind: "soon", items: [
             "PRSC Governance Structure",
             "PRSC Readiness Score™ Overview",
             "Methodology and Score FAQ",
@@ -618,7 +635,7 @@ export const GROUPS: TopicGroup[] = [
             "Board, Advisor, and Methodology Committee Directory",
             "Decisions, Meeting Materials, and Updates",
           ] },
-          { kind: "p", text: "Materials released to you appear in Your Documents." },
+          { kind: "p", text: "Materials released to you now appear in Your Documents." },
         ],
       },
     ],
