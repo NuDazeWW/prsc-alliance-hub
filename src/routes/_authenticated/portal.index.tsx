@@ -48,6 +48,8 @@ export const Route = createFileRoute("/_authenticated/portal/")({
       { name: "twitter:card", content: "summary" },
     ],
   }),
+  validateSearch: (search: Record<string, unknown>): { asMember?: string } =>
+    typeof search.asMember === "string" ? { asMember: search.asMember } : {},
   component: PortalHome,
 });
 
@@ -82,27 +84,28 @@ const demoMember = {
 };
 
 function PortalHome() {
+  const { asMember } = Route.useSearch();
   const { data, isLoading, error } = useQuery({
-    queryKey: ["portal-session"],
-    queryFn: () => isPreviewHost() ? Promise.resolve(null) : getPortalSession(),
+    queryKey: ["portal-session", asMember ?? null],
+    queryFn: () => isPreviewHost() && !asMember ? Promise.resolve(null) : getPortalSession({ data: { asMemberId: asMember } }),
     retry: false,
   });
 
   const headshot = useQuery({
-    queryKey: ["my-headshot"],
-    queryFn: () => getMyHeadshotUrl().catch(() => null),
+    queryKey: ["my-headshot", asMember ?? null],
+    queryFn: () => getMyHeadshotUrl({ data: { asMemberId: asMember } }).catch(() => null),
     retry: false,
     enabled: Boolean(data?.member),
   });
   const documents = useQuery({
-    queryKey: ["my-documents"],
-    queryFn: () => getMyDocuments().catch(() => null),
+    queryKey: ["my-documents", asMember ?? null],
+    queryFn: () => getMyDocuments({ data: { asMemberId: asMember } }).catch(() => null),
     retry: false,
     enabled: Boolean(data?.member && data?.hasProfile),
   });
   const meetings = useQuery({
-    queryKey: ["my-meetings"],
-    queryFn: () => getMyMeetings().catch(() => null),
+    queryKey: ["my-meetings", asMember ?? null],
+    queryFn: () => getMyMeetings({ data: { asMemberId: asMember } }).catch(() => null),
     retry: false,
     enabled: Boolean(data?.member),
   });
@@ -110,7 +113,7 @@ function PortalHome() {
   const navigate = useNavigate();
   const [panel, setPanel] = useState<"role" | "prsc" | "dis" | "documents" | "questions" | "meetings" | null>(null);
   useEffect(() => {
-    if (data?.isAdmin) navigate({ to: "/admin", replace: true });
+    if (data?.isAdmin && !data?.viewingAs) navigate({ to: "/admin", replace: true });
   }, [data, navigate]);
 
   if (isLoading)
@@ -166,7 +169,16 @@ function PortalHome() {
 
 
 
+  const viewingBanner = data?.viewingAs ? (
+    <div className="sticky top-0 z-[70] flex flex-wrap items-center justify-center gap-3 border-b border-gold/40 bg-navy-deep px-4 py-2 text-sm text-ivory">
+      <span>Viewing the Welcome Center as <strong className="text-gold">{m.first_name} {m.last_name}</strong> · read-only admin view</span>
+      <Link to="/admin" className="rounded-full border border-gold/60 px-3 py-1 text-xs uppercase tracking-[0.14em] text-gold hover:bg-gold hover:text-navy-deep">Return to Admin</Link>
+    </div>
+  ) : null;
+
   return (
+    <>
+    {viewingBanner}
     <PortalShell
       memberName={name}
       memberProgress={
@@ -396,7 +408,7 @@ function PortalHome() {
           <h2 className="mt-3 font-display text-[clamp(1.75rem,2.2vw,2.4rem)] leading-tight">Your meeting calendar</h2>
           <p className="mt-2 text-sm text-ivory/60">Mark your availability for proposed dates, check confirmed meetings, and add them to your calendar.</p>
           <div className="mt-6">
-            <MemberMeetings hideIntro />
+            <MemberMeetings asMemberId={asMember} hideIntro />
           </div>
         </section>
         <section id="team" className="min-w-0">
@@ -671,5 +683,6 @@ function PortalHome() {
         </DialogContent>
       </Dialog>
     </PortalShell>
+    </>
   );
 }

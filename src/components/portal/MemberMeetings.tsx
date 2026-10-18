@@ -57,7 +57,7 @@ function fmt(iso: string) {
   });
 }
 
-export function MemberMeetings({ hideWhenEmpty = false, hideIntro = false }: { hideWhenEmpty?: boolean; hideIntro?: boolean } = {}) {
+export function MemberMeetings({ hideWhenEmpty = false, hideIntro = false, asMemberId }: { hideWhenEmpty?: boolean; hideIntro?: boolean; asMemberId?: string } = {}) {
   const [polls, setPolls] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState<string | null>(null);
@@ -69,7 +69,7 @@ export function MemberMeetings({ hideWhenEmpty = false, hideIntro = false }: { h
     try {
       let res: { polls: any[] };
       try {
-        res = await getMyMeetings();
+        res = await getMyMeetings({ data: { asMemberId } });
         if (isPreviewHost() && res.polls.length === 0) res = { polls: demoPolls() };
       } catch (err) {
         if (!isPreviewHost()) throw err;
@@ -109,6 +109,7 @@ export function MemberMeetings({ hideWhenEmpty = false, hideIntro = false }: { h
     }
     setSaving(poll.id);
     try {
+      if (asMemberId) { toast("Admin view: availability can only be changed by the member."); return; }
       await submitMyAvailability({ data: { poll_id: poll.id, responses, note: notes[poll.id]?.trim() || undefined } });
       toast.success("Your availability has been sent");
       await refresh();

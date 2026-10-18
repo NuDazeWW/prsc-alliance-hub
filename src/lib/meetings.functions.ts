@@ -261,8 +261,21 @@ export const cancelPoll = createServerFn({ method: "POST" })
 
 export const getMyMeetings = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
-  .handler(async ({ context }) => {
-    const member = await getMyMember(context);
+  .inputValidator((input?: { asMemberId?: string }) => z.object({ asMemberId: z.string().uuid().optional() }).parse(input ?? {}))
+  .handler(async ({ context: ctx, data: input }) => {
+    let context: any = ctx;
+    let member: any;
+    if (input.asMemberId) {
+      const { data: isAdmin } = await ctx.supabase.from("user_roles").select("role").eq("user_id", ctx.userId).eq("role", "admin").maybeSingle();
+      if (!isAdmin) throw new Error("Unauthorized");
+      const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+      context = { supabase: supabaseAdmin };
+      const { data } = await supabaseAdmin.from("portal_members").select("*").eq("id", input.asMemberId).maybeSingle();
+      if (!data) throw new Error("Member not found");
+      member = data;
+    } else {
+      member = await getMyMember(ctx);
+    }
     const { data: polls, error } = await context.supabase
       .from("meeting_polls")
       .select("*")

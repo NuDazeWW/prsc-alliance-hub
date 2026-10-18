@@ -34,7 +34,16 @@ async function assertAdmin(context: { supabase: any; userId: string }) {
 
 export const getPortalSession = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
-  .handler(async ({ context }) => {
+  .inputValidator((input?: { asMemberId?: string }) => z.object({ asMemberId: z.string().uuid().optional() }).parse(input ?? {}))
+  .handler(async ({ context, data: input }) => {
+    if (input.asMemberId) {
+      await assertAdmin(context);
+      const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+      const { data: viewed } = await supabaseAdmin.from("portal_members").select("*").eq("id", input.asMemberId).maybeSingle();
+      if (!viewed) throw new Error("Member not found");
+      const { data: vp } = await supabaseAdmin.from("portal_profiles").select("submitted_at").eq("member_id", viewed.id).maybeSingle();
+      return { member: viewed as PortalMember | null, isAdmin: true, hasProfile: Boolean(vp?.submitted_at), viewingAs: true };
+    }
     const [{ data: member }, { data: roles }] = await Promise.all([
       context.supabase.from("portal_members").select("*").eq("user_id", context.userId).maybeSingle(),
       context.supabase.from("user_roles").select("role").eq("user_id", context.userId),
@@ -51,7 +60,7 @@ export const getPortalSession = createServerFn({ method: "GET" })
         .maybeSingle();
       hasProfile = Boolean(profile?.submitted_at);
     }
-    return { member: member as PortalMember | null, isAdmin: roleNames.includes("admin"), hasProfile };
+    return { member: member as PortalMember | null, isAdmin: roleNames.includes("admin"), hasProfile, viewingAs: false };
   });
 
 export const getMyProfile = createServerFn({ method: "GET" })
@@ -204,8 +213,17 @@ export const setMyHeadshot = createServerFn({ method: "POST" })
 
 export const getMyHeadshotUrl = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
-  .handler(async ({ context }) => {
-    const { data: member } = await context.supabase.from("portal_members").select("id").eq("user_id", context.userId).maybeSingle();
+  .inputValidator((input?: { asMemberId?: string }) => z.object({ asMemberId: z.string().uuid().optional() }).parse(input ?? {}))
+  .handler(async ({ context: ctx, data: input }) => {
+    let context: any = ctx;
+    if (input.asMemberId) {
+      await assertAdmin(ctx);
+      const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+      context = { supabase: supabaseAdmin };
+    }
+    const { data: member } = input.asMemberId
+      ? await context.supabase.from("portal_members").select("id").eq("id", input.asMemberId).maybeSingle()
+      : await context.supabase.from("portal_members").select("id").eq("user_id", ctx.userId).maybeSingle();
     if (!member) return { url: null };
     const { data: profile } = await context.supabase.from("portal_profiles").select("headshot_path").eq("member_id", member.id).maybeSingle();
     if (!profile?.headshot_path) return { url: null };
@@ -632,9 +650,16 @@ async function signDocumentUrls(documents: PortalDocumentRecord[]) {
 
 export const getMyDocuments = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
-  .handler(async ({ context }) => {
+  .inputValidator((input?: { asMemberId?: string }) => z.object({ asMemberId: z.string().uuid().optional() }).parse(input ?? {}))
+  .handler(async ({ context: ctx, data: input }) => {
+    let context: any = ctx;
+    if (input.asMemberId) {
+      await assertAdmin(ctx);
+      const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+      context = { supabase: supabaseAdmin };
+    }
     const { data: member } = await context.supabase
-      .from("portal_members").select("id, entity, role, documents_released_at").eq("user_id", context.userId).maybeSingle();
+      .from("portal_members").select("id, entity, role, documents_released_at").eq(input.asMemberId ? "id" : "user_id", input.asMemberId ?? ctx.userId).maybeSingle();
     if (!member) return { memberId: null, released: false, documents: [], acknowledged: [] as string[], completions: [] as PortalCompletion[] };
     if (!member.documents_released_at) {
       return { memberId: member.id as string, released: false, documents: [], acknowledged: [] as string[], completions: [] as PortalCompletion[] };
