@@ -97,7 +97,6 @@ export function OrientationHub({ onClose, onOpenDocuments }: { onClose: () => vo
             <button type="button" onClick={onOpenDocuments} className={`${btn} cta-glow`}><span>Open Your Documents</span></button>
           </div>
           <SiteLinks ids={["score", "governance", "charter", "standards", "vanguard"]} />
-          </div>
         </>
       )}
     </div>
