@@ -1,6 +1,7 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
+import { OrientationHub } from "@/components/portal/OrientationHub";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import {
   ArrowRight,
@@ -111,7 +112,7 @@ function PortalHome() {
   });
   const queryClient = useQueryClient();
   const navigate = useNavigate();
-  const [panel, setPanel] = useState<"role" | "prsc" | "dis" | "documents" | "questions" | "meetings" | null>(null);
+  const [panel, setPanel] = useState<"role" | "hub" | "documents" | "questions" | "meetings" | null>(null);
   useEffect(() => {
     if (data?.isAdmin && !data?.viewingAs) navigate({ to: "/admin", replace: true });
   }, [data, navigate]);
@@ -162,8 +163,7 @@ function PortalHome() {
     { label: "Overview", href: "#overview", icon: Home, active: true, onSelect: undefined as (() => void) | undefined },
     { label: "Your Documents", href: "#documents", icon: profileComplete ? FileSignature : Lock, active: false, onSelect: () => setPanel("documents") },
     { label: "Meetings", href: "#meetings", icon: CalendarDays, active: false, onSelect: () => document.getElementById("meetings")?.scrollIntoView({ behavior: "smooth" }) },
-    ...(showPrsc ? [{ label: "Refresh on PRSC", href: "#prsc", icon: ScrollText, active: false, onSelect: () => setPanel("prsc") }] : []),
-    ...(showDis ? [{ label: "Learn about DIS", href: "#dis", icon: FileText, active: false, onSelect: () => setPanel("dis") }] : []),
+    { label: "The Orientation Hub", href: "#hub", icon: ScrollText, active: false, onSelect: () => setPanel("hub") },
   ];
 
 
@@ -474,152 +474,7 @@ function PortalHome() {
             </div>
           )}
 
-          {panel === "prsc" && (
-            <div className="relative">
-              <img
-                src={heroRoad}
-                alt=""
-                aria-hidden="true"
-                className="pointer-events-none absolute inset-y-0 right-0 hidden h-full w-[58%] object-cover object-[60%_40%] opacity-45 [mask-image:linear-gradient(to_right,transparent_0%,black_45%,black_88%,transparent_100%)] lg:block"
-              />
-              <div className="relative grid gap-8 lg:grid-cols-[58%_42%]">
-                <div className="min-w-0">
-                  <DialogHeader className="space-y-0 text-left">
-                    <p className="text-[10px] uppercase tracking-[0.24em] text-gold">About PRSC</p>
-                    <DialogTitle className="mt-4 font-display text-[clamp(2rem,2.6vw,2.9rem)] font-normal leading-[1.1]">
-                      Partnership Readiness Standards Council (PRSC)
-                    </DialogTitle>
-                  </DialogHeader>
-                  <p className="mt-5 max-w-[34rem] text-[17px] leading-[1.5] text-gold">
-                    PRSC is the independent standards body creating the first common language for commercial partnership
-                    readiness in motorsport.
-                  </p>
-                  <p className="mt-5 max-w-[34rem] text-[14px] leading-[1.6] text-ivory/70">
-                    Today, teams, drivers, brands, agencies, and series make sponsorship decisions using fragmented
-                    information, personal relationships, and inconsistent measures of value.
-                  </p>
-                  <p className="mt-4 max-w-[34rem] text-[14px] leading-[1.6] text-ivory/70">
-                    PRSC changes that by governing the PRSC Readiness Standard™—the methodology behind the PRSC Readiness
-                    Score™, which evaluates whether an organization can clearly communicate, deliver, and prove commercial
-                    value to a partner.
-                  </p>
-                  <p className="mt-4 max-w-[34rem] text-[14px] leading-[1.6] text-ivory/70">
-                    PRSC's independence is central: it does not sell sponsorship, broker deals, or benefit from who is
-                    chosen. Its role is to make the market more credible, comparable, and accountable. Board and advisor
-                    participation helps ensure that this standard is trusted, practical, and built to serve the entire
-                    ecosystem—not any single commercial interest.
-                  </p>
-                  <div className="mt-7 flex flex-wrap items-center gap-3">
-                    {[
-                      { label: "PRSC Readiness Score", href: "https://www.prscstandards.com/the-standard" },
-                      { label: "Governance", href: "https://www.prscstandards.com/governance" },
-                      { label: "The Readiness Vanguard", href: "https://www.prscstandards.com/readiness-vanguard" },
-                    ].map((l) => (
-                      <a
-                        key={l.href}
-                        href={l.href}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="cta-glow-outline inline-flex items-center gap-3 rounded-full px-6 py-3 text-[14px] transition-all"
-                      >
-                        <span className="relative z-10 flex items-center gap-3">
-                          {l.label} <ArrowRight className="h-4 w-4" />
-                        </span>
-                      </a>
-                    ))}
-                  </div>
-                </div>
-                <div className="flex flex-col justify-center gap-6">
-                  {[
-                    { icon: Shield, label: "Independent\nGovernance" },
-                    { icon: BarChart3, label: "Objective\nMethodology" },
-                    { icon: Users, label: "Market\nComparability" },
-                    { icon: Globe, label: "A Stronger\nEcosystem" },
-                  ].map((p) => (
-                    <div key={p.label} className="flex items-center gap-5">
-                      <span className="grid h-12 w-12 shrink-0 place-items-center rounded-full border border-gold/55">
-                        <p.icon className="h-[19px] w-[19px] text-gold" />
-                      </span>
-                      <span className="whitespace-pre-line text-[11px] uppercase leading-[1.9] tracking-[0.24em] text-ivory/85">
-                        {p.label}
-                      </span>
-                    </div>
-                  ))}
-                  <div className="mt-2 h-px w-12 bg-gold" />
-                  <p className="font-display text-[21px] italic leading-[1.45] text-gold">
-                    A more credible,
-                    <br />
-                    comparable, and accountable
-                    <br />
-                    partnership market.
-                  </p>
-                  <div className="h-px w-12 bg-gold" />
-                </div>
-              </div>
-            </div>
-          )}
-
-          {panel === "dis" && (
-            <div className="grid gap-8 lg:grid-cols-[58%_42%]">
-              <div className="min-w-0">
-                <DialogHeader className="space-y-0 text-left">
-                  <p className="text-[10px] uppercase tracking-[0.24em] text-gold">About DIS</p>
-                  <DialogTitle className="mt-4 font-display text-[clamp(2rem,2.6vw,2.9rem)] font-normal leading-[1.1]">
-                    Decision Intelligence Systems (DIS)
-                  </DialogTitle>
-                </DialogHeader>
-                <p className="mt-5 max-w-[34rem] text-[17px] leading-[1.5] text-gold">
-                  DIS is the company building the technology and intelligence infrastructure that makes the PRSC standard
-                  useful at scale.
-                </p>
-                <p className="mt-5 max-w-[34rem] text-[14px] leading-[1.6] text-ivory/70">
-                  Through the Readiness Terminal™, DIS turns verified evidence and the PRSC Readiness Score™ into practical
-                  tools: Commercial Strength Reports™, benchmark intelligence, and clearer decision support for teams,
-                  brands, agencies, series, and investors.
-                </p>
-                <p className="mt-4 max-w-[34rem] text-[14px] leading-[1.6] text-ivory/70">
-                  The opportunity is significant because motorsport has real partnership capital and sophisticated
-                  performance data, but no shared commercial reference point. DIS is building the platform and data asset
-                  that fills that gap—starting with motorsport, where the problem is acute, and expanding as the benchmark
-                  becomes more valuable.
-                </p>
-                <p className="mt-4 max-w-[34rem] text-[14px] leading-[1.6] text-ivory/70">
-                  Advisors and board members are joining at the moment the category is being established: helping shape the
-                  first credible standard, the first benchmark, and the intelligence platform that can make better
-                  partnership decisions possible across the market.
-                </p>
-              </div>
-              <div className="flex flex-col justify-center gap-8">
-                <div className="flex flex-wrap items-start gap-x-2 gap-y-5">
-                  {[
-                    { icon: FileText, label: "Evidence" },
-                    { icon: Cog, label: "Readiness\nEngine™" },
-                    { icon: BarChart3, label: "Readiness\nScore™" },
-                    { icon: Share2, label: "Benchmark\nIntelligence" },
-                    { icon: Target, label: "Better\nDecisions" },
-                  ].map((s, i) => (
-                    <span key={s.label} className="flex items-start gap-2">
-                      <span className="flex w-[76px] flex-col items-center gap-3 text-center">
-                        <span className="grid h-11 w-11 place-items-center rounded-full border border-gold/55">
-                          <s.icon className="h-[18px] w-[18px] text-gold" />
-                        </span>
-                        <span className="whitespace-pre-line text-[9px] uppercase leading-[1.6] tracking-[0.18em] text-ivory/80">
-                          {s.label}
-                        </span>
-                      </span>
-                      {i < 4 && <ArrowRight className="mt-3.5 h-3.5 w-3.5 shrink-0 text-gold/70" />}
-                    </span>
-                  ))}
-                </div>
-                <div className="h-px w-12 bg-gold" />
-                <p className="font-display text-[21px] italic leading-[1.45] text-gold">
-                  From evidence to intelligence.
-                  <br />A stronger partnership economy.
-                </p>
-              </div>
-            </div>
-          )}
-
+          {panel === "hub" && <OrientationHub onClose={() => setPanel(null)} onOpenDocuments={() => setPanel("documents")} />}
 
           {panel === "documents" && (
             <>

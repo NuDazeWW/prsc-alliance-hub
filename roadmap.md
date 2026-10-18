@@ -28,3 +28,4 @@
 - [x] Show "Refresh on PRSC" and "Learn about DIS" sidebar links to every member (were hidden by entity)
 - [x] Welcome Center redesign to reference image + Our Leadership Team panel with admin editor and member bio
 - [ ] Import leadership/document spreadsheet (waiting on user's file)
+- [x] Orientation Hub replaces Refresh on PRSC / Learn about DIS
