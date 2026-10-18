@@ -1,3 +1,4 @@
+import { Link } from "@tanstack/react-router";
 import { AdminLeadership } from "@/components/portal/AdminLeadership";
 import { createFileRoute } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
@@ -1784,9 +1785,14 @@ function Admin() {
                   })()}
                 </p>
               </div>
-              <button type="button" aria-label="Close profile" onClick={() => setDetailId(null)} className="text-ivory/60 hover:text-gold">
-                <X className="h-5 w-5" />
-              </button>
+              <div className="flex shrink-0 items-center gap-4">
+                <Link to="/portal" search={{ asMember: detailId }} className="rounded-full border border-gold/50 px-4 py-2 text-xs uppercase tracking-[0.16em] text-gold hover:bg-gold hover:text-navy-deep">
+                  View portal as member
+                </Link>
+                <button type="button" aria-label="Close profile" onClick={() => setDetailId(null)} className="text-ivory/60 hover:text-gold">
+                  <X className="h-5 w-5" />
+                </button>
+              </div>
             </div>
             <div className="flex-1 space-y-7 overflow-y-auto px-6 py-6">
               {detail.isLoading ? (
