@@ -50,6 +50,14 @@
   --color-emerald: var(--emerald);
   --color-burgundy: var(--burgundy);
 
+  /* DIS palette */
+  --color-dis-midnight: var(--dis-midnight);
+  --color-dis-navy: var(--dis-navy);
+  --color-dis-cyan: var(--dis-cyan);
+  --color-dis-blue: var(--dis-blue);
+  --color-dis-silver: var(--dis-silver);
+  --color-dis-gold: var(--dis-gold);
+
   --font-display: "Cormorant Garamond", ui-serif, Georgia, serif;
   --font-sans: "Inter Tight", ui-sans-serif, system-ui, sans-serif;
 }
@@ -94,6 +102,14 @@
   --ivory: oklch(0.975 0.008 85);       /* #F2EFE6 Ivory */
   --emerald: oklch(0.42 0.08 155);      /* #1F7A5A Emerald */
   --burgundy: oklch(0.38 0.13 20);      /* #7A1F2B Burgundy */
+
+  /* DIS palette */
+  --dis-midnight: #050B14;
+  --dis-navy: #0B1E2E;
+  --dis-cyan: #00D6FF;
+  --dis-blue: #0066FF;
+  --dis-silver: #C7D2DE;
+  --dis-gold: #F4C542;
 }
 
 @layer base {
