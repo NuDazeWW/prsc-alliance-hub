@@ -27,6 +27,7 @@ import {
 
 import { MemberDocuments } from "@/components/portal/MemberDocuments";
 import { MemberMeetings } from "@/components/portal/MemberMeetings";
+import { LeadershipTeam } from "@/components/portal/LeadershipTeam";
 import { getMyMeetings } from "@/lib/meetings.functions";
 import { getMyDocuments, getMyHeadshotUrl, getPortalSession } from "@/lib/portal.functions";
 import { INVITE_ROLE_LABELS } from "@/lib/invite-email-config";
@@ -295,56 +296,26 @@ function PortalHome() {
               </div>
             );
           })()}
-          {/* Hero */}
-          <section id="overview" className="relative overflow-hidden px-7 pb-5 pt-9 sm:px-10 lg:px-[3.5%] lg:pb-[clamp(1.5rem,2vw,2.75rem)] lg:pt-[clamp(3.25rem,4.2vw,5.5rem)]">
-
-
-            <img
-              src={heroRoad}
-              alt=""
-              width={1280}
-              height={960}
-              aria-hidden="true"
-              className="pointer-events-none absolute inset-y-0 right-0 h-full w-full object-cover object-[64%_48%] opacity-25 [mask-image:linear-gradient(to_right,transparent_0%,black_45%,black_82%,transparent_100%)] lg:w-[62%] lg:object-[60%_48%] lg:opacity-80 lg:[mask-image:linear-gradient(to_right,transparent_0%,black_38%,black_82%,transparent_100%)]"
-            />
-            <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(to_right,var(--color-navy)_0%,var(--color-navy)_38%,transparent_68%),linear-gradient(to_top,var(--color-navy)_0%,transparent_28%)]" />
-            <div className="relative grid gap-10 lg:grid-cols-[62%_38%]">
-              <div className="min-w-0">
-                <p className="text-[11px] uppercase tracking-[0.28em] text-gold">Private Board &amp; Advisor Center</p>
-                <h1 className="mt-3 font-display text-5xl leading-[1.02] sm:text-6xl lg:text-[clamp(4.5rem,5.1vw,6rem)]">Welcome, {name}.</h1>
-                <p className="mt-1 font-display text-2xl leading-tight text-ivory/85 sm:text-3xl lg:whitespace-nowrap lg:text-[clamp(2rem,2.45vw,2.85rem)]">To the future of Partnership Readiness.</p>
-                <div className="mt-5 h-px w-12 bg-gold" />
-                <p className="mt-5 max-w-[46rem] text-[15px] leading-[1.65] text-ivory/72">
-                  PRSC and Decision Intelligence Systems have reached an important inflection point. The foundation is built, the
-                  platform is advancing, and DIS has officially entered investor prospecting.
-                </p>
-                <p className="mt-4 max-w-[46rem] text-[15px] leading-[1.65] text-ivory/72">
-                  You were selected to join us because we believe your experience, perspective, and credibility can contribute
-                  meaningfully to what we're building.
-                </p>
-                <Link
-                  to="/portal/profile"
-                  className="cta-glow mt-[22px] inline-flex min-h-14 w-full max-w-[300px] items-center justify-between gap-6 rounded-full px-7 py-4 text-[19px] font-semibold transition-all"
-                >
-                  <span className="relative z-10 flex w-full items-center justify-between gap-6">
-                    {profileComplete ? "Review Your Profile" : "Complete Your Profile"} <ArrowRight className="h-4 w-4" />
-                  </span>
-                </Link>
-                <p className="mt-3 text-[17px] text-ivory/52">
-                  {profileComplete
-                    ? "Your profile is on file — your package is being prepared."
-                    : (
-                      <>
-                        Approx. 7–10 minutes  •  Your Submission is Private.
-                        <br />
-                         Completing your profile unlocks your individualized package.
-                      </>
-                    )}
-                </p>
-              </div>
-              <div className="relative hidden flex-col justify-between pb-2 pt-8 lg:flex">
-                <div className="absolute right-[4%] top-2">
-                  <p className="text-[12px] uppercase leading-[2.15] tracking-[0.42em] text-ivory/90">
+          {/* Hero banner */}
+          <section id="overview" className="px-5 pt-5 sm:px-7 lg:px-[1.5%] lg:pt-[1.25%]">
+            <div className="relative overflow-hidden border border-gold/15 bg-navy-deep">
+              <img
+                src={heroRoad}
+                alt=""
+                width={1280}
+                height={960}
+                aria-hidden="true"
+                className="pointer-events-none absolute inset-y-0 right-0 h-full w-full object-cover object-[60%_55%] opacity-40 lg:w-[78%] lg:opacity-90 [mask-image:linear-gradient(to_right,transparent_0%,black_35%,black_100%)]"
+              />
+              <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(to_right,var(--color-navy-deep)_0%,var(--color-navy-deep)_22%,transparent_60%)]" />
+              <div className="relative grid gap-6 px-6 py-10 sm:px-8 lg:grid-cols-[1fr_auto] lg:px-[clamp(1.5rem,2.2vw,2.5rem)] lg:py-[clamp(2.5rem,3.4vw,4rem)]">
+                <div className="min-w-0">
+                  <p className="text-[11px] uppercase tracking-[0.28em] text-gold">Private Board &amp; Advisor Center</p>
+                  <h1 className="mt-3 font-display text-5xl leading-[1.02] sm:text-6xl lg:text-[clamp(3.5rem,4.2vw,5rem)]">Welcome, {name}.</h1>
+                  <p className="mt-1 font-display text-2xl leading-tight text-ivory/85 sm:text-3xl lg:text-[clamp(1.75rem,2vw,2.4rem)]">To the future of Partnership Readiness.</p>
+                </div>
+                <div className="hidden lg:block">
+                  <p className="text-[11px] uppercase leading-[2.15] tracking-[0.36em] text-ivory/90">
                     A higher
                     <br />
                     standard
@@ -353,27 +324,45 @@ function PortalHome() {
                     <br />
                     industry.
                   </p>
-                  <div className="mt-6 h-px w-11 bg-gold" />
+                  <div className="mt-4 h-px w-11 bg-gold" />
                 </div>
               </div>
             </div>
           </section>
 
-          {/* Meetings & calendar */}
-          <section id="meetings" className="scroll-mt-6 px-7 pb-6 pt-2 sm:px-10 lg:px-[2.5%]">
-            <div className="border border-gold/25 bg-[linear-gradient(135deg,var(--color-midnight),var(--color-navy))] p-6 sm:p-8">
-              <p className="text-[10px] uppercase tracking-[0.24em] text-gold">Meetings &amp; Calendar</p>
-              <h2 className="mt-3 font-display text-[clamp(1.75rem,2.2vw,2.4rem)] leading-tight">Your meeting calendar</h2>
-              <p className="mt-2 text-sm text-ivory/60">Mark your availability for proposed dates, check confirmed meetings, and add them to your calendar.</p>
-              <div className="mt-6">
-                <MemberMeetings hideIntro />
-              </div>
-            </div>
-          </section>
+          {/* Intro + Why you */}
+          <div className="grid gap-5 px-5 pb-5 pt-5 sm:px-7 lg:grid-cols-2 lg:gap-[1.25%] lg:px-[1.5%] lg:pt-[1.25%]">
+            <section className="flex flex-col justify-center border border-gold/25 bg-[linear-gradient(135deg,var(--color-midnight),var(--color-navy))] p-6 sm:p-8">
+              <p className="text-[15px] leading-[1.65] text-ivory/72">
+                PRSC and Decision Intelligence Systems have reached an important inflection point. The foundation is built, the
+                platform is advancing, and DIS has officially entered investor prospecting.
+              </p>
+              <p className="mt-4 text-[15px] leading-[1.65] text-ivory/72">
+                You were selected to join us because we believe your experience, perspective, and credibility can contribute
+                meaningfully to what we're building.
+              </p>
+              <Link
+                to="/portal/profile"
+                className="cta-glow mt-[22px] inline-flex min-h-14 w-full max-w-[300px] items-center justify-between gap-6 rounded-full px-7 py-4 text-[19px] font-semibold transition-all"
+              >
+                <span className="relative z-10 flex w-full items-center justify-between gap-6">
+                  {profileComplete ? "Review Your Profile" : "Complete Your Profile"} <ArrowRight className="h-4 w-4" />
+                </span>
+              </Link>
+              <p className="mt-3 text-[15px] text-ivory/52">
+                {profileComplete
+                  ? "Your profile is on file — your package is being prepared."
+                  : (
+                    <>
+                      Approx. 7–10 minutes  •  Your Submission is Private.
+                      <br />
+                      Completing your profile unlocks your individualized package.
+                    </>
+                  )}
+              </p>
+            </section>
 
-          {/* Why you */}
-          <section id="role" className="flex-1 px-7 pb-8 sm:px-10 lg:px-[2.5%]">
-            <div className="grid h-full min-h-0 items-stretch gap-6 border border-gold/25 bg-[linear-gradient(135deg,var(--color-midnight),var(--color-navy))] p-6 sm:p-8 lg:grid-cols-[2fr_1fr] lg:gap-8 lg:px-[clamp(1.75rem,2.6vw,3rem)] lg:py-[clamp(2.5rem,3.6vw,4.75rem)]">
+            <section id="role" className="grid items-stretch gap-6 border border-gold/25 bg-[linear-gradient(135deg,var(--color-midnight),var(--color-navy))] p-6 sm:p-8 xl:grid-cols-[1.6fr_1fr]">
               <div className="flex min-w-0 flex-col justify-center">
                 <p className="text-[10px] uppercase tracking-[0.24em] text-gold">
                   Why You <span className="mx-2 text-gold/40">|</span>
@@ -381,12 +370,12 @@ function PortalHome() {
                   <span className="mx-2 text-gold/40">·</span>
                   <span className="text-ivory/70">{entityWord}</span>
                 </p>
-                <h2 className="mt-4 font-display text-[clamp(2rem,2.5vw,2.8rem)] leading-tight">{name}, Your Perspective Matters.</h2>
-                <p className="mt-7 max-w-[52rem] text-[16px] leading-8 text-ivory/75">{m.why_you}</p>
-                <div className="mt-9 h-px w-16 bg-gold" />
+                <h2 className="mt-4 font-display text-[clamp(1.75rem,2vw,2.3rem)] leading-tight">{name}, Your Perspective Matters.</h2>
+                <p className="mt-5 text-[15px] leading-7 text-ivory/75">{m.why_you}</p>
+                <div className="mt-6 h-px w-16 bg-gold" />
               </div>
-              <div className="relative flex flex-col justify-center overflow-hidden border-gold/20 py-4 lg:border-l lg:pl-[12%]">
-                <blockquote className="font-display text-[20px] italic leading-snug text-gold lg:text-[24px]">
+              <div className="flex flex-col justify-center border-gold/20 xl:border-l xl:pl-6">
+                <blockquote className="font-display text-[20px] italic leading-snug text-gold">
                   “Independent standards create stronger markets.”
                 </blockquote>
                 <p className="mt-3 text-[10px] uppercase leading-[2] tracking-[0.24em] text-ivory/60">
@@ -395,10 +384,24 @@ function PortalHome() {
                   Brighter opportunities.
                 </p>
               </div>
-            </div>
-          </section>
-
+            </section>
+          </div>
         </main>
+      </div>
+
+      {/* Meetings + Leadership */}
+      <div className="grid gap-5 border-t border-gold/10 px-5 py-6 sm:px-7 lg:grid-cols-[64%_1fr] lg:gap-[1.25%] lg:px-[7%] lg:py-[1.25%]">
+        <section id="meetings" className="scroll-mt-6 border border-gold/25 bg-[linear-gradient(135deg,var(--color-midnight),var(--color-navy))] p-6 sm:p-8">
+          <p className="text-[10px] uppercase tracking-[0.24em] text-gold">Meetings &amp; Calendar</p>
+          <h2 className="mt-3 font-display text-[clamp(1.75rem,2.2vw,2.4rem)] leading-tight">Your meeting calendar</h2>
+          <p className="mt-2 text-sm text-ivory/60">Mark your availability for proposed dates, check confirmed meetings, and add them to your calendar.</p>
+          <div className="mt-6">
+            <MemberMeetings hideIntro />
+          </div>
+        </section>
+        <section id="team" className="min-w-0">
+          <LeadershipTeam />
+        </section>
       </div>
 
       <Dialog open={panel !== null} onOpenChange={(open) => !open && setPanel(null)}>
