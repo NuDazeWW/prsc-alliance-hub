@@ -101,6 +101,80 @@ export type Database = {
         }
         Relationships: []
       }
+      leadership_settings: {
+        Row: {
+          eyebrow: string
+          heading: string
+          singleton: boolean
+          subtext: string
+          updated_at: string
+        }
+        Insert: {
+          eyebrow?: string
+          heading?: string
+          singleton?: boolean
+          subtext?: string
+          updated_at?: string
+        }
+        Update: {
+          eyebrow?: string
+          heading?: string
+          singleton?: boolean
+          subtext?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      leadership_team: {
+        Row: {
+          bio: string | null
+          created_at: string
+          id: string
+          is_placeholder: boolean
+          member_id: string | null
+          name: string
+          photo_path: string | null
+          sort_order: number
+          title: string
+          updated_at: string
+          visible: boolean
+        }
+        Insert: {
+          bio?: string | null
+          created_at?: string
+          id?: string
+          is_placeholder?: boolean
+          member_id?: string | null
+          name: string
+          photo_path?: string | null
+          sort_order?: number
+          title?: string
+          updated_at?: string
+          visible?: boolean
+        }
+        Update: {
+          bio?: string | null
+          created_at?: string
+          id?: string
+          is_placeholder?: boolean
+          member_id?: string | null
+          name?: string
+          photo_path?: string | null
+          sort_order?: number
+          title?: string
+          updated_at?: string
+          visible?: boolean
+        }
+        Relationships: [
+          {
+            foreignKeyName: "leadership_team_member_id_fkey"
+            columns: ["member_id"]
+            isOneToOne: false
+            referencedRelation: "portal_members"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       meeting_poll_notes: {
         Row: {
           member_id: string
@@ -694,6 +768,7 @@ export type Database = {
       }
       portal_profiles: {
         Row: {
+          bio: string | null
           contact_requested: boolean
           created_at: string
           current_organization: string | null
@@ -716,6 +791,7 @@ export type Database = {
           visibility_instructions: Json
         }
         Insert: {
+          bio?: string | null
           contact_requested?: boolean
           created_at?: string
           current_organization?: string | null
@@ -738,6 +814,7 @@ export type Database = {
           visibility_instructions?: Json
         }
         Update: {
+          bio?: string | null
           contact_requested?: boolean
           created_at?: string
           current_organization?: string | null
