@@ -1,6 +1,5 @@
-import { Link } from "@tanstack/react-router";
 import { AdminLeadership } from "@/components/portal/AdminLeadership";
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
