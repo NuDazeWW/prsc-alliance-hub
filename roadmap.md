@@ -26,3 +26,5 @@
 - [x] Status board, filters, Nudge now, CSV export, activity log, member doc progress, completion summary
 
 - [x] Show "Refresh on PRSC" and "Learn about DIS" sidebar links to every member (were hidden by entity)
+- [x] Welcome Center redesign to reference image + Our Leadership Team panel with admin editor and member bio
+- [ ] Import leadership/document spreadsheet (waiting on user's file)
