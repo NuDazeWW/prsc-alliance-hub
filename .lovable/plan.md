@@ -20,11 +20,15 @@ Rearrange the member Welcome Center to match the supplied reference. All existin
 - Tablet/phone: everything stacks in one column in the same order.
 
 ## Leadership Team panel
-- Heading "Meet the Board / Our Leadership Team" with the short description from the image.
-- List of people: photo, name, title, and a dropdown arrow that expands a short bio.
-- Starts with the six names shown in the image as placeholders (these are sample people, not real). Please send real names, titles, bios and headshots, and I will swap them in; later an admin editor can be added if you want.
+- Small gold label and heading both read "Our Leadership Team" (replacing "Meet the Board"), with the image's subtext: "A distinguished group of advisors and executives guiding PRSC's mission and industry impact."
+- Each row: photo, name, role, and a dropdown arrow that expands the bio.
+- For now it shows the six placeholder people from the image (sample only).
+- Once your spreadsheet arrives, the list will be built from it (names and roles). Each person's photo and bio fill in automatically when they complete their profile card; until then a placeholder photo/initials and no bio show.
+- A short "Bio" box is added to the first step of the member profile so members can supply that text (the headshot upload already exists).
 
 ## Technical details
-- Changes limited to `portal.index.tsx` layout markup and a new `LeadershipTeam` component with a static list; no backend, query, or route changes.
-- Placeholder headshots generated as images; replaced when real ones arrive.
-- Verify at the current desktop width plus tablet and phone with screenshots.
+- Layout changes in `portal.index.tsx`; new `LeadershipTeam` component.
+- Add a nullable `bio` column to member profiles and a field in profile step 1; a signed-in server function returns team rows (name, role, headshot link, bio) for active members only, falling back to the placeholder list while no team data exists.
+- Spreadsheet import (names, roles, document timing) handled in a later step when the file is uploaded.
+- Placeholder headshots generated as images.
+- Verify at desktop, tablet and phone with screenshots.
