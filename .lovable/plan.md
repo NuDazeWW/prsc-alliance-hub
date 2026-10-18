@@ -12,11 +12,11 @@ Every screen keeps the same frame:
 - a short list of chapters down the side (it becomes a drop-down on phones)
 
 **1. Opening screen: "Welcome to the PRSC & DIS Orientation Hub"**
-- The short opening text from the model, word for word.
+- The tone orients the people guiding PRSC and DIS. It does not pitch to them. The opening message, word for word: "This hub is a shared reference point for the people helping guide PRSC and DIS. It explains the problem we are solving, how the organizations work together, what the Score and Terminal are designed to do, and why your role matters."
 - Three cards:
-  - PRSC: navy and gold, with a shield icon
-  - The PRSC Readiness Score™: a sample 0–100 ring, not a real score
-  - DIS + the Readiness Terminal™: cyan and electric blue lines from the DIS palette
+  - PRSC — Standard and governance: navy and gold, with a shield icon
+  - PRSC Readiness Score™ — Shared commercial-readiness language: a sample 0–100 ring, not a real score
+  - DIS + Readiness Terminal™ — Data, platform, intelligence, and ongoing utility: cyan and electric blue lines from the DIS palette
 - Three buttons: Take the 5-Minute Orientation, Explore the System, View Current Materials.
 
 **2. The 5-Minute Orientation**
