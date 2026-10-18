@@ -26,9 +26,16 @@ Rearrange the member Welcome Center to match the supplied reference. All existin
 - Once your spreadsheet arrives, the list will be built from it (names and roles). Each person's photo and bio fill in automatically when they complete their profile card; until then a placeholder photo/initials and no bio show.
 - A short "Bio" box is added to the first step of the member profile so members can supply that text (the headshot upload already exists).
 
+## Admin editing (new "Leadership Team" section in the admin center)
+- Add, edit, remove and reorder people; show/hide each one.
+- Edit name, role/title, bio and photo (upload), and optionally link a person to a portal member so their profile photo and bio fill in automatically.
+- Admin edits override the member's own profile text when both exist.
+- Edit the panel's label, heading and subtext.
+
 ## Technical details
 - Layout changes in `portal.index.tsx`; new `LeadershipTeam` component.
-- Add a nullable `bio` column to member profiles and a field in profile step 1; a signed-in server function returns team rows (name, role, headshot link, bio) for active members only, falling back to the placeholder list while no team data exists.
+- New `leadership_team` table (name, title, bio, photo path, optional member link, sort order, visible) plus a small settings row for heading/subtext; admins have full write access, signed-in members read visible rows only. Photos stored in a private bucket served via signed links.
+- Add a nullable `bio` column to member profiles and a field in profile step 1; a signed-in server function returns team rows, merging linked member photo/bio when the admin left those blank. Seeded with the six placeholders.
 - Spreadsheet import (names, roles, document timing) handled in a later step when the file is uploaded.
 - Placeholder headshots generated as images.
 - Verify at desktop, tablet and phone with screenshots.
