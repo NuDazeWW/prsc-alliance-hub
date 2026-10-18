@@ -1,9 +1,12 @@
 import { useEffect, useRef, useState } from "react";
-import { ArrowLeft, ArrowRight, Shield } from "lucide-react";
+import { ArrowLeft, ArrowRight, ExternalLink } from "lucide-react";
+import prscCrest from "@/assets/prsc-logo-only.png.asset.json";
+import scoreGauge from "@/assets/prsc-score-gauge.png.asset.json";
+import disLogo from "@/assets/dis-logo-hub.png";
 import { DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import {
   ALL_TOPICS, AUDIENCES, AVAILABILITY, DIMENSIONS, FLYWHEEL, GROUPS, GUIDED, HUB_INTRO, HUB_SCOPE, HUB_TITLE,
-  INTELLIGENCE, IP_STACK, PAGE_LABELS, RELATIONSHIP, ROLE_CARDS, type Block, type Tone, type Topic,
+  INTELLIGENCE, IP_STACK, SITE_LINKS, PAGE_LABELS, RELATIONSHIP, ROLE_CARDS, type Block, type Tone, type Topic,
 } from "@/data/orientation-hub";
 
 type View = { kind: "hub" } | { kind: "guided"; step: number } | { kind: "explore" } | { kind: "topic"; id: string } | { kind: "materials" };
@@ -18,7 +21,7 @@ export function OrientationHub({ onClose, onOpenDocuments }: { onClose: () => vo
     top.current?.closest("[role=dialog]")?.scrollTo({ top: 0, behavior: "smooth" });
   }, [view]);
 
-  const btn = "inline-flex min-h-11 items-center justify-center gap-2 rounded-full px-6 text-[12px] font-semibold uppercase tracking-[0.14em]";
+  const btn = "inline-flex min-h-[52px] items-center justify-center gap-2 rounded-full px-8 text-[12.5px] font-semibold uppercase tracking-[0.14em]";
 
   return (
     <div ref={top}>
@@ -38,7 +41,7 @@ export function OrientationHub({ onClose, onOpenDocuments }: { onClose: () => vo
           <p className="mt-3 text-xs text-ivory/50">{HUB_SCOPE}</p>
           <div className="mt-8 grid gap-4 md:grid-cols-3">
             {ROLE_CARDS.map((c) => (
-              <div key={c.title} className={`rounded-md border ${toneBorder[c.tone]} bg-navy-deep/60 p-5`}>
+              <div key={c.title} className={`${c.tone === "dis" ? "hub-card-dis" : "hub-card"} rounded-lg p-5`}>
                 <RoleVisual v={c.visual} />
                 <p className={`mt-4 font-display text-xl ${toneText[c.tone]}`}>{c.title}</p>
                 <p className="mt-2 text-sm leading-6 text-ivory/75">{c.text}</p>
@@ -92,10 +95,8 @@ export function OrientationHub({ onClose, onOpenDocuments }: { onClose: () => vo
           <p className="mt-4 max-w-2xl text-sm leading-7 text-ivory/75">Materials released to you, including items to read or sign, live in Your Documents.</p>
           <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
             <button type="button" onClick={onOpenDocuments} className={`${btn} cta-glow`}><span>Open Your Documents</span></button>
-            <a href="/the-standard" target="_blank" rel="noreferrer" className={`${btn} cta-glow-outline`}><span>PRSC Readiness Score™</span></a>
-            <a href="/governance" target="_blank" rel="noreferrer" className={`${btn} cta-glow-outline`}><span>Governance</span></a>
-            <a href="/readiness-vanguard" target="_blank" rel="noreferrer" className={`${btn} cta-glow-outline`}><span>The Readiness Vanguard™</span></a>
           </div>
+          <SiteLinks ids={["score", "governance", "charter", "standards", "vanguard"]} />
         </>
       )}
     </div>
@@ -194,6 +195,7 @@ function TopicBody({ topic }: { topic: Topic }) {
     <>
       <h2 className="mt-3 font-display text-[clamp(1.6rem,2.2vw,2.3rem)] leading-tight text-ivory">{topic.heading}</h2>
       <div className="mt-5 space-y-5">{topic.blocks.map((b, i) => <BlockView key={i} b={b} tone={topic.tone} />)}</div>
+      {topic.links && <SiteLinks ids={topic.links} />}
     </>
   );
 }
@@ -208,6 +210,12 @@ function BlockView({ b, tone }: { b: Block; tone: Tone }) {
       return <blockquote className={`border-l-2 ${tone === "dis" ? "border-dis-cyan" : "border-gold"} pl-4 font-display text-lg italic leading-8 text-ivory/90`}>{b.text}</blockquote>;
     case "label":
       return <p className="rounded-md border border-ivory/15 bg-ivory/5 px-4 py-3 text-xs uppercase tracking-[0.12em] text-ivory/70">{b.text}</p>;
+    case "soon":
+      return (
+        <div>
+          <ul className="grid gap-2 sm:grid-cols-2">{b.items.map((it) => <li key={it} className="flex items-center justify-between gap-3 rounded-md border border-ivory/10 bg-navy-deep/40 px-4 py-3 text-[14px] text-ivory/80">{it}<span className="shrink-0 rounded-full border border-gold/40 px-2 py-0.5 text-[9.5px] uppercase tracking-[0.14em] text-gold">Coming soon</span></li>)}</ul>
+        </div>
+      );
     case "list":
       return (
         <div>
@@ -321,21 +329,27 @@ function BlockView({ b, tone }: { b: Block; tone: Tone }) {
   }
 }
 
-function RoleVisual({ v }: { v: "shield" | "ring" | "signal" }) {
-  if (v === "shield") return <span className="grid h-12 w-12 place-items-center rounded-full border border-gold/50"><Shield className="h-5 w-5 text-gold" /></span>;
-  if (v === "ring")
-    return (
-      <svg viewBox="0 0 48 48" className="h-12 w-12" aria-hidden>
-        <circle cx="24" cy="24" r="20" fill="none" stroke="currentColor" strokeWidth="3" className="text-ivory/15" />
-        <circle cx="24" cy="24" r="20" fill="none" stroke="url(#hubg)" strokeWidth="3" strokeLinecap="round" strokeDasharray="88 126" transform="rotate(-90 24 24)" />
-        <defs><linearGradient id="hubg"><stop offset="0" stopColor="var(--gold)" /><stop offset="1" stopColor="var(--dis-cyan)" /></linearGradient></defs>
-        <text x="24" y="28" textAnchor="middle" fontSize="9" fill="currentColor" className="text-ivory/70">0–100</text>
-      </svg>
-    );
+function SiteLinks({ ids }: { ids: string[] }) {
   return (
-    <svg viewBox="0 0 48 48" className="h-12 w-12 text-dis-cyan" aria-hidden>
-      <path d="M2 30 L12 30 L17 16 L24 38 L30 22 L35 30 L46 30" fill="none" stroke="currentColor" strokeWidth="2" />
-      <path d="M2 36 H46" stroke="var(--dis-blue)" strokeWidth="1" opacity=".7" />
-    </svg>
+    <div className="mt-6">
+      <p className="mb-2 text-[11px] uppercase tracking-[0.18em] text-ivory/50">Related pages</p>
+      <div className="flex flex-wrap gap-2">
+        {SITE_LINKS.filter((l) => ids.includes(l.id)).map((l) => (
+          <a key={l.id} href={l.href} target="_blank" rel="noreferrer" className="inline-flex items-center gap-2 rounded-full border border-gold/40 px-4 py-2 text-[12px] text-gold transition-colors hover:bg-gold/10">
+            {l.label} <ExternalLink className="h-3 w-3" />
+          </a>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function RoleVisual({ v }: { v: "shield" | "ring" | "signal" }) {
+  const src = v === "shield" ? prscCrest.url : v === "ring" ? scoreGauge.url : disLogo;
+  const alt = v === "shield" ? "PRSC crest" : v === "ring" ? "PRSC Readiness Score gauge" : "DIS — Decision Intelligence Systems";
+  return (
+    <div className="grid h-24 place-items-center">
+      <img src={src} alt={alt} className={`max-h-24 object-contain drop-shadow-[0_6px_18px_rgba(0,0,0,0.5)] ${v === "signal" ? "w-[88%]" : "h-24 w-auto"}`} />
+    </div>
   );
 }
