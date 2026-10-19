@@ -1226,13 +1226,39 @@ function Admin() {
           <div className="min-w-0">
             <div className="mb-8"><AdminLeadership /></div>
             <section id="email-center" className="border border-gold/20 p-6 sm:p-8">
+              <div className="mb-6 flex flex-wrap gap-2" role="tablist">
+                {([
+                  ["compose", "Compose & send"],
+                  ["template", "Template library editor"],
+                ] as const).map(([mode, label]) => (
+                  <button
+                    key={mode}
+                    type="button"
+                    role="tab"
+                    aria-selected={emailMode === mode}
+                    onClick={() => {
+                      setEmailMode(mode);
+                      setDraft(emptyDraft);
+                      setComposeFromId("");
+                      setEmailStatus(mode === "template" ? "Pick a template on the left, upload one, or start a new one." : "");
+                    }}
+                    className={`border px-4 py-2 text-sm uppercase tracking-[0.14em] transition-colors ${emailMode === mode ? "border-gold bg-gold text-navy" : "border-gold/30 text-ivory/70 hover:text-gold"}`}
+                  >
+                    {label}
+                  </button>
+                ))}
+              </div>
               <div className="flex flex-wrap items-center justify-between gap-3">
                 <div className="flex items-center gap-3">
-                  <Send className="h-5 w-5 text-gold" />
-                  <h2 className="font-display text-3xl">Compose &amp; send</h2>
+                  {isTemplateMode ? <FileText className="h-5 w-5 text-gold" /> : <Send className="h-5 w-5 text-gold" />}
+                  <h2 className="font-display text-3xl">
+                    {isTemplateMode ? (draft.id ? `Editing: ${draft.name || "template"}` : "New template") : <>Compose &amp; send</>}
+                  </h2>
                   <InfoTip
-                    title="Compose & send"
-                    body="Write or edit an email here. Upload Content loads a .txt, .md, or .html file into the body. Use {{first_name}}, {{full_name}}, {{entity}}, {{role}}, and similar tokens — they personalize automatically per recipient. View in Template shows the exact branded email before anything is sent. Select recipients below, then Save Template to keep it or Send to deliver it. Members who already received the loaded template are flagged to prevent duplicates."
+                    title={isTemplateMode ? "Template library editor" : "Compose & send"}
+                    body={isTemplateMode
+                      ? "Edit and save templates in your library. Changes here permanently update the saved template for all future uses. Upload Template loads a .txt, .md, or .html file as a new template. Nothing is sent from this view."
+                      : "Write any email from scratch in plain text, or optionally load a saved template as a starting point. Edits here only affect this send — your saved templates stay unchanged. Select recipients below, then Send."}
                   />
                 </div>
                 <div className="flex w-full flex-wrap items-center gap-2 sm:w-auto">
@@ -1248,7 +1274,7 @@ function Admin() {
                     }}
                   />
                   <Button type="button" className="w-full rounded-none border border-gold/40 bg-transparent text-base text-ivory hover:bg-gold/10 hover:text-gold sm:w-auto" onClick={() => fileRef.current?.click()}>
-                    <Upload className="mr-2 h-4 w-4" /> Upload content
+                    <Upload className="mr-2 h-4 w-4" /> {isTemplateMode ? "Upload template" : "Upload text"}
                   </Button>
                   <Button type="button" className="w-full rounded-none bg-gold text-base text-navy hover:bg-gold-light hover:text-navy sm:w-auto" onClick={() => setPreviewOpen(true)}>
                     <Eye className="mr-2 h-4 w-4" /> View in template
@@ -1256,6 +1282,40 @@ function Admin() {
                 </div>
               </div>
 
+              {!isTemplateMode && (
+                <label className="mt-6 flex flex-col gap-2 text-base text-ivory/80 sm:flex-row sm:items-center">
+                  <span className="shrink-0">Start from a saved template (optional)</span>
+                  <select
+                    value={composeFromId}
+                    onChange={(e) => {
+                      const id = e.target.value;
+                      setComposeFromId(id);
+                      const t = templates.find((x) => x.id === id);
+                      if (!t) { setDraft(emptyDraft); return; }
+                      setDraft({
+                        id: "",
+                        name: t.name,
+                        subject: t.subject,
+                        description: t.description ?? "",
+                        eyebrow: t.eyebrow || "Private Communication",
+                        heading: t.heading ?? "",
+                        body: t.body,
+                        cta_label: t.cta_label ?? "",
+                        cta_url: t.cta_url ?? "",
+                        cta_subtext: t.cta_subtext ?? "",
+                        signatures: t.signatures ?? "",
+                      });
+                      setEmailStatus(`Loaded “${t.name}” as a starting point. Edits here won't change the saved template.`);
+                    }}
+                    className="h-10 w-full min-w-0 rounded-md border border-input bg-navy px-3 text-base"
+                  >
+                    <option value="">None — write raw text</option>
+                    {templates.map((t) => <option key={t.id} value={t.id}>{t.name}</option>)}
+                  </select>
+                </label>
+              )}
+
+              {!isTemplateMode && (
               <div className="mt-6 flex flex-col gap-3 border border-gold/30 bg-gold/[.04] p-4 sm:flex-row sm:items-center">
                 <span className="flex shrink-0 items-center gap-2 text-base text-ivory/90"><CalendarDays className="h-4 w-4 text-gold" /> Attach an upcoming meeting</span>
                 <select
@@ -1281,6 +1341,7 @@ function Admin() {
                   ))}
                 </select>
               </div>
+              )}
 
               {isTemplateMode && draft.id && templates.find((t) => t.id === draft.id)?.system_key && (
                 <div className="mt-4 flex flex-wrap items-center justify-between gap-3 border border-gold/25 px-4 py-3 text-sm text-ivory/70">
