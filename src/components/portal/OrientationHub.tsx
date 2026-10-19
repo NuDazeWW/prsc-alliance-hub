@@ -77,7 +77,7 @@ export function OrientationHub({ onClose, onOpenDocuments, onOpenRoleDetails }: 
         <>
           <p className="label-caps text-gold">Explore by Topic</p>
           <h2 className="mt-3 font-display text-[clamp(1.8rem,2.4vw,2.5rem)] leading-tight">Open any chapter.</h2>
-          <div className="mt-5 grid gap-3 md:grid-cols-2 md:auto-rows-fr">
+          <div className="mt-5 grid gap-3 md:grid-cols-2">
             {GROUPS.map((g) => (
               <div key={g.id} className="rounded-md border border-gold/20 bg-navy-deep/50 p-4">
                 <p className="text-[11px] uppercase tracking-[0.18em] text-gold">{g.letter} · {g.title}</p>
