@@ -162,7 +162,7 @@ export function MemberMeetings({ hideWhenEmpty = false, hideIntro = false, asMem
             </p>
             {p.respond_by && (
               <p className={`mt-2 text-xs ${new Date(p.respond_by).getTime() < Date.now() ? "text-rose-300" : "text-gold"}`}>
-                Please respond by {fmt(p.respond_by)}
+                Please respond by {fmt(p.respond_by, p.timezone)}
                 {(() => { const days = Math.ceil((new Date(p.respond_by).getTime() - Date.now()) / 86400000); return days > 0 ? ` · ${days} day${days === 1 ? "" : "s"} left` : " · deadline passed"; })()}
               </p>
             )}
@@ -176,7 +176,7 @@ export function MemberMeetings({ hideWhenEmpty = false, hideIntro = false, asMem
                 <div key={s.id} className="flex flex-col gap-2 rounded-md border border-ivory/10 p-3 sm:flex-row sm:items-center sm:justify-between">
                   <span className="text-sm text-ivory/85">
                     <Clock className="mr-1 inline h-3.5 w-3.5 text-gold/70" />
-                    {fmt(s.starts_at)}
+                    {fmt(s.starts_at, p.timezone)}
                   </span>
                   <div className="flex flex-wrap gap-2">
                     {CHOICES.map((c) => (
