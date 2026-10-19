@@ -48,7 +48,7 @@ function DateTimePicker({ label, onPick }: { label: string; onPick: (local: stri
           selected={day}
           onSelect={setDay}
           disabled={(d) => d < new Date(new Date().setHours(0, 0, 0, 0))}
-          className="pointer-events-auto p-0"
+          className="pointer-events-auto bg-transparent p-0 text-ivory"
         />
         <div className="mt-3 flex items-center gap-2 border-t border-gold/20 pt-3">
           <span className="text-xs text-ivory/60">Time</span>
