@@ -55,6 +55,8 @@ import { AdminMemberDocuments } from "@/components/portal/AdminMemberDocuments";
 import { isPreviewHost } from "@/routes/_authenticated/route";
 import { AdminMeetings } from "@/components/portal/AdminMeetings";
 import { listAdminPolls } from "@/lib/meetings.functions";
+import { MeetingSetupForm } from "@/components/portal/MeetingSetupForm";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { MEETING_TYPE_LABEL, meetingBlockText, pollFitsMember } from "@/lib/meeting-block";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -934,6 +936,7 @@ function Admin() {
   };
 
   return (
+    <>
     <PortalShell
       admin
       notifications={notifications}
@@ -2199,6 +2202,23 @@ function Admin() {
         </div>
       )}
     </PortalShell>
+    <Dialog open={meetingDialog !== null} onOpenChange={(o) => !o && setMeetingDialog(null)}>
+      <DialogContent className="max-h-[90vh] max-w-3xl overflow-y-auto border-gold/30 bg-navy text-ivory">
+        <DialogHeader>
+          <DialogTitle className="font-display text-2xl text-ivory">Set Up a New Meeting</DialogTitle>
+          <DialogDescription className="text-ivory/60">Save the meeting and it attaches to the email you're working on. Your draft stays as it is.</DialogDescription>
+        </DialogHeader>
+        {meetingDialog && (
+          <MeetingSetupForm
+            allowNoInvitees={meetingDialog === "invite"}
+            defaultType={meetingDialog === "invite" ? (inviteDraft.role === "methodology_committee" || inviteDraft.is_methodology_committee ? "methodology" : inviteDraft.role === "advisor" ? "advisory" : "board") : "board"}
+            submitLabel="Save and attach to this email"
+            onCreated={(id) => void onMeetingCreated(id)}
+          />
+        )}
+      </DialogContent>
+    </Dialog>
+    </>
   );
 }
 
