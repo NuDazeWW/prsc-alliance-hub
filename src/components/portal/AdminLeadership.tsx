@@ -33,6 +33,7 @@ export function AdminLeadership() {
   const [settings, setSettings] = useState({ eyebrow: "", heading: "", subtext: "" });
   const [editing, setEditing] = useState<Draft | null>(null);
   const [busy, setBusy] = useState(false);
+  const [collapsed, setCollapsed] = useStoredFlag("admin.leadershipCollapsed");
 
   useEffect(() => {
     if (q.data?.settings) setSettings(q.data.settings);
