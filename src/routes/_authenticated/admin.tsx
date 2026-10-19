@@ -40,6 +40,7 @@ import {
   deleteEmailTemplate,
   deleteEmailHistory,
   getEmailCenter,
+  resetEmailTemplate,
   saveEmailTemplate,
   sendMemberEmail,
   type EmailSend,
@@ -50,6 +51,8 @@ import { PortalShell, type PortalNotification } from "@/components/portal/Portal
 import { AdminMemberDocuments } from "@/components/portal/AdminMemberDocuments";
 import { isPreviewHost } from "@/routes/_authenticated/route";
 import { AdminMeetings } from "@/components/portal/AdminMeetings";
+import { listAdminPolls } from "@/lib/meetings.functions";
+import { MEETING_TYPE_LABEL, meetingBlockText, pollFitsMember } from "@/lib/meeting-block";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -341,6 +344,15 @@ function Admin() {
     retry: false,
   });
 
+  const polls = useQuery({
+    queryKey: ["portal-admin-polls"],
+    queryFn: () => (preview ? Promise.resolve({ polls: [] as any[] }) : listAdminPolls()),
+    retry: false,
+  });
+  const openPolls: any[] = (polls.data?.polls ?? []).filter((p: any) => p.status === "open");
+  const [invitePollId, setInvitePollId] = useState("");
+  const [composePollId, setComposePollId] = useState("");
+  const [previewAsId, setPreviewAsId] = useState("");
   const [status, setStatus] = useState("");
   const [inviteDraft, setInviteDraft] = useState<InviteEmailReview>(emptyInvite);
   const [aiLinkedin, setAiLinkedin] = useState("");
@@ -619,8 +631,10 @@ function Admin() {
       return;
     }
     try {
-      await invitePortalMember({ data: inviteDraft });
-      setStatus("Invitation sent.");
+      await invitePortalMember({ data: { ...inviteDraft, poll_id: invitePollId || null } });
+      setStatus(invitePollId ? "Invitation sent with the meeting dates attached." : "Invitation sent.");
+      setInvitePollId("");
+      void polls.refetch();
       form.reset();
       setInviteDraft(emptyInvite);
       await overview.refetch();
@@ -642,6 +656,7 @@ function Admin() {
           entity={inviteDraft.entity}
           roleLabel={memberRoleLabel(inviteDraft.role, inviteDraft.entity)}
           copy={inviteTemplate}
+          meetingBlock={invitePollBlock}
         />,
       );
       setInvitePreviewHtml(html);
@@ -737,8 +752,11 @@ function Admin() {
           cta_url: draft.cta_url,
           cta_subtext: draft.cta_subtext,
           signatures: draft.signatures,
+          poll_id: composePollId || null,
         },
       });
+      setComposePollId("");
+      void polls.refetch();
       const failed = res.results.filter((r) => r.status !== "sent").length;
       setEmailStatus(failed ? `${res.results.length - failed} sent, ${failed} failed.` : `Sent to ${res.results.length} member(s).`);
       setRecipients([]);
@@ -751,7 +769,7 @@ function Admin() {
     }
   }
 
-  const previewMember = members.find((m) => m.id === recipients[0]) ?? members[0];
+  const previewMember = members.find((m) => m.id === previewAsId) ?? members.find((m) => m.id === recipients[0]) ?? members[0];
   const tokens = previewMember ? buildMemberTokens(previewMember) : {};
   useEffect(() => {
     if (!editingInvite) return;
@@ -766,12 +784,13 @@ function Admin() {
         entity={entity}
         roleLabel={memberRoleLabel(m?.role ?? "advisor", entity)}
         copy={draft}
+        meetingBlock={composePollBlock}
       />,
     ).then((html) => alive && setInviteComposeHtml(html));
     return () => {
       alive = false;
     };
-  }, [editingInvite, draft, previewMember]);
+  }, [editingInvite, draft, previewMember, composePollBlock]);
 
   const previewHtml = editingInvite && inviteComposeHtml ? inviteComposeHtml : renderBrandedEmail({
     subject: applyTokens(draft.subject || "Subject line", tokens),
