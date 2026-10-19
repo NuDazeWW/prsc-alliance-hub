@@ -1,3 +1,5 @@
+import { useStoredFlag } from "@/hooks/use-stored-flag";
+import { ArrowLeftRight, ChevronDown, ChevronUp, Maximize2, Minimize2 } from "lucide-react";
 import { AdminLeadership } from "@/components/portal/AdminLeadership";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
@@ -352,6 +354,9 @@ function Admin() {
   });
   const openPolls: any[] = (polls.data?.polls ?? []).filter((p: any) => p.status === "open");
   const [invitePollId, setInvitePollId] = useState("");
+  const [inviteCollapsed, setInviteCollapsed] = useStoredFlag("admin.inviteCollapsed");
+  const [columnsSwapped, setColumnsSwapped] = useStoredFlag("admin.columnsSwapped");
+  const [emailFullWidth, setEmailFullWidth] = useStoredFlag("admin.emailFullWidth");
   const [composePollId, setComposePollId] = useState("");
   const [previewAsId, setPreviewAsId] = useState("");
   const blockFor = (id: string) => {
@@ -1243,7 +1248,7 @@ function Admin() {
             </aside>
           </div>
 
-          <div className="min-w-0">
+          <div className={`min-w-0 ${emailFullWidth ? "order-1" : columnsSwapped ? "xl:order-1" : ""}`}>
             <div className="mb-8"><AdminLeadership /></div>
             <section id="email-center" className="border border-gold/20 p-6 sm:p-8">
               <div className="mb-6 flex flex-wrap gap-2" role="tablist">
