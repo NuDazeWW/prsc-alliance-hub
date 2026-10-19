@@ -259,12 +259,14 @@ const inviteSchema = z.object({
   title: z.string().trim().max(160), entity: entitySchema, role: roleSchema,
   why_you: z.string().trim().min(20).max(2000),
   is_methodology_committee: z.boolean().optional(),
+  poll_id: z.string().uuid().nullable().optional(),
 });
-function portalInviteRedirect(member: { first_name: string; entity: string; role: string }) {
+function portalInviteRedirect(member: { first_name: string; entity: string; role: string; poll_id?: string | null }) {
   const url = new URL("https://access.prscstandards.org/accept-invitation");
   url.searchParams.set("first_name", member.first_name);
   url.searchParams.set("entity", member.entity);
   url.searchParams.set("role", member.role);
+  if (member.poll_id) url.searchParams.set("poll", member.poll_id);
   return url.toString();
 }
 export const invitePortalMember = createServerFn({ method: "POST" })
@@ -273,18 +275,27 @@ export const invitePortalMember = createServerFn({ method: "POST" })
   .handler(async ({ context, data }) => {
     await assertAdmin(context);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const { data: invitation, error: inviteError } = await supabaseAdmin.auth.admin.inviteUserByEmail(data.email, {
+    const { poll_id: pollId, ...member } = data;
+    if (pollId) {
+      const { loadOpenPoll } = await import("@/lib/meeting-poll.server");
+      if (!(await loadOpenPoll(pollId))) throw new Error("That meeting is no longer open for availability. Pick another or remove it.");
+    }
+    const { data: invitation, error: inviteError } = await supabaseAdmin.auth.admin.inviteUserByEmail(member.email, {
       redirectTo: portalInviteRedirect(data),
-      data: { first_name: data.first_name, last_name: data.last_name, entity: data.entity, role: data.role },
+      data: { first_name: member.first_name, last_name: member.last_name, entity: member.entity, role: member.role },
     });
     if (inviteError || !invitation.user) throw inviteError ?? new Error("Invitation could not be created");
-    const { error: memberError } = await supabaseAdmin.from("portal_members").upsert({
-      user_id: invitation.user.id, email: data.email.toLowerCase(), first_name: data.first_name,
-      last_name: data.last_name, organization: data.organization, title: data.title || null,
-      entity: data.entity, role: data.role, why_you: data.why_you, status: "invited",
-      is_methodology_committee: data.is_methodology_committee ?? false,
-    }, { onConflict: "email" });
+    const { data: saved, error: memberError } = await supabaseAdmin.from("portal_members").upsert({
+      user_id: invitation.user.id, email: member.email.toLowerCase(), first_name: member.first_name,
+      last_name: member.last_name, organization: member.organization, title: member.title || null,
+      entity: member.entity, role: member.role, why_you: member.why_you, status: "invited",
+      is_methodology_committee: member.is_methodology_committee ?? false,
+    }, { onConflict: "email" }).select("id").single();
     if (memberError) throw memberError;
+    if (pollId && saved) {
+      const { addMembersToPoll } = await import("@/lib/meeting-poll.server");
+      await addMembersToPoll(pollId, [saved.id]);
+    }
     const { error: roleError } = await supabaseAdmin.from("user_roles").upsert({ user_id: invitation.user.id, role: data.role }, { onConflict: "user_id,role" });
     if (roleError) throw roleError;
     return { ok: true };
