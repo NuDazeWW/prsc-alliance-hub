@@ -99,26 +99,19 @@ export const createMeetingPoll = createServerFn({ method: "POST" })
       .in("id", data.invited_member_ids);
 
     const typeLabel = MEETING_TYPE_LABEL[data.meeting_type];
-    const where =
-      data.format === "virtual"
-        ? `Format: Virtual${data.virtual_link ? ` — the joining link will be shared once the time is confirmed.` : ""}`
-        : `Format: In person${data.location ? ` — ${data.location}` : ""}`;
-    const slotLines = data.slots
-      .map((s) => `• ${formatSlot(new Date(s.starts_at).toISOString())} (${data.duration_minutes} minutes)`)
-      .join("\n");
+    const { loadSystemEmail } = await import("@/lib/portal-notify.server");
+    const { meetingBlockText } = await import("@/lib/meeting-block");
+    const block = meetingBlockText(
+      { ...data, respond_by: data.respond_by ?? null },
+      data.slots.map((s) => ({ starts_at: new Date(s.starts_at).toISOString() })),
+    );
+    const build = await loadSystemEmail("meeting_poll");
+    void founderSignature;
 
     for (const m of members ?? []) {
       await sendPortalEmail(
         m.email,
-        {
-          subject: `Please share your availability: ${data.title}`,
-          eyebrow: typeLabel,
-          heading: `${m.first_name?.trim() || "Hello"}, we are scheduling the next ${typeLabel.toLowerCase()}.`,
-          body: `Because everyone carries a full corporate calendar, we are proposing a few time options and asking each member to mark what works.\n\n${data.description ? `${data.description}\n\n` : ""}${where}\nDuration: ${data.duration_minutes} minutes\n\nProposed times (shown here in New York time — your Welcome Center shows them in your own time zone):\n${slotLines}\n\n${data.respond_by ? `Please respond by ${formatSlot(data.respond_by)}.\n\n` : ""}Open your private Welcome Center to mark each option Available, If needed, or Unavailable — it takes under a minute.`,
-          ctaLabel: "Share Your Availability",
-          ctaUrl: PORTAL_URL,
-          signatures: founderSignature(),
-        },
+        build({ first_name: m.first_name?.trim() || "Hello", meeting_title: data.title, meeting_type: typeLabel, meeting_block: block }),
         "meeting-poll-invite",
       );
     }
@@ -219,19 +212,21 @@ export const confirmPollSlot = createServerFn({ method: "POST" })
       .select("id, email, first_name")
       .in("id", poll.invited_member_ids as string[]);
 
+    const { loadSystemEmail } = await import("@/lib/portal-notify.server");
+    const build = await loadSystemEmail("meeting_confirmed");
+    void founderSignature;
     for (const m of members ?? []) {
       await sendPortalEmail(
         m.email,
-        {
-          subject: `Confirmed: ${poll.title} — ${formatSlot(slot.data.starts_at)}`,
-          eyebrow: typeLabel,
-          heading: `${m.first_name?.trim() || "Hello"}, the ${typeLabel.toLowerCase()} is confirmed.`,
-          body: `Thank you for sharing your availability. The time that aligned best for the group is:\n\n${formatSlot(slot.data.starts_at)} (${poll.duration_minutes} minutes)\n\n${where}${poll.description ? `\n\n${poll.description}` : ""}\n\nUse the button below to add it directly to your Outlook, Apple, or Google calendar.`,
-          ctaLabel: "Add to My Calendar",
-          ctaUrl: icsUrl,
-          ctaSubtext: "Downloads a calendar file you can open with one click.",
-          signatures: founderSignature(),
-        },
+        build({
+          first_name: m.first_name?.trim() || "Hello",
+          meeting_title: poll.title,
+          meeting_type: typeLabel,
+          confirmed_time: formatSlot(slot.data.starts_at),
+          meeting_duration: String(poll.duration_minutes),
+          meeting_where: `${where}${poll.description ? `\n\n${poll.description}` : ""}`,
+          calendar_url: icsUrl,
+        }),
         "meeting-confirmed",
       );
     }
