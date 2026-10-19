@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { CalendarDays, Check, Clock, MapPin, Video, X } from "lucide-react";
 import { toast } from "sonner";
 import {
@@ -24,28 +24,8 @@ const AVAIL_STYLE: Record<string, string> = {
   unavailable: "bg-rose-500/20 text-rose-300 border-rose-400/40",
 };
 
-function fmt(iso: string) {
-  return new Date(iso).toLocaleString("en-US", {
-    weekday: "short",
-    month: "short",
-    day: "numeric",
-    hour: "numeric",
-    minute: "2-digit",
-  });
-}
-
 function memberName(m: any) {
   return `${m.first_name ?? ""} ${m.last_name ?? ""}`.trim() || m.email;
-}
-
-function autoAudience(members: any[], type: string) {
-  return members
-    .filter((m) => {
-      if (type === "methodology") return m.is_methodology_committee || m.role === "methodology_committee";
-      if (type === "board") return m.role === "board_member" || m.role === "prsc_board_dis_advisor" || m.role === "prsc_advisor_dis_board";
-      return m.role === "advisor" || m.role === "prsc_board_dis_advisor" || m.role === "prsc_advisor_dis_board";
-    })
-    .map((m) => m.id);
 }
 
 export function AdminMeetings() {
@@ -121,7 +101,7 @@ export function AdminMeetings() {
                     <div className="min-w-0">
                       <p className="font-display text-lg text-ivory">{p.title}</p>
                       <p className="mt-1 text-xs text-ivory/50">
-                        {TYPE_LABEL[p.meeting_type]} · {p.duration_minutes} min ·{" "}
+                        {TYPE_LABEL[p.meeting_type]} · {p.duration_minutes} min · {timezoneLabel(p.timezone)} ·{" "}
                         {p.format === "virtual" ? (
                           <span className="inline-flex items-center gap-1"><Video className="h-3 w-3" /> Virtual</span>
                         ) : (
@@ -150,7 +130,7 @@ export function AdminMeetings() {
                           {p.slots.map((s: any) => (
                             <th key={s.id} className="border-b border-gold/15 px-2 py-2 text-center">
                               <Clock className="mr-1 inline h-3 w-3" />
-                              {fmt(s.starts_at)}
+                              {formatSlot(s.starts_at, p.timezone)}
                             </th>
                           ))}
                         </tr>
@@ -225,7 +205,7 @@ export function AdminMeetings() {
                           onClick={() => void confirm(p.id, s.id)}
                           className="border-gold/40 text-gold hover:bg-gold/10"
                         >
-                          <Check className="mr-1 h-3.5 w-3.5" /> Confirm {fmt(s.starts_at)}
+                          <Check className="mr-1 h-3.5 w-3.5" /> Confirm {formatSlot(s.starts_at, p.timezone)}
                         </Button>
                       ))}
                       <Button
