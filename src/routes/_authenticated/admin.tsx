@@ -947,7 +947,7 @@ function Admin() {
             {emailFullWidth ? <Minimize2 className="h-4 w-4" /> : <Maximize2 className="h-4 w-4" />} {emailFullWidth ? "Split view" : "Email full width"}
           </button>
         </div>
-        <div className={`mt-4 grid items-start gap-6 ${emailFullWidth ? "" : "xl:grid-cols-2"}`}>
+        <div className={`mt-4 grid items-start gap-6 ${emailFullWidth ? "grid-cols-1 [&>*]:!col-span-full" : "xl:grid-cols-2"}`}>
           <div className={`flex min-w-0 flex-col gap-8 ${emailFullWidth ? "order-2" : columnsSwapped ? "xl:order-2" : ""}`}>
             <section className={`border border-gold/20 p-6 sm:p-8 ${inviteCollapsed ? "[&>*:not(:first-child)]:hidden" : ""}`}>
               <div className="flex items-start justify-between gap-3">
