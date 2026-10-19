@@ -53,8 +53,8 @@ import { AdminMeetings } from "@/components/portal/AdminMeetings";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { InviteEmail, capitalizeInviteName, inviteEntityCopy } from "@/lib/email-templates/invite";
-import { INVITE_EMAIL_PREVIEW_URL, INVITE_EMAIL_REPLY_TO, INVITE_EMAIL_SUBJECT, INVITE_ROLE_LABELS } from "@/lib/invite-email-config";
+import { InviteEmail, capitalizeInviteName } from "@/lib/email-templates/invite";
+import { INVITE_EMAIL_PREVIEW_URL, INVITE_EMAIL_REPLY_TO, INVITE_EMAIL_SUBJECT } from "@/lib/invite-email-config";
 import { memberRoleLabel } from "@/lib/member-role-labels";
 import type { InviteEmailReview } from "@/lib/portal-invite-email.functions";
 import { PORTAL_EXPERIENCE_QUESTIONS, PORTAL_PERMISSION_LABELS, PORTAL_PROFILE_STAGES, PORTAL_VISIBILITY_PERMISSIONS } from "@/lib/portal-profile-fields";
@@ -1445,7 +1445,7 @@ function Admin() {
                             </button>
                           </div>
                         </td>
-                        <td className="uppercase">{m.entity}</td>
+                        <td>{memberRoleLabel(m.role, m.entity)}</td>
                         <td className="py-4 pr-3">
                           <span className={`inline-block border px-2 py-1 text-xs uppercase tracking-[0.12em] ${st.tone}`}>{st.label}</span>
                           {st.detail && <span className="mt-1 block text-sm text-ivory/55">{st.detail}</span>}
@@ -1570,7 +1570,7 @@ function Admin() {
                             Access: {m.status}
                           </span>
                         </button>
-                        <span className="shrink-0 uppercase text-ivory/70">{m.entity}</span>
+                        <span className="max-w-[45%] text-right text-xs text-ivory/70">{memberRoleLabel(m.role, m.entity)}</span>
                       </div>
 
                       <div className="mt-3 border-t border-ivory/10 pt-3">
