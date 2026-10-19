@@ -546,7 +546,7 @@ const SOURCE_GROUPS: TopicGroup[] = [
     topics: [
       {
         id: "vanguard",
-        links: ["vanguard"],
+        links: ["vanguard-site"],
         title: "The Readiness Vanguard™",
         heading: "The first 25 teams and drivers.",
         tone: "prsc",
@@ -585,6 +585,7 @@ const SOURCE_GROUPS: TopicGroup[] = [
       },
       {
         id: "flywheel",
+        links: ["vanguard"],
         title: "The Benchmark Flywheel",
         heading: "How the model builds value over time.",
         tone: "bridge",
