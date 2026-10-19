@@ -34,3 +34,11 @@
 - [x] Orientation Hub replaces Refresh on PRSC / Learn about DIS
 - [x] Correct Hub background locking and navigation scroll, add Competitive Context, separate entity-role labels, and verify desktop/phone interactions
 - [ ] Verify Hub in a real signed-in member session (no session available; account selection or preview sign-in required)
+
+## Private portal update (uploaded brief, Oct 19)
+- [x] Hub opening: labels removed, copy fixed, "Your Personal Documents", hover-only glow
+- [x] Six-chapter guided orientation, chapter fixes (02 bullets, 03 rename + certification callout, 04 boundary, 05 3x3 grid, 06 internal link)
+- [x] Explore reorganized into four groups; role pages moved to personalized Role Details with role chips
+- [x] Welcome Center top gap removed
+- [x] Admin: Set Up a New Meeting pop-up in Invite and Compose; calendar date picker, chips, time zones
+- [ ] Verify in a real signed-in admin session: create a meeting from an email and send (needs live sign-in)
