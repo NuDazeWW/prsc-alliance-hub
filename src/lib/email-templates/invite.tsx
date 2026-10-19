@@ -12,6 +12,16 @@ export interface InviteEmailProps {
   entity?: InviteEntity
   roleLabel?: string
   copy?: InviteEmailCopy | null
+  meetingBlock?: string | null
+}
+
+function MeetingSection({ block }: { block?: string | null }) {
+  if (!block?.trim()) return null
+  const parts = block.trim().split(/\n\s*\n/)
+  return <Section style={meetingBox}>
+    <Text style={meetingEyebrow}>Upcoming meeting · please select your availability</Text>
+    {parts.map((p, i) => <Text key={i} style={i === 0 ? meetingTitle : meetingText}>{p.split('\n').map((l, li) => <React.Fragment key={li}>{li > 0 && <br />}{l}</React.Fragment>)}</Text>)}
+  </Section>
 }
 
 export interface InviteEmailCopy {
@@ -59,6 +69,7 @@ export const InviteEmail = ({
   entity = 'both',
   roleLabel = 'Board Member or Advisor',
   copy,
+  meetingBlock,
 }: InviteEmailProps) => {
   const inviteeName = capitalizeInviteName(firstName) || 'There'
   const selectedEntity = inviteEntityCopy[entity]
@@ -96,6 +107,7 @@ export const InviteEmail = ({
             })}
             {blocks.length <= 1 && <><Button style={button} href={confirmationUrl}>{fill(copy.cta_label, 'Access Your Private Welcome Center →')}</Button>
               {copy.cta_subtext?.trim() && <Text style={instruction}>{fill(copy.cta_subtext)}</Text>}</>}
+            <MeetingSection block={meetingBlock} />
             <Text style={signoff}>Warmly,</Text>
             <Text style={signature}>{sigName.trim()}</Text>
             <Text style={signatureTitle}>{sigTitle.join('|').split(',').map((part, i) => <React.Fragment key={i}>{i > 0 && <br />}{part.trim()}</React.Fragment>)}</Text>
@@ -140,6 +152,7 @@ export const InviteEmail = ({
           <Button style={button} href={confirmationUrl}>Access Your Private Welcome Center →</Button>
           <Text style={instruction}>After you click the button, you’ll create your own private password on the secure invitation page. No password will be sent by email. Once your password is set, you’ll enter the Welcome Center immediately.</Text>
           <Text style={text}>We’re excited to reconnect and officially welcome you into this next chapter.</Text>
+          <MeetingSection block={meetingBlock} />
           <Text style={signoff}>Warmly,</Text>
           <Text style={signature}>Shirley Johnson</Text>
           <Text style={signatureTitle}>Founder<br />Partnership Readiness Standards Council / Decision Intelligence Systems</Text>
@@ -178,3 +191,7 @@ const signatureTitle = { color: '#25303F', fontSize: '12px', lineHeight: '1.55',
 const securityFooter = { backgroundColor: '#0A1322', padding: '20px 28px' }
 const securityText = { color: '#B8C0CB', fontFamily: 'Arial, sans-serif', fontSize: '10px', lineHeight: '1.55', margin: 0, textAlign: 'center' as const }
 const footerLink = { color: '#D9BD82', textDecoration: 'underline' }
+const meetingBox = { border: '1px solid #C8A464', backgroundColor: '#FBF8F1', padding: '18px 20px', margin: '8px 0 10px' }
+const meetingEyebrow = { color: '#8C6E3B', fontSize: '10px', letterSpacing: '0.16em', textTransform: 'uppercase' as const, margin: '0 0 10px' }
+const meetingTitle = { fontSize: '15px', color: '#0A1322', lineHeight: '1.6', margin: '0 0 12px', fontWeight: 'bold' as const }
+const meetingText = { fontSize: '14px', color: '#25303F', lineHeight: '1.6', margin: '0 0 12px' }

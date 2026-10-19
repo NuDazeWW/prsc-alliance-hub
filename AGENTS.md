@@ -11,3 +11,6 @@
 
 - Use the shared member-role presentation helper for member designations across portal, admin, and emails; stored role values and permissions remain independent of display wording.
 - The Orientation Hub owns a fixed-body scroll lock with cleanup, and resets its dialog scroll before painting each view; keep background position stable during navigation.
+
+- Automatic emails load admin-editable copy by `system_key` via `loadSystemEmail`, with originals in `src/lib/system-email-defaults.ts`; edit wording there, not inline in send code, so admin edits and Reset keep working.
+- Meeting details in emails come from the shared `meetingBlockText` helper, and attaching a meeting always enrolls the recipients in that poll, so the email and the Welcome Center card match.

@@ -163,18 +163,9 @@ export const saveMyProfile = createServerFn({ method: "POST" })
         try {
           const { sendLovableEmail } = await import("@lovable.dev/email-js");
           const firstName = member.first_name?.trim() || "there";
-          const confirmation = {
-            subject: "We've received your profile — next steps are being prepared",
-            eyebrow: "Profile received",
-            heading: `Thank you, ${firstName}. Your profile has been received.`,
-            body: `Your private profile has been submitted successfully, and your individualized ${roleLabel} package is now being prepared.\n\nYou will receive your next steps privately and shortly. There is nothing further you need to do at this time.\n\nIf any questions come to mind in the meantime, you can send them to us from the Welcome Center at any time — or simply reply to this email.`,
-            ctaLabel: "Return to Your Welcome Center",
-            ctaUrl: "https://access.prscstandards.org/portal",
-            ctaSubtext: "Your Welcome Center shows your current status and any documents released to you.",
-            signatures: [
-              { name: "Shirley Johnson", title: `Founder, ${entityLabel === "PRSC and DIS" ? "PRSC / DIS" : entityLabel}` },
-            ],
-          };
+          const { loadSystemEmail } = await import("@/lib/portal-notify.server");
+          void entityLabel;
+          const confirmation = (await loadSystemEmail("profile_received"))({ first_name: firstName, role: roleLabel });
           await sendLovableEmail(
             {
               to: member.email,
@@ -268,12 +259,14 @@ const inviteSchema = z.object({
   title: z.string().trim().max(160), entity: entitySchema, role: roleSchema,
   why_you: z.string().trim().min(20).max(2000),
   is_methodology_committee: z.boolean().optional(),
+  poll_id: z.string().uuid().nullable().optional(),
 });
-function portalInviteRedirect(member: { first_name: string; entity: string; role: string }) {
+function portalInviteRedirect(member: { first_name: string; entity: string; role: string; poll_id?: string | null }) {
   const url = new URL("https://access.prscstandards.org/accept-invitation");
   url.searchParams.set("first_name", member.first_name);
   url.searchParams.set("entity", member.entity);
   url.searchParams.set("role", member.role);
+  if (member.poll_id) url.searchParams.set("poll", member.poll_id);
   return url.toString();
 }
 export const invitePortalMember = createServerFn({ method: "POST" })
@@ -282,18 +275,27 @@ export const invitePortalMember = createServerFn({ method: "POST" })
   .handler(async ({ context, data }) => {
     await assertAdmin(context);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const { data: invitation, error: inviteError } = await supabaseAdmin.auth.admin.inviteUserByEmail(data.email, {
+    const { poll_id: pollId, ...member } = data;
+    if (pollId) {
+      const { loadOpenPoll } = await import("@/lib/meeting-poll.server");
+      if (!(await loadOpenPoll(pollId))) throw new Error("That meeting is no longer open for availability. Pick another or remove it.");
+    }
+    const { data: invitation, error: inviteError } = await supabaseAdmin.auth.admin.inviteUserByEmail(member.email, {
       redirectTo: portalInviteRedirect(data),
-      data: { first_name: data.first_name, last_name: data.last_name, entity: data.entity, role: data.role },
+      data: { first_name: member.first_name, last_name: member.last_name, entity: member.entity, role: member.role },
     });
     if (inviteError || !invitation.user) throw inviteError ?? new Error("Invitation could not be created");
-    const { error: memberError } = await supabaseAdmin.from("portal_members").upsert({
-      user_id: invitation.user.id, email: data.email.toLowerCase(), first_name: data.first_name,
-      last_name: data.last_name, organization: data.organization, title: data.title || null,
-      entity: data.entity, role: data.role, why_you: data.why_you, status: "invited",
-      is_methodology_committee: data.is_methodology_committee ?? false,
-    }, { onConflict: "email" });
+    const { data: saved, error: memberError } = await supabaseAdmin.from("portal_members").upsert({
+      user_id: invitation.user.id, email: member.email.toLowerCase(), first_name: member.first_name,
+      last_name: member.last_name, organization: member.organization, title: member.title || null,
+      entity: member.entity, role: member.role, why_you: member.why_you, status: "invited",
+      is_methodology_committee: member.is_methodology_committee ?? false,
+    }, { onConflict: "email" }).select("id").single();
     if (memberError) throw memberError;
+    if (pollId && saved) {
+      const { addMembersToPoll } = await import("@/lib/meeting-poll.server");
+      await addMembersToPoll(pollId, [saved.id]);
+    }
     const { error: roleError } = await supabaseAdmin.from("user_roles").upsert({ user_id: invitation.user.id, role: data.role }, { onConflict: "user_id,role" });
     if (roleError) throw roleError;
     return { ok: true };
@@ -913,19 +915,14 @@ export const releaseMemberDocuments = createServerFn({ method: "POST" })
     const toSign = docs.filter((d) => d.category === "sign").length;
     const toRead = docs.length - toSign;
     const parts = [toSign ? `${toSign} to review and sign` : "", toRead ? `${toRead} to read and acknowledge` : ""].filter(Boolean).join(" and ");
-    const { sendPortalEmail, founderSignature } = await import("@/lib/portal-notify.server");
+    const { sendPortalEmail, loadSystemEmail } = await import("@/lib/portal-notify.server");
+    const build = await loadSystemEmail("documents_ready");
     await sendPortalEmail(
       member.email,
-      {
-        subject: "Action needed: your documents are ready",
-        eyebrow: "Documents ready",
-        heading: `${member.first_name?.trim() || "There"}, your documents are ready.`,
-        body: `Your individualized package is now available in your private Welcome Center: ${docs.length} document${docs.length === 1 ? "" : "s"} — ${parts}.\n\nEverything is completed inside the portal. Open each document, read it, then initial or sign right there. It only takes a few minutes.`,
-        ctaLabel: "Review & Sign Your Documents",
-        ctaUrl: "https://access.prscstandards.org/portal",
-        ctaSubtext: "Sign in with your email and the password you created.",
-        signatures: founderSignature(),
-      },
+      build({
+        first_name: member.first_name?.trim() || "There",
+        document_summary: `${docs.length} document${docs.length === 1 ? "" : "s"} — ${parts}`,
+      }),
       "documents-ready-member",
     );
     await context.supabase.from("portal_activity").insert({ member_id: member.id, actor_user_id: context.userId, event_type: "documents_released", metadata: { count: docs.length } });

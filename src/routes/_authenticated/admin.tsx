@@ -7,6 +7,7 @@ import { render } from "@react-email/render";
 import {
   Activity,
   AlertTriangle,
+  CalendarDays,
   CheckCircle2,
   Download,
   Clock3,
@@ -40,6 +41,7 @@ import {
   deleteEmailTemplate,
   deleteEmailHistory,
   getEmailCenter,
+  resetEmailTemplate,
   saveEmailTemplate,
   sendMemberEmail,
   type EmailSend,
@@ -50,6 +52,8 @@ import { PortalShell, type PortalNotification } from "@/components/portal/Portal
 import { AdminMemberDocuments } from "@/components/portal/AdminMemberDocuments";
 import { isPreviewHost } from "@/routes/_authenticated/route";
 import { AdminMeetings } from "@/components/portal/AdminMeetings";
+import { listAdminPolls } from "@/lib/meetings.functions";
+import { MEETING_TYPE_LABEL, meetingBlockText, pollFitsMember } from "@/lib/meeting-block";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -341,6 +345,21 @@ function Admin() {
     retry: false,
   });
 
+  const polls = useQuery({
+    queryKey: ["portal-admin-polls"],
+    queryFn: () => (preview ? Promise.resolve({ polls: [] as any[] }) : listAdminPolls()),
+    retry: false,
+  });
+  const openPolls: any[] = (polls.data?.polls ?? []).filter((p: any) => p.status === "open");
+  const [invitePollId, setInvitePollId] = useState("");
+  const [composePollId, setComposePollId] = useState("");
+  const [previewAsId, setPreviewAsId] = useState("");
+  const blockFor = (id: string) => {
+    const p = openPolls.find((x) => x.id === id);
+    return p ? meetingBlockText(p, p.slots ?? []) : null;
+  };
+  const invitePollBlock = blockFor(invitePollId);
+  const composePollBlock = blockFor(composePollId);
   const [status, setStatus] = useState("");
   const [inviteDraft, setInviteDraft] = useState<InviteEmailReview>(emptyInvite);
   const [aiLinkedin, setAiLinkedin] = useState("");
@@ -619,8 +638,10 @@ function Admin() {
       return;
     }
     try {
-      await invitePortalMember({ data: inviteDraft });
-      setStatus("Invitation sent.");
+      await invitePortalMember({ data: { ...inviteDraft, poll_id: invitePollId || null } });
+      setStatus(invitePollId ? "Invitation sent with the meeting dates attached." : "Invitation sent.");
+      setInvitePollId("");
+      void polls.refetch();
       form.reset();
       setInviteDraft(emptyInvite);
       await overview.refetch();
@@ -642,6 +663,7 @@ function Admin() {
           entity={inviteDraft.entity}
           roleLabel={memberRoleLabel(inviteDraft.role, inviteDraft.entity)}
           copy={inviteTemplate}
+          meetingBlock={invitePollBlock}
         />,
       );
       setInvitePreviewHtml(html);
@@ -698,6 +720,20 @@ function Admin() {
     }
   }
 
+  async function resetDraft() {
+    if (!draft.id) return;
+    if (!confirm("Restore the original wording for this automatic email?")) return;
+    if (preview) { setEmailStatus("Preview mode: resetting works on the live admin page."); return; }
+    try {
+      const { template } = await resetEmailTemplate({ data: { id: draft.id } });
+      setDraft((d) => ({ ...d, ...template }));
+      setEmailStatus("Original wording restored.");
+      await email.refetch();
+    } catch (error) {
+      setEmailStatus(error instanceof Error ? error.message : "Could not reset the template.");
+    }
+  }
+
   async function removeTemplate(id: string) {
     if (preview) return;
     try {
@@ -737,8 +773,11 @@ function Admin() {
           cta_url: draft.cta_url,
           cta_subtext: draft.cta_subtext,
           signatures: draft.signatures,
+          poll_id: composePollId || null,
         },
       });
+      setComposePollId("");
+      void polls.refetch();
       const failed = res.results.filter((r) => r.status !== "sent").length;
       setEmailStatus(failed ? `${res.results.length - failed} sent, ${failed} failed.` : `Sent to ${res.results.length} member(s).`);
       setRecipients([]);
@@ -751,7 +790,7 @@ function Admin() {
     }
   }
 
-  const previewMember = members.find((m) => m.id === recipients[0]) ?? members[0];
+  const previewMember = members.find((m) => m.id === previewAsId) ?? members.find((m) => m.id === recipients[0]) ?? members[0];
   const tokens = previewMember ? buildMemberTokens(previewMember) : {};
   useEffect(() => {
     if (!editingInvite) return;
@@ -766,12 +805,13 @@ function Admin() {
         entity={entity}
         roleLabel={memberRoleLabel(m?.role ?? "advisor", entity)}
         copy={draft}
+        meetingBlock={composePollBlock}
       />,
     ).then((html) => alive && setInviteComposeHtml(html));
     return () => {
       alive = false;
     };
-  }, [editingInvite, draft, previewMember]);
+  }, [editingInvite, draft, previewMember, composePollBlock]);
 
   const previewHtml = editingInvite && inviteComposeHtml ? inviteComposeHtml : renderBrandedEmail({
     subject: applyTokens(draft.subject || "Subject line", tokens),
@@ -938,6 +978,28 @@ function Admin() {
                   <span className="text-base text-ivory/85">Also appoint to the Methodology Committee <span className="text-ivory/45">— they will be included in committee meetings</span></span>
                 </label>
                 )}
+                {(() => {
+                  const fitting = openPolls.filter((p) => pollFitsMember(p.meeting_type, inviteDraft.role, inviteDraft.is_methodology_committee ?? false));
+                  return (
+                    <div className="grid gap-3 border border-gold/30 bg-gold/[.04] p-4 sm:col-span-2">
+                      <span className="flex items-center gap-2 text-base font-medium text-ivory/90"><CalendarDays className="h-4 w-4 text-gold" /> Attach an upcoming meeting (optional)</span>
+                      <span className="text-sm leading-6 text-ivory/55">The invitation will list the meeting and its proposed dates, and ask them to mark their availability. The availability card is waiting at the top of their Welcome Center when they first sign in.</span>
+                      {fitting.length ? (
+                        <select value={invitePollId} onChange={(e) => setInvitePollId(e.target.value)} className="h-10 w-full min-w-0 rounded-md border border-input bg-navy px-3 text-base">
+                          <option value="">No meeting attached</option>
+                          {fitting.map((p) => (
+                            <option key={p.id} value={p.id}>{p.title} — {MEETING_TYPE_LABEL[p.meeting_type]} · {p.slots?.length ?? 0} proposed time{p.slots?.length === 1 ? "" : "s"}</option>
+                          ))}
+                        </select>
+                      ) : (
+                        <span className="text-sm text-amber-200/80">
+                          No open meeting fits this role yet. <a href="#meetings" className="text-gold underline">Propose meeting dates first</a>, then come back to attach them.
+                        </span>
+                      )}
+                      {invitePollBlock && <pre className="whitespace-pre-wrap border-l-2 border-gold/50 pl-3 font-sans text-sm leading-6 text-ivory/70">{invitePollBlock}</pre>}
+                    </div>
+                  );
+                })()}
                 <div className="grid gap-3 border border-gold/20 p-4 sm:col-span-2">
                   <span className="text-base font-medium text-ivory/90">Draft “Why You” with AI (optional)</span>
                   <span className="text-sm leading-6 text-ivory/55">Fill in their name, title, and organization above, then click Draft with AI — the “Why this candidate was chosen” field fills in for you to review. For a more personal note, optionally paste their LinkedIn About and Experience text below.</span>
@@ -1194,7 +1256,41 @@ function Admin() {
                 </div>
               </div>
 
-              <div className="mt-6 grid gap-4 sm:grid-cols-2">
+              <div className="mt-6 flex flex-col gap-3 border border-gold/30 bg-gold/[.04] p-4 sm:flex-row sm:items-center">
+                <span className="flex shrink-0 items-center gap-2 text-base text-ivory/90"><CalendarDays className="h-4 w-4 text-gold" /> Attach an upcoming meeting</span>
+                <select
+                  value={composePollId}
+                  onChange={(e) => {
+                    const id = e.target.value;
+                    setComposePollId(id);
+                    const block = blockFor(id);
+                    if (!block) return;
+                    setDraft((d) => ({
+                      ...d,
+                      body: d.body.includes(block) ? d.body : `${d.body.trim()}${d.body.trim() ? "\n\n" : ""}${block}`,
+                      cta_label: d.cta_label || "Share Your Availability",
+                      cta_url: d.cta_url || "https://access.prscstandards.org/portal#meetings",
+                    }));
+                    setEmailStatus("Meeting dates added to the email. Recipients will be added to this meeting when you send.");
+                  }}
+                  className="h-10 w-full min-w-0 rounded-md border border-input bg-navy px-3 text-base"
+                >
+                  <option value="">{openPolls.length ? "Choose a meeting…" : "No open meetings — propose dates in Meetings"}</option>
+                  {openPolls.map((p) => (
+                    <option key={p.id} value={p.id}>{p.title} — {MEETING_TYPE_LABEL[p.meeting_type]} · {p.slots?.length ?? 0} times</option>
+                  ))}
+                </select>
+              </div>
+
+              {draft.id && templates.find((t) => t.id === draft.id)?.system_key && (
+                <div className="mt-4 flex flex-wrap items-center justify-between gap-3 border border-gold/25 px-4 py-3 text-sm text-ivory/70">
+                  <span>You are editing an automatic email. Saved changes are used for every future send.</span>
+                  <Button type="button" variant="outline" size="sm" className="rounded-none" onClick={() => void resetDraft()}>Reset to original</Button>
+                </div>
+              )}
+
+              <div className="mt-6 grid gap-6 2xl:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
+              <div className="grid content-start gap-4 sm:grid-cols-2">
                 <Input value={draft.name} onChange={(e) => setDraft({ ...draft, name: e.target.value })} placeholder="Template name" className="text-base" />
                 <Input
                   value={draft.description}
@@ -1230,6 +1326,19 @@ function Admin() {
                   placeholder={"Signatures — one per line: Name, Title (rendered in cursive)"}
                   className="min-h-20 text-base sm:col-span-2"
                 />
+              </div>
+              <div className="min-w-0">
+                <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
+                  <p className="text-xs uppercase tracking-[0.18em] text-gold">Live preview</p>
+                  <label className="flex items-center gap-2 text-sm text-ivory/60">
+                    Preview as
+                    <select value={previewMember?.id ?? ""} onChange={(e) => setPreviewAsId(e.target.value)} className="h-8 max-w-[220px] rounded-md border border-input bg-navy px-2 text-sm">
+                      {members.map((m) => <option key={m.id} value={m.id}>{m.first_name} {m.last_name}</option>)}
+                    </select>
+                  </label>
+                </div>
+                <iframe title="Live email preview" srcDoc={previewHtml} className="h-[720px] w-full border border-gold/20 bg-ivory" />
+              </div>
               </div>
 
               <p className="mt-3 text-sm text-ivory/40">
