@@ -2154,9 +2154,11 @@ function Admin() {
               <Button type="button" className="rounded-none border border-gold/40 bg-transparent text-base text-ivory hover:bg-gold/10 hover:text-gold" onClick={() => setPreviewOpen(false)}>
                 Keep editing
               </Button>
+              {isTemplateMode && (
               <Button type="button" className="rounded-none bg-gold text-base text-navy hover:bg-gold-light hover:text-navy" onClick={saveDraft}>
                 Save template
               </Button>
+              )}
             </div>
           </div>
         </div>
