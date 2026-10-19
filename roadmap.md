@@ -29,3 +29,4 @@
 - [x] Welcome Center redesign to reference image + Our Leadership Team panel with admin editor and member bio
 - [ ] Import leadership/document spreadsheet (waiting on user's file)
 - [x] Orientation Hub replaces Refresh on PRSC / Learn about DIS
+- [ ] Correct Hub background locking and navigation scroll, add Competitive Context, separate entity-role labels, and verify interactions

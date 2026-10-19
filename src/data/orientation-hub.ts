@@ -15,6 +15,7 @@ export type Block =
   | { kind: "intelligence" }
   | { kind: "availability" }
   | { kind: "ipstack" }
+  | { kind: "competitive" }
   | { kind: "flywheel" }
   | { kind: "pairs"; rows: { term: string; text: string }[] };
 
@@ -28,6 +29,13 @@ export const SITE_LINKS = [
   { id: "vanguard", label: "The Readiness Vanguard™", href: "/readiness-vanguard" },
 ];
 export type TopicGroup = { id: string; letter: string; title: string; topics: Topic[] };
+
+export const COMPETITIVE_CONTEXT = [
+  { category: "Media and sponsorship measurement tools", does: "Measure exposure, content, media value, or campaign results.", adds: "A governed readiness standard and private Score before and beyond one campaign." },
+  { category: "Sponsorship-management platforms", does: "Manage rights, assets, deals, and reporting.", adds: "Commercial-readiness and benchmark intelligence." },
+  { category: "Agencies, agents, and brokers", does: "Sell, negotiate, introduce, or manage deals.", adds: "Neutral measurement and decision support—not deal facilitation." },
+  { category: "Traditional sponsorship decks", does: "Tell a property’s story.", adds: "Comparable, evidence-led commercial-readiness context." },
+];
 
 export const HUB_TITLE = "Welcome to the PRSC & DIS Orientation Hub";
 export const HUB_INTRO =
@@ -475,7 +483,7 @@ export const GROUPS: TopicGroup[] = [
             "Participant-level and confidential information",
           ] },
           { kind: "quote", text: "A competitor can build a dashboard. It is much harder to build a trusted, independent standard; protected scoring logic; verified data infrastructure; benchmark context; outcome evidence; and an ecosystem that uses all of it over time." },
-          { kind: "quote", text: "There are companies that measure sponsorship and companies that manage sponsorship. There is no clear direct competitor combining an independent motorsport readiness standard, a privately issued Score, governed evidence rules, and a multi-audience intelligence platform." },
+          { kind: "competitive" },
         ],
       },
     ],

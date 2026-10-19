@@ -1,11 +1,12 @@
-import { useEffect, useRef, useState } from "react";
+import { useLayoutEffect, useRef, useState } from "react";
 import { ArrowLeft, ArrowRight, ExternalLink } from "lucide-react";
 import prscCrest from "@/assets/prsc-logo-only.png.asset.json";
 import scoreGauge from "@/assets/prsc-score-gauge.png.asset.json";
 import disLogo from "@/assets/dis-logo-hub.png";
 import { DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
 import {
-  ALL_TOPICS, AUDIENCES, AVAILABILITY, DIMENSIONS, FLYWHEEL, GROUPS, GUIDED, HUB_INTRO, HUB_SCOPE, HUB_TITLE,
+  ALL_TOPICS, AUDIENCES, AVAILABILITY, COMPETITIVE_CONTEXT, DIMENSIONS, FLYWHEEL, GROUPS, GUIDED, HUB_INTRO, HUB_SCOPE, HUB_TITLE,
   INTELLIGENCE, IP_STACK, SITE_LINKS, PAGE_LABELS, RELATIONSHIP, ROLE_CARDS, type Block, type Tone, type Topic,
 } from "@/data/orientation-hub";
 
@@ -17,8 +18,21 @@ const toneBorder: Record<Tone, string> = { prsc: "border-gold/40", dis: "border-
 export function OrientationHub({ onClose, onOpenDocuments }: { onClose: () => void; onOpenDocuments: () => void }) {
   const [view, setView] = useState<View>({ kind: "hub" });
   const top = useRef<HTMLDivElement>(null);
-  useEffect(() => {
-    top.current?.closest("[role=dialog]")?.scrollTo({ top: 0, behavior: "smooth" });
+  useLayoutEffect(() => {
+    const body = document.body;
+    const y = window.scrollY;
+    const previous = { position: body.style.position, top: body.style.top, width: body.style.width, overflow: body.style.overflow };
+    body.style.position = "fixed";
+    body.style.top = `-${y}px`;
+    body.style.width = "100%";
+    body.style.overflow = "hidden";
+    return () => {
+      Object.assign(body.style, previous);
+      window.scrollTo({ top: y, behavior: "instant" });
+    };
+  }, []);
+  useLayoutEffect(() => {
+    top.current?.closest("[role=dialog]")?.scrollTo({ top: 0, behavior: "instant" });
   }, [view]);
 
   const btn = "inline-flex min-h-[52px] items-center justify-center gap-2 rounded-full px-8 text-[12.5px] font-semibold uppercase tracking-[0.14em]";
@@ -86,7 +100,7 @@ export function OrientationHub({ onClose, onOpenDocuments }: { onClose: () => vo
         </>
       )}
 
-      {view.kind === "topic" && <TopicView id={view.id} onPick={(id) => setView({ kind: "topic", id })} />}
+      {view.kind === "topic" && <TopicView key={view.id} id={view.id} onPick={(id) => setView({ kind: "topic", id })} />}
 
       {view.kind === "materials" && (
         <>
@@ -130,7 +144,7 @@ function Guided({ step, setStep, onExplore, onMaterials, onClose, btn }: { step:
           <div className="h-1 rounded-full bg-gradient-to-r from-gold to-dis-cyan transition-all" style={{ width: `${((step + 1) / GUIDED.length) * 100}%` }} />
         </div>
         <p className="mt-6 label-caps text-gold">{ch.title}</p>
-        <TopicBody topic={ch.topic} />
+        <TopicBody key={step} topic={ch.topic} />
         <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
           {step > 0 && <button type="button" onClick={() => setStep(step - 1)} className={`${btn} cta-glow-outline`}><span>Previous</span></button>}
           {!last && <button type="button" onClick={() => setStep(step + 1)} className={`${btn} cta-glow`}><span>Next chapter</span></button>}
@@ -148,9 +162,11 @@ function Guided({ step, setStep, onExplore, onMaterials, onClose, btn }: { step:
 }
 
 function TopicView({ id, onPick }: { id: string; onPick: (id: string) => void }) {
-  const topic = ALL_TOPICS.find((t) => t.id === id)!;
+  const topic = ALL_TOPICS.find((t) => t.id === id);
+  if (!topic) return null;
   const idx = ALL_TOPICS.indexOf(topic);
-  const group = GROUPS.find((g) => g.topics.includes(topic))!;
+  const group = GROUPS.find((g) => g.topics.includes(topic));
+  if (!group) return null;
   return (
     <div className="grid gap-8 lg:grid-cols-[220px_1fr]">
       <aside>
@@ -315,6 +331,25 @@ function BlockView({ b, tone }: { b: Block; tone: Tone }) {
           ))}
         </ol>
       );
+    case "competitive":
+      return (
+        <section className="rounded-md border border-gold/25 bg-navy-deep/50 p-4 sm:p-5">
+          <h3 className="font-display text-xl text-gold">Competitive Context</h3>
+          <div className="mt-4 hidden grid-cols-3 gap-4 border-b border-gold/20 pb-3 text-xs font-semibold text-gold sm:grid">
+            <span>Existing category</span><span>What it does</span><span>What PRSC and DIS add</span>
+          </div>
+          <dl className="divide-y divide-ivory/10">
+            {COMPETITIVE_CONTEXT.map((row) => (
+              <div key={row.category} className="grid gap-3 py-4 text-sm leading-6 sm:grid-cols-3 sm:gap-4">
+                <dt className="font-semibold text-ivory">{row.category}</dt>
+                <dd className="text-ivory/75"><span className="block text-xs font-semibold text-gold sm:hidden">What it does</span>{row.does}</dd>
+                <dd className="text-ivory/80"><span className="block text-xs font-semibold text-gold sm:hidden">What PRSC and DIS add</span>{row.adds}</dd>
+              </div>
+            ))}
+          </dl>
+          <p className="mt-4 border-t border-gold/20 pt-4 text-sm leading-7 text-ivory/85">There are companies that measure sponsorship and companies that manage sponsorship. There is no clear direct competitor combining an independent motorsport readiness standard, a privately issued Score, governed evidence rules, and a multi-audience intelligence platform.</p>
+        </section>
+      );
     case "flywheel":
       return (
         <ol className="grid gap-3 sm:grid-cols-2">
@@ -335,7 +370,7 @@ function SiteLinks({ ids }: { ids: string[] }) {
       <p className="mb-2 text-[11px] uppercase tracking-[0.18em] text-ivory/50">Related pages</p>
       <div className="flex flex-wrap gap-2">
         {SITE_LINKS.filter((l) => ids.includes(l.id)).map((l) => (
-          <a key={l.id} href={l.href} target="_blank" rel="noreferrer" className="inline-flex items-center gap-2 rounded-full border border-gold/40 px-4 py-2 text-[12px] text-gold transition-colors hover:bg-gold/10">
+          <a key={l.id} href={l.href} target="_blank" rel="noreferrer" onClick={(event) => event.currentTarget.closest("[role=dialog]")?.scrollTo({ top: 0, behavior: "instant" })} className="inline-flex items-center gap-2 rounded-full border border-gold/40 px-4 py-2 text-[12px] text-gold transition-colors hover:bg-gold/10">
             {l.label} <ExternalLink className="h-3 w-3" />
           </a>
         ))}
