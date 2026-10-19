@@ -385,7 +385,7 @@ function PortalHome() {
                 <p className="mt-3 text-[10px] uppercase leading-[2] tracking-[0.24em] text-ivory/60">
                   Better data.
                   <br />
-                  Brighter opportunities.
+                  <span className="whitespace-nowrap">Brighter opportunities.</span>
                 </p>
               </div>
             </section>
