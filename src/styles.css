@@ -635,6 +635,15 @@
 .cta-glow:hover::after, .cta-glow:focus-visible::after,
 .cta-glow-outline:hover::after, .cta-glow-outline:focus-visible::after { animation: cta-shimmer 2.4s ease-in-out infinite !important; opacity: 1; }
 .cta-glow:focus:not(:focus-visible), .cta-glow-outline:focus:not(:focus-visible) { outline: none; }
+/* When a sibling CTA in the hub row is pointed at, the gold CTA drops its highlight. */
+.hub-cta-row:has(.cta-glow-outline:hover) .cta-glow,
+.hub-cta-row:has(.cta-glow-outline:focus-visible) .cta-glow {
+  box-shadow:
+    inset 0 1px 0 color-mix(in oklab, var(--color-ivory) 55%, transparent),
+    inset 0 -1px 0 color-mix(in oklab, var(--color-bronze) 50%, transparent),
+    0 4px 14px color-mix(in oklab, var(--color-navy-deep) 55%, transparent);
+  filter: brightness(0.94) saturate(0.92);
+}
 @media (hover: none) {
   .hub-card:hover, .hub-card-dis:hover { transform: none; }
   .hub-card:hover::after, .hub-card-dis:hover::after, .cta-glow:hover::after, .cta-glow-outline:hover::after { animation: none !important; opacity: 0; }
