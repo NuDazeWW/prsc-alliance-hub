@@ -3,6 +3,7 @@ import { z } from "zod";
 import { getRequest } from "@tanstack/react-start/server";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { renderBrandedEmail, renderBrandedEmailText } from "@/lib/branded-email";
+import { memberRoleLabel } from "@/lib/member-role-labels";
 
 type PortalMember = {
   id: string; user_id: string; email: string; first_name: string; last_name: string;
@@ -126,14 +127,14 @@ export const saveMyProfile = createServerFn({ method: "POST" })
       const apiKey = process.env["LOVABLE_API_KEY"];
       if (apiKey) {
         const fullName = `${member.first_name ?? ""} ${member.last_name ?? ""}`.trim() || member.email;
-        const roleLabel = ({ board_member: "Board Member", advisor: "Advisor", prsc_board_dis_advisor: "Board Member (PRSC) and Advisor (DIS)", prsc_advisor_dis_board: "Advisor (PRSC) and Board Member (DIS)" } as Record<string, string>)[member.role] ?? "Advisor";
+        const roleLabel = memberRoleLabel(member.role, member.entity);
         const entityLabel = member.entity === "both" ? "PRSC and DIS" : String(member.entity).toUpperCase();
         const subject = `Profile submitted — ${fullName}`;
         const email = {
           subject,
           eyebrow: "Profile received",
           heading: `${fullName} has submitted their profile`,
-          body: `${fullName} (${entityLabel} · ${roleLabel}) has completed and submitted their private profile.\n\nThe profile is now marked Profile Received. Review their answers and load the next-step documents in the administrator center.\n\nPreferred email: ${data.preferred_email}\nPreferred phone: ${data.preferred_phone || "Not provided"}\nContact requested: ${data.contact_requested ? "Yes" : "No"}`,
+          body: `${fullName} (${roleLabel}) has completed and submitted their private profile.\n\nThe profile is now marked Profile Received. Review their answers and load the next-step documents in the administrator center.\n\nPreferred email: ${data.preferred_email}\nPreferred phone: ${data.preferred_phone || "Not provided"}\nContact requested: ${data.contact_requested ? "Yes" : "No"}`,
           ctaLabel: "Review Profile & Prepare Next Step",
           ctaUrl: "https://access.prscstandards.org/admin",
           ctaSubtext: "Open the member record, review the submitted profile, then upload or release the appropriate documents.",
@@ -166,7 +167,7 @@ export const saveMyProfile = createServerFn({ method: "POST" })
             subject: "We've received your profile — next steps are being prepared",
             eyebrow: "Profile received",
             heading: `Thank you, ${firstName}. Your profile has been received.`,
-            body: `Your private profile has been submitted successfully, and your individualized ${entityLabel} ${roleLabel.toLowerCase()} package is now being prepared.\n\nYou will receive your next steps privately and shortly. There is nothing further you need to do at this time.\n\nIf any questions come to mind in the meantime, you can send them to us from the Welcome Center at any time — or simply reply to this email.`,
+            body: `Your private profile has been submitted successfully, and your individualized ${roleLabel} package is now being prepared.\n\nYou will receive your next steps privately and shortly. There is nothing further you need to do at this time.\n\nIf any questions come to mind in the meantime, you can send them to us from the Welcome Center at any time — or simply reply to this email.`,
             ctaLabel: "Return to Your Welcome Center",
             ctaUrl: "https://access.prscstandards.org/portal",
             ctaSubtext: "Your Welcome Center shows your current status and any documents released to you.",

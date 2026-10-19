@@ -55,6 +55,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { InviteEmail, capitalizeInviteName, inviteEntityCopy } from "@/lib/email-templates/invite";
 import { INVITE_EMAIL_PREVIEW_URL, INVITE_EMAIL_REPLY_TO, INVITE_EMAIL_SUBJECT, INVITE_ROLE_LABELS } from "@/lib/invite-email-config";
+import { memberRoleLabel } from "@/lib/member-role-labels";
 import type { InviteEmailReview } from "@/lib/portal-invite-email.functions";
 import { PORTAL_EXPERIENCE_QUESTIONS, PORTAL_PERMISSION_LABELS, PORTAL_PROFILE_STAGES, PORTAL_VISIBILITY_PERMISSIONS } from "@/lib/portal-profile-fields";
 
@@ -639,7 +640,7 @@ function Admin() {
           firstName={inviteDraft.first_name}
           recipientEmail={inviteDraft.email}
           entity={inviteDraft.entity}
-          roleLabel={INVITE_ROLE_LABELS[inviteDraft.role]}
+          roleLabel={memberRoleLabel(inviteDraft.role, inviteDraft.entity)}
           copy={inviteTemplate}
         />,
       );
@@ -763,7 +764,7 @@ function Admin() {
         firstName={m?.first_name ?? "Shirley"}
         recipientEmail={m?.email ?? "member@example.com"}
         entity={entity}
-        roleLabel={INVITE_ROLE_LABELS[m?.role as keyof typeof INVITE_ROLE_LABELS] ?? "Advisor"}
+        roleLabel={memberRoleLabel(m?.role ?? "advisor", entity)}
         copy={draft}
       />,
     ).then((html) => alive && setInviteComposeHtml(html));
@@ -845,7 +846,7 @@ function Admin() {
       const prog = docProgress[m.id];
       const ans = p.experience_answers ?? {};
       const vis = p.visibility_instructions ?? {};
-      return [m.first_name, m.last_name, m.email, m.organization, m.title, String(m.entity).toUpperCase(), INVITE_ROLE_LABELS[m.role as keyof typeof INVITE_ROLE_LABELS] ?? m.role, m.status, stageOf(m).label,
+      return [m.first_name, m.last_name, m.email, m.organization, m.title, String(m.entity).toUpperCase(), memberRoleLabel(m.role, m.entity), m.status, stageOf(m).label,
         date(m.invited_at), date(m.last_access_at), date(p.submitted_at), prog?.done ?? "", prog?.total ?? "", date(m.documents_completed_at),
         p.preferred_name, p.professional_role, p.current_organization, p.preferred_email, p.preferred_phone,
         ...PORTAL_EXPERIENCE_QUESTIONS.map((_, i) => ans[`q${i + 1}`] ?? ""),
@@ -1027,8 +1028,7 @@ function Admin() {
                         <span className="font-medium">{r.first_name} {r.last_name}</span>
                         <span className="text-ivory/60">{r.email}</span>
                         <span className="text-ivory/60">{[r.title, r.organization].filter(Boolean).join(", ")}</span>
-                        <span className="uppercase text-gold">{r.entity}</span>
-                        <span className="text-ivory/60">{INVITE_ROLE_LABELS[r.role]}</span>
+                        <span className="text-ivory/60">{memberRoleLabel(r.role, r.entity)}</span>
                         <Button type="button" variant="outline" size="sm" disabled={batchDrafting || rowDrafting === r.email} className="ml-auto rounded-none" onClick={() => void draftRow(i)}>
                           {rowDrafting === r.email ? "Drafting…" : r.why_you.trim() ? "Regenerate" : "Draft with AI"}
                         </Button>
@@ -1920,7 +1920,7 @@ function Admin() {
               </div>
               <div className="bg-navy px-5 py-3">
                 <p className="text-xs uppercase tracking-[0.14em] text-gold">Company &amp; role</p>
-                <p className="mt-1 text-base text-ivory">{inviteEntityCopy[inviteDraft.entity].short} · {INVITE_ROLE_LABELS[inviteDraft.role]}</p>
+                <p className="mt-1 text-base text-ivory">{memberRoleLabel(inviteDraft.role, inviteDraft.entity)}</p>
               </div>
               <div className="bg-navy px-5 py-3">
                 <p className="text-xs uppercase tracking-[0.14em] text-gold">Logos shown</p>
