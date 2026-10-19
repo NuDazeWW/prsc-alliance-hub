@@ -1282,7 +1282,7 @@ function Admin() {
                 </select>
               </div>
 
-              {draft.id && templates.find((t) => t.id === draft.id)?.system_key && (
+              {isTemplateMode && draft.id && templates.find((t) => t.id === draft.id)?.system_key && (
                 <div className="mt-4 flex flex-wrap items-center justify-between gap-3 border border-gold/25 px-4 py-3 text-sm text-ivory/70">
                   <span>You are editing an automatic email. Saved changes are used for every future send.</span>
                   <Button type="button" variant="outline" size="sm" className="rounded-none" onClick={() => void resetDraft()}>Reset to original</Button>
@@ -1291,13 +1291,17 @@ function Admin() {
 
               <div className="mt-6 grid gap-6 2xl:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
               <div className="grid content-start gap-4 sm:grid-cols-2">
-                <Input value={draft.name} onChange={(e) => setDraft({ ...draft, name: e.target.value })} placeholder="Template name" className="text-base" />
-                <Input
-                  value={draft.description}
-                  onChange={(e) => setDraft({ ...draft, description: e.target.value })}
-                  placeholder="Short description (optional)"
-                  className="text-base"
-                />
+                {isTemplateMode && (
+                  <>
+                    <Input value={draft.name} onChange={(e) => setDraft({ ...draft, name: e.target.value })} placeholder="Template name" className="text-base" />
+                    <Input
+                      value={draft.description}
+                      onChange={(e) => setDraft({ ...draft, description: e.target.value })}
+                      placeholder="Short description (optional)"
+                      className="text-base"
+                    />
+                  </>
+                )}
                 <Input
                   value={draft.subject}
                   onChange={(e) => setDraft({ ...draft, subject: e.target.value })}
