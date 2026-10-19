@@ -363,6 +363,28 @@ function Admin() {
     const p = openPolls.find((x) => x.id === id);
     return p ? meetingBlockText(p, p.slots ?? []) : null;
   };
+  const [meetingDialog, setMeetingDialog] = useState<null | "invite" | "compose">(null);
+  const attachComposeBlock = (block: string | null) => {
+    if (!block) return;
+    setDraft((d) => ({
+      ...d,
+      body: d.body.includes(block) ? d.body : `${d.body.trim()}${d.body.trim() ? "\n\n" : ""}${block}`,
+      cta_label: d.cta_label || "Share Your Availability",
+      cta_url: d.cta_url || "https://access.prscstandards.org/portal#meetings",
+    }));
+    setEmailStatus("Meeting dates added to the email. Recipients will be added to this meeting when you send.");
+  };
+  const onMeetingCreated = async (pollId: string) => {
+    const target = meetingDialog;
+    setMeetingDialog(null);
+    const res = await polls.refetch();
+    const p = (res.data?.polls ?? []).find((x: any) => x.id === pollId);
+    if (target === "invite") setInvitePollId(pollId);
+    if (target === "compose") {
+      setComposePollId(pollId);
+      attachComposeBlock(p ? meetingBlockText(p, p.slots ?? []) : null);
+    }
+  };
   const invitePollBlock = blockFor(invitePollId);
   const composePollBlock = blockFor(composePollId);
   const [status, setStatus] = useState("");
@@ -1014,9 +1036,12 @@ function Admin() {
                         </select>
                       ) : (
                         <span className="text-sm text-amber-200/80">
-                          No open meeting fits this role yet. <a href="#meetings" className="text-gold underline">Propose meeting dates first</a>, then come back to attach them.
+                          No open meeting fits this role yet. Set one up below and it attaches to this invitation.
                         </span>
                       )}
+                      <button type="button" onClick={() => setMeetingDialog("invite")} className="inline-flex w-fit items-center gap-2 rounded-full border border-gold/50 px-4 py-2 text-sm text-gold hover:bg-gold/10">
+                        <Plus className="h-4 w-4" /> Set Up a New Meeting
+                      </button>
                       {invitePollBlock && <pre className="whitespace-pre-wrap border-l-2 border-gold/50 pl-3 font-sans text-sm leading-6 text-ivory/70">{invitePollBlock}</pre>}
                     </div>
                   );
@@ -1348,23 +1373,18 @@ function Admin() {
                   onChange={(e) => {
                     const id = e.target.value;
                     setComposePollId(id);
-                    const block = blockFor(id);
-                    if (!block) return;
-                    setDraft((d) => ({
-                      ...d,
-                      body: d.body.includes(block) ? d.body : `${d.body.trim()}${d.body.trim() ? "\n\n" : ""}${block}`,
-                      cta_label: d.cta_label || "Share Your Availability",
-                      cta_url: d.cta_url || "https://access.prscstandards.org/portal#meetings",
-                    }));
-                    setEmailStatus("Meeting dates added to the email. Recipients will be added to this meeting when you send.");
+                    attachComposeBlock(blockFor(id));
                   }}
                   className="h-10 w-full min-w-0 rounded-md border border-input bg-navy px-3 text-base"
                 >
-                  <option value="">{openPolls.length ? "Choose a meeting…" : "No open meetings — propose dates in Meetings"}</option>
+                  <option value="">{openPolls.length ? "Choose a meeting…" : "No open meetings yet — set one up"}</option>
                   {openPolls.map((p) => (
                     <option key={p.id} value={p.id}>{p.title} — {MEETING_TYPE_LABEL[p.meeting_type]} · {p.slots?.length ?? 0} times</option>
                   ))}
                 </select>
+                <button type="button" onClick={() => setMeetingDialog("compose")} className="inline-flex shrink-0 items-center gap-2 rounded-full border border-gold/50 px-4 py-2 text-sm text-gold hover:bg-gold/10">
+                  <Plus className="h-4 w-4" /> Set Up a New Meeting
+                </button>
               </div>
               )}
 
