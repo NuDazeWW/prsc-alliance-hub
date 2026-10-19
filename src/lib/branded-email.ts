@@ -1,3 +1,5 @@
+import { memberRoleLabel } from "./member-role-labels";
+
 export type EmailSignature = { name: string; title: string };
 
 export type BrandedEmailInput = {
@@ -45,14 +47,6 @@ const ENTITY_FULL: Record<string, string> = {
   both: "Partnership Readiness Standards Council (PRSC) and Decision Intelligence Systems (DIS)",
 };
 
-const ROLE_LABEL: Record<string, string> = {
-  board_member: "Board Member",
-  advisor: "Advisor",
-  prsc_board_dis_advisor: "Board Member (PRSC) and Advisor (DIS)",
-  prsc_advisor_dis_board: "Advisor (PRSC) and Board Member (DIS)",
-  methodology_committee: "Methodology Committee Member",
-};
-
 const PACKAGE_LABEL: Record<string, string> = {
   board_member: "Board",
   advisor: "Advisor",
@@ -80,8 +74,8 @@ export function buildMemberTokens(member: {
     title: member.title ?? "",
     entity: entity.toUpperCase(),
     entity_full: ENTITY_FULL[entity] ?? entity.toUpperCase(),
-    role: role.replace("_", " "),
-    role_label: ROLE_LABEL[role] ?? role.replace("_", " "),
+    role: memberRoleLabel(role, entity),
+    role_label: memberRoleLabel(role, entity),
     package_label: PACKAGE_LABEL[role] ?? "Board / Advisor",
     email: member.email ?? "",
   };

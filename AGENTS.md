@@ -8,3 +8,6 @@
 > Commits you push to the connected branch sync back to Lovable and show up in
 > the editor, so keep the branch in a working state.
 <!-- LOVABLE:END -->
+
+- Use the shared member-role presentation helper for member designations across portal, admin, and emails; stored role values and permissions remain independent of display wording.
+- The Orientation Hub owns a fixed-body scroll lock with cleanup, and resets its dialog scroll before painting each view; keep background position stable during navigation.

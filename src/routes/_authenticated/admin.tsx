@@ -53,8 +53,9 @@ import { AdminMeetings } from "@/components/portal/AdminMeetings";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { InviteEmail, capitalizeInviteName, inviteEntityCopy } from "@/lib/email-templates/invite";
-import { INVITE_EMAIL_PREVIEW_URL, INVITE_EMAIL_REPLY_TO, INVITE_EMAIL_SUBJECT, INVITE_ROLE_LABELS } from "@/lib/invite-email-config";
+import { InviteEmail, capitalizeInviteName } from "@/lib/email-templates/invite";
+import { INVITE_EMAIL_PREVIEW_URL, INVITE_EMAIL_REPLY_TO, INVITE_EMAIL_SUBJECT } from "@/lib/invite-email-config";
+import { memberRoleLabel } from "@/lib/member-role-labels";
 import type { InviteEmailReview } from "@/lib/portal-invite-email.functions";
 import { PORTAL_EXPERIENCE_QUESTIONS, PORTAL_PERMISSION_LABELS, PORTAL_PROFILE_STAGES, PORTAL_VISIBILITY_PERMISSIONS } from "@/lib/portal-profile-fields";
 
@@ -639,7 +640,7 @@ function Admin() {
           firstName={inviteDraft.first_name}
           recipientEmail={inviteDraft.email}
           entity={inviteDraft.entity}
-          roleLabel={INVITE_ROLE_LABELS[inviteDraft.role]}
+          roleLabel={memberRoleLabel(inviteDraft.role, inviteDraft.entity)}
           copy={inviteTemplate}
         />,
       );
@@ -763,7 +764,7 @@ function Admin() {
         firstName={m?.first_name ?? "Shirley"}
         recipientEmail={m?.email ?? "member@example.com"}
         entity={entity}
-        roleLabel={INVITE_ROLE_LABELS[m?.role as keyof typeof INVITE_ROLE_LABELS] ?? "Advisor"}
+        roleLabel={memberRoleLabel(m?.role ?? "advisor", entity)}
         copy={draft}
       />,
     ).then((html) => alive && setInviteComposeHtml(html));
@@ -845,7 +846,7 @@ function Admin() {
       const prog = docProgress[m.id];
       const ans = p.experience_answers ?? {};
       const vis = p.visibility_instructions ?? {};
-      return [m.first_name, m.last_name, m.email, m.organization, m.title, String(m.entity).toUpperCase(), INVITE_ROLE_LABELS[m.role as keyof typeof INVITE_ROLE_LABELS] ?? m.role, m.status, stageOf(m).label,
+      return [m.first_name, m.last_name, m.email, m.organization, m.title, String(m.entity).toUpperCase(), memberRoleLabel(m.role, m.entity), m.status, stageOf(m).label,
         date(m.invited_at), date(m.last_access_at), date(p.submitted_at), prog?.done ?? "", prog?.total ?? "", date(m.documents_completed_at),
         p.preferred_name, p.professional_role, p.current_organization, p.preferred_email, p.preferred_phone,
         ...PORTAL_EXPERIENCE_QUESTIONS.map((_, i) => ans[`q${i + 1}`] ?? ""),
@@ -912,11 +913,11 @@ function Admin() {
                   <option value="both">Both</option>
                 </select>
                 <select name="role" value={inviteDraft.role} onChange={(e) => { const role = e.target.value as InviteEmailReview["role"]; setInviteDraft({ ...inviteDraft, role, entity: role.startsWith("prsc_") ? "both" : inviteDraft.entity }); }} required className="h-9 w-full min-w-0 rounded-md border border-input bg-navy px-3 text-base">
-                  <option value="board_member">Board member</option>
-                  <option value="advisor">Advisor</option>
-                  <option value="prsc_board_dis_advisor">PRSC Board member + DIS Advisor</option>
-                  <option value="prsc_advisor_dis_board">PRSC Advisor + DIS Board member</option>
-                  <option value="methodology_committee">Methodology Committee member</option>
+                  <option value="board_member">{memberRoleLabel("board_member", inviteDraft.entity)}</option>
+                  <option value="advisor">{memberRoleLabel("advisor", inviteDraft.entity)}</option>
+                  <option value="prsc_board_dis_advisor">PRSC Board / DIS Advisor</option>
+                  <option value="prsc_advisor_dis_board">PRSC Advisor / DIS Board</option>
+                  <option value="methodology_committee">{memberRoleLabel("methodology_committee", inviteDraft.entity)}</option>
                 </select>
                 {(() => {
                   const dup = members.find((m) => m.email?.toLowerCase() === inviteDraft.email.trim().toLowerCase());
@@ -1027,8 +1028,7 @@ function Admin() {
                         <span className="font-medium">{r.first_name} {r.last_name}</span>
                         <span className="text-ivory/60">{r.email}</span>
                         <span className="text-ivory/60">{[r.title, r.organization].filter(Boolean).join(", ")}</span>
-                        <span className="uppercase text-gold">{r.entity}</span>
-                        <span className="text-ivory/60">{INVITE_ROLE_LABELS[r.role]}</span>
+                        <span className="text-ivory/60">{memberRoleLabel(r.role, r.entity)}</span>
                         <Button type="button" variant="outline" size="sm" disabled={batchDrafting || rowDrafting === r.email} className="ml-auto rounded-none" onClick={() => void draftRow(i)}>
                           {rowDrafting === r.email ? "Drafting…" : r.why_you.trim() ? "Regenerate" : "Draft with AI"}
                         </Button>
@@ -1445,7 +1445,7 @@ function Admin() {
                             </button>
                           </div>
                         </td>
-                        <td className="uppercase">{m.entity}</td>
+                        <td>{memberRoleLabel(m.role, m.entity)}</td>
                         <td className="py-4 pr-3">
                           <span className={`inline-block border px-2 py-1 text-xs uppercase tracking-[0.12em] ${st.tone}`}>{st.label}</span>
                           {st.detail && <span className="mt-1 block text-sm text-ivory/55">{st.detail}</span>}
@@ -1570,7 +1570,7 @@ function Admin() {
                             Access: {m.status}
                           </span>
                         </button>
-                        <span className="shrink-0 uppercase text-ivory/70">{m.entity}</span>
+                        <span className="max-w-[45%] text-right text-xs text-ivory/70">{memberRoleLabel(m.role, m.entity)}</span>
                       </div>
 
                       <div className="mt-3 border-t border-ivory/10 pt-3">
@@ -1920,7 +1920,7 @@ function Admin() {
               </div>
               <div className="bg-navy px-5 py-3">
                 <p className="text-xs uppercase tracking-[0.14em] text-gold">Company &amp; role</p>
-                <p className="mt-1 text-base text-ivory">{inviteEntityCopy[inviteDraft.entity].short} · {INVITE_ROLE_LABELS[inviteDraft.role]}</p>
+                <p className="mt-1 text-base text-ivory">{memberRoleLabel(inviteDraft.role, inviteDraft.entity)}</p>
               </div>
               <div className="bg-navy px-5 py-3">
                 <p className="text-xs uppercase tracking-[0.14em] text-gold">Logos shown</p>

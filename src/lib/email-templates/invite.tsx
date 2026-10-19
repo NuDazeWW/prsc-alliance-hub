@@ -101,7 +101,7 @@ export const InviteEmail = ({
             <Text style={signatureTitle}>{sigTitle.join('|').split(',').map((part, i) => <React.Fragment key={i}>{i > 0 && <br />}{part.trim()}</React.Fragment>)}</Text>
           </Section>
           <Section style={securityFooter}>
-            <Text style={securityText}>This invitation was sent specifically to <Link href={`mailto:${recipientEmail}`} style={footerLink}>{recipientEmail}</Link> in connection with your previously discussed PRSC/DIS Board or Advisor role. If you have questions about this invitation before accessing the portal, contact us at <Link href="mailto:info@readinessterminal.com" style={footerLink}>info@readinessterminal.com</Link>.</Text>
+            <Text style={securityText}>This invitation was sent specifically to <Link href={`mailto:${recipientEmail}`} style={footerLink}>{recipientEmail}</Link> in connection with your previously discussed {roleLabel} role. If you have questions about this invitation before accessing the portal, contact us at <Link href="mailto:info@readinessterminal.com" style={footerLink}>info@readinessterminal.com</Link>.</Text>
           </Section>
         </Container>
       </Body>
@@ -145,7 +145,7 @@ export const InviteEmail = ({
           <Text style={signatureTitle}>Founder<br />Partnership Readiness Standards Council / Decision Intelligence Systems</Text>
         </Section>
         <Section style={securityFooter}>
-          <Text style={securityText}>This invitation was sent specifically to <Link href={`mailto:${recipientEmail}`} style={footerLink}>{recipientEmail}</Link> in connection with your previously discussed PRSC/DIS Board or Advisor role. If you have questions about this invitation before accessing the portal, contact us at <Link href="mailto:info@readinessterminal.com" style={footerLink}>info@readinessterminal.com</Link>.</Text>
+          <Text style={securityText}>This invitation was sent specifically to <Link href={`mailto:${recipientEmail}`} style={footerLink}>{recipientEmail}</Link> in connection with your previously discussed {roleLabel} role. If you have questions about this invitation before accessing the portal, contact us at <Link href="mailto:info@readinessterminal.com" style={footerLink}>info@readinessterminal.com</Link>.</Text>
         </Section>
       </Container>
     </Body>

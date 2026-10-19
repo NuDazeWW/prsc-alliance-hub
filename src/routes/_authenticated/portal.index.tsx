@@ -31,7 +31,7 @@ import { MemberMeetings } from "@/components/portal/MemberMeetings";
 import { LeadershipTeam } from "@/components/portal/LeadershipTeam";
 import { getMyMeetings } from "@/lib/meetings.functions";
 import { getMyDocuments, getMyHeadshotUrl, getPortalSession } from "@/lib/portal.functions";
-import { INVITE_ROLE_LABELS } from "@/lib/invite-email-config";
+import { memberRoleLabel, memberRoleLabels } from "@/lib/member-role-labels";
 import { StatusTimeline } from "@/components/portal/StatusTimeline";
 import { PortalShell } from "@/components/portal/PortalShell";
 import { isPreviewHost } from "@/routes/_authenticated/route";
@@ -53,14 +53,6 @@ export const Route = createFileRoute("/_authenticated/portal/")({
     typeof search.asMember === "string" ? { asMember: search.asMember } : {},
   component: PortalHome,
 });
-
-const entityLabel = { prsc: "PRSC", dis: "DIS", both: "PRSC / DIS" } as const;
-
-const capacityLabel = (role: string) =>
-  INVITE_ROLE_LABELS[role as keyof typeof INVITE_ROLE_LABELS] ?? "Board Member";
-
-const selectedLabel = (role: string) =>
-  role === "advisor" ? "Selected Advisor" : role === "board_member" ? "Board Member" : capacityLabel(role);
 
 const demoMember = {
   id: "demo",
@@ -141,7 +133,8 @@ function PortalHome() {
   const name = m.professional_name || m.first_name;
   const initials = `${(m.first_name || "").charAt(0)}${(m.last_name || "").charAt(0)}`.toUpperCase();
   // Every member can read about both organizations, regardless of designation.
-  const entityWord = entityLabel[m.entity];
+  const entityWord = m.entity === "both" ? "PRSC and DIS" : m.entity.toUpperCase();
+  const designations = memberRoleLabels(m.role, m.entity);
   const profileComplete = data?.hasProfile ?? false;
   const packageReady = m.package_status === "package_ready";
   const myDocs = documents.data?.documents ?? [];
@@ -376,9 +369,7 @@ function PortalHome() {
               <div className="flex min-w-0 flex-col justify-center">
                 <p className="text-[10px] uppercase tracking-[0.24em] text-gold">
                   Why You <span className="mx-2 text-gold/40">|</span>
-                  <span className="text-ivory/70">{m.title || selectedLabel(m.role)}</span>
-                  <span className="mx-2 text-gold/40">·</span>
-                  <span className="text-ivory/70">{entityWord}</span>
+                  <span className="inline-flex flex-wrap gap-x-2 gap-y-1 text-ivory/70">{designations.map((label, i) => <span key={label}>{i > 0 && <span className="mr-2 text-gold/40">/</span>}{label}</span>)}</span>
                 </p>
                 <h2 className="mt-4 font-display text-[clamp(1.75rem,2vw,2.3rem)] leading-tight">{name}, Your Perspective Matters.</h2>
                 <p className="mt-5 text-[15px] leading-7 text-ivory/75">{m.why_you}</p>
@@ -415,7 +406,7 @@ function PortalHome() {
       </div>
 
       <Dialog open={panel !== null} onOpenChange={(open) => !open && setPanel(null)}>
-        <DialogContent className="max-h-[86vh] w-[min(94vw,980px)] max-w-none overflow-y-auto border-gold/30 bg-[linear-gradient(145deg,var(--color-midnight),var(--color-navy))] p-8 text-ivory shadow-2xl lg:p-[clamp(2rem,2.7vw,3.25rem)]">
+        <DialogContent className="max-h-[86vh] w-[min(94vw,980px)] max-w-none overflow-y-auto overscroll-contain scroll-auto border-gold/30 bg-[linear-gradient(145deg,var(--color-midnight),var(--color-navy))] p-5 text-ivory shadow-2xl sm:p-8 lg:p-[clamp(2rem,2.7vw,3.25rem)]">
           {panel === "meetings" && (
             <div>
               <DialogHeader className="space-y-0 text-left">
@@ -439,7 +430,7 @@ function PortalHome() {
                   </DialogTitle>
                 </DialogHeader>
                 <p className="mt-5 font-display text-[clamp(1.35rem,1.8vw,2rem)] leading-tight text-gold">
-                  {m.title || selectedLabel(m.role)}
+                  {memberRoleLabel(m.role, m.entity)}
                 </p>
                 {m.organization && (
                   <p className="mt-3 text-[16px] leading-7 text-ivory/70">{m.organization}</p>
@@ -458,7 +449,7 @@ function PortalHome() {
                   <div>
                     <dt className="text-[10px] uppercase tracking-[0.22em] text-ivory/45">Capacity</dt>
                     <dd className="mt-2 font-display text-2xl text-ivory">
-                      {capacityLabel(m.role)}
+                      {memberRoleLabel(m.role, m.entity)}
                     </dd>
                   </div>
                   {m.organization && (

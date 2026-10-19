@@ -8,7 +8,7 @@ export const INVITE_EMAIL_PREVIEW_URL = "https://access.prscstandards.org/accept
 export const INVITE_ROLE_LABELS = {
   board_member: "Board Member",
   advisor: "Advisor",
-  prsc_board_dis_advisor: "Board Member (PRSC) and Advisor (DIS)",
-  prsc_advisor_dis_board: "Advisor (PRSC) and Board Member (DIS)",
+  prsc_board_dis_advisor: "PRSC Board / DIS Advisor",
+  prsc_advisor_dis_board: "PRSC Advisor / DIS Board",
   methodology_committee: "Methodology Committee Member",
 } as const;
