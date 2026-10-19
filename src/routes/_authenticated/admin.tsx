@@ -385,6 +385,9 @@ function Admin() {
   const [invitePreviewHtml, setInvitePreviewHtml] = useState("");
   const inviteFormRef = useRef<HTMLFormElement>(null);
   const [draft, setDraft] = useState<Draft>(emptyDraft);
+  const [emailMode, setEmailMode] = useState<"compose" | "template">("compose");
+  const isTemplateMode = emailMode === "template";
+  const [composeFromId, setComposeFromId] = useState("");
   const [emailStatus, setEmailStatus] = useState("");
   const [demoTemplates, setDemoTemplates] = useState<EmailTemplate[] | null>(null);
   const [inviteComposeHtml, setInviteComposeHtml] = useState("");
@@ -683,12 +686,14 @@ function Admin() {
           .replace(/\n{3,}/g, "\n\n")
           .trim()
       : text.trim();
-    setDraft((d) => ({
-      ...d,
-      name: d.name || file.name.replace(/\.[^.]+$/, ""),
-      body: stripped,
-    }));
-    setEmailStatus(`Loaded content from ${file.name}. Review it before sending.`);
+    if (emailMode === "template") {
+      const name = file.name.replace(/\.[^.]+$/, "");
+      setDraft({ ...emptyDraft, name, subject: name, body: stripped });
+      setEmailStatus(`Loaded ${file.name} as a new template. Review it, then Save to template library.`);
+      return;
+    }
+    setDraft((d) => ({ ...d, body: stripped }));
+    setEmailStatus(`Loaded text from ${file.name}. Review it before sending.`);
   }
 
   async function saveDraft() {
@@ -762,7 +767,7 @@ function Admin() {
     try {
       const res = await sendMemberEmail({
         data: {
-          template_id: draft.id || null,
+          template_id: composeFromId || null,
           member_ids: recipients,
           name: draft.name || draft.subject,
           subject: draft.subject,
@@ -782,6 +787,7 @@ function Admin() {
       setEmailStatus(failed ? `${res.results.length - failed} sent, ${failed} failed.` : `Sent to ${res.results.length} member(s).`);
       setRecipients([]);
       setDraft(emptyDraft);
+      setComposeFromId("");
       await email.refetch();
     } catch (error) {
       setEmailStatus(error instanceof Error ? error.message : "Sending failed.");
@@ -1185,7 +1191,9 @@ function Admin() {
                           cta_subtext: t.cta_subtext ?? "",
                           signatures: t.signatures ?? "",
                         });
-                        setEmailStatus(`Editing “${t.name}”.`);
+                        setEmailMode("template");
+                        setEmailStatus(`Editing saved template “${t.name}”. Save to update it in the library.`);
+                        document.getElementById("email-center")?.scrollIntoView({ behavior: "smooth", block: "start" });
                       }}
                       className="min-w-0 flex-1 text-left"
                     >
@@ -1213,8 +1221,10 @@ function Admin() {
               <button
                 type="button"
                 onClick={() => {
+                  setEmailMode("template");
                   setDraft(emptyDraft);
                   setEmailStatus("New template started.");
+                  document.getElementById("email-center")?.scrollIntoView({ behavior: "smooth", block: "start" });
                 }}
                 className="flex w-full items-center justify-center gap-2 border-t border-gold/15 px-5 py-3 text-base text-gold transition-colors hover:bg-gold/10"
               >
@@ -1226,13 +1236,39 @@ function Admin() {
           <div className="min-w-0">
             <div className="mb-8"><AdminLeadership /></div>
             <section id="email-center" className="border border-gold/20 p-6 sm:p-8">
+              <div className="mb-6 flex flex-wrap gap-2" role="tablist">
+                {([
+                  ["compose", "Compose & send"],
+                  ["template", "Template library editor"],
+                ] as const).map(([mode, label]) => (
+                  <button
+                    key={mode}
+                    type="button"
+                    role="tab"
+                    aria-selected={emailMode === mode}
+                    onClick={() => {
+                      setEmailMode(mode);
+                      setDraft(emptyDraft);
+                      setComposeFromId("");
+                      setEmailStatus(mode === "template" ? "Pick a template on the left, upload one, or start a new one." : "");
+                    }}
+                    className={`border px-4 py-2 text-sm uppercase tracking-[0.14em] transition-colors ${emailMode === mode ? "border-gold bg-gold text-navy" : "border-gold/30 text-ivory/70 hover:text-gold"}`}
+                  >
+                    {label}
+                  </button>
+                ))}
+              </div>
               <div className="flex flex-wrap items-center justify-between gap-3">
                 <div className="flex items-center gap-3">
-                  <Send className="h-5 w-5 text-gold" />
-                  <h2 className="font-display text-3xl">Compose &amp; send</h2>
+                  {isTemplateMode ? <FileText className="h-5 w-5 text-gold" /> : <Send className="h-5 w-5 text-gold" />}
+                  <h2 className="font-display text-3xl">
+                    {isTemplateMode ? (draft.id ? `Editing: ${draft.name || "template"}` : "New template") : <>Compose &amp; send</>}
+                  </h2>
                   <InfoTip
-                    title="Compose & send"
-                    body="Write or edit an email here. Upload Content loads a .txt, .md, or .html file into the body. Use {{first_name}}, {{full_name}}, {{entity}}, {{role}}, and similar tokens — they personalize automatically per recipient. View in Template shows the exact branded email before anything is sent. Select recipients below, then Save Template to keep it or Send to deliver it. Members who already received the loaded template are flagged to prevent duplicates."
+                    title={isTemplateMode ? "Template library editor" : "Compose & send"}
+                    body={isTemplateMode
+                      ? "Edit and save templates in your library. Changes here permanently update the saved template for all future uses. Upload Template loads a .txt, .md, or .html file as a new template. Nothing is sent from this view."
+                      : "Write any email from scratch in plain text, or optionally load a saved template as a starting point. Edits here only affect this send — your saved templates stay unchanged. Select recipients below, then Send."}
                   />
                 </div>
                 <div className="flex w-full flex-wrap items-center gap-2 sm:w-auto">
@@ -1248,7 +1284,7 @@ function Admin() {
                     }}
                   />
                   <Button type="button" className="w-full rounded-none border border-gold/40 bg-transparent text-base text-ivory hover:bg-gold/10 hover:text-gold sm:w-auto" onClick={() => fileRef.current?.click()}>
-                    <Upload className="mr-2 h-4 w-4" /> Upload content
+                    <Upload className="mr-2 h-4 w-4" /> {isTemplateMode ? "Upload template" : "Upload text"}
                   </Button>
                   <Button type="button" className="w-full rounded-none bg-gold text-base text-navy hover:bg-gold-light hover:text-navy sm:w-auto" onClick={() => setPreviewOpen(true)}>
                     <Eye className="mr-2 h-4 w-4" /> View in template
@@ -1256,6 +1292,40 @@ function Admin() {
                 </div>
               </div>
 
+              {!isTemplateMode && (
+                <label className="mt-6 flex flex-col gap-2 text-base text-ivory/80 sm:flex-row sm:items-center">
+                  <span className="shrink-0">Start from a saved template (optional)</span>
+                  <select
+                    value={composeFromId}
+                    onChange={(e) => {
+                      const id = e.target.value;
+                      setComposeFromId(id);
+                      const t = templates.find((x) => x.id === id);
+                      if (!t) { setDraft(emptyDraft); return; }
+                      setDraft({
+                        id: "",
+                        name: t.name,
+                        subject: t.subject,
+                        description: t.description ?? "",
+                        eyebrow: t.eyebrow || "Private Communication",
+                        heading: t.heading ?? "",
+                        body: t.body,
+                        cta_label: t.cta_label ?? "",
+                        cta_url: t.cta_url ?? "",
+                        cta_subtext: t.cta_subtext ?? "",
+                        signatures: t.signatures ?? "",
+                      });
+                      setEmailStatus(`Loaded “${t.name}” as a starting point. Edits here won't change the saved template.`);
+                    }}
+                    className="h-10 w-full min-w-0 rounded-md border border-input bg-navy px-3 text-base"
+                  >
+                    <option value="">None — write raw text</option>
+                    {templates.map((t) => <option key={t.id} value={t.id}>{t.name}</option>)}
+                  </select>
+                </label>
+              )}
+
+              {!isTemplateMode && (
               <div className="mt-6 flex flex-col gap-3 border border-gold/30 bg-gold/[.04] p-4 sm:flex-row sm:items-center">
                 <span className="flex shrink-0 items-center gap-2 text-base text-ivory/90"><CalendarDays className="h-4 w-4 text-gold" /> Attach an upcoming meeting</span>
                 <select
@@ -1281,8 +1351,9 @@ function Admin() {
                   ))}
                 </select>
               </div>
+              )}
 
-              {draft.id && templates.find((t) => t.id === draft.id)?.system_key && (
+              {isTemplateMode && draft.id && templates.find((t) => t.id === draft.id)?.system_key && (
                 <div className="mt-4 flex flex-wrap items-center justify-between gap-3 border border-gold/25 px-4 py-3 text-sm text-ivory/70">
                   <span>You are editing an automatic email. Saved changes are used for every future send.</span>
                   <Button type="button" variant="outline" size="sm" className="rounded-none" onClick={() => void resetDraft()}>Reset to original</Button>
@@ -1291,13 +1362,17 @@ function Admin() {
 
               <div className="mt-6 grid gap-6 2xl:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
               <div className="grid content-start gap-4 sm:grid-cols-2">
-                <Input value={draft.name} onChange={(e) => setDraft({ ...draft, name: e.target.value })} placeholder="Template name" className="text-base" />
-                <Input
-                  value={draft.description}
-                  onChange={(e) => setDraft({ ...draft, description: e.target.value })}
-                  placeholder="Short description (optional)"
-                  className="text-base"
-                />
+                {isTemplateMode && (
+                  <>
+                    <Input value={draft.name} onChange={(e) => setDraft({ ...draft, name: e.target.value })} placeholder="Template name" className="text-base" />
+                    <Input
+                      value={draft.description}
+                      onChange={(e) => setDraft({ ...draft, description: e.target.value })}
+                      placeholder="Short description (optional)"
+                      className="text-base"
+                    />
+                  </>
+                )}
                 <Input
                   value={draft.subject}
                   onChange={(e) => setDraft({ ...draft, subject: e.target.value })}
@@ -1345,12 +1420,13 @@ function Admin() {
                 Personalize with {"{{first_name}}"}, {"{{last_name}}"}, {"{{full_name}}"}, {"{{organization}}"}, {"{{title}}"}, {"{{entity}}"}, {"{{entity_full}}"}, {"{{role}}"}, {"{{role_label}}"}, {"{{package_label}}"}.
               </p>
 
+              {!isTemplateMode && (
               <div className="mt-6 border-t border-gold/15 pt-5">
                 <p className="text-xs uppercase tracking-[0.18em] text-gold">Recipients</p>
                 <div className="mt-3 grid gap-2 sm:grid-cols-2">
                   {members.map((m) => {
-                    const already = draft.id
-                      ? (sendsByMember.get(m.id) ?? []).some((s) => s.template_id === draft.id && s.status === "sent")
+                    const already = composeFromId
+                      ? (sendsByMember.get(m.id) ?? []).some((s) => s.template_id === composeFromId && s.status === "sent")
                       : false;
                     const checked = recipients.includes(m.id);
                     return (
@@ -1384,6 +1460,8 @@ function Admin() {
                   })}
                 </div>
               </div>
+              )}
+
 
               <div className="mt-6 flex flex-wrap items-center gap-3">
                 <Button
@@ -1391,18 +1469,22 @@ function Admin() {
                   className="rounded-none border border-ivory/20 bg-transparent text-base text-ivory/70 hover:border-gold/40 hover:text-gold"
                   onClick={() => {
                     setDraft(emptyDraft);
+                    setComposeFromId("");
                     setEmailStatus("");
                     setRecipients([]);
                   }}
                 >
-                  <Trash2 className="mr-2 h-4 w-4" /> Discard
+                  <Trash2 className="mr-2 h-4 w-4" /> {isTemplateMode ? "Close" : "Clear"}
                 </Button>
-                <Button type="button" className="rounded-none border border-gold/40 bg-transparent text-base text-ivory hover:bg-gold/10 hover:text-gold" onClick={saveDraft}>
-                  Save template
-                </Button>
-                <Button type="button" disabled={sending} className="rounded-none bg-gold text-base text-navy hover:bg-gold-light hover:text-navy" onClick={send}>
-                  {sending ? "Sending…" : `Send to ${recipients.length || 0} member(s)`}
-                </Button>
+                {isTemplateMode ? (
+                  <Button type="button" className="rounded-none bg-gold text-base text-navy hover:bg-gold-light hover:text-navy" onClick={saveDraft}>
+                    {draft.id ? "Save changes to template" : "Save to template library"}
+                  </Button>
+                ) : (
+                  <Button type="button" disabled={sending} className="rounded-none bg-gold text-base text-navy hover:bg-gold-light hover:text-navy" onClick={send}>
+                    {sending ? "Sending…" : `Send to ${recipients.length || 0} member(s)`}
+                  </Button>
+                )}
                 {emailStatus && <p className="text-base text-ivory/60">{emailStatus}</p>}
               </div>
             </section>
@@ -2072,9 +2154,11 @@ function Admin() {
               <Button type="button" className="rounded-none border border-gold/40 bg-transparent text-base text-ivory hover:bg-gold/10 hover:text-gold" onClick={() => setPreviewOpen(false)}>
                 Keep editing
               </Button>
+              {isTemplateMode && (
               <Button type="button" className="rounded-none bg-gold text-base text-navy hover:bg-gold-light hover:text-navy" onClick={saveDraft}>
                 Save template
               </Button>
+              )}
             </div>
           </div>
         </div>
