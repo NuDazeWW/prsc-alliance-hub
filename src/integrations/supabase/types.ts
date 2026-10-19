@@ -304,6 +304,7 @@ export type Database = {
           meeting_type: string
           respond_by: string | null
           status: string
+          timezone: string | null
           title: string
           updated_at: string
           virtual_link: string | null
@@ -322,6 +323,7 @@ export type Database = {
           meeting_type: string
           respond_by?: string | null
           status?: string
+          timezone?: string | null
           title: string
           updated_at?: string
           virtual_link?: string | null
@@ -340,6 +342,7 @@ export type Database = {
           meeting_type?: string
           respond_by?: string | null
           status?: string
+          timezone?: string | null
           title?: string
           updated_at?: string
           virtual_link?: string | null
