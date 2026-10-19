@@ -1,3 +1,5 @@
+import { useStoredFlag } from "@/hooks/use-stored-flag";
+import { ArrowLeftRight, ChevronDown, ChevronUp, Maximize2, Minimize2 } from "lucide-react";
 import { AdminLeadership } from "@/components/portal/AdminLeadership";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
@@ -352,6 +354,9 @@ function Admin() {
   });
   const openPolls: any[] = (polls.data?.polls ?? []).filter((p: any) => p.status === "open");
   const [invitePollId, setInvitePollId] = useState("");
+  const [inviteCollapsed, setInviteCollapsed] = useStoredFlag("admin.inviteCollapsed");
+  const [columnsSwapped, setColumnsSwapped] = useStoredFlag("admin.columnsSwapped");
+  const [emailFullWidth, setEmailFullWidth] = useStoredFlag("admin.emailFullWidth");
   const [composePollId, setComposePollId] = useState("");
   const [previewAsId, setPreviewAsId] = useState("");
   const blockFor = (id: string) => {
@@ -934,14 +939,24 @@ function Admin() {
           ))}
         </nav>
 
-        <div className="mt-10 grid items-start gap-6 xl:grid-cols-2">
-          <div className="flex min-w-0 flex-col gap-8">
-            <section className="border border-gold/20 p-6 sm:p-8">
+        <div className="mt-8 flex flex-wrap justify-end gap-2">
+          <button type="button" onClick={() => setColumnsSwapped(!columnsSwapped)} disabled={emailFullWidth} className="flex items-center gap-2 border border-gold/30 px-4 py-2 text-sm text-ivory/80 transition-colors hover:border-gold hover:text-gold disabled:opacity-40">
+            <ArrowLeftRight className="h-4 w-4" /> Swap columns
+          </button>
+          <button type="button" onClick={() => setEmailFullWidth(!emailFullWidth)} className={`flex items-center gap-2 border px-4 py-2 text-sm transition-colors ${emailFullWidth ? "border-gold bg-gold text-navy" : "border-gold/30 text-ivory/80 hover:border-gold hover:text-gold"}`}>
+            {emailFullWidth ? <Minimize2 className="h-4 w-4" /> : <Maximize2 className="h-4 w-4" />} {emailFullWidth ? "Split view" : "Email full width"}
+          </button>
+        </div>
+        <div className={`mt-4 grid items-start gap-6 ${emailFullWidth ? "grid-cols-1 [&>*]:!col-span-full" : "xl:grid-cols-2"}`}>
+          <div className={`flex min-w-0 flex-col gap-8 ${emailFullWidth ? "-order-1" : columnsSwapped ? "xl:order-2" : ""}`}>
+            <section className={`border border-gold/20 p-6 sm:p-8 ${inviteCollapsed ? "[&>*:not(:first-child)]:hidden" : ""}`}>
               <div className="flex items-start justify-between gap-3">
-                <div className="flex items-center gap-3">
+                <button type="button" onClick={() => setInviteCollapsed(!inviteCollapsed)} aria-expanded={!inviteCollapsed} className="flex items-center gap-3 text-left">
                   <MailPlus className="h-5 w-5 text-gold" />
                   <h2 id="invite" className="scroll-mt-20 font-display text-3xl">Invite a member</h2>
-                </div>
+                  {inviteCollapsed && <span className="text-sm text-ivory/50">Click to expand</span>}
+                  {inviteCollapsed ? <ChevronDown className="h-5 w-5 text-gold" /> : <ChevronUp className="h-5 w-5 text-gold" />}
+                </button>
                 <InfoTip
                   title="Invite a member"
                   body="Add a board member or advisor here. Before sending their first welcome email, explain why this person was chosen. That private, personalized message appears prominently in their welcome center. Choose PRSC, DIS, or Both — their portal language adapts to the designation."
@@ -1233,7 +1248,7 @@ function Admin() {
             </aside>
           </div>
 
-          <div className="min-w-0">
+          <div className={`min-w-0 ${emailFullWidth ? "order-first" : columnsSwapped ? "xl:order-1" : ""}`}>
             <div className="mb-8"><AdminLeadership /></div>
             <section id="email-center" className="border border-gold/20 p-6 sm:p-8">
               <div className="mb-6 flex flex-wrap gap-2" role="tablist">

@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { ArrowDown, ArrowUp, Eye, EyeOff, Plus, Save, Trash2, Upload } from "lucide-react";
+import { ArrowDown, ArrowUp, ChevronDown, ChevronUp, Eye, EyeOff, Plus, Save, Trash2, Upload } from "lucide-react";
+import { useStoredFlag } from "@/hooks/use-stored-flag";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import {
@@ -32,6 +33,7 @@ export function AdminLeadership() {
   const [settings, setSettings] = useState({ eyebrow: "", heading: "", subtext: "" });
   const [editing, setEditing] = useState<Draft | null>(null);
   const [busy, setBusy] = useState(false);
+  const [collapsed, setCollapsed] = useStoredFlag("admin.leadershipCollapsed");
 
   useEffect(() => {
     if (q.data?.settings) setSettings(q.data.settings);
@@ -78,9 +80,15 @@ export function AdminLeadership() {
   });
 
   return (
-    <section id="leadership" className="border border-gold/20 p-6 sm:p-8">
-      <p className="text-[10px] uppercase tracking-[0.24em] text-gold">Welcome Center</p>
-      <h2 className="mt-2 font-display text-3xl">Leadership Team</h2>
+    <section id="leadership" className={`border border-gold/20 p-6 sm:p-8 ${collapsed ? "[&>*:not(:first-child)]:hidden" : ""}`}>
+      <button type="button" onClick={() => setCollapsed(!collapsed)} aria-expanded={!collapsed} className="flex w-full items-start justify-between gap-3 text-left">
+        <span>
+          <span className="block text-[10px] uppercase tracking-[0.24em] text-gold">Welcome Center</span>
+          <span className="mt-2 block font-display text-3xl">Leadership Team</span>
+          {collapsed && <span className="mt-1 block text-sm text-ivory/50">{(q.data?.team ?? []).length} people · Click to expand</span>}
+        </span>
+        {collapsed ? <ChevronDown className="mt-2 h-5 w-5 text-gold" /> : <ChevronUp className="mt-2 h-5 w-5 text-gold" />}
+      </button>
       <p className="mt-2 text-sm text-ivory/60">
         Edit the "Our Leadership Team" panel members see. Link a person to a portal member and their profile photo and bio fill in
         automatically; anything you type here takes priority.
