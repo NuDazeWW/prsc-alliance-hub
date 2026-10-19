@@ -12,6 +12,8 @@ export const Route = createFileRoute("/request-briefing")({
       { property: "og:title", content: "Request a Briefing — PRSC" },
       { property: "og:description", content: "Private briefings for organizations, brands, investors, and industry leaders." },
       { property: "og:url", content: CANONICAL },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
     ],
     links: [{ rel: "canonical", href: CANONICAL }],
     scripts: [

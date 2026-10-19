@@ -29,4 +29,5 @@
 - [x] Welcome Center redesign to reference image + Our Leadership Team panel with admin editor and member bio
 - [ ] Import leadership/document spreadsheet (waiting on user's file)
 - [x] Orientation Hub replaces Refresh on PRSC / Learn about DIS
-- [ ] Correct Hub background locking and navigation scroll, add Competitive Context, separate entity-role labels, and verify interactions
+- [x] Correct Hub background locking and navigation scroll, add Competitive Context, separate entity-role labels, and verify desktop/phone interactions
+- [ ] Verify Hub in a real signed-in member session (no session available; account selection or preview sign-in required)

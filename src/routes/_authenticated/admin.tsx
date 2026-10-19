@@ -913,11 +913,11 @@ function Admin() {
                   <option value="both">Both</option>
                 </select>
                 <select name="role" value={inviteDraft.role} onChange={(e) => { const role = e.target.value as InviteEmailReview["role"]; setInviteDraft({ ...inviteDraft, role, entity: role.startsWith("prsc_") ? "both" : inviteDraft.entity }); }} required className="h-9 w-full min-w-0 rounded-md border border-input bg-navy px-3 text-base">
-                  <option value="board_member">Board member</option>
-                  <option value="advisor">Advisor</option>
-                  <option value="prsc_board_dis_advisor">PRSC Board member + DIS Advisor</option>
-                  <option value="prsc_advisor_dis_board">PRSC Advisor + DIS Board member</option>
-                  <option value="methodology_committee">Methodology Committee member</option>
+                  <option value="board_member">{memberRoleLabel("board_member", inviteDraft.entity)}</option>
+                  <option value="advisor">{memberRoleLabel("advisor", inviteDraft.entity)}</option>
+                  <option value="prsc_board_dis_advisor">PRSC Board / DIS Advisor</option>
+                  <option value="prsc_advisor_dis_board">PRSC Advisor / DIS Board</option>
+                  <option value="methodology_committee">{memberRoleLabel("methodology_committee", inviteDraft.entity)}</option>
                 </select>
                 {(() => {
                   const dup = members.find((m) => m.email?.toLowerCase() === inviteDraft.email.trim().toLowerCase());
