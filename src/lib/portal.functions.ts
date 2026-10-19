@@ -163,18 +163,9 @@ export const saveMyProfile = createServerFn({ method: "POST" })
         try {
           const { sendLovableEmail } = await import("@lovable.dev/email-js");
           const firstName = member.first_name?.trim() || "there";
-          const confirmation = {
-            subject: "We've received your profile — next steps are being prepared",
-            eyebrow: "Profile received",
-            heading: `Thank you, ${firstName}. Your profile has been received.`,
-            body: `Your private profile has been submitted successfully, and your individualized ${roleLabel} package is now being prepared.\n\nYou will receive your next steps privately and shortly. There is nothing further you need to do at this time.\n\nIf any questions come to mind in the meantime, you can send them to us from the Welcome Center at any time — or simply reply to this email.`,
-            ctaLabel: "Return to Your Welcome Center",
-            ctaUrl: "https://access.prscstandards.org/portal",
-            ctaSubtext: "Your Welcome Center shows your current status and any documents released to you.",
-            signatures: [
-              { name: "Shirley Johnson", title: `Founder, ${entityLabel === "PRSC and DIS" ? "PRSC / DIS" : entityLabel}` },
-            ],
-          };
+          const { loadSystemEmail } = await import("@/lib/portal-notify.server");
+          void entityLabel;
+          const confirmation = (await loadSystemEmail("profile_received"))({ first_name: firstName, role: roleLabel });
           await sendLovableEmail(
             {
               to: member.email,
@@ -913,19 +904,14 @@ export const releaseMemberDocuments = createServerFn({ method: "POST" })
     const toSign = docs.filter((d) => d.category === "sign").length;
     const toRead = docs.length - toSign;
     const parts = [toSign ? `${toSign} to review and sign` : "", toRead ? `${toRead} to read and acknowledge` : ""].filter(Boolean).join(" and ");
-    const { sendPortalEmail, founderSignature } = await import("@/lib/portal-notify.server");
+    const { sendPortalEmail, loadSystemEmail } = await import("@/lib/portal-notify.server");
+    const build = await loadSystemEmail("documents_ready");
     await sendPortalEmail(
       member.email,
-      {
-        subject: "Action needed: your documents are ready",
-        eyebrow: "Documents ready",
-        heading: `${member.first_name?.trim() || "There"}, your documents are ready.`,
-        body: `Your individualized package is now available in your private Welcome Center: ${docs.length} document${docs.length === 1 ? "" : "s"} — ${parts}.\n\nEverything is completed inside the portal. Open each document, read it, then initial or sign right there. It only takes a few minutes.`,
-        ctaLabel: "Review & Sign Your Documents",
-        ctaUrl: "https://access.prscstandards.org/portal",
-        ctaSubtext: "Sign in with your email and the password you created.",
-        signatures: founderSignature(),
-      },
+      build({
+        first_name: member.first_name?.trim() || "There",
+        document_summary: `${docs.length} document${docs.length === 1 ? "" : "s"} — ${parts}`,
+      }),
       "documents-ready-member",
     );
     await context.supabase.from("portal_activity").insert({ member_id: member.id, actor_user_id: context.userId, event_type: "documents_released", metadata: { count: docs.length } });
