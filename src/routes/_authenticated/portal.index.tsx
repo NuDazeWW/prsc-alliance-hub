@@ -31,7 +31,8 @@ import { MemberMeetings } from "@/components/portal/MemberMeetings";
 import { LeadershipTeam } from "@/components/portal/LeadershipTeam";
 import { getMyMeetings } from "@/lib/meetings.functions";
 import { getMyDocuments, getMyHeadshotUrl, getPortalSession } from "@/lib/portal.functions";
-import { memberRoleLabel, memberRoleLabels } from "@/lib/member-role-labels";
+import { memberRoleChips, memberRoleKinds, memberRoleLabel, memberRoleLabels } from "@/lib/member-role-labels";
+import { ROLE_DETAILS } from "@/data/orientation-hub";
 import { StatusTimeline } from "@/components/portal/StatusTimeline";
 import { PortalShell } from "@/components/portal/PortalShell";
 import { isPreviewHost } from "@/routes/_authenticated/route";
@@ -135,6 +136,8 @@ function PortalHome() {
   // Every member can read about both organizations, regardless of designation.
   const entityWord = m.entity === "both" ? "PRSC and DIS" : m.entity.toUpperCase();
   const designations = memberRoleLabels(m.role, m.entity);
+  const roleChips = memberRoleChips(m.role, m.entity);
+  const roleKinds = memberRoleKinds(m.role, Boolean((m as { is_methodology_committee?: boolean }).is_methodology_committee));
   const profileComplete = data?.hasProfile ?? false;
   const packageReady = m.package_status === "package_ready";
   const myDocs = documents.data?.documents ?? [];
@@ -152,7 +155,7 @@ function PortalHome() {
 
   const sideNav = [
     { label: "Overview", href: "#overview", icon: Home, active: true, onSelect: undefined as (() => void) | undefined },
-    { label: "Your Documents", href: "#documents", icon: profileComplete ? FileSignature : Lock, active: false, onSelect: () => setPanel("documents") },
+    { label: "Your Personal Documents", href: "#documents", icon: profileComplete ? FileSignature : Lock, active: false, onSelect: () => setPanel("documents") },
     { label: "Meetings", href: "#meetings", icon: CalendarDays, active: false, onSelect: () => document.getElementById("meetings")?.scrollIntoView({ behavior: "smooth" }) },
     { label: "The Orientation Hub", href: "#hub", icon: ScrollText, active: false, onSelect: () => setPanel("hub") },
   ];
@@ -281,7 +284,7 @@ function PortalHome() {
         </aside>
 
         {/* Main */}
-        <main className="order-1 flex min-w-0 flex-col justify-between pb-2 lg:order-none">
+        <main className="order-1 flex min-w-0 flex-col justify-start pb-2 lg:order-none">
           {(() => {
             const pendingMeetings = (meetings.data?.polls ?? []).filter((p: any) => p.status === "open" && p.my_responses.length === 0).length;
             const items: { label: string; onClick: () => void }[] = [];
@@ -369,8 +372,8 @@ function PortalHome() {
               <div className="flex min-w-0 flex-col justify-center">
                 <p className="text-[10px] uppercase tracking-[0.24em] text-gold">
                   Why You <span className="mx-2 text-gold/40">|</span>
-                  <span className="inline-flex flex-wrap gap-x-2 gap-y-1 text-ivory/70">{designations.map((label, i) => <span key={label}>{i > 0 && <span className="mr-2 text-gold/40">/</span>}{label}</span>)}</span>
-                </p>
+                  </p>
+                <div className="mt-2 flex flex-wrap gap-2">{roleChips.map((label) => <span key={label} className="rounded-full border border-gold/35 px-3 py-1 text-[10px] uppercase tracking-[0.16em] text-ivory/75">{label}</span>)}</div>
                 <h2 className="mt-4 font-display text-[clamp(1.75rem,2vw,2.3rem)] leading-tight">{name}, Your Perspective Matters.</h2>
                 <p className="mt-5 text-[15px] leading-7 text-ivory/75">{m.why_you}</p>
                 <div className="mt-6 h-px w-16 bg-gold" />
@@ -435,9 +438,22 @@ function PortalHome() {
                 {m.organization && (
                   <p className="mt-3 text-[16px] leading-7 text-ivory/70">{m.organization}</p>
                 )}
-                <p className="mt-7 max-w-[36rem] text-[15px] leading-7 text-ivory/65">
-                  Your role details reflect the information provided when your private center access was created. Your
-                  individualized package will provide the formal terms and complete scope of your role.
+                <div className="mt-4 flex flex-wrap gap-2">{roleChips.map((label) => <span key={label} className="rounded-full border border-gold/35 px-3 py-1 text-[10px] uppercase tracking-[0.16em] text-ivory/75">{label}</span>)}</div>
+                <div className="mt-7 space-y-5">
+                  {roleKinds.map((k) => (
+                    <section key={k} className="border border-gold/25 bg-navy-deep/50 p-5">
+                      <h3 className="font-display text-xl text-gold">{ROLE_DETAILS[k].title}</h3>
+                      <p className="mt-1 text-[14px] italic leading-6 text-ivory/80">{ROLE_DETAILS[k].lede}</p>
+                      <ul className="mt-3 space-y-1.5">
+                        {ROLE_DETAILS[k].items.map((it) => (
+                          <li key={it} className="flex gap-3 text-[14px] leading-6 text-ivory/80"><span aria-hidden className="mt-2.5 h-1 w-1 shrink-0 rounded-full bg-gold" />{it}</li>
+                        ))}
+                      </ul>
+                    </section>
+                  ))}
+                </div>
+                <p className="mt-6 max-w-[36rem] text-[13px] leading-6 text-ivory/55">
+                  Your individualized package provides the formal terms and complete scope of your role.
                 </p>
               </div>
               <div className="border-t border-gold/20 pt-7 lg:border-l lg:border-t-0 lg:pl-10 lg:pt-1">
@@ -463,12 +479,12 @@ function PortalHome() {
             </div>
           )}
 
-          {panel === "hub" && <OrientationHub onClose={() => setPanel(null)} onOpenDocuments={() => setPanel("documents")} />}
+          {panel === "hub" && <OrientationHub onClose={() => setPanel(null)} onOpenDocuments={() => setPanel("documents")} onOpenRoleDetails={() => setPanel("role")} />}
 
           {panel === "documents" && (
             <>
               <DialogHeader className="space-y-0 text-left">
-                <p className="text-[10px] uppercase tracking-[0.24em] text-gold">Your Documents</p>
+                <p className="text-[10px] uppercase tracking-[0.24em] text-gold">Your Personal Documents</p>
                 <DialogTitle className="mt-4 font-display text-[clamp(2rem,2.6vw,2.9rem)] font-normal leading-tight">
                   Documents to sign and return. Documents to read and retain.
                 </DialogTitle>

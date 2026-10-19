@@ -64,6 +64,13 @@
       "when": 1792350332998,
       "tag": "0008_leadership_photos_policies",
       "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1792428949654,
+      "tag": "0009_meeting_poll_timezone",
+      "breakpoints": true
     }
   ]
 }

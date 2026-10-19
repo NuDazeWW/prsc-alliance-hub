@@ -1,3 +1,4 @@
+import { DEFAULT_MEETING_TZ, timezoneLabel } from "@/lib/meeting-block";
 import { useEffect, useState } from "react";
 import { CalendarDays, Check, Clock, Download, MapPin, Video } from "lucide-react";
 import { toast } from "sonner";
@@ -46,8 +47,9 @@ const CHOICES = [
   { value: "unavailable", label: "Unavailable", active: "border-rose-400 bg-rose-500/20 text-rose-200" },
 ] as const;
 
-function fmt(iso: string) {
-  return new Date(iso).toLocaleString(undefined, {
+function fmt(iso: string, tz?: string | null) {
+  return new Date(iso).toLocaleString("en-US", {
+    timeZone: tz || DEFAULT_MEETING_TZ,
     weekday: "long",
     month: "long",
     day: "numeric",
@@ -156,11 +158,11 @@ export function MemberMeetings({ hideWhenEmpty = false, hideIntro = false, asMem
               ) : (
                 <span className="inline-flex items-center gap-1"><MapPin className="h-3 w-3" /> {p.location || "In person"}</span>
               )}{" "}
-              · {p.duration_minutes} minutes · times shown in your local time zone
+              · {p.duration_minutes} minutes · times shown in {timezoneLabel(p.timezone)} time — please confirm in your local time zone
             </p>
             {p.respond_by && (
               <p className={`mt-2 text-xs ${new Date(p.respond_by).getTime() < Date.now() ? "text-rose-300" : "text-gold"}`}>
-                Please respond by {fmt(p.respond_by)}
+                Please respond by {fmt(p.respond_by, p.timezone)}
                 {(() => { const days = Math.ceil((new Date(p.respond_by).getTime() - Date.now()) / 86400000); return days > 0 ? ` · ${days} day${days === 1 ? "" : "s"} left` : " · deadline passed"; })()}
               </p>
             )}
@@ -174,7 +176,7 @@ export function MemberMeetings({ hideWhenEmpty = false, hideIntro = false, asMem
                 <div key={s.id} className="flex flex-col gap-2 rounded-md border border-ivory/10 p-3 sm:flex-row sm:items-center sm:justify-between">
                   <span className="text-sm text-ivory/85">
                     <Clock className="mr-1 inline h-3.5 w-3.5 text-gold/70" />
-                    {fmt(s.starts_at)}
+                    {fmt(s.starts_at, p.timezone)}
                   </span>
                   <div className="flex flex-wrap gap-2">
                     {CHOICES.map((c) => (
@@ -232,7 +234,7 @@ export function MemberMeetings({ hideWhenEmpty = false, hideIntro = false, asMem
                     {slot && (
                       <p className="mt-1 text-sm text-ivory/70">
                         <CalendarDays className="mr-1 inline h-4 w-4 text-gold" />
-                        {fmt(slot.starts_at)} · {p.duration_minutes} min
+                        {fmt(slot.starts_at, p.timezone)} · {p.duration_minutes} min
                       </p>
                     )}
                     <p className="mt-1 text-xs text-ivory/50">

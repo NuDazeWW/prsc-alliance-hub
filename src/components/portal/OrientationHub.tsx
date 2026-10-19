@@ -5,8 +5,8 @@ import scoreGauge from "@/assets/prsc-score-gauge.png.asset.json";
 import disLogo from "@/assets/dis-logo-hub.png";
 import { DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import {
-  ALL_TOPICS, AUDIENCES, AVAILABILITY, COMPETITIVE_CONTEXT, DIMENSIONS, FLYWHEEL, GROUPS, GUIDED, HUB_INTRO, HUB_SCOPE, HUB_TITLE,
-  INTELLIGENCE, IP_STACK, SITE_LINKS, PAGE_LABELS, RELATIONSHIP, ROLE_CARDS, type Block, type Tone, type Topic,
+  ALL_TOPICS, AUDIENCES, AVAILABILITY, COMPETITIVE_CONCLUSION, COMPETITIVE_TEXT, DIMENSIONS, FLYWHEEL, GROUPS, GUIDED, HUB_INTRO, HUB_SCOPE, HUB_TITLE,
+  INTELLIGENCE, IP_STACK, QUICK_REFERENCE, RESOURCE_LIBRARY, SITE_LINKS, RELATIONSHIP, ROLE_CARDS, type Block, type Tone, type Topic,
 } from "@/data/orientation-hub";
 
 type View = { kind: "hub" } | { kind: "guided"; step: number } | { kind: "explore" } | { kind: "topic"; id: string } | { kind: "materials" };
@@ -14,7 +14,7 @@ type View = { kind: "hub" } | { kind: "guided"; step: number } | { kind: "explor
 const toneText: Record<Tone, string> = { prsc: "text-gold", dis: "text-dis-cyan", bridge: "text-gold-light" };
 const toneBorder: Record<Tone, string> = { prsc: "border-gold/40", dis: "border-dis-cyan/40", bridge: "border-dis-silver/30" };
 
-export function OrientationHub({ onClose, onOpenDocuments }: { onClose: () => void; onOpenDocuments: () => void }) {
+export function OrientationHub({ onClose, onOpenDocuments, onOpenRoleDetails }: { onClose: () => void; onOpenDocuments: () => void; onOpenRoleDetails: () => void }) {
   const [view, setView] = useState<View>({ kind: "hub" });
   const top = useRef<HTMLDivElement>(null);
   useLayoutEffect(() => {
@@ -64,30 +64,27 @@ export function OrientationHub({ onClose, onOpenDocuments }: { onClose: () => vo
           <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
             <button type="button" onClick={() => setView({ kind: "guided", step: 0 })} className={`${btn} cta-glow`}><span>Take the 5-Minute Orientation</span></button>
             <button type="button" onClick={() => setView({ kind: "explore" })} className={`${btn} cta-glow-outline`}><span>Explore the System</span></button>
-            <button type="button" onClick={() => setView({ kind: "materials" })} className={`${btn} cta-glow-outline`}><span>View Current Materials</span></button>
-          </div>
-          <div className="mt-8 flex flex-wrap gap-2">
-            {PAGE_LABELS.map((l) => <span key={l} className="rounded-full border border-ivory/15 px-3 py-1 text-[10px] uppercase tracking-[0.14em] text-ivory/55">{l}</span>)}
+            <button type="button" onClick={() => setView({ kind: "materials" })} className={`${btn} cta-glow-outline`}><span>View Your Personal Documents</span></button>
           </div>
         </>
       )}
 
       {view.kind === "guided" && (
-        <Guided step={view.step} setStep={(s) => setView({ kind: "guided", step: s })} onExplore={() => setView({ kind: "explore" })} onMaterials={() => setView({ kind: "materials" })} onClose={onClose} btn={btn} />
+        <Guided step={view.step} setStep={(s) => setView({ kind: "guided", step: s })} onExplore={() => setView({ kind: "explore" })} onMaterials={onOpenDocuments} onRole={onOpenRoleDetails} btn={btn} onPick={(id) => setView({ kind: "topic", id })} />
       )}
 
       {view.kind === "explore" && (
         <>
           <p className="label-caps text-gold">Explore by Topic</p>
           <h2 className="mt-3 font-display text-[clamp(1.8rem,2.4vw,2.5rem)] leading-tight">Open any chapter.</h2>
-          <div className="mt-6 grid gap-4 md:grid-cols-2">
+          <div className="mt-5 grid gap-3 md:grid-cols-2">
             {GROUPS.map((g) => (
-              <div key={g.id} className="rounded-md border border-gold/20 bg-navy-deep/50 p-5">
+              <div key={g.id} className="rounded-md border border-gold/20 bg-navy-deep/50 p-4">
                 <p className="text-[11px] uppercase tracking-[0.18em] text-gold">{g.letter} · {g.title}</p>
-                <ul className="mt-3 space-y-1">
+                <ul className="mt-2 space-y-0.5">
                   {g.topics.map((tp) => (
                     <li key={tp.id}>
-                      <button type="button" onClick={() => setView({ kind: "topic", id: tp.id })} className="flex w-full items-center justify-between py-1.5 text-left text-sm text-ivory/85 hover:text-gold">
+                      <button type="button" onClick={() => setView({ kind: "topic", id: tp.id })} className="flex w-full items-center justify-between py-1 text-left text-sm text-ivory/85 hover:text-gold">
                         {tp.title} <ArrowRight className="h-3.5 w-3.5 opacity-60" />
                       </button>
                     </li>
@@ -103,20 +100,28 @@ export function OrientationHub({ onClose, onOpenDocuments }: { onClose: () => vo
 
       {view.kind === "materials" && (
         <>
-          <p className="label-caps text-gold">Current Materials</p>
+          <p className="label-caps text-gold">Your Personal Documents</p>
           <h2 className="mt-3 font-display text-[clamp(1.8rem,2.4vw,2.5rem)] leading-tight">Your documents and references.</h2>
-          <p className="mt-4 max-w-2xl text-sm leading-7 text-ivory/75">Materials released to you, including items to read or sign, live in Your Documents.</p>
+          <p className="mt-4 max-w-2xl text-sm leading-7 text-ivory/75">Materials released to you, including items to read or sign, live in Your Personal Documents.</p>
           <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
-            <button type="button" onClick={onOpenDocuments} className={`${btn} cta-glow`}><span>Open Your Documents</span></button>
+            <button type="button" onClick={onOpenDocuments} className={`${btn} cta-glow`}><span>Open Your Personal Documents</span></button>
           </div>
-          <SiteLinks ids={["score", "governance", "charter", "standards", "vanguard"]} />
+          <div className="mt-8">
+            <p className="mb-2 text-[11px] uppercase tracking-[0.18em] text-ivory/50">Resource Library</p>
+            <ul className="grid gap-2 sm:grid-cols-2">{RESOURCE_LIBRARY.map((it) => <li key={it} className="flex items-center justify-between gap-3 rounded-md border border-ivory/10 bg-navy-deep/40 px-4 py-2.5 text-[13.5px] text-ivory/80">{it}<span className="shrink-0 rounded-full border border-gold/40 px-2 py-0.5 text-[9.5px] uppercase tracking-[0.14em] text-gold">Coming soon</span></li>)}</ul>
+          </div>
+          <div className="mt-8 space-y-3">
+            <p className="text-[11px] uppercase tracking-[0.18em] text-ivory/50">Quick Reference</p>
+            {QUICK_REFERENCE.map((q) => <p key={q} className="border-l-2 border-gold pl-4 text-[14px] leading-7 text-ivory/80">{q}</p>)}
+          </div>
+          <SiteLinks ids={["score", "governance", "charter", "standards", "vanguard-site"]} onPick={(id) => setView({ kind: "topic", id })} />
         </>
       )}
     </div>
   );
 }
 
-function Guided({ step, setStep, onExplore, onMaterials, onClose, btn }: { step: number; setStep: (n: number) => void; onExplore: () => void; onMaterials: () => void; onClose: () => void; btn: string }) {
+function Guided({ step, setStep, onExplore, onMaterials, onRole, btn, onPick }: { step: number; setStep: (n: number) => void; onExplore: () => void; onMaterials: () => void; onRole: () => void; btn: string; onPick: (id: string) => void }) {
   const ch = GUIDED[step];
   const last = step === GUIDED.length - 1;
   return (
@@ -142,16 +147,16 @@ function Guided({ step, setStep, onExplore, onMaterials, onClose, btn }: { step:
         <div className="mt-2 h-1 w-full rounded-full bg-ivory/10">
           <div className="h-1 rounded-full bg-gradient-to-r from-gold to-dis-cyan transition-all" style={{ width: `${((step + 1) / GUIDED.length) * 100}%` }} />
         </div>
-        <p className="mt-6 label-caps text-gold">{ch.title}</p>
-        <TopicBody key={step} topic={ch.topic} />
+        <p className="mt-5 label-caps text-gold">{ch.title}</p>
+        <TopicBody key={step} topic={ch.topic} onPick={onPick} />
         <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
           {step > 0 && <button type="button" onClick={() => setStep(step - 1)} className={`${btn} cta-glow-outline`}><span>Previous</span></button>}
           {!last && <button type="button" onClick={() => setStep(step + 1)} className={`${btn} cta-glow`}><span>Next chapter</span></button>}
           {last && (
             <>
-              <button type="button" onClick={onExplore} className={`${btn} cta-glow`}><span>Explore the full system</span></button>
-              <button type="button" onClick={onMaterials} className={`${btn} cta-glow-outline`}><span>View documents and materials</span></button>
-              <button type="button" onClick={onClose} className={`${btn} cta-glow-outline`}><span>Return to portal</span></button>
+              <button type="button" onClick={onExplore} className={`${btn} cta-glow`}><span>Explore the System</span></button>
+              <button type="button" onClick={onRole} className={`${btn} cta-glow-outline`}><span>View Your Role Details</span></button>
+              <button type="button" onClick={onMaterials} className={`${btn} cta-glow-outline`}><span>View Your Personal Documents</span></button>
             </>
           )}
         </div>
@@ -194,8 +199,8 @@ function TopicView({ id, onPick }: { id: string; onPick: (id: string) => void })
         <div className="mt-2 h-1 w-full rounded-full bg-ivory/10">
           <div className="h-1 rounded-full bg-gradient-to-r from-gold to-dis-cyan" style={{ width: `${((idx + 1) / ALL_TOPICS.length) * 100}%` }} />
         </div>
-        <p className={`mt-6 label-caps ${toneText[topic.tone]}`}>{topic.title}</p>
-        <TopicBody topic={topic} />
+        <p className={`mt-5 label-caps ${toneText[topic.tone]}`}>{topic.title}</p>
+        <TopicBody topic={topic} onPick={onPick} />
         <div className="mt-8 flex justify-between gap-3 text-[12px] uppercase tracking-[0.14em]">
           {idx > 0 ? <button type="button" onClick={() => onPick(ALL_TOPICS[idx - 1].id)} className="text-ivory/60 hover:text-gold">← {ALL_TOPICS[idx - 1].title}</button> : <span />}
           {idx < ALL_TOPICS.length - 1 && <button type="button" onClick={() => onPick(ALL_TOPICS[idx + 1].id)} className="text-right text-gold hover:text-ivory">{ALL_TOPICS[idx + 1].title} →</button>}
@@ -205,13 +210,13 @@ function TopicView({ id, onPick }: { id: string; onPick: (id: string) => void })
   );
 }
 
-function TopicBody({ topic }: { topic: Topic }) {
+function TopicBody({ topic, onPick }: { topic: Topic; onPick: (id: string) => void }) {
   return (
-    <>
-      <h2 className="mt-3 font-display text-[clamp(1.6rem,2.2vw,2.3rem)] leading-tight text-ivory">{topic.heading}</h2>
-      <div className="mt-5 space-y-5">{topic.blocks.map((b, i) => <BlockView key={i} b={b} tone={topic.tone} />)}</div>
-      {topic.links && <SiteLinks ids={topic.links} />}
-    </>
+    <div className="max-w-[920px]">
+      <h2 className="mt-2 font-display text-[clamp(1.6rem,2.2vw,2.3rem)] leading-tight text-ivory">{topic.heading}</h2>
+      <div className="mt-4 space-y-4">{topic.blocks.map((b, i) => <BlockView key={i} b={b} tone={topic.tone} />)}</div>
+      {topic.links && <SiteLinks ids={topic.links} onPick={onPick} />}
+    </div>
   );
 }
 
@@ -223,6 +228,13 @@ function BlockView({ b, tone }: { b: Block; tone: Tone }) {
       return <p className="text-[15px] leading-7 text-ivory/80">{b.text}</p>;
     case "quote":
       return <blockquote className={`border-l-2 ${tone === "dis" ? "border-dis-cyan" : "border-gold"} pl-4 font-display text-lg italic leading-8 text-ivory/90`}>{b.text}</blockquote>;
+    case "callout":
+      return (
+        <div className={`rounded-md border-2 ${tone === "dis" ? "border-dis-cyan/60 bg-dis-navy/60" : "border-gold/60 bg-gold/[.07]"} px-5 py-4`}>
+          {b.title && <p className={`text-[11px] font-semibold uppercase tracking-[0.18em] ${tone === "dis" ? "text-dis-cyan" : "text-gold"}`}>{b.title}</p>}
+          <p className="mt-1.5 text-[15px] leading-7 text-ivory/90">{b.text}</p>
+        </div>
+      );
     case "label":
       return <p className="rounded-md border border-ivory/15 bg-ivory/5 px-4 py-3 text-xs uppercase tracking-[0.12em] text-ivory/70">{b.text}</p>;
     case "soon":
@@ -256,7 +268,7 @@ function BlockView({ b, tone }: { b: Block; tone: Tone }) {
             {RELATIONSHIP.columns.map((c) => (
               <div key={c.title} className={`rounded-md border ${toneBorder[c.tone]} bg-navy-deep/60 p-4`}>
                 <p className={`font-display text-xl ${toneText[c.tone]}`}>{c.title}</p>
-                <ul className="mt-3 space-y-2">{c.rows.map((r) => <li key={r} className="text-[13.5px] leading-6 text-ivory/80">{r}</li>)}</ul>
+                <ul className="mt-3 space-y-2">{c.rows.map((r) => <li key={r} className="flex gap-2.5 text-[13.5px] leading-6 text-ivory/80"><span aria-hidden className={`mt-2.5 h-1.5 w-1.5 shrink-0 rounded-full ${c.tone === "dis" ? "bg-dis-cyan" : "bg-gold"}`} />{r}</li>)}</ul>
               </div>
             ))}
           </div>
@@ -285,12 +297,14 @@ function BlockView({ b, tone }: { b: Block; tone: Tone }) {
             ))}
           </div>
           <div className="mt-4 rounded-md border border-dis-cyan/30 bg-dis-navy/60 p-5">
-            {a.future && <p className="mb-3 text-[10px] uppercase tracking-[0.16em] text-dis-silver">Future-state / not yet a market promise</p>}
-            <p className="text-sm font-semibold text-dis-cyan">What they receive</p>
+            <p className="text-[10px] uppercase tracking-[0.16em] text-dis-silver">{a.availability}</p>
+            <p className="mt-3 text-sm font-semibold text-dis-cyan">The problem</p>
+            <p className="mt-1 text-[14px] leading-6 text-ivory/80">{a.problem}</p>
+            <p className="mt-4 text-sm font-semibold text-dis-cyan">What becomes possible</p>
+            <p className="mt-1 text-[14px] leading-6 text-ivory/80">{a.possible}</p>
+            <p className="mt-4 text-sm font-semibold text-dis-cyan">What they receive</p>
             <ul className="mt-2 space-y-1.5">{a.receives.map((r) => <li key={r} className="text-[14px] leading-6 text-ivory/80">· {r}</li>)}</ul>
-            <p className="mt-4 text-sm font-semibold text-dis-cyan">What it helps them do</p>
-            <p className="mt-1 text-[14px] leading-6 text-ivory/80">{a.helps}</p>
-            <p className="mt-4 rounded-md border border-gold/30 bg-navy-deep/60 px-4 py-3 text-[13px] leading-6 text-ivory/80"><span className="font-semibold text-gold">Boundary · </span>{a.boundary}</p>
+            <p className="mt-4 rounded-md border border-gold/30 bg-navy-deep/60 px-4 py-3 text-[13px] leading-6 text-ivory/80"><span className="font-semibold text-gold">Not promised · </span>{a.notPromised}</p>
           </div>
         </div>
       );
@@ -321,11 +335,12 @@ function BlockView({ b, tone }: { b: Block; tone: Tone }) {
       );
     case "ipstack":
       return (
-        <ol className="space-y-1.5">
+        <ol className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
           {IP_STACK.map((l, i) => (
-            <li key={l.name} className="flex gap-4 rounded-md border border-gold/20 bg-navy-deep/50 p-3" style={{ marginLeft: `${Math.min(i, 6) * 6}px` }}>
-              <span className="font-display text-lg text-gold">{String(i + 1).padStart(2, "0")}</span>
-              <div><p className="text-sm font-semibold text-ivory">{l.name}</p><p className="text-[13px] leading-6 text-ivory/70">{l.text}</p></div>
+            <li key={l.name} className="flex flex-col rounded-md border border-gold/20 bg-navy-deep/50 p-4">
+              <span className="font-display text-lg leading-none text-gold">{String(i + 1).padStart(2, "0")}</span>
+              <p className="mt-2 text-sm font-semibold text-ivory">{l.name}</p>
+              <p className="mt-1 text-[13px] leading-6 text-ivory/70">{l.text}</p>
             </li>
           ))}
         </ol>
@@ -334,19 +349,8 @@ function BlockView({ b, tone }: { b: Block; tone: Tone }) {
       return (
         <section className="rounded-md border border-gold/25 bg-navy-deep/50 p-4 sm:p-5">
           <h3 className="font-display text-xl text-gold">Competitive Context</h3>
-          <div className="mt-4 hidden grid-cols-3 gap-4 border-b border-gold/20 pb-3 text-xs font-semibold text-gold sm:grid">
-            <span>Existing category</span><span>What it does</span><span>What PRSC and DIS add</span>
-          </div>
-          <dl className="divide-y divide-ivory/10">
-            {COMPETITIVE_CONTEXT.map((row) => (
-              <div key={row.category} className="grid gap-3 py-4 text-sm leading-6 sm:grid-cols-3 sm:gap-4">
-                <dt className="font-semibold text-ivory">{row.category}</dt>
-                <dd className="text-ivory/75"><span className="block text-xs font-semibold text-gold sm:hidden">What it does</span>{row.does}</dd>
-                <dd className="text-ivory/80"><span className="block text-xs font-semibold text-gold sm:hidden">What PRSC and DIS add</span>{row.adds}</dd>
-              </div>
-            ))}
-          </dl>
-          <p className="mt-4 border-t border-gold/20 pt-4 text-sm leading-7 text-ivory/85">There are companies that measure sponsorship and companies that manage sponsorship. There is no clear direct competitor combining an independent motorsport readiness standard, a privately issued Score, governed evidence rules, and a multi-audience intelligence platform.</p>
+          <p className="mt-2 text-[14.5px] leading-7 text-ivory/80">{COMPETITIVE_TEXT}</p>
+          <p className="mt-3 border-t border-gold/20 pt-3 font-display text-lg italic leading-8 text-ivory/90">“{COMPETITIVE_CONCLUSION}”</p>
         </section>
       );
     case "flywheel":
@@ -363,16 +367,23 @@ function BlockView({ b, tone }: { b: Block; tone: Tone }) {
   }
 }
 
-function SiteLinks({ ids }: { ids: string[] }) {
+function SiteLinks({ ids, onPick }: { ids: string[]; onPick: (id: string) => void }) {
+  const cls = "inline-flex items-center gap-2 rounded-full border border-gold/40 px-4 py-2 text-[12px] text-gold transition-colors hover:bg-gold/10";
   return (
     <div className="mt-6">
       <p className="mb-2 text-[11px] uppercase tracking-[0.18em] text-ivory/50">Related pages</p>
       <div className="flex flex-wrap gap-2">
-        {SITE_LINKS.filter((l) => ids.includes(l.id)).map((l) => (
-          <a key={l.id} href={l.href} target="_blank" rel="noreferrer" onClick={(event) => event.currentTarget.closest("[role=dialog]")?.scrollTo({ top: 0, behavior: "instant" })} className="inline-flex items-center gap-2 rounded-full border border-gold/40 px-4 py-2 text-[12px] text-gold transition-colors hover:bg-gold/10">
-            {l.label} <ExternalLink className="h-3 w-3" />
-          </a>
-        ))}
+        {SITE_LINKS.filter((l) => ids.includes(l.id)).map((l) =>
+          l.topic ? (
+            <button key={l.id} type="button" onClick={() => onPick(l.topic!)} className={cls}>
+              {l.label} <ArrowRight className="h-3 w-3" />
+            </button>
+          ) : (
+            <a key={l.id} href={l.href} target="_blank" rel="noreferrer" className={cls}>
+              {l.label} <ExternalLink className="h-3 w-3" />
+            </a>
+          ),
+        )}
       </div>
     </div>
   );

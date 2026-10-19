@@ -627,3 +627,18 @@
   }
   @media (prefers-reduced-motion: reduce) { &::after { animation: none; opacity: 0; } }
 }
+
+/* Hub cards and CTAs glow only while pointed at or keyboard-focused; never stuck after a click. */
+.hub-card::after, .hub-card-dis::after, .cta-glow::after, .cta-glow-outline::after { animation: none !important; opacity: 0; }
+.hub-card:hover::after, .hub-card:focus-visible::after,
+.hub-card-dis:hover::after, .hub-card-dis:focus-visible::after,
+.cta-glow:hover::after, .cta-glow:focus-visible::after,
+.cta-glow-outline:hover::after, .cta-glow-outline:focus-visible::after { animation: cta-shimmer 2.4s ease-in-out infinite !important; opacity: 1; }
+.cta-glow:focus:not(:focus-visible), .cta-glow-outline:focus:not(:focus-visible) { outline: none; }
+@media (hover: none) {
+  .hub-card:hover, .hub-card-dis:hover { transform: none; }
+  .hub-card:hover::after, .hub-card-dis:hover::after, .cta-glow:hover::after, .cta-glow-outline:hover::after { animation: none !important; opacity: 0; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .hub-card::after, .hub-card-dis::after, .cta-glow::after, .cta-glow-outline::after { animation: none !important; opacity: 0 !important; }
+}

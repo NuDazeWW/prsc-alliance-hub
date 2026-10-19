@@ -11,3 +11,23 @@ export function memberRoleLabels(role: string | null | undefined, entity: string
 export function memberRoleLabel(role: string | null | undefined, entity: string | null | undefined): string {
   return memberRoleLabels(role, entity).join(" / ");
 }
+const ENTITY_FULL: Record<string, string> = { PRSC: "Partnership Readiness Standards Council", DIS: "Decision Intelligence Systems" };
+
+/** One chip per role/entity pair, e.g. "Advisor · Partnership Readiness Standards Council". */
+export function memberRoleChips(role: string | null | undefined, entity: string | null | undefined): string[] {
+  return memberRoleLabels(role, entity).map((label) => {
+    const [org, ...rest] = label.split(" ");
+    return `${rest.join(" ")} · ${ENTITY_FULL[org] ?? org}`;
+  });
+}
+
+export type RoleKind = "board" | "advisor" | "committee";
+
+/** Which role-orientation sections apply to a member. Committee comes from the role or the committee flag. */
+export function memberRoleKinds(role: string | null | undefined, isCommittee = false): RoleKind[] {
+  const kinds = new Set<RoleKind>();
+  if (role === "board_member" || role === "prsc_board_dis_advisor" || role === "prsc_advisor_dis_board") kinds.add("board");
+  if (role === "advisor" || role === "prsc_board_dis_advisor" || role === "prsc_advisor_dis_board") kinds.add("advisor");
+  if (role === "methodology_committee" || isCommittee) kinds.add("committee");
+  return (["board", "advisor", "committee"] as RoleKind[]).filter((k) => kinds.has(k));
+}
