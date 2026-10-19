@@ -43,6 +43,7 @@ function DateTimePicker({ label, onPick }: { label: string; onPick: (local: stri
         </button>
       </PopoverTrigger>
       <PopoverContent className="z-[200] w-auto border-gold/30 bg-navy-deep p-3 text-ivory" align="start">
+        <div className="[--background:var(--color-navy-deep)] [--color-background:var(--color-navy-deep)] [--foreground:var(--color-ivory)] [--color-foreground:var(--color-ivory)] [--muted-foreground:color-mix(in_oklab,var(--color-ivory)_55%,transparent)] [--color-muted-foreground:color-mix(in_oklab,var(--color-ivory)_55%,transparent)] [--primary:var(--color-gold)] [--color-primary:var(--color-gold)] [--accent:color-mix(in_oklab,var(--color-gold)_20%,transparent)] [--color-accent:color-mix(in_oklab,var(--color-gold)_20%,transparent)]">
         <Calendar
           mode="single"
           selected={day}
@@ -50,6 +51,7 @@ function DateTimePicker({ label, onPick }: { label: string; onPick: (local: stri
           disabled={(d) => d < new Date(new Date().setHours(0, 0, 0, 0))}
           className="pointer-events-auto bg-transparent p-0 text-ivory"
         />
+        </div>
         <div className="mt-3 flex items-center gap-2 border-t border-gold/20 pt-3">
           <span className="text-xs text-ivory/60">Time</span>
           <input type="time" value={time} onChange={(e) => setTime(e.target.value)} step={900} className={`${inputCls} w-32`} />
