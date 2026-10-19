@@ -230,7 +230,7 @@ const QUICK_REF = [
   "The strategic play is to give a fragmented industry a shared commercial language—then build the technology, data, and recurring intelligence products around that language.",
 ];
 
-export const GROUPS: TopicGroup[] = [
+const SOURCE_GROUPS: TopicGroup[] = [
   {
     id: "a",
     letter: "A",
@@ -344,11 +344,19 @@ export const GROUPS: TopicGroup[] = [
       {
         id: "score",
         links: ["score"],
-        title: "What the Score Is—and Is Not",
+        title: "The PRSC Readiness Score™",
         heading: "One private score. One clearer starting point.",
         tone: "prsc",
         blocks: [
           { kind: "p", text: "A private 0–100 score that helps a participating entity understand commercial readiness." },
+          { kind: "list", title: "The essentials", items: [
+            "The Score is issued by PRSC and delivered through the Readiness Terminal™.",
+            "It is peer-cohort calibrated by comparable series, competitive level, and resource tier.",
+            "It is not a universal rating, a ranking table, or a wins-and-followers score.",
+            "Individual Scores are confidential by default.",
+            "The Score is not certification.",
+          ] },
+          { kind: "callout", title: "Score vs. Certification", text: "The PRSC Readiness Score™ is a diagnostic view of commercial readiness. Readiness Certified™ is a separate PRSC-governed credential that depends on verified evidence, eligibility requirements, and renewal standards." },
           { kind: "list", title: "What it does", items: [
             "Turns a complicated commercial picture into a clear starting point",
             "Shows what is strong",
@@ -364,6 +372,17 @@ export const GROUPS: TopicGroup[] = [
             "Not a scarlet letter",
             "Not a promise of a sponsor, deal, investment, or financial return",
           ] },
+
+        ],
+      },
+      {
+        id: "certification",
+        links: ["score"],
+        title: "Score, Certification, and Confidentiality",
+        heading: "What the Score is, what certification is, and who sees what.",
+        tone: "prsc",
+        blocks: [
+          { kind: "callout", title: "Score vs. Certification", text: "The PRSC Readiness Score™ is a diagnostic view of commercial readiness. Readiness Certified™ is a separate PRSC-governed credential that depends on verified evidence, eligibility requirements, and renewal standards." },
           { kind: "list", title: "Privacy and fairness", items: [
             "Individual scores are private by default",
             "Programs are compared against relevant peers",
@@ -414,6 +433,7 @@ export const GROUPS: TopicGroup[] = [
         heading: "Five jobs. One connected system.",
         tone: "dis",
         blocks: [
+          { kind: "callout", title: "Boundary", text: "The Readiness Terminal™ provides governed visibility, reports, benchmark context, and decision support. It does not broker deals, make introductions, guarantee sponsorship, or promise commercial outcomes." },
           { kind: "pairs", rows: [
             { term: "Rates readiness", text: "Delivers the PRSC Readiness Score™ and explains what it means." },
             { term: "Shows the full picture", text: "Brings together relevant racing, audience, media, consumer, digital, and commercial context." },
@@ -481,6 +501,13 @@ export const GROUPS: TopicGroup[] = [
             { term: "Evidence rules", text: "Verified claims follow defined evidence requirements and review processes." },
             { term: "Confidentiality", text: "Individual Scores are private by default. Aggregated benchmark data may be used without exposing individual participants." },
           ] },
+          { kind: "list", title: "Evidence integrity", items: [
+            "Retrievable data should be Terminal-ingested where possible.",
+            "Participant-provided claims may require verification.",
+            "Claims that remain unresolved are routed for Methodology Committee review.",
+            "A Score cannot finalize while required verified claims remain unresolved.",
+            "Individual Score information and participant outputs are private by default.",
+          ] },
           { kind: "list", title: "No commercial conflict", items: [
             "PRSC does not sell sponsorship",
             "DIS does not broker introductions or take a percentage of a deal",
@@ -497,6 +524,7 @@ export const GROUPS: TopicGroup[] = [
         tone: "bridge",
         blocks: [
           { kind: "ipstack" },
+          { kind: "competitive" },
           { kind: "list", title: "What remains protected", items: [
             "Exact weights",
             "Scoring formulas",
@@ -507,7 +535,6 @@ export const GROUPS: TopicGroup[] = [
             "Participant-level and confidential information",
           ] },
           { kind: "quote", text: "A competitor can build a dashboard. It is much harder to build a trusted, independent standard; protected scoring logic; verified data infrastructure; benchmark context; outcome evidence; and an ecosystem that uses all of it over time." },
-          { kind: "competitive" },
         ],
       },
     ],
@@ -538,6 +565,15 @@ export const GROUPS: TopicGroup[] = [
             "A foundation for validating the connection between readiness, improvement, and commercial outcomes",
             "The beginning of the Benchmark Database and long-term Outcome Intelligence layer",
           ] },
+          { kind: "list", title: "Locked principles", items: [
+            "The Readiness Vanguard™ is a fixed 25-slot supply-side-first program.",
+            "It begins with teams and drivers.",
+            "Individual Scores are confidential by default.",
+            "Aggregate benchmark context may be used as the system matures.",
+            "Brands and Partnership Ecosystem Operators™ are demand-side audiences.",
+            "Manufacturers are future-state Terminal audiences and are not Vanguard participants.",
+            "The Vanguard is not a promise of sponsorship, funding, brand interest, introductions, or commercial outcomes.",
+          ] },
           { kind: "list", title: "What it is not", items: [
             "Not a sponsor-matching program",
             "Not free money",
@@ -553,6 +589,7 @@ export const GROUPS: TopicGroup[] = [
         heading: "How the model builds value over time.",
         tone: "bridge",
         blocks: [
+          { kind: "callout", title: "The story in one line", text: CHAIN },
           { kind: "flywheel" },
           { kind: "quote", text: "The Score starts the conversation. The Terminal creates ongoing value. The benchmark makes the system stronger." },
         ],
@@ -568,6 +605,7 @@ export const GROUPS: TopicGroup[] = [
             { term: "Tier 2 — Intelligence", text: "A series gains deeper series-level benchmark intelligence, aggregate reporting, and stronger sponsor-conversation tools." },
             { term: "Tier 3 — Mandate", text: "A series adopts the Standard as an expectation for a defined participant group or sponsor-eligibility use case." },
           ] },
+          { kind: "callout", title: "The story in one line", text: CHAIN },
           { kind: "quote", text: "The long-term inflection point is not a single subscription. It is when a respected series adopts commercial readiness as part of how the sport operates." },
         ],
       },
@@ -674,17 +712,79 @@ export const GROUPS: TopicGroup[] = [
   },
 ];
 
-const t = (id: string) => GROUPS.flatMap((g) => g.topics).find((x) => x.id === id)!;
+const src = (id: string) => SOURCE_GROUPS.flatMap((g) => g.topics).find((x) => x.id === id)!;
 
-// Guided 5-minute orientation: seven chapters drawn from the topics above.
+const GOVERNANCE_PROTECTS: Topic = {
+  id: "governance-protects",
+  links: ["governance", "charter", "standards"],
+  title: "How Governance Protects the System",
+  heading: "Trust, relevance, and responsible scale.",
+  tone: "prsc",
+  blocks: [
+    { kind: "p", text: "PRSC governs the Standard, the methodology, and how the Score is issued. DIS builds the technology but does not control the scoring rules." },
+    { kind: "quote", text: "The Board helps the organizations grow responsibly. Advisors keep the work connected to the market. The Methodology Committee protects the integrity of the Score." },
+    { kind: "p", text: "Your own role responsibilities are in Role Details." },
+  ],
+};
+
+export const GROUPS: TopicGroup[] = [
+  { id: "a", letter: "A", title: "The Market and the System", topics: ["big-picture", "ecosystem", "market", "prsc", "together"].map(src) },
+  { id: "b", letter: "B", title: "The Score and the Terminal", topics: ["score", "dimensions", "certification", "dis", "terminal-jobs", "audiences", "intelligence"].map(src) },
+  { id: "c", letter: "C", title: "Trust, IP, and Governance", topics: [...["data", "trust", "moat"].map(src), GOVERNANCE_PROTECTS] },
+  { id: "d", letter: "D", title: "Validation and Scale", topics: ["vanguard", "flywheel", "series"].map(src) },
+];
+
+export const RESOURCE_LIBRARY = (src("resources").blocks.find((b) => b.kind === "soon") as { items: string[] }).items;
+export const QUICK_REFERENCE = QUICK_REF;
+
+// Guided orientation: six chapters drawn from the topics above.
 export const GUIDED: { title: string; topic: Topic }[] = [
-  { title: "The Problem", topic: t("ecosystem") },
-  { title: "The System", topic: t("together") },
-  { title: "The Score", topic: t("score") },
-  { title: "What the Terminal Delivers", topic: t("terminal-jobs") },
-  { title: "Why It Is Different", topic: t("moat") },
-  { title: "The Readiness Vanguard™", topic: t("vanguard") },
-  { title: "Why Your Role Matters", topic: t("committee") },
+  { title: "The Problem", topic: src("ecosystem") },
+  { title: "The System", topic: src("together") },
+  { title: "The PRSC Readiness Score™", topic: src("score") },
+  { title: "What the Readiness Terminal Delivers", topic: src("terminal-jobs") },
+  { title: "Why This Is Hard to Copy", topic: src("moat") },
+  { title: "The Readiness Vanguard™", topic: src("vanguard") },
 ];
 
 export const ALL_TOPICS = GROUPS.flatMap((g) => g.topics);
+
+// Personalized Role Details: shown only for the roles a member holds.
+export const ROLE_DETAILS: Record<"board" | "advisor" | "committee", { title: string; lede: string; items: string[] }> = {
+  board: {
+    title: "Your Role on the Board",
+    lede: "The Board helps the organizations grow responsibly.",
+    items: [
+      "Provide oversight and strategic governance.",
+      "Help ensure the organization is governed responsibly, financially disciplined, and commercially practical.",
+      "Protect independence, credibility, and responsible scale, so growth never compromises trust.",
+      "Help build the right team, partnerships, and institutional foundation.",
+      "Attend Official Board Meetings, review materials in advance, and take part in decisions.",
+      "Read, acknowledge, or sign the documents released to you in Your Personal Documents.",
+    ],
+  },
+  advisor: {
+    title: "Your Role as an Advisor",
+    lede: "Advisors keep the work connected to the market.",
+    items: [
+      "Offer strategic counsel, market context, and sector perspective.",
+      "Share relationship insight from teams and drivers, series, sponsor-side buyers, agencies, media, and technology.",
+      "Provide reality checks on what the market needs.",
+      "Advisors do not govern methodology or issue Scores.",
+      "Join Advisory Meetings when invited and share your availability when dates are proposed.",
+      "Read, acknowledge, or sign the documents released to you in Your Personal Documents.",
+    ],
+  },
+  committee: {
+    title: "Your Role on the Methodology Committee",
+    lede: "The Methodology Committee protects the integrity of the PRSC Readiness Standard™ and the PRSC Readiness Score™.",
+    items: [
+      "Review methodology and calibration updates.",
+      "Govern evidence and verification rules.",
+      "Review unusual or unresolved verified claims where applicable, along with anomalous scoring matters.",
+      "Help ensure fairness across comparable peer groups.",
+      "Help keep the Score separate from commercial pressure.",
+      "Attend Methodology Committee Meetings and review materials released to you.",
+    ],
+  },
+};
