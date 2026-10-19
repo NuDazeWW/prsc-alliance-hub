@@ -2,6 +2,7 @@ import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { meetingIcsToken } from "@/lib/ics";
+import { formatSlot, zonedToUtc } from "@/lib/meeting-block";
 
 const PORTAL_URL = "https://access.prscstandards.org/portal";
 
@@ -31,21 +32,8 @@ async function getMyMember(context: { supabase: any; userId: string }) {
   return data as any;
 }
 
-function formatSlot(iso: string) {
-  return new Date(iso).toLocaleString("en-US", {
-    weekday: "long",
-    month: "long",
-    day: "numeric",
-    year: "numeric",
-    hour: "numeric",
-    minute: "2-digit",
-    timeZone: "America/New_York",
-    timeZoneName: "short",
-  });
-}
-
 const slotSchema = z.object({
-  starts_at: z.string().refine((v) => !Number.isNaN(Date.parse(v)), "Invalid date"),
+  starts_at: z.string().regex(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}/, "Invalid date"),
 });
 
 const createPollSchema = z.object({
@@ -56,9 +44,10 @@ const createPollSchema = z.object({
   location: z.string().trim().max(300).optional(),
   virtual_link: z.string().trim().max(500).optional(),
   duration_minutes: z.number().int().min(15).max(480),
-  respond_by: z.string().refine((v) => !Number.isNaN(Date.parse(v)), "Invalid date").optional(),
+  respond_by: z.string().regex(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}/, "Invalid date").optional(),
+  timezone: z.string().trim().max(64).refine((tz) => { try { new Intl.DateTimeFormat("en-US", { timeZone: tz }); return true; } catch { return false; } }, "Unknown time zone").optional(),
   slots: z.array(slotSchema).min(1).max(12),
-  invited_member_ids: z.array(z.string().uuid()).min(1),
+  invited_member_ids: z.array(z.string().uuid()),
 });
 
 export const createMeetingPoll = createServerFn({ method: "POST" })
@@ -68,6 +57,9 @@ export const createMeetingPoll = createServerFn({ method: "POST" })
     await assertAdmin(context);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { sendPortalEmail, founderSignature } = await import("@/lib/portal-notify.server");
+    const tz = data.timezone || "America/New_York";
+    const slotIsos = data.slots.map((s) => zonedToUtc(s.starts_at, tz));
+    const respondBy = data.respond_by ? zonedToUtc(data.respond_by, tz) : null;
 
     const { data: poll, error } = await supabaseAdmin
       .from("meeting_polls")
@@ -79,7 +71,8 @@ export const createMeetingPoll = createServerFn({ method: "POST" })
         location: data.format === "in_person" ? data.location || null : null,
         virtual_link: data.format === "virtual" ? data.virtual_link || null : null,
         duration_minutes: data.duration_minutes,
-        respond_by: data.respond_by ?? null,
+        respond_by: respondBy,
+        timezone: tz,
         status: "open",
         invited_member_ids: data.invited_member_ids,
         created_by: context.userId,
@@ -89,21 +82,20 @@ export const createMeetingPoll = createServerFn({ method: "POST" })
     if (error) throw error;
 
     const { error: slotsError } = await supabaseAdmin.from("meeting_poll_slots").insert(
-      data.slots.map((s) => ({ poll_id: poll.id, starts_at: new Date(s.starts_at).toISOString() })),
+      slotIsos.map((starts_at) => ({ poll_id: poll.id, starts_at })),
     );
     if (slotsError) throw slotsError;
 
-    const { data: members } = await supabaseAdmin
-      .from("portal_members")
-      .select("id, email, first_name")
-      .in("id", data.invited_member_ids);
+    const { data: members } = data.invited_member_ids.length
+      ? await supabaseAdmin.from("portal_members").select("id, email, first_name").in("id", data.invited_member_ids)
+      : { data: [] as { id: string; email: string; first_name: string | null }[] };
 
     const typeLabel = MEETING_TYPE_LABEL[data.meeting_type];
     const { loadSystemEmail } = await import("@/lib/portal-notify.server");
     const { meetingBlockText } = await import("@/lib/meeting-block");
     const block = meetingBlockText(
-      { ...data, respond_by: data.respond_by ?? null },
-      data.slots.map((s) => ({ starts_at: new Date(s.starts_at).toISOString() })),
+      { ...data, respond_by: respondBy, timezone: tz },
+      slotIsos.map((starts_at) => ({ starts_at })),
     );
     const build = await loadSystemEmail("meeting_poll");
     void founderSignature;
@@ -222,7 +214,7 @@ export const confirmPollSlot = createServerFn({ method: "POST" })
           first_name: m.first_name?.trim() || "Hello",
           meeting_title: poll.title,
           meeting_type: typeLabel,
-          confirmed_time: formatSlot(slot.data.starts_at),
+          confirmed_time: `${formatSlot(slot.data.starts_at, poll.timezone)} (please confirm in your local time zone)`,
           meeting_duration: String(poll.duration_minutes),
           meeting_where: `${where}${poll.description ? `\n\n${poll.description}` : ""}`,
           calendar_url: icsUrl,
