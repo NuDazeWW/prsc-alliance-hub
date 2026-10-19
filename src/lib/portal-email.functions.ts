@@ -2,6 +2,7 @@ import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { applyTokens, buildMemberTokens, parseSignatures, renderBrandedEmail, renderBrandedEmailText } from "@/lib/branded-email";
+import { SYSTEM_EMAIL_DEFAULTS } from "@/lib/system-email-defaults";
 
 export type EmailTemplate = {
   id: string;
@@ -45,6 +46,16 @@ export const getEmailCenter = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
     await assertAdmin(context);
+    // Make sure every automatic email is listed so admins can edit it.
+    const { data: existing } = await context.supabase.from("portal_email_templates").select("system_key").not("system_key", "is", null);
+    const have = new Set((existing ?? []).map((r: any) => r.system_key));
+    const missing = Object.entries(SYSTEM_EMAIL_DEFAULTS).filter(([k]) => !have.has(k));
+    if (missing.length) {
+      await context.supabase.from("portal_email_templates").upsert(
+        missing.map(([system_key, c]) => ({ system_key, ...c, created_by: context.userId })),
+        { onConflict: "system_key", ignoreDuplicates: true },
+      );
+    }
     const [{ data: templates }, { data: sends }] = await Promise.all([
       context.supabase.from("portal_email_templates").select("*").order("created_at", { ascending: true }),
       context.supabase.from("portal_email_sends").select("*").order("created_at", { ascending: false }).limit(500),
@@ -97,6 +108,19 @@ export const saveEmailTemplate = createServerFn({ method: "POST" })
     return { ok: true, id: saved.id as string };
   });
 
+export const resetEmailTemplate = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input) => z.object({ id: z.string().uuid() }).parse(input))
+  .handler(async ({ context, data }) => {
+    await assertAdmin(context);
+    const { data: row } = await context.supabase.from("portal_email_templates").select("system_key").eq("id", data.id).maybeSingle();
+    const original = row?.system_key ? SYSTEM_EMAIL_DEFAULTS[row.system_key] : null;
+    if (!original) throw new Error("Only automatic emails can be reset");
+    const { error } = await context.supabase.from("portal_email_templates").update(original).eq("id", data.id);
+    if (error) throw error;
+    return { ok: true, template: original };
+  });
+
 export const deleteEmailTemplate = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input) => z.object({ id: z.string().uuid() }).parse(input))
@@ -129,6 +153,7 @@ const sendSchema = z.object({
   cta_url: z.string().trim().max(400).optional().default(""),
   cta_subtext: z.string().trim().max(200).optional().default(""),
   signatures: z.string().trim().max(600).optional().default(""),
+  poll_id: z.string().uuid().nullable().optional(),
 });
 
 export const sendMemberEmail = createServerFn({ method: "POST" })
@@ -142,6 +167,10 @@ export const sendMemberEmail = createServerFn({ method: "POST" })
       .in("id", data.member_ids);
     if (error) throw error;
     if (!members?.length) throw new Error("No recipients found");
+    if (data.poll_id) {
+      const { addMembersToPoll } = await import("@/lib/meeting-poll.server");
+      await addMembersToPoll(data.poll_id, (members as any[]).map((m) => m.id));
+    }
 
     const apiKey = process.env["SENDGRID_API_KEY"];
     const results: { member_id: string; status: string; error?: string }[] = [];
