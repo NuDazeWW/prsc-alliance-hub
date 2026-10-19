@@ -85,7 +85,7 @@ export function AdminLeadership() {
         <span>
           <span className="block text-[10px] uppercase tracking-[0.24em] text-gold">Welcome Center</span>
           <span className="mt-2 block font-display text-3xl">Leadership Team</span>
-          {collapsed && <span className="mt-1 block text-sm text-ivory/50">{rows.length} people · Click to expand</span>}
+          {collapsed && <span className="mt-1 block text-sm text-ivory/50">{(q.data?.team ?? []).length} people · Click to expand</span>}
         </span>
         {collapsed ? <ChevronDown className="mt-2 h-5 w-5 text-gold" /> : <ChevronUp className="mt-2 h-5 w-5 text-gold" />}
       </button>
