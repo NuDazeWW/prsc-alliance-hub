@@ -81,7 +81,7 @@ export function buildMemberTokens(member: {
   };
 }
 
-export function applyTokens(text: string, tokens: EmailTokens) {
+export function applyTokens(text: string, tokens: EmailTokens | Record<string, string | undefined>) {
   return text.replace(/\{\{\s*([a-z_]+)\s*\}\}/gi, (match, key: string) => {
     const value = (tokens as Record<string, string | undefined>)[key.toLowerCase()];
     return value ?? match;
