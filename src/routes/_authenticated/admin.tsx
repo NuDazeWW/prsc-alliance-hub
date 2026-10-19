@@ -385,6 +385,9 @@ function Admin() {
   const [invitePreviewHtml, setInvitePreviewHtml] = useState("");
   const inviteFormRef = useRef<HTMLFormElement>(null);
   const [draft, setDraft] = useState<Draft>(emptyDraft);
+  const [emailMode, setEmailMode] = useState<"compose" | "template">("compose");
+  const isTemplateMode = emailMode === "template";
+  const [composeFromId, setComposeFromId] = useState("");
   const [emailStatus, setEmailStatus] = useState("");
   const [demoTemplates, setDemoTemplates] = useState<EmailTemplate[] | null>(null);
   const [inviteComposeHtml, setInviteComposeHtml] = useState("");
@@ -683,12 +686,14 @@ function Admin() {
           .replace(/\n{3,}/g, "\n\n")
           .trim()
       : text.trim();
-    setDraft((d) => ({
-      ...d,
-      name: d.name || file.name.replace(/\.[^.]+$/, ""),
-      body: stripped,
-    }));
-    setEmailStatus(`Loaded content from ${file.name}. Review it before sending.`);
+    if (emailMode === "template") {
+      const name = file.name.replace(/\.[^.]+$/, "");
+      setDraft({ ...emptyDraft, name, subject: name, body: stripped });
+      setEmailStatus(`Loaded ${file.name} as a new template. Review it, then Save to template library.`);
+      return;
+    }
+    setDraft((d) => ({ ...d, body: stripped }));
+    setEmailStatus(`Loaded text from ${file.name}. Review it before sending.`);
   }
 
   async function saveDraft() {
@@ -762,7 +767,7 @@ function Admin() {
     try {
       const res = await sendMemberEmail({
         data: {
-          template_id: draft.id || null,
+          template_id: composeFromId || null,
           member_ids: recipients,
           name: draft.name || draft.subject,
           subject: draft.subject,
@@ -782,6 +787,7 @@ function Admin() {
       setEmailStatus(failed ? `${res.results.length - failed} sent, ${failed} failed.` : `Sent to ${res.results.length} member(s).`);
       setRecipients([]);
       setDraft(emptyDraft);
+      setComposeFromId("");
       await email.refetch();
     } catch (error) {
       setEmailStatus(error instanceof Error ? error.message : "Sending failed.");
@@ -1185,7 +1191,9 @@ function Admin() {
                           cta_subtext: t.cta_subtext ?? "",
                           signatures: t.signatures ?? "",
                         });
-                        setEmailStatus(`Editing “${t.name}”.`);
+                        setEmailMode("template");
+                        setEmailStatus(`Editing saved template “${t.name}”. Save to update it in the library.`);
+                        document.getElementById("email-center")?.scrollIntoView({ behavior: "smooth", block: "start" });
                       }}
                       className="min-w-0 flex-1 text-left"
                     >
@@ -1213,8 +1221,10 @@ function Admin() {
               <button
                 type="button"
                 onClick={() => {
+                  setEmailMode("template");
                   setDraft(emptyDraft);
                   setEmailStatus("New template started.");
+                  document.getElementById("email-center")?.scrollIntoView({ behavior: "smooth", block: "start" });
                 }}
                 className="flex w-full items-center justify-center gap-2 border-t border-gold/15 px-5 py-3 text-base text-gold transition-colors hover:bg-gold/10"
               >
