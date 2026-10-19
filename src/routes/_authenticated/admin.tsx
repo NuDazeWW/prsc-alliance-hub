@@ -1345,12 +1345,13 @@ function Admin() {
                 Personalize with {"{{first_name}}"}, {"{{last_name}}"}, {"{{full_name}}"}, {"{{organization}}"}, {"{{title}}"}, {"{{entity}}"}, {"{{entity_full}}"}, {"{{role}}"}, {"{{role_label}}"}, {"{{package_label}}"}.
               </p>
 
+              {!isTemplateMode && (
               <div className="mt-6 border-t border-gold/15 pt-5">
                 <p className="text-xs uppercase tracking-[0.18em] text-gold">Recipients</p>
                 <div className="mt-3 grid gap-2 sm:grid-cols-2">
                   {members.map((m) => {
-                    const already = draft.id
-                      ? (sendsByMember.get(m.id) ?? []).some((s) => s.template_id === draft.id && s.status === "sent")
+                    const already = composeFromId
+                      ? (sendsByMember.get(m.id) ?? []).some((s) => s.template_id === composeFromId && s.status === "sent")
                       : false;
                     const checked = recipients.includes(m.id);
                     return (
@@ -1384,6 +1385,8 @@ function Admin() {
                   })}
                 </div>
               </div>
+              )}
+
 
               <div className="mt-6 flex flex-wrap items-center gap-3">
                 <Button
@@ -1391,18 +1394,22 @@ function Admin() {
                   className="rounded-none border border-ivory/20 bg-transparent text-base text-ivory/70 hover:border-gold/40 hover:text-gold"
                   onClick={() => {
                     setDraft(emptyDraft);
+                    setComposeFromId("");
                     setEmailStatus("");
                     setRecipients([]);
                   }}
                 >
-                  <Trash2 className="mr-2 h-4 w-4" /> Discard
+                  <Trash2 className="mr-2 h-4 w-4" /> {isTemplateMode ? "Close" : "Clear"}
                 </Button>
-                <Button type="button" className="rounded-none border border-gold/40 bg-transparent text-base text-ivory hover:bg-gold/10 hover:text-gold" onClick={saveDraft}>
-                  Save template
-                </Button>
-                <Button type="button" disabled={sending} className="rounded-none bg-gold text-base text-navy hover:bg-gold-light hover:text-navy" onClick={send}>
-                  {sending ? "Sending…" : `Send to ${recipients.length || 0} member(s)`}
-                </Button>
+                {isTemplateMode ? (
+                  <Button type="button" className="rounded-none bg-gold text-base text-navy hover:bg-gold-light hover:text-navy" onClick={saveDraft}>
+                    {draft.id ? "Save changes to template" : "Save to template library"}
+                  </Button>
+                ) : (
+                  <Button type="button" disabled={sending} className="rounded-none bg-gold text-base text-navy hover:bg-gold-light hover:text-navy" onClick={send}>
+                    {sending ? "Sending…" : `Send to ${recipients.length || 0} member(s)`}
+                  </Button>
+                )}
                 {emailStatus && <p className="text-base text-ivory/60">{emailStatus}</p>}
               </div>
             </section>
