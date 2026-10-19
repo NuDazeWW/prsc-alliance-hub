@@ -58,6 +58,12 @@ export const Route = createFileRoute("/lovable/email/auth/webhook")({
                 const entityValue = member?.entity ?? callbackEntity
                 const entity = entityKeys.find((value) => value === entityValue) ?? 'both'
                 const role = (member?.role ?? callbackRole) as keyof typeof INVITE_ROLE_LABELS | undefined
+                const pollId = callback.searchParams.get('poll')
+                let meetingBlock: string | null = null
+                if (pollId && /^[0-9a-f-]{36}$/i.test(pollId)) {
+                  const { loadOpenPoll } = await import('@/lib/meeting-poll.server')
+                  meetingBlock = (await loadOpenPoll(pollId))?.block ?? null
+                }
                 return React.createElement(InviteEmail, {
                   confirmationUrl: data.url,
                   recipientEmail: data.email,
@@ -65,6 +71,7 @@ export const Route = createFileRoute("/lovable/email/auth/webhook")({
                   entity,
                   roleLabel: role ? memberRoleLabel(role, entity) : 'Board Member or Advisor',
                   copy: inviteCopy,
+                  meetingBlock,
                 })
               },
             },
