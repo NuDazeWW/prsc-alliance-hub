@@ -231,7 +231,7 @@ function BlockView({ b, tone }: { b: Block; tone: Tone }) {
     case "callout":
       return (
         <div className={`rounded-md border-2 ${tone === "dis" ? "border-dis-cyan/60 bg-dis-navy/60" : "border-gold/60 bg-gold/[.07]"} px-5 py-4`}>
-          {b.title && <p className={`text-[11px] font-semibold uppercase tracking-[0.18em] ${tone === "dis" ? "text-dis-cyan" : "text-gold"}`}>{b.title}</p>}
+          {b.title && <p className={`text-[11px] font-semibold ${b.title === "Boundary" ? "text-[13px]" : "uppercase"} tracking-[0.18em] ${tone === "dis" ? "text-dis-cyan" : "text-gold"}`}>{b.title}</p>}
           <p className="mt-1.5 text-[15px] leading-7 text-ivory/90">{b.text}</p>
         </div>
       );
