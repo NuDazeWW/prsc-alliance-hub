@@ -14,9 +14,38 @@ export type MeetingBlockPoll = {
   duration_minutes: number;
   description?: string | null;
   respond_by?: string | null;
+  timezone?: string | null;
 };
 
-export function formatSlotET(iso: string) {
+export const DEFAULT_MEETING_TZ = "America/New_York";
+
+export const MEETING_TIMEZONES: { value: string; label: string }[] = [
+  { value: "America/New_York", label: "Eastern (New York)" },
+  { value: "America/Chicago", label: "Central (Chicago)" },
+  { value: "America/Denver", label: "Mountain (Denver)" },
+  { value: "America/Phoenix", label: "Arizona (Phoenix)" },
+  { value: "America/Los_Angeles", label: "Pacific (Los Angeles)" },
+  { value: "America/Anchorage", label: "Alaska (Anchorage)" },
+  { value: "Pacific/Honolulu", label: "Hawaii (Honolulu)" },
+  { value: "America/Toronto", label: "Eastern Canada (Toronto)" },
+  { value: "America/Sao_Paulo", label: "Brazil (São Paulo)" },
+  { value: "Europe/London", label: "UK (London)" },
+  { value: "Europe/Paris", label: "Central Europe (Paris)" },
+  { value: "Europe/Berlin", label: "Central Europe (Berlin)" },
+  { value: "Europe/Athens", label: "Eastern Europe (Athens)" },
+  { value: "Asia/Dubai", label: "Gulf (Dubai)" },
+  { value: "Asia/Singapore", label: "Singapore" },
+  { value: "Asia/Tokyo", label: "Japan (Tokyo)" },
+  { value: "Australia/Sydney", label: "Australia (Sydney)" },
+];
+
+export function timezoneLabel(tz?: string | null) {
+  const zone = tz || DEFAULT_MEETING_TZ;
+  return MEETING_TIMEZONES.find((z) => z.value === zone)?.label ?? zone;
+}
+
+/** Formats a stored UTC time in the meeting's time zone (Eastern when none was saved). */
+export function formatSlot(iso: string, tz?: string | null) {
   return new Date(iso).toLocaleString("en-US", {
     weekday: "long",
     month: "long",
@@ -24,9 +53,33 @@ export function formatSlotET(iso: string) {
     year: "numeric",
     hour: "numeric",
     minute: "2-digit",
-    timeZone: "America/New_York",
+    timeZone: tz || DEFAULT_MEETING_TZ,
     timeZoneName: "short",
   });
+}
+
+/** @deprecated use formatSlot(iso, tz) */
+export const formatSlotET = (iso: string) => formatSlot(iso);
+
+function zoneOffsetMs(ts: number, tz: string) {
+  const parts = new Intl.DateTimeFormat("en-US", {
+    timeZone: tz, hourCycle: "h23", year: "numeric", month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit", second: "2-digit",
+  }).formatToParts(new Date(ts));
+  const g = (k: string) => Number(parts.find((p) => p.type === k)!.value);
+  return Date.UTC(g("year"), g("month") - 1, g("day"), g("hour"), g("minute"), g("second")) - ts;
+}
+
+/** Converts a wall-clock time "YYYY-MM-DDTHH:mm" in a time zone to a UTC ISO string. Values that already carry an offset pass through. */
+export function zonedToUtc(local: string, tz?: string | null) {
+  if (/[zZ]|[+-]\d\d:?\d\d$/.test(local)) return new Date(local).toISOString();
+  const [d, t = "00:00"] = local.split("T");
+  const [y, mo, da] = d.split("-").map(Number);
+  const [h, mi] = t.split(":").map(Number);
+  const zone = tz || DEFAULT_MEETING_TZ;
+  const guess = Date.UTC(y, mo - 1, da, h, mi);
+  let ts = guess - zoneOffsetMs(guess, zone);
+  ts = guess - zoneOffsetMs(ts, zone);
+  return new Date(ts).toISOString();
 }
 
 /** Plain-text meeting section used by invitations, Compose, and poll emails. */
@@ -36,13 +89,13 @@ export function meetingBlockText(poll: MeetingBlockPoll, slots: { starts_at: str
   const header = [`Upcoming meeting: ${poll.title} (${type})`, where, `Duration: ${poll.duration_minutes} minutes`].join("\n");
   const times = [...slots]
     .sort((a, b) => a.starts_at.localeCompare(b.starts_at))
-    .map((s) => `• ${formatSlotET(s.starts_at)}`)
+    .map((s) => `• ${formatSlot(s.starts_at, poll.timezone)}`)
     .join("\n");
   const parts = [header];
   if (poll.description?.trim()) parts.push(poll.description.trim());
-  parts.push(`Proposed times (New York time — your Welcome Center shows them in your own time zone):\n${times}`);
+  parts.push(`Proposed times (${timezoneLabel(poll.timezone)} time — please confirm each time in your local time zone):\n${times}`);
   parts.push(
-    `Please mark your availability for each option in your private Welcome Center${poll.respond_by ? ` by ${formatSlotET(poll.respond_by)}` : ""}.`,
+    `Please mark your availability for each option in your private Welcome Center${poll.respond_by ? ` by ${formatSlot(poll.respond_by, poll.timezone)}` : ""}.`,
   );
   return parts.join("\n\n");
 }
