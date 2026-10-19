@@ -61,10 +61,10 @@ export function OrientationHub({ onClose, onOpenDocuments, onOpenRoleDetails }: 
               </div>
             ))}
           </div>
-          <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
-            <button type="button" onClick={() => setView({ kind: "guided", step: 0 })} className={`${btn} cta-glow`}><span>Take the 5-Minute Orientation</span></button>
-            <button type="button" onClick={() => setView({ kind: "explore" })} className={`${btn} cta-glow-outline`}><span>Explore the System</span></button>
-            <button type="button" onClick={() => setView({ kind: "materials" })} className={`${btn} cta-glow-outline`}><span>View Your Personal Documents</span></button>
+          <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:flex-nowrap sm:gap-2.5">
+            <button type="button" onClick={() => setView({ kind: "guided", step: 0 })} className={`${btn} whitespace-nowrap sm:px-5`}><span>Take the 5-Minute Orientation</span></button>
+            <button type="button" onClick={() => setView({ kind: "explore" })} className={`${btn} whitespace-nowrap sm:px-5`}><span>Explore the System</span></button>
+            <button type="button" onClick={() => setView({ kind: "materials" })} className={`${btn} whitespace-nowrap sm:px-5`}><span>View Your Personal Documents</span></button>
           </div>
         </>
       )}
@@ -149,14 +149,14 @@ function Guided({ step, setStep, onExplore, onMaterials, onRole, btn, onPick }: 
         </div>
         <p className="mt-5 label-caps text-gold">{ch.title}</p>
         <TopicBody key={step} topic={ch.topic} onPick={onPick} />
-        <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
-          {step > 0 && <button type="button" onClick={() => setStep(step - 1)} className={`${btn} cta-glow-outline`}><span>Previous</span></button>}
-          {!last && <button type="button" onClick={() => setStep(step + 1)} className={`${btn} cta-glow`}><span>Next chapter</span></button>}
+        <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:flex-nowrap sm:gap-2.5">
+          {step > 0 && <button type="button" onClick={() => setStep(step - 1)} className={`${btn} cta-glow-outline whitespace-nowrap sm:px-5`}><span>Previous</span></button>}
+          {!last && <button type="button" onClick={() => setStep(step + 1)} className={`${btn} cta-glow whitespace-nowrap sm:px-5`}><span>Next chapter</span></button>}
           {last && (
             <>
-              <button type="button" onClick={onExplore} className={`${btn} cta-glow`}><span>Explore the System</span></button>
-              <button type="button" onClick={onRole} className={`${btn} cta-glow-outline`}><span>View Your Role Details</span></button>
-              <button type="button" onClick={onMaterials} className={`${btn} cta-glow-outline`}><span>View Your Personal Documents</span></button>
+              <button type="button" onClick={onExplore} className={`${btn} cta-glow whitespace-nowrap sm:px-5`}><span>Explore the System</span></button>
+              <button type="button" onClick={onRole} className={`${btn} cta-glow-outline whitespace-nowrap sm:px-5`}><span>View Your Role Details</span></button>
+              <button type="button" onClick={onMaterials} className={`${btn} cta-glow-outline whitespace-nowrap sm:px-5`}><span>View Your Personal Documents</span></button>
             </>
           )}
         </div>
