@@ -41,7 +41,7 @@ export const COMPETITIVE_CONTEXT = [
 
 export const HUB_TITLE = "Welcome to the PRSC & DIS Orientation Hub";
 export const HUB_INTRO =
-  "This hub is a shared reference point for the individuals helping guide PRSC and DIS. It explains the problem we are solving, how the organizations work together, what the Score and Terminal are designed to do, and why your role matters.";
+  "This hub is a shared reference point for individuals guiding PRSC and DIS. The hub explains the problem being solved, how the two organizations work together, what the PRSC Score and Readiness Terminal are designed to do, and why your role matters.";
 export const HUB_SCOPE =
   "An internal orientation hub for the people responsible for guiding, governing, advising, and protecting the work of PRSC and DIS.";
 
@@ -70,7 +70,7 @@ export const RELATIONSHIP = {
       title: "Readiness Terminal™",
       rows: [
         "The market-facing product experience.",
-        "Delivers Score reports, benchmark context, and intelligence views.",
+        "Delivers PRSC Readiness Score reports, benchmark context, and intelligence views.",
         "Makes complex information understandable and usable.",
       ],
     },
@@ -78,14 +78,14 @@ export const RELATIONSHIP = {
       tone: "dis" as Tone,
       title: "DIS",
       rows: [
-        "Builds and operates the platform.",
+        "Builds and operates the intelligence platform",
         "Builds data pipelines, benchmarks, subscriber tools, and intelligence products.",
-        "Does not govern the Standard or issue the Score.",
+        "Does not govern the PRSC Readiness Standard or issue the PRSC Readiness Score.",
       ],
     },
   ],
   lines: [
-    "PRSC sets the rules and issues the Score. DIS builds the technology that makes the Score, data, and benchmark intelligence useful.",
+    "PRSC creates the methodology behind the Score. DIS builds the technology that calculates the Score and makes data and benchmark intelligence useful.",
     "PRSC protects trust in the Score. DIS makes the information useful.",
   ],
 };
@@ -197,19 +197,19 @@ export const AVAILABILITY = [
 ];
 
 export const IP_STACK = [
-  { name: "The PRSC Readiness Standard™", text: "The governed definition of commercial readiness in motorsport." },
-  { name: "The PRSC Readiness Score™", text: "The private, market-facing score that makes readiness understandable." },
-  { name: "The Readiness Engine", text: "Protected scoring, calibration, and prioritization logic. The underlying mathematics are protected trade secrets." },
-  { name: "The Six Dimensions", text: "The full commercial-readiness framework—not a wins-and-followers score." },
-  { name: "The Data Architecture", text: "Racing, audience, media, consumer, digital, series, and verified-evidence inputs brought into one system." },
-  { name: "The Benchmark Database", text: "Anonymized benchmark context that strengthens as more programs are scored." },
-  { name: "Outcome Intelligence", text: "A long-term dataset connecting readiness signals to commercial outcomes, renewal, activation, and measurable value." },
-  { name: "The Readiness Terminal™", text: "The DIS platform that operationalizes the Standard and Score through useful views, reports, intelligence, and recurring products." },
-  { name: "The Trademark and Governance Spine", text: "Protected names, methodology, score, Standard, certification, and independence rules that establish trust." },
+  { name: "The PRSC Readiness Standard™", text: "The official, independently governed definition of commercial readiness in motorsport." },
+  { name: "The PRSC Readiness Score™", text: "The private score, written in plain commercial terms." },
+  { name: "The Readiness Engine", text: "The proprietary scoring and calibration behind the Score. The underlying math is a protected trade secret." },
+  { name: "The Six Readiness Areas", text: "The six areas every participant is evaluated on, not a wins-and-followers score." },
+  { name: "The Data Architecture", text: "Racing, audience, media, consumer, digital, and verified evidence, brought together in one system." },
+  { name: "The Benchmark Database", text: "Anonymized comparisons that become more accurate as more participants are scored." },
+  { name: "Outcome Intelligence", text: "Long-term data linking readiness to real commercial results: sponsor renewals, activations, and measurable value." },
+  { name: "The Readiness Terminal™", text: "The DIS platform that puts the Standard and Score to work through reports, insights, and ongoing products." },
+  { name: "The Trademark and Governance Framework", text: "Protected names, methodology, score, Standard, certification, and independence rules that establish trust." },
 ];
 
 export const COMPETITIVE_TEXT =
-  "Existing tools may measure sponsorship exposure, manage rights and reporting, sell or negotiate deals, or help properties tell their story. PRSC and DIS add a different layer: an independent readiness standard, a privately issued Score, governed evidence rules, and a platform designed to deliver benchmark context and intelligence.";
+  "Existing tools measure sponsorship exposure, manage rights and reporting, broker deals, or help properties tell their story. PRSC and DIS add something different: an independent readiness standard, a private Score, clear rules for what counts as evidence, and a platform that shows how each program compares with its peers.";
 export const COMPETITIVE_CONCLUSION =
   "We have not identified a clear direct competitor in motorsport combining all of these elements in one governed system.";
 
@@ -265,10 +265,10 @@ const SOURCE_GROUPS: TopicGroup[] = [
         tone: "bridge",
         blocks: [
           { kind: "pairs", rows: [
-            { term: "Teams & drivers", text: "Need money to keep racing. Today they may walk into a sponsorship conversation with race history, wins, followers, photos, logos, and a sponsor deck—without knowing whether that is the information a sponsor needs. Missing: a plain-language way to understand their commercial value, why a sponsor conversation may stall, and what they may need to strengthen." },
-            { term: "Series", text: "Need more people at races, stronger teams and drivers, and more sponsor investment around the series. Missing: a better way to understand commercial readiness across the ecosystem without exposing individual participant scores." },
-            { term: "Sponsors", text: "Brands, agencies, agents, media buyers, organizations, and other decision-makers need a measurable reason to spend money. Missing: the kinds of audience, media, consumer, activation, and performance information used in other major media and marketing channels." },
-            { term: "Manufacturers", text: "Need a better way to decide where to place resources, engineering support, parts, brand equity, and program backing. Missing: a broader view of commercial readiness, activation capability, measurement confidence, and sponsorship sustainability—not simply competitive performance." },
+            { term: "Teams & Drivers", text: "Teams and drivers need money to race. Today they walk into a sponsorship conversation with race history, wins, followers, photos, logos, and a sponsor deck—without knowing if that is the information a sponsor needs. Missing: a plain-language method to understand their commercial value, why a sponsor conversation stalls, and what they need to improve." },
+            { term: "Series", text: "Series need more people attending races, commercially stronger teams and drivers, and increased sponsor investment around the series. Missing: a clear method to understand commercial readiness across the ecosystem without exposing individual participant scores." },
+            { term: "Sponsors", text: "Brands, agencies, agents, media buyers, organizations, and other decision-makers need a measurable reason to invest money. Missing: the audience, media, consumer, activation, and performance metrics utilized in other major media and marketing channels." },
+            { term: "Manufacturers", text: "Manufacturers need an informed method to decide where to place resources, engineering support, parts, brand equity, and program backing. Missing: a broader view of commercial readiness, activation capability, measurement confidence, and sponsorship sustainability—not simply competitive performance." },
           ] },
           { kind: "label", text: "Manufacturers are a future-state Readiness Terminal audience. They are not Readiness Vanguard™ participants." },
           { kind: "quote", text: "The ecosystem is not broken because people do not care or do not work hard. It is broken because people are making decisions without the same information—or a shared language for commercial value." },
@@ -335,9 +335,9 @@ const SOURCE_GROUPS: TopicGroup[] = [
         blocks: [
           { kind: "relationship" },
           { kind: "list", title: "Why separation matters", items: [
-            "A score is more credible when the group issuing it does not sell deals or take a percentage of commercial outcomes.",
-            "A platform is more valuable when it can build useful products around a trusted, independently governed standard.",
-            "PRSC and DIS support the same ecosystem, but they do not perform the same job.",
+            "An independent score from a group with no financial stake in the outcome.",
+            "Trusted standard at the core, useful products around it.",
+            "PRSC and DIS support the same ecosystem but play different roles.",
           ] },
         ],
       },
@@ -345,32 +345,30 @@ const SOURCE_GROUPS: TopicGroup[] = [
         id: "score",
         links: ["score"],
         title: "The PRSC Readiness Score™",
-        heading: "One private score. One clearer starting point.",
+        heading: "One private score. One clear starting point.",
         tone: "prsc",
         blocks: [
-          { kind: "p", text: "A private 0–100 score that helps a participating entity understand commercial readiness." },
-          { kind: "list", title: "The essentials", items: [
-            "The Score is issued by PRSC and delivered through the Readiness Terminal™.",
-            "It is peer-cohort calibrated by comparable series, competitive level, and resource tier.",
-            "It is not a universal rating, a ranking table, or a wins-and-followers score.",
-            "Individual Scores are confidential by default.",
-            "The Score is not certification.",
+          { kind: "p", text: "Private. Scored 0–100. Shows where you stand commercially." },
+          { kind: "list", title: "The Essentials", items: [
+            "The PRSC Readiness Score is issued by PRSC and accessed through the Readiness Terminal™.",
+            "Compared like-for-like: same type of series, competitive level, and resources.",
+            "Each participant's score is private by default.",
+            "The PRSC Readiness Score is not a certification.",
           ] },
           { kind: "callout", title: "Score vs. Certification", text: "The PRSC Readiness Score™ is a diagnostic view of commercial readiness. Readiness Certified™ is a separate PRSC-governed credential that depends on verified evidence, eligibility requirements, and renewal standards." },
           { kind: "list", title: "What it does", items: [
-            "Turns a complicated commercial picture into a clear starting point",
-            "Shows what is strong",
-            "Shows what may need attention",
-            "Creates a common reference point for better conversations",
-            "Gives the participant a clearer understanding before the next important commercial meeting",
+            "Turns a complicated commercial picture into a clear starting point.",
+            "Shows which categories are commercially strong and which need attention.",
+            "Creates a common reference point for improved conversations.",
+            "Gives the participant clarity going into their next key commercial meeting.",
           ] },
           { kind: "list", title: "What it is not", items: [
-            "Not a public leaderboard",
-            "Not a race ranking",
-            "Not a popularity contest",
-            "Not a measure of who has the largest budget",
-            "Not a scarlet letter",
-            "Not a promise of a sponsor, deal, investment, or financial return",
+            "Not a public leaderboard.",
+            "Not a race ranking.",
+            "Not a popularity contest.",
+            "Not a measure of who has the most sponsors.",
+            "Not a scarlet letter.",
+            "Not a promise of a sponsor, deal, investment, or financial return.",
           ] },
 
         ],
@@ -378,7 +376,7 @@ const SOURCE_GROUPS: TopicGroup[] = [
       {
         id: "certification",
         links: ["score"],
-        title: "Score, Certification, and Confidentiality",
+        title: "Score, Certification, and Privacy",
         heading: "What the Score is, what certification is, and who sees what.",
         tone: "prsc",
         blocks: [
@@ -438,8 +436,8 @@ const SOURCE_GROUPS: TopicGroup[] = [
             { term: "Rates readiness", text: "Delivers the PRSC Readiness Score™ and explains what it means." },
             { term: "Shows the full picture", text: "Brings together relevant racing, audience, media, consumer, digital, and commercial context." },
             { term: "Tracks change over time", text: "Shows whether readiness is improving, holding steady, or slipping—and where attention may be needed." },
-            { term: "Gives each audience its own view", text: "Each audience sees the information relevant to the decision it is trying to make." },
-            { term: "Builds the benchmark", text: "Every scored program and verified outcome can make the benchmark stronger and more useful over time." },
+            { term: "Provides each audience its own view", text: "The right information for the right decision, for each audience." },
+            { term: "Builds the benchmark", text: "Every scored program and verified outcome makes the benchmark stronger and increasingly useful over time." },
           ] },
           { kind: "quote", text: "The Score starts the conversation. The Terminal creates ongoing value." },
         ],
@@ -499,7 +497,7 @@ const SOURCE_GROUPS: TopicGroup[] = [
             { term: "Methodology governance", text: "PRSC governs the Score’s definitions, methodology, calibration rules, and review process." },
             { term: "Data and platform separation", text: "DIS builds the technology and data infrastructure but does not control the scoring rules." },
             { term: "Evidence rules", text: "Verified claims follow defined evidence requirements and review processes." },
-            { term: "Confidentiality", text: "Individual Scores are private by default. Aggregated benchmark data may be used without exposing individual participants." },
+            { term: "Privacy", text: "Individual Scores are private by default. Aggregated benchmark data may be used without exposing individual participants." },
           ] },
           { kind: "list", title: "Evidence integrity", items: [
             "Retrievable data should be Terminal-ingested where possible.",
@@ -519,8 +517,8 @@ const SOURCE_GROUPS: TopicGroup[] = [
       },
       {
         id: "moat",
-        title: "Why This Is Hard to Copy",
-        heading: "Why this is hard to copy—and why DIS can become valuable.",
+        title: "Why This Is Hard to Replicate",
+        heading: "Why this is hard to replicate—and why DIS can become valuable.",
         tone: "bridge",
         blocks: [
           { kind: "ipstack" },
@@ -532,9 +530,9 @@ const SOURCE_GROUPS: TopicGroup[] = [
             "Priority and recommendation logic",
             "Data mappings",
             "Internal benchmark methodology",
-            "Participant-level and confidential information",
+            "Participant-level and private information",
           ] },
-          { kind: "quote", text: "A competitor can build a dashboard. It is much harder to build a trusted, independent standard; protected scoring logic; verified data infrastructure; benchmark context; outcome evidence; and an ecosystem that uses all of it over time." },
+          { kind: "quote", text: "A competitor can build a dashboard. What's much harder to replicate is everything behind it: a trusted, independent standard, protected scoring, verified data, years of peer comparisons and real-world results, and an ecosystem built around all of it." },
         ],
       },
     ],
@@ -551,35 +549,34 @@ const SOURCE_GROUPS: TopicGroup[] = [
         heading: "The first 25 teams and drivers.",
         tone: "prsc",
         blocks: [
-          { kind: "p", text: "The Readiness Vanguard™ is the fixed, curated first group of 25 teams and drivers to receive the PRSC Readiness Score™ and Commercial Strength Report™." },
+          { kind: "p", text: "The Readiness Vanguard™ is the fixed, curated first group of 25 teams and drivers to receive the PRSC Readiness Score™ and Commercial Strength Report™ ahead of the 2027 racing season." },
           { kind: "list", title: "What participants receive", items: [
             "A private Score before the 2027 racing season",
             "A Commercial Strength Report™",
-            "Plain-language Score interpretation",
+            "A plain-language explanation of their Score",
             "A clear picture of what is working and what may need attention",
-            "Comparable peer-context benchmark insight without exposing another participant’s individual Score",
+            "Benchmark insight from comparable programs, without exposing any other participant's individual Score",
           ] },
           { kind: "list", title: "What it gives PRSC and DIS", items: [
             "Real-world evidence that the methodology works with actual racing programs",
-            "The first benchmark dataset",
+            "The first data for the Benchmark Database",
             "A foundation for validating the connection between readiness, improvement, and commercial outcomes",
-            "The beginning of the Benchmark Database and long-term Outcome Intelligence layer",
+            "The starting point for the long-term Outcome Intelligence layer",
           ] },
           { kind: "list", title: "Locked principles", items: [
-            "The Readiness Vanguard™ is a fixed 25-slot supply-side-first program.",
+            "The Readiness Vanguard™ is a fixed, 25-slot, supply-side-first program.",
             "It begins with teams and drivers.",
-            "Individual Scores are confidential by default.",
-            "Aggregate benchmark context may be used as the system matures.",
+            "Individual Scores are private by default.",
+            "Anonymized, aggregated benchmark data may be used as the system matures.",
             "Brands and Partnership Ecosystem Operators™ are demand-side audiences.",
-            "Manufacturers are future-state Terminal audiences and are not Vanguard participants.",
+            "Manufacturers are a future audience for the Readiness Terminal™, not Vanguard participants.",
             "The Vanguard is not a promise of sponsorship, funding, brand interest, introductions, or commercial outcomes.",
           ] },
-          { kind: "list", title: "What it is not", items: [
-            "Not a sponsor-matching program",
-            "Not free money",
-            "Not a manufacturer hookup",
-            "Not a public ranking",
-            "Not a guarantee of sponsorship, funding, a deal, or an introduction",
+          { kind: "list", title: "What participants should not expect", items: [
+            "Sponsor matching",
+            "A funding source",
+            "A path to manufacturer relationships",
+            "A public ranking",
           ] },
         ],
       },
@@ -744,7 +741,7 @@ export const GUIDED: { title: string; topic: Topic }[] = [
   { title: "The System", topic: src("together") },
   { title: "The PRSC Readiness Score™", topic: src("score") },
   { title: "What the Readiness Terminal Delivers", topic: src("terminal-jobs") },
-  { title: "Why This Is Hard to Copy", topic: src("moat") },
+  { title: "Why This Is Hard to Replicate", topic: src("moat") },
   { title: "The Readiness Vanguard™", topic: src("vanguard") },
 ];
 

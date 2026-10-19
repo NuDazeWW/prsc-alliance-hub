@@ -42,10 +42,10 @@ export const Route = createFileRoute("/_authenticated/portal/")({
   head: () => ({
     meta: [
       { title: "Private Board & Advisor Center | PRSC" },
-      { name: "description", content: "Confidential PRSC and DIS board and advisor briefing center." },
+      { name: "description", content: "Private PRSC and DIS board and advisor briefing center." },
       { name: "robots", content: "noindex,nofollow,noarchive" },
       { property: "og:title", content: "Private Board & Advisor Center | PRSC" },
-      { property: "og:description", content: "Confidential PRSC and DIS board and advisor briefing center." },
+      { property: "og:description", content: "Private PRSC and DIS board and advisor briefing center." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
     ],
@@ -69,7 +69,7 @@ const demoMember = {
   status: "active" as const,
   package_status: "in_preparation" as const,
   why_you:
-    "We've been intentional about who we invite into this next chapter. You were selected because of your unique experience, judgment, and relationships, and the value you can bring as we build the market infrastructure for Partnership Readiness.",
+    "We've been intentional about who we invite to this next chapter. You were selected due to your unique experience, judgment, relationships and the value you bring as we build the market infrastructure for Partnership Readiness.",
   invited_at: "",
   first_access_at: "",
   last_access_at: "",
@@ -360,7 +360,7 @@ function PortalHome() {
                   ? "Your profile is on file — your package is being prepared."
                   : (
                     <>
-                      Approx. 7–10 minutes  •  Your Submission is Private.
+                      Approx. 7–10 minutes  •  Your submission is private.
                       <br />
                       Completing your profile unlocks your individualized package.
                     </>
@@ -486,7 +486,7 @@ function PortalHome() {
               <DialogHeader className="space-y-0 text-left">
                 <p className="text-[10px] uppercase tracking-[0.24em] text-gold">Your Personal Documents</p>
                 <DialogTitle className="mt-4 font-display text-[clamp(2rem,2.6vw,2.9rem)] font-normal leading-tight">
-                  Documents to sign and return. Documents to read and retain.
+                  Documents to read, sign, return, and retain.
                 </DialogTitle>
               </DialogHeader>
 
@@ -495,8 +495,7 @@ function PortalHome() {
                   <Lock className="mx-auto h-7 w-7 text-gold" />
                   <h3 className="mt-5 font-display text-[24px] leading-snug">Available after your profile is complete.</h3>
                   <p className="mx-auto mt-4 max-w-[34rem] text-[15px] leading-7 text-ivory/65">
-                    Your documents are prepared individually. Once your profile is on file, the documents to sign and return
-                    and the documents to read and retain will appear here.
+                    Your documents are prepared individually. Once your profile is completed, the documents will appear here.
                   </p>
                   <Link
                     to="/portal/profile"
