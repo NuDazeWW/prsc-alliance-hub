@@ -635,14 +635,23 @@
 .cta-glow:hover::after, .cta-glow:focus-visible::after,
 .cta-glow-outline:hover::after, .cta-glow-outline:focus-visible::after { animation: cta-shimmer 2.4s ease-in-out infinite !important; opacity: 1; }
 .cta-glow:focus:not(:focus-visible), .cta-glow-outline:focus:not(:focus-visible) { outline: none; }
-/* When a sibling CTA in the hub row is pointed at, the gold CTA drops its highlight. */
+/* When a sibling CTA in the hub row is pointed at, the gold CTA takes the plain outline look. */
 .hub-cta-row:has(.cta-glow-outline:hover) .cta-glow,
 .hub-cta-row:has(.cta-glow-outline:focus-visible) .cta-glow {
+  background-image:
+    radial-gradient(ellipse 90% 55% at 28% 0%, color-mix(in oklab, var(--color-gold) 18%, transparent) 0%, transparent 55%),
+    linear-gradient(
+      180deg,
+      color-mix(in oklab, var(--color-ivory) 11%, transparent) 0%,
+      color-mix(in oklab, var(--color-ivory) 3%, transparent) 100%
+    );
+  color: var(--color-gold);
+  filter: none;
   box-shadow:
-    inset 0 1px 0 color-mix(in oklab, var(--color-ivory) 55%, transparent),
-    inset 0 -1px 0 color-mix(in oklab, var(--color-bronze) 50%, transparent),
-    0 4px 14px color-mix(in oklab, var(--color-navy-deep) 55%, transparent);
-  filter: brightness(0.94) saturate(0.92);
+    inset 0 0 0 1px color-mix(in oklab, var(--color-gold) 62%, transparent),
+    inset 0 1px 0 color-mix(in oklab, var(--color-ivory) 18%, transparent),
+    0 0 32px color-mix(in oklab, var(--color-gold) 28%, transparent),
+    0 0 68px color-mix(in oklab, var(--color-gold) 14%, transparent);
 }
 @media (hover: none) {
   .hub-card:hover, .hub-card-dis:hover { transform: none; }

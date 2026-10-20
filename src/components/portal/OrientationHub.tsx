@@ -61,7 +61,7 @@ export function OrientationHub({ onClose, onOpenDocuments, onOpenRoleDetails }: 
               </div>
             ))}
           </div>
-          <div className="hub-cta-row mt-8 flex flex-col gap-3 sm:flex-row sm:flex-nowrap sm:gap-2.5">
+          <div className="hub-cta-row mt-8 flex flex-col gap-3 sm:flex-row sm:flex-nowrap sm:justify-center sm:gap-2.5">
             <button type="button" onClick={() => setView({ kind: "guided", step: 0 })} className={`${btn} cta-glow whitespace-nowrap sm:px-5`}><span>Take the 5-Minute Orientation</span></button>
             <button type="button" onClick={() => setView({ kind: "explore" })} className={`${btn} cta-glow-outline whitespace-nowrap sm:px-5`}><span>Explore the System</span></button>
             <button type="button" onClick={() => setView({ kind: "materials" })} className={`${btn} cta-glow-outline whitespace-nowrap sm:px-5`}><span>View Your Personal Documents</span></button>
