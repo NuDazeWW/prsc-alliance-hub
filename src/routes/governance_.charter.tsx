@@ -109,7 +109,7 @@ const articles: Article[] = [
       {
         num: "3.1",
         heading: "Authority.",
-        body: "The Methodology Committee is the technical authority of the Council. It owns the PRSC Readiness Standard \u2014 including the published methodology, the scoring framework, the six dimensions, and the calibration profiles. The Committee determines what the score means and how it is calculated at the framework level.",
+        body: "The Methodology Committee is the technical authority of the Council. It owns the PRSC Readiness Standard™ \u2014 including the published methodology, the scoring framework, the six dimensions, and the calibration profiles. The Committee determines what the score means and how it is calculated at the framework level.",
       },
       {
         num: "3.2",

@@ -122,7 +122,7 @@ export function PRSCReadinessGauge() {
     <figure
       className="prsc-gauge-figure"
       role="group"
-      aria-label="PRSC Readiness Score ranges from 0 to 100 and provides an independent measure of commercial readiness."
+      aria-label="PRSC Readiness Score™ ranges from 0 to 100 and provides an independent measure of commercial readiness."
     >
       <div
         ref={ref}
@@ -156,7 +156,7 @@ export function PRSCReadinessGauge() {
 
         <div className="prsc-gauge__type">
           <span className="prsc-gauge__value font-display">0–100</span>
-          <span className="prsc-gauge__title">PRSC Readiness Score</span>
+          <span className="prsc-gauge__title">PRSC Readiness Score™</span>
           <span className="prsc-gauge__sub">Independent. Objective. Built to last.</span>
         </div>
 

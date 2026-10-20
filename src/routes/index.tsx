@@ -21,18 +21,18 @@ export const Route = createFileRoute("/")({
       {
         name: "description",
         content:
-          "Partnership Readiness Standards Council (PRSC) is the independent standards body behind the PRSC Readiness Score — an authoritative, evidence-based framework for the global sponsorship market.",
+          "Partnership Readiness Standards Council (PRSC) is the independent standards body behind the PRSC Readiness Score™ — an authoritative, evidence-based framework for the global sponsorship market.",
       },
       {
         name: "keywords",
         content:
-          "Partnership Readiness Standards Council, PRSC, PRSC Readiness Score, Readiness Score, partnership readiness, sponsorship standard, independent standards body",
+          "Partnership Readiness Standards Council, PRSC, PRSC Readiness Score™, Readiness Score, partnership readiness, sponsorship standard, independent standards body",
       },
       { property: "og:title", content: "Partnership Readiness Standards Council (PRSC) | Readiness Score" },
       {
         property: "og:description",
         content:
-          "Partnership Readiness Standards Council (PRSC) is the independent standards body behind the PRSC Readiness Score — an authoritative, evidence-based framework for the global sponsorship market.",
+          "Partnership Readiness Standards Council (PRSC) is the independent standards body behind the PRSC Readiness Score™ — an authoritative, evidence-based framework for the global sponsorship market.",
       },
       { property: "og:url", content: CANONICAL },
       { property: "og:type", content: "website" },
@@ -41,7 +41,7 @@ export const Route = createFileRoute("/")({
       {
         name: "twitter:description",
         content:
-          "The independent standards body behind the PRSC Readiness Score for the global sponsorship market.",
+          "The independent standards body behind the PRSC Readiness Score™ for the global sponsorship market.",
       },
     ],
     links: [
@@ -56,9 +56,9 @@ export const Route = createFileRoute("/")({
           "@type": "WebPage",
           "@id": CANONICAL + "#webpage",
           url: CANONICAL,
-          name: "Partnership Readiness Standards Council — PRSC Readiness Score",
+          name: "Partnership Readiness Standards Council — PRSC Readiness Score™",
           description:
-            "The Partnership Readiness Standards Council (PRSC) governs the independent, evidence-based PRSC Readiness Score for the global sponsorship market.",
+            "The Partnership Readiness Standards Council (PRSC) governs the independent, evidence-based PRSC Readiness Score™ for the global sponsorship market.",
           isPartOf: { "@id": "https://prscstandards.com/#website" },
           about: { "@id": "https://prscstandards.com/#organization" },
           primaryImageOfPage: {
@@ -135,7 +135,7 @@ function HomePage() {
                 to="/the-standard"
                 className="group inline-flex items-center gap-2 label-caps text-[0.7rem] font-medium tracking-wider text-ivory border-b border-transparent hover:border-gold transition-all pb-1"
               >
-                <span className="shimmer-link">PRSC Readiness Score</span>
+                <span className="shimmer-link">PRSC Readiness Score™</span>
                 <ArrowRight size={14} className="transition-transform group-hover:translate-x-1" />
               </Link>
             </div>
@@ -207,7 +207,7 @@ function HomePage() {
             title="Deploy capital with confidence."
             body="Evaluate partnerships against a single, independent benchmark. Reduce risk. Sharpen ROI. Move faster."
             to="/the-standard"
-            cta="PRSC Readiness Score"
+            cta="PRSC Readiness Score™"
           />
           <PathwayCard
             icon={Landmark}
@@ -240,7 +240,7 @@ function HomePage() {
 
       <ContinueReading
         links={[
-          { to: "/the-standard", label: "PRSC Readiness Score" },
+          { to: "/the-standard", label: "PRSC Readiness Score™" },
           { to: "/governance", label: "Governance" },
           { to: "/readiness-vanguard", label: "The Readiness Vanguard" },
         ]}

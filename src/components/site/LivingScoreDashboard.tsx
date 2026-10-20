@@ -144,7 +144,7 @@ export function LivingScoreDashboard() {
   if (prefersReduced) {
     return (
       <div className="relative w-full">
-        <img src={heroState1.url} alt="PRSC Readiness Score dashboard showing six dimensions and a composite score of 82, Commercially Undeniable." className="w-full h-auto" />
+        <img src={heroState1.url} alt="PRSC Readiness Score™ dashboard showing six dimensions and a composite score of 82, Commercially Undeniable." className="w-full h-auto" />
       </div>
     );
   }

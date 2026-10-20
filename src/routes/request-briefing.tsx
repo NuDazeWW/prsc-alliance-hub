@@ -8,7 +8,7 @@ export const Route = createFileRoute("/request-briefing")({
   head: () => ({
     meta: [
       { title: "Request a Briefing — PRSC" },
-      { name: "description", content: "Request a private briefing on the PRSC Readiness Standard, methodology, and how it applies to your organization." },
+      { name: "description", content: "Request a private briefing on the PRSC Readiness Standard™, methodology, and how it applies to your organization." },
       { property: "og:title", content: "Request a Briefing — PRSC" },
       { property: "og:description", content: "Private briefings for organizations, brands, investors, and industry leaders." },
       { property: "og:url", content: CANONICAL },
@@ -27,7 +27,7 @@ export const Route = createFileRoute("/request-briefing")({
             url: CANONICAL,
             name: "Request a Briefing — PRSC",
             description:
-              "Request a private briefing on the PRSC Readiness Standard, methodology, and how it applies to your organization.",
+              "Request a private briefing on the PRSC Readiness Standard™, methodology, and how it applies to your organization.",
             isPartOf: { "@id": "https://prscstandards.com/#website" },
             about: { "@id": "https://prscstandards.com/#organization" },
             inLanguage: "en-US",
@@ -78,7 +78,7 @@ function BriefingPage() {
 
       <ContinueReading
         links={[
-          { to: "/the-standard", label: "PRSC Readiness Score" },
+          { to: "/the-standard", label: "PRSC Readiness Score™" },
           { to: "/governance", label: "Governance" },
           { to: "/readiness-vanguard", label: "The Readiness Vanguard" },
         ]}
