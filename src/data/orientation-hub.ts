@@ -265,10 +265,10 @@ const SOURCE_GROUPS: TopicGroup[] = [
         tone: "bridge",
         blocks: [
           { kind: "pairs", rows: [
-            { term: "Teams & Drivers", text: "Teams and drivers need money to race. Today they walk into a sponsorship conversation with race history, wins, followers, photos, logos, and a sponsor deck—without knowing if that is the information a sponsor needs. Missing: a plain-language method to understand their commercial value, why a sponsor conversation stalls, and what they need to improve" },
-            { term: "Series", text: "Series need more people attending races, commercially stronger teams and drivers, and increased sponsor investment around the series. Missing: a clear method to understand commercial readiness across the ecosystem without exposing individual participant PRSC Readiness Scores" },
-            { term: "Sponsors", text: "Brands, agencies, agents, media buyers, organizations, and other decision-makers need a measurable reason to invest money. Missing: the audience, media, consumer, activation, and performance metrics utilized in other major media and marketing channels" },
-            { term: "Manufacturers", text: "Manufacturers need an informed method to decide where to place resources, engineering support, parts, brand equity, and program backing. Missing: a broader view of commercial readiness, activation capability, measurement confidence, and sponsorship sustainability—not simply competitive performance" },
+            { term: "Teams & Drivers", text: "Teams and drivers need money to race. Today they walk into a sponsorship conversation with race history, wins, followers, photos, logos, and a sponsor deck—without knowing if that is the information a sponsor needs. Missing: a plain-language method to understand their commercial value, why a sponsor conversation stalls, and what they need to improve." },
+            { term: "Series", text: "Series need more people attending races, commercially stronger teams and drivers, and increased sponsor investment around the series. Missing: a clear method to understand commercial readiness across the ecosystem without exposing individual participant PRSC Readiness Scores." },
+            { term: "Sponsors", text: "Brands, agencies, agents, media buyers, organizations, and other decision-makers need a measurable reason to invest money. Missing: the audience, media, consumer, activation, and performance metrics utilized in other major media and marketing channels." },
+            { term: "Manufacturers", text: "Manufacturers need an informed method to decide where to place resources, engineering support, parts, brand equity, and program backing. Missing: a broader view of commercial readiness, activation capability, measurement confidence, and sponsorship sustainability—not simply competitive performance." },
           ] },
           { kind: "label", text: "Manufacturers are a future-state Readiness Terminal audience. They are not Readiness Vanguard™ participants." },
           { kind: "quote", text: "The ecosystem is not broken because people do not care or do not work hard. It is broken because people are making decisions without the same information—or a shared language for commercial value." },
@@ -433,11 +433,11 @@ const SOURCE_GROUPS: TopicGroup[] = [
         blocks: [
           { kind: "callout", title: "Boundary", text: "The Readiness Terminal™ provides governed visibility, reports, benchmark context, and decision support. It does not broker deals, make introductions, guarantee sponsorship, or promise commercial outcomes." },
           { kind: "pairs", rows: [
-            { term: "Rates readiness", text: "Delivers the PRSC Readiness Score™ and explains what it means" },
-            { term: "Shows the full picture", text: "Brings together relevant racing, audience, media, consumer, digital, and commercial context" },
-            { term: "Tracks change over time", text: "Shows whether readiness is improving, holding steady, or slipping—and where attention may be needed" },
-            { term: "Provides each audience its own view", text: "The right information for the right decision, for each audience" },
-            { term: "Builds the benchmark", text: "Every scored program and verified outcome makes the benchmark stronger and increasingly useful over time" },
+            { term: "Rates readiness", text: "Delivers the PRSC Readiness Score™ and explains what it means." },
+            { term: "Shows the full picture", text: "Brings together relevant racing, audience, media, consumer, digital, and commercial context." },
+            { term: "Tracks change over time", text: "Shows whether readiness is improving, holding steady, or slipping—and where attention may be needed." },
+            { term: "Provides each audience its own view", text: "The right information for the right decision, for each audience." },
+            { term: "Builds the benchmark", text: "Every scored program and verified outcome makes the benchmark stronger and increasingly useful over time." },
           ] },
           { kind: "quote", text: "The PRSC Readiness Score starts the conversation. The Terminal creates ongoing value." },
         ],
@@ -477,13 +477,13 @@ const SOURCE_GROUPS: TopicGroup[] = [
         tone: "dis",
         blocks: [
           { kind: "pairs", rows: [
-            { term: "Racing and series information", text: "Official results context, event information, participation, timing, and series data where available" },
-            { term: "Audience, media, and digital information", text: "Broadcast, content, social, web, earned-media, reach, engagement, and exposure signals" },
-            { term: "Consumer and commercial information", text: "Audience behavior, category affinity, purchase intent, media consumption, and other information that helps sponsors understand business relevance" },
-            { term: "Verified evidence", text: "When needed, credible records of activation, delivery, and commercial activity reviewed through defined evidence rules" },
+            { term: "Racing and series information", text: "Official results context, event information, participation, timing, and series data where available." },
+            { term: "Audience, media, and digital information", text: "Broadcast, content, social, web, earned-media, reach, engagement, and exposure signals." },
+            { term: "Consumer and commercial information", text: "Audience behavior, category affinity, purchase intent, media consumption, and other information that helps sponsors understand business relevance." },
+            { term: "Verified evidence", text: "When needed, credible records of activation, delivery, and commercial activity reviewed through defined evidence rules." },
           ] },
           { kind: "quote", text: "DIS builds the data pipelines. PRSC defines what the PRSC Readiness Score measures and governs how the PRSC Readiness Score is issued." },
-          { kind: "p", text: "The system is designed to retrieve, ingest, and verify information wherever possible—not require participants to manually enter endless statistics or self-PRSC Readiness Score." },
+          { kind: "p", text: "The system is designed to retrieve, ingest, and verify information wherever possible—not require participants to manually enter endless statistics or assess themselves." },
         ],
       },
       {
@@ -494,10 +494,10 @@ const SOURCE_GROUPS: TopicGroup[] = [
         tone: "prsc",
         blocks: [
           { kind: "pairs", rows: [
-            { term: "Methodology governance", text: "PRSC governs the PRSC Readiness Score’s definitions, methodology, calibration rules, and review process" },
-            { term: "Data and platform separation", text: "DIS builds the technology and data infrastructure but does not control the scoring rules" },
-            { term: "Evidence rules", text: "Verified claims follow defined evidence requirements and review processes" },
-            { term: "Privacy", text: "Individual PRSC Readiness Scores are private by default. Aggregated benchmark data may be used without exposing individual participants" },
+            { term: "Methodology governance", text: "PRSC governs the PRSC Readiness Score’s definitions, methodology, calibration rules, and review process." },
+            { term: "Data and platform separation", text: "DIS builds the technology and data infrastructure but does not control the scoring rules." },
+            { term: "Evidence rules", text: "Verified claims follow defined evidence requirements and review processes." },
+            { term: "Privacy", text: "Individual PRSC Readiness Scores are private by default. Aggregated benchmark data may be used without exposing individual participants." },
           ] },
           { kind: "list", title: "Evidence integrity", items: [
             "Retrievable data should be Terminal-ingested where possible",
@@ -599,9 +599,9 @@ const SOURCE_GROUPS: TopicGroup[] = [
         tone: "prsc",
         blocks: [
           { kind: "pairs", rows: [
-            { term: "Tier 1 — Endorsement", text: "A series supports the Standard, encourages participation, and gains early benchmark context" },
-            { term: "Tier 2 — Intelligence", text: "A series gains deeper series-level benchmark intelligence, aggregate reporting, and stronger sponsor-conversation tools" },
-            { term: "Tier 3 — Mandate", text: "A series adopts the Standard as an expectation for a defined participant group or sponsor-eligibility use case" },
+            { term: "Tier 1 — Endorsement", text: "A series supports the Standard, encourages participation, and gains early benchmark context." },
+            { term: "Tier 2 — Intelligence", text: "A series gains deeper series-level benchmark intelligence, aggregate reporting, and stronger sponsor-conversation tools." },
+            { term: "Tier 3 — Mandate", text: "A series adopts the Standard as an expectation for a defined participant group or sponsor-eligibility use case." },
           ] },
           { kind: "callout", title: "The story in one line", text: CHAIN },
           { kind: "quote", text: "The long-term inflection point is not a single subscription. It is when a respected series adopts commercial readiness as part of how the sport operates." },
