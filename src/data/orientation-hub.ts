@@ -393,7 +393,7 @@ const SOURCE_GROUPS: TopicGroup[] = [
       {
         id: "dimensions",
         links: ["score", "standards"],
-        title: "What the PRSC Readiness Score™ Looks At",
+        title: "What the PRSC Readiness Score™ Measures",
         heading: "Six simple questions—not just race results.",
         tone: "prsc",
         blocks: [
