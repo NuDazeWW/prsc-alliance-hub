@@ -6,25 +6,25 @@ const CANONICAL = "https://prscstandards.com/standard-v1";
 export const Route = createFileRoute("/standard-v1")({
   head: () => ({
     meta: [
-      { title: "The PRSC Readiness Standard v1.0 — Full Document" },
+      { title: "The PRSC Readiness Standard™ v1.0 — Full Document" },
       {
         name: "description",
         content:
-          "The full text of the PRSC Readiness Standard v1.0 — the independent framework for measuring commercial readiness across partnership-driven ecosystems. Effective July 22, 2026.",
+          "The full text of the PRSC Readiness Standard™ v1.0 — the independent framework for measuring commercial readiness across partnership-driven ecosystems. Effective July 22, 2026.",
       },
-      { property: "og:title", content: "The PRSC Readiness Standard v1.0 — Full Document" },
+      { property: "og:title", content: "The PRSC Readiness Standard™ v1.0 — Full Document" },
       {
         property: "og:description",
         content:
-          "The full text of the PRSC Readiness Standard v1.0 — the independent framework for measuring commercial readiness in partnership-driven ecosystems.",
+          "The full text of the PRSC Readiness Standard™ v1.0 — the independent framework for measuring commercial readiness in partnership-driven ecosystems.",
       },
       { property: "og:type", content: "article" },
       { property: "og:url", content: CANONICAL },
       { name: "twitter:card", content: "summary_large_image" },
-      { name: "twitter:title", content: "The PRSC Readiness Standard v1.0" },
+      { name: "twitter:title", content: "The PRSC Readiness Standard™ v1.0" },
       {
         name: "twitter:description",
-        content: "The full text of the PRSC Readiness Standard v1.0 — effective July 22, 2026.",
+        content: "The full text of the PRSC Readiness Standard™ v1.0 — effective July 22, 2026.",
       },
     ],
     links: [{ rel: "canonical", href: CANONICAL }],
@@ -227,7 +227,7 @@ function StandardV1Page() {
                 Partnership Readiness Standards Council
               </p>
               <h1 className="font-display text-4xl md:text-6xl leading-tight text-ivory mb-5">
-                The PRSC Readiness Standard
+                The PRSC Readiness Standard™
               </h1>
               <p className="italic text-lg md:text-xl text-ivory/70 max-w-2xl leading-relaxed">
                 A Framework for Measuring Commercial Readiness in Partnership-Driven Ecosystems
@@ -285,7 +285,7 @@ function StandardV1Page() {
         <section>
           <SectionHeading id="purpose" num="1" title="Purpose and Governing Philosophy" />
           <p className="mb-5">
-            The PRSC Readiness Standard (the "Standard") is the foundational methodology of the
+            The PRSC Readiness Standard™ (the "Standard") is the foundational methodology of the
             Partnership Readiness Standards Council ("PRSC" or the "Council"). It defines what
             commercial readiness means, how it is measured, and how scores are interpreted for
             entities operating within sponsorship, partnership, and investment-driven ecosystems.

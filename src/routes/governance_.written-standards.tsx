@@ -257,7 +257,7 @@ function WrittenStandardsPage() {
             to="/standard-v1"
             className="block text-gold text-sm tracking-[0.14em] uppercase hover:underline"
           >
-            Read the PRSC Readiness Standard &rarr;
+            Read the PRSC Readiness Standard™ &rarr;
           </Link>
         </div>
       </section>

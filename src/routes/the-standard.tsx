@@ -16,7 +16,7 @@ export const Route = createFileRoute("/the-standard")({
     meta: [
       { title: "PRSC Readiness Score™ — The Independent Standard for Partnership Readiness" },
       { name: "description", content: "The PRSC Readiness Score™ is the independent, evidence-based measure of commercial partnership readiness — built on the Six Readiness Dimensions™ and governed by the Partnership Readiness Standards Council." },
-      { name: "keywords", content: "PRSC Readiness Score™, PRSC Readiness Standard, Partnership Readiness Standards Council, Six Readiness Dimensions, commercial readiness score, sponsorship readiness" },
+      { name: "keywords", content: "PRSC Readiness Score™, PRSC Readiness Standard™, Partnership Readiness Standards Council, Six Readiness Dimensions, commercial readiness score, sponsorship readiness" },
       { property: "og:title", content: "PRSC Readiness Score™ — The Independent Standard for Partnership Readiness" },
       { property: "og:description", content: "The PRSC Readiness Score™ — the independent, evidence-based measure of commercial partnership readiness, governed by the Partnership Readiness Standards Council." },
       { property: "og:type", content: "article" },
@@ -74,7 +74,7 @@ export const Route = createFileRoute("/the-standard")({
             url: CANONICAL,
             inDefinedTermSet: {
               "@type": "DefinedTermSet",
-              name: "PRSC Readiness Standard",
+              name: "PRSC Readiness Standard™",
               url: CANONICAL,
             },
           },

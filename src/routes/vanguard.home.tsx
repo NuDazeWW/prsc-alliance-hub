@@ -28,7 +28,7 @@ export const Route = createFileRoute("/vanguard/home")({
       {
         name: "description",
         content:
-          "An invitation to a select group of Trans Am drivers and teams to join the Readiness Vanguard of the PRSC Readiness Standard.",
+          "An invitation to a select group of Trans Am drivers and teams to join the Readiness Vanguard of the PRSC Readiness Standard™.",
       },
       { name: "robots", content: "noindex, nofollow" },
       { name: "viewport", content: "width=device-width, initial-scale=1, viewport-fit=cover" },

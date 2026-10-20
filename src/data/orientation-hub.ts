@@ -80,7 +80,7 @@ export const RELATIONSHIP = {
       rows: [
         "Builds and operates the intelligence platform",
         "Builds data pipelines, benchmarks, subscriber tools, and intelligence products",
-        "Does not govern the PRSC Readiness Standard or issue the PRSC Readiness Score™",
+        "Does not govern the PRSC Readiness Standard™ or issue the PRSC Readiness Score™",
       ],
     },
   ],
