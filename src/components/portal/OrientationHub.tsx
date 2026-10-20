@@ -149,7 +149,7 @@ function Guided({ step, setStep, onExplore, onMaterials, onRole, btn, onPick }: 
         </div>
         <p className="mt-5 label-caps text-gold">{ch.title}</p>
         <TopicBody key={step} topic={ch.topic} onPick={onPick} />
-        <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:flex-nowrap sm:gap-2.5">
+        <div className={`mt-8 flex flex-col gap-3 sm:flex-row sm:gap-2.5 ${last ? "hub-cta-row sm:flex-wrap [&>button]:shrink-0 [&>button]:max-w-full [&>button]:whitespace-normal [&>button]:py-3 sm:[&>button]:whitespace-nowrap" : "sm:flex-nowrap"}`}>
           {step > 0 && <button type="button" onClick={() => setStep(step - 1)} className={`${btn} cta-glow-outline whitespace-nowrap sm:px-5`}><span>Previous</span></button>}
           {!last && <button type="button" onClick={() => setStep(step + 1)} className={`${btn} cta-glow whitespace-nowrap sm:px-5`}><span>Next chapter</span></button>}
           {last && (
@@ -231,8 +231,8 @@ function BlockView({ b, tone }: { b: Block; tone: Tone }) {
     case "callout":
       return (
         <div className={`rounded-md border-2 ${tone === "dis" ? "border-dis-cyan/60 bg-dis-navy/60" : "border-gold/60 bg-gold/[.07]"} px-5 py-4`}>
-          {b.title && <p className={`text-[11px] font-semibold ${b.title === "Boundary" ? "text-[13px]" : "uppercase"} tracking-[0.18em] ${tone === "dis" ? "text-dis-cyan" : "text-gold"}`}>{b.title}</p>}
-          <p className="mt-1.5 text-[15px] leading-7 text-ivory/90">{b.text}</p>
+          {b.title && <p className={`${b.title === "Boundary" ? "font-sans text-sm font-semibold" : "text-[11px] font-semibold uppercase tracking-[0.18em]"} ${tone === "dis" ? "text-dis-cyan" : "text-gold"}`}>{b.title}</p>}
+          <p className={b.title === "Boundary" ? "mt-1 font-sans text-[14px] leading-6 text-ivory/78" : "mt-1.5 text-[15px] leading-7 text-ivory/90"}>{b.text}</p>
         </div>
       );
     case "label":
