@@ -494,7 +494,7 @@ const SOURCE_GROUPS: TopicGroup[] = [
         tone: "prsc",
         blocks: [
           { kind: "pairs", rows: [
-            { term: "Methodology governance", text: "PRSC governs the PRSC Readiness Score™’s definitions, methodology, calibration rules, and review process." },
+            { term: "Methodology governance", text: "PRSC governs how the PRSC Readiness Score™ is defined, calculated, calibrated, and reviewed." },
             { term: "Data and platform separation", text: "DIS builds the technology and data infrastructure but does not control the scoring rules." },
             { term: "Evidence rules", text: "Verified claims follow defined evidence requirements and review processes." },
             { term: "Privacy", text: "Each individual PRSC Readiness Score™ is private by default. Aggregated benchmark data may be used without exposing individual participants." },
