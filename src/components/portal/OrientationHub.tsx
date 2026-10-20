@@ -391,7 +391,7 @@ function SiteLinks({ ids, onPick }: { ids: string[]; onPick: (id: string) => voi
 
 function RoleVisual({ v }: { v: "shield" | "ring" | "signal" }) {
   const src = v === "shield" ? prscCrest.url : v === "ring" ? scoreGauge.url : disLogo;
-  const alt = v === "shield" ? "PRSC crest" : v === "ring" ? "PRSC Readiness Score gauge" : "DIS — Decision Intelligence Systems";
+  const alt = v === "shield" ? "PRSC crest" : v === "ring" ? "PRSC Readiness Score™ gauge" : "DIS — Decision Intelligence Systems";
   return (
     <div className="grid h-24 place-items-center">
       <img src={src} alt={alt} className={`max-h-24 object-contain drop-shadow-[0_6px_18px_rgba(0,0,0,0.5)] ${v === "signal" ? "w-[88%]" : "h-24 w-auto"}`} />

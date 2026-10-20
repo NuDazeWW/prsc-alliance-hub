@@ -171,7 +171,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient; host
             description:
               "The independent standards body governing partnership readiness — an authoritative, evidence-based rating for the $100B+ sponsorship market.",
             knowsAbout: [
-              "PRSC Readiness Score",
+              "PRSC Readiness Score™",
               "PRSC Readiness Standard",
               "Partnership Readiness",
               "Sponsorship Standards",

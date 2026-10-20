@@ -16,7 +16,7 @@ export const Route = createFileRoute("/the-standard")({
     meta: [
       { title: "PRSC Readiness Score™ — The Independent Standard for Partnership Readiness" },
       { name: "description", content: "The PRSC Readiness Score™ is the independent, evidence-based measure of commercial partnership readiness — built on the Six Readiness Dimensions™ and governed by the Partnership Readiness Standards Council." },
-      { name: "keywords", content: "PRSC Readiness Score, PRSC Readiness Standard, Partnership Readiness Standards Council, Six Readiness Dimensions, commercial readiness score, sponsorship readiness" },
+      { name: "keywords", content: "PRSC Readiness Score™, PRSC Readiness Standard, Partnership Readiness Standards Council, Six Readiness Dimensions, commercial readiness score, sponsorship readiness" },
       { property: "og:title", content: "PRSC Readiness Score™ — The Independent Standard for Partnership Readiness" },
       { property: "og:description", content: "The PRSC Readiness Score™ — the independent, evidence-based measure of commercial partnership readiness, governed by the Partnership Readiness Standards Council." },
       { property: "og:type", content: "article" },
@@ -53,9 +53,9 @@ export const Route = createFileRoute("/the-standard")({
             "@context": "https://schema.org",
             "@type": "Article",
             "@id": CANONICAL + "#article",
-            headline: "The PRSC Readiness Score — The Independent Standard for Partnership Readiness",
+            headline: "The PRSC Readiness Score™ — The Independent Standard for Partnership Readiness",
             description:
-              "An overview of the PRSC Readiness Score methodology, the Six Readiness Dimensions, and the governance of the Partnership Readiness Standards Council.",
+              "An overview of the PRSC Readiness Score™ methodology, the Six Readiness Dimensions, and the governance of the Partnership Readiness Standards Council.",
             mainEntityOfPage: { "@id": CANONICAL + "#webpage" },
             image: OG_IMAGE,
             author: { "@id": "https://prscstandards.com/#organization" },
@@ -68,9 +68,9 @@ export const Route = createFileRoute("/the-standard")({
             "@context": "https://schema.org",
             "@type": "DefinedTerm",
             "@id": CANONICAL + "#prsc-readiness-score",
-            name: "PRSC Readiness Score",
+            name: "PRSC Readiness Score™",
             alternateName: ["PRSC Readiness Score™", "Readiness Score"],
-            description: "The PRSC Readiness Score is the independent, evidence-based measure of an organization's commercial partnership readiness, calculated across the Six Readiness Dimensions and governed by the Partnership Readiness Standards Council (PRSC).",
+            description: "The PRSC Readiness Score™ is the independent, evidence-based measure of an organization's commercial partnership readiness, calculated across the Six Readiness Dimensions and governed by the Partnership Readiness Standards Council (PRSC).",
             url: CANONICAL,
             inDefinedTermSet: {
               "@type": "DefinedTermSet",
@@ -82,7 +82,7 @@ export const Route = createFileRoute("/the-standard")({
             "@context": "https://schema.org",
             "@type": "DefinedTermSet",
             name: "The Six Readiness Dimensions",
-            description: "The six independent dimensions of the PRSC Readiness Score methodology for measuring commercial partnership readiness.",
+            description: "The six independent dimensions of the PRSC Readiness Score™ methodology for measuring commercial partnership readiness.",
             url: CANONICAL,
             hasDefinedTerm: [
               { "@type": "DefinedTerm", name: "Signal Strength", description: "The clarity, consistency, and reach of an organization's public presence — the raw broadcast footprint on which every partnership is built." },
@@ -99,18 +99,18 @@ export const Route = createFileRoute("/the-standard")({
             mainEntity: [
               {
                 "@type": "Question",
-                name: "What is the PRSC Readiness Score?",
+                name: "What is the PRSC Readiness Score™?",
                 acceptedAnswer: {
                   "@type": "Answer",
-                  text: "The PRSC Readiness Score is a single, independent measure of an organization's commercial partnership readiness. It is produced through a structured, peer-reviewed process governed by the Partnership Readiness Standards Council and calculated across the Six Readiness Dimensions.",
+                  text: "The PRSC Readiness Score™ is a single, independent measure of an organization's commercial partnership readiness. It is produced through a structured, peer-reviewed process governed by the Partnership Readiness Standards Council and calculated across the Six Readiness Dimensions.",
                 },
               },
               {
                 "@type": "Question",
-                name: "Who governs the PRSC Readiness Score?",
+                name: "Who governs the PRSC Readiness Score™?",
                 acceptedAnswer: {
                   "@type": "Answer",
-                  text: "The PRSC Readiness Score is governed by the Partnership Readiness Standards Council (PRSC) — an independent, non-commercial standards body with a peer-reviewed methodology committee.",
+                  text: "The PRSC Readiness Score™ is governed by the Partnership Readiness Standards Council (PRSC) — an independent, non-commercial standards body with a peer-reviewed methodology committee.",
                 },
               },
             ],
@@ -121,7 +121,7 @@ export const Route = createFileRoute("/the-standard")({
             "@id": CANONICAL + "#breadcrumb",
             itemListElement: [
               { "@type": "ListItem", position: 1, name: "PRSC", item: "https://prscstandards.com/" },
-              { "@type": "ListItem", position: 2, name: "PRSC Readiness Score", item: CANONICAL },
+              { "@type": "ListItem", position: 2, name: "PRSC Readiness Score™", item: CANONICAL },
             ],
           },
         ]),

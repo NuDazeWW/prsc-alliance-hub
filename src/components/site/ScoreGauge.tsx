@@ -1,7 +1,7 @@
 import gaugeAsset from "@/assets/prsc-score-gauge.png.asset.json";
 
 /**
- * Hero gauge: chrome-and-gold dial representing the 0–100 PRSC Readiness Score.
+ * Hero gauge: chrome-and-gold dial representing the 0–100 PRSC Readiness Score™.
  */
 export function ScoreGauge() {
   return (
@@ -16,7 +16,7 @@ export function ScoreGauge() {
       />
       <img
         src={gaugeAsset.url}
-        alt="PRSC Readiness Score gauge, scored 0 to 100 — independent, objective, built to last."
+        alt="PRSC Readiness Score™ gauge, scored 0 to 100 — independent, objective, built to last."
         width={890}
         height={772}
         fetchPriority="high"

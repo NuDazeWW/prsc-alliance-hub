@@ -78,7 +78,7 @@ function BriefingPage() {
 
       <ContinueReading
         links={[
-          { to: "/the-standard", label: "PRSC Readiness Score" },
+          { to: "/the-standard", label: "PRSC Readiness Score™" },
           { to: "/governance", label: "Governance" },
           { to: "/readiness-vanguard", label: "The Readiness Vanguard" },
         ]}
