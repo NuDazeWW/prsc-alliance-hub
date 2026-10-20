@@ -45,3 +45,5 @@
 - [x] Welcome Center top gap removed
 - [x] Admin: Set Up a New Meeting pop-up in Invite and Compose; calendar date picker, chips, time zones
 - [ ] Verify in a real signed-in admin session: create a meeting from an email and send (needs live sign-in)
+
+- [ ] Add the ™ mark to every PRSC Readiness Standard mention (site, portal, emails)
