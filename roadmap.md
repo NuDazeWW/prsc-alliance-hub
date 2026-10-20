@@ -1,6 +1,7 @@
 # Portal build roadmap
 
 - [ ] Match chapter 04 box typography, fit chapter 06 footer labels, and standardize portal bullet punctuation and PRSC Readiness Score references
+- [ ] Apply exclusive hover highlighting to chapter 06 footer buttons
 
 - [x] Configure invite-only authentication and password protections
 - [x] Add secure portal schema, roles, RLS, activity records, and private headshot storage

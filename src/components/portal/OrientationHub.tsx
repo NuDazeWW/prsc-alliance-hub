@@ -149,7 +149,7 @@ function Guided({ step, setStep, onExplore, onMaterials, onRole, btn, onPick }: 
         </div>
         <p className="mt-5 label-caps text-gold">{ch.title}</p>
         <TopicBody key={step} topic={ch.topic} onPick={onPick} />
-        <div className={`mt-8 flex flex-col gap-3 sm:flex-row sm:gap-2.5 ${last ? "sm:flex-wrap [&>button]:shrink-0 [&>button]:max-w-full [&>button]:whitespace-normal [&>button]:py-3 sm:[&>button]:whitespace-nowrap" : "sm:flex-nowrap"}`}>
+        <div className={`mt-8 flex flex-col gap-3 sm:flex-row sm:gap-2.5 ${last ? "hub-cta-row sm:flex-wrap [&>button]:shrink-0 [&>button]:max-w-full [&>button]:whitespace-normal [&>button]:py-3 sm:[&>button]:whitespace-nowrap" : "sm:flex-nowrap"}`}>
           {step > 0 && <button type="button" onClick={() => setStep(step - 1)} className={`${btn} cta-glow-outline whitespace-nowrap sm:px-5`}><span>Previous</span></button>}
           {!last && <button type="button" onClick={() => setStep(step + 1)} className={`${btn} cta-glow whitespace-nowrap sm:px-5`}><span>Next chapter</span></button>}
           {last && (
