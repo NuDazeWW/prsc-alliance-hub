@@ -4,6 +4,7 @@ import { Activity, CalendarDays, ChevronDown, Eye, EyeOff, HelpCircle, KeyRound,
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { PrscMark } from "@/components/site/PrscMark";
+import { useSidebarCollapse } from "@/components/portal/PortalShell";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
@@ -24,6 +25,8 @@ export function AdminSidebar({ page, onNavigate }: { page: "overview" | "send"; 
   const navigate = useNavigate();
   const [name, setName] = useState("Administrator");
   const [dialog, setDialog] = useState<null | "password" | "admins">(null);
+  const collapse = useSidebarCollapse();
+  const collapsed = collapse?.collapsed ?? false;
 
   useEffect(() => {
     void supabase.auth.getUser().then(({ data }) => {
@@ -41,15 +44,20 @@ export function AdminSidebar({ page, onNavigate }: { page: "overview" | "send"; 
 
   return (
     <div className="flex h-full flex-col">
-      <p className="text-[11px] uppercase tracking-[0.24em] text-gold">Administration</p>
+      {!collapsed && <p className="text-[11px] uppercase tracking-[0.24em] text-gold">Administration</p>}
       <DropdownMenu>
-        <DropdownMenuTrigger className="mt-4 flex w-full items-center gap-3 text-left outline-none focus-visible:ring-2 focus-visible:ring-gold">
-          <span className="grid h-11 w-11 shrink-0 place-items-center rounded-full border-2 border-gold/60 font-display text-lg text-ivory">{initials}</span>
+        <DropdownMenuTrigger
+          title={collapsed ? name : undefined}
+          className={`mt-4 flex w-full text-left outline-none focus-visible:ring-2 focus-visible:ring-gold ${collapsed ? "justify-center" : "items-center gap-3"}`}
+        >
+          <span className={`grid h-11 w-11 shrink-0 place-items-center rounded-full border-2 border-gold/60 font-display text-lg text-ivory ${collapsed ? "transition-colors hover:border-gold hover:bg-gold/10" : ""}`}>{initials}</span>
+          {!collapsed && (
           <span className="min-w-0 flex-1">
             <span className="block truncate font-display text-lg text-ivory">{name}</span>
             <span className="block text-[11px] font-semibold uppercase tracking-[0.18em] text-gold">Admin</span>
           </span>
-          <ChevronDown className="h-4 w-4 text-gold" />
+          )}
+          {!collapsed && <ChevronDown className="h-4 w-4 text-gold" />}
         </DropdownMenuTrigger>
         <DropdownMenuContent align="start" className="w-56 border-gold/30 bg-navy-deep text-ivory">
           <DropdownMenuItem onSelect={() => setDialog("password")}><KeyRound className="mr-2 h-4 w-4 text-gold" /> Change password</DropdownMenuItem>
@@ -69,19 +77,26 @@ export function AdminSidebar({ page, onNavigate }: { page: "overview" | "send"; 
               to={it.to}
               hash={it.hash}
               onClick={onNavigate}
-              className={`-mx-5 flex items-center gap-3 border-l-[3px] px-5 py-3 text-[15px] transition-colors ${active ? "border-gold bg-gold/10 text-gold" : "border-transparent text-ivory/75 hover:bg-ivory/5 hover:text-gold"}`}
+              title={collapsed ? it.label : undefined}
+              aria-label={collapsed ? it.label : undefined}
+              className={`border-l-[3px] py-3 text-[15px] transition-colors ${collapsed ? "-mx-4 flex justify-center" : "-mx-5 flex items-center gap-3 px-5"} ${active ? "border-gold bg-gold/10 text-gold" : "border-transparent text-ivory/75 hover:bg-ivory/5 hover:text-gold"}`}
             >
-              <Icon className="h-[18px] w-[18px]" /> {it.label}
+              <Icon className="h-[18px] w-[18px]" /> {!collapsed && it.label}
             </Link>
           );
         })}
       </nav>
 
       <div className="mt-6 border-t border-gold/15 pt-5">
-        <p className="text-[11px] uppercase tracking-[0.24em] text-ivory/45">Need help?</p>
-        <a href="mailto:info@readinessterminal.com" className="mt-3 flex items-start gap-3 text-ivory/80 hover:text-gold">
-          <HelpCircle className="mt-0.5 h-6 w-6 text-gold" />
-          <span><span className="block text-[15px]">Questions?</span><span className="block text-sm text-ivory/55">Send a message</span></span>
+        {!collapsed && <p className="text-[11px] uppercase tracking-[0.24em] text-ivory/45">Need help?</p>}
+        <a
+          href="mailto:info@readinessterminal.com"
+          title={collapsed ? "Questions? Send a message" : undefined}
+          aria-label={collapsed ? "Questions? Send a message" : undefined}
+          className={`text-ivory/80 hover:text-gold ${collapsed ? "mt-4 flex justify-center" : "mt-3 flex items-start gap-3"}`}
+        >
+          <HelpCircle className={`${collapsed ? "h-6 w-6" : "mt-0.5 h-6 w-6"} text-gold`} />
+          {!collapsed && <span><span className="block text-[15px]">Questions?</span><span className="block text-sm text-ivory/55">Send a message</span></span>}
         </a>
       </div>
 
