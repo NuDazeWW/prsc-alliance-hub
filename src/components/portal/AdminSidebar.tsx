@@ -77,9 +77,11 @@ export function AdminSidebar({ page, onNavigate }: { page: "overview" | "send"; 
               to={it.to}
               hash={it.hash}
               onClick={onNavigate}
-              className={`-mx-5 flex items-center gap-3 border-l-[3px] px-5 py-3 text-[15px] transition-colors ${active ? "border-gold bg-gold/10 text-gold" : "border-transparent text-ivory/75 hover:bg-ivory/5 hover:text-gold"}`}
+              title={collapsed ? it.label : undefined}
+              aria-label={collapsed ? it.label : undefined}
+              className={`border-l-[3px] py-3 text-[15px] transition-colors ${collapsed ? "-mx-4 flex justify-center" : "-mx-5 flex items-center gap-3 px-5"} ${active ? "border-gold bg-gold/10 text-gold" : "border-transparent text-ivory/75 hover:bg-ivory/5 hover:text-gold"}`}
             >
-              <Icon className="h-[18px] w-[18px]" /> {it.label}
+              <Icon className="h-[18px] w-[18px]" /> {!collapsed && it.label}
             </Link>
           );
         })}
