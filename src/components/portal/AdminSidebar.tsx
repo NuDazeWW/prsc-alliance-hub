@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link, useNavigate } from "@tanstack/react-router";
-import { Activity, CalendarDays, ChevronDown, Eye, EyeOff, HelpCircle, KeyRound, LayoutDashboard, LogOut, MailPlus, MessageSquare, ShieldPlus, Trash2, Users } from "lucide-react";
+import { Activity, CalendarDays, ChevronDown, Eye, EyeOff, FileText, HelpCircle, KeyRound, LayoutDashboard, LogOut, MailPlus, MessageSquare, ShieldPlus, Trash2, Users } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { PrscMark } from "@/components/site/PrscMark";
@@ -16,6 +16,7 @@ const ITEMS: Item[] = [
   { label: "Overview", to: "/admin", icon: LayoutDashboard, page: "overview" },
   { label: "Invite & Email", to: "/admin/send", icon: MailPlus, page: "send" },
   { label: "Members", to: "/admin", hash: "tracker", icon: Users },
+  { label: "Documents", to: "/admin", hash: "documents", icon: FileText },
   { label: "Inquiries", to: "/admin", hash: "inquiries", icon: MessageSquare },
   { label: "Meetings", to: "/admin", hash: "meetings", icon: CalendarDays },
   { label: "Activity", to: "/admin", hash: "activity-log", icon: Activity },
