@@ -1,13 +1,21 @@
-import { useState } from "react";
+import { createContext, useContext, useState } from "react";
 import { useNavigate } from "@tanstack/react-router";
-import { Bell, LogOut, Menu, User } from "lucide-react";
+import { Bell, ChevronsLeft, ChevronsRight, LogOut, Menu, User } from "lucide-react";
 import { Sheet, SheetContent, SheetTitle } from "@/components/ui/sheet";
 import { supabase } from "@/integrations/supabase/client";
 import { PrscMark } from "@/components/site/PrscMark";
+import { useStoredFlag } from "@/hooks/use-stored-flag";
 
 type NavItem = { label: string; href: string; onSelect?: () => void };
 export type PortalNotification = { id: string; label: string; detail?: string; href?: string };
 export type PortalStat = { label: string; value: React.ReactNode; icon?: React.ComponentType<{ className?: string }> };
+
+export type SidebarCollapseState = { collapsed: boolean; toggle: () => void };
+const SidebarCollapseContext = createContext<SidebarCollapseState | null>(null);
+/** Read inside admin sidebar content: collapse state is only provided on the desktop rail. */
+export function useSidebarCollapse(): SidebarCollapseState | null {
+  return useContext(SidebarCollapseContext);
+}
 
 export function PortalShell({
   children,
