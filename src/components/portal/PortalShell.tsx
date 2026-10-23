@@ -39,6 +39,7 @@ export function PortalShell({
   const [menuOpen, setMenuOpen] = useState(false);
   const navigate = useNavigate();
   const [alertsOpen, setAlertsOpen] = useState(false);
+  const [navCollapsed, setNavCollapsed] = useStoredFlag("admin-sidebar-collapsed", false);
   async function signOut() {
     await supabase.auth.signOut();
     await navigate({ to: "/auth", search: { redirect: "/portal", mode: undefined, email: undefined, passwordCreated: undefined }, replace: true });
