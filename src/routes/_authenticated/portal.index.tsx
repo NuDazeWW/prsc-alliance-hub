@@ -1,6 +1,8 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import { Pencil } from "lucide-react";
+import { useHeadshotUpload } from "@/hooks/use-headshot-upload";
 import { OrientationHub } from "@/components/portal/OrientationHub";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import {
@@ -215,24 +217,14 @@ function PortalHome() {
           <div className="lg:px-[12.5%] lg:pt-[clamp(1.5rem,2vw,2.25rem)]">
             <p className="text-[11px] uppercase tracking-[0.22em] text-gold/80">Your Welcome Center</p>
             <div className="mt-5 flex items-center gap-4">
-              {headshot.data?.url ? (
-                <img
-                  src={headshot.data.url}
-                  alt={`${name} ${m.last_name}`}
-                  className="aspect-square w-[64px] shrink-0 rounded-full border border-gold/55 object-cover"
-                />
-              ) : (
-                <span className="grid aspect-square w-[64px] shrink-0 place-items-center rounded-full border border-gold/55 font-display text-xl text-gold">
-                  {initials}
-                </span>
-              )}
+              <AvatarCircle url={headshot.data?.url} initials={initials} alt={`${name} ${m.last_name}`} editable={!asMember} />
               <h2 className="min-w-0 font-display text-[clamp(1.15rem,1.3vw,1.5rem)] leading-tight">
                 {name} {m.last_name}
               </h2>
             </div>
             <div className="mt-4 flex flex-col items-start gap-2 border-t border-gold/15 pt-4">
               {profileComplete && (
-                <Link to="/portal/profile" className="inline-flex items-center gap-2 text-[13px] font-medium text-gold transition-colors hover:text-ivory">
+                <Link to="/portal/profile" search={{ edit: 1 } as never} className="inline-flex items-center gap-2 text-[13px] font-medium text-gold transition-colors hover:text-ivory">
                   <PenLine className="h-3.5 w-3.5" /> Update Private Profile
                 </Link>
               )}
@@ -543,5 +535,26 @@ function PortalHome() {
       </Dialog>
     </PortalShell>
     </>
+  );
+}
+
+function AvatarCircle({ url, initials, alt, editable }: { url?: string | null; initials: string; alt: string; editable: boolean }) {
+  const fileRef = useRef<HTMLInputElement>(null);
+  const { upload, busy, msg } = useHeadshotUpload();
+  const circle = url ? (
+    <img src={url} alt={alt} className="aspect-square w-[64px] rounded-full border border-gold/55 object-cover" />
+  ) : (
+    <span className="grid aspect-square w-[64px] place-items-center rounded-full border border-gold/55 font-display text-xl text-gold">{initials}</span>
+  );
+  if (!editable) return <div className="shrink-0">{circle}</div>;
+  return (
+    <div className="relative shrink-0">
+      <button type="button" disabled={busy} onClick={() => fileRef.current?.click()} aria-label={url ? "Change your photo" : "Upload your photo"} title={url ? "Change your photo" : "Upload your photo"} className={`relative block rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold ${busy ? "opacity-60" : ""}`}>
+        {circle}
+        <span className="absolute -bottom-0.5 -right-0.5 grid h-6 w-6 place-items-center rounded-full border border-navy-deep bg-gold text-navy-deep shadow"><Pencil className="h-3 w-3" /></span>
+      </button>
+      <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={(e) => { const f = e.target.files?.[0]; if (f) void upload(f); e.target.value = ""; }} />
+      {msg && msg !== "Photo saved." && <p role="status" className="absolute left-0 top-full mt-1 w-48 text-[11px] text-ivory/60">{msg}</p>}
+    </div>
   );
 }
