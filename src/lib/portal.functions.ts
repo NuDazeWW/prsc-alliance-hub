@@ -102,9 +102,11 @@ export const saveMyProfile = createServerFn({ method: "POST" })
       .eq("user_id", context.userId)
       .single();
     if (memberError || !member) throw new Error("Member profile unavailable");
+    const { data: existing } = await context.supabase.from("portal_profiles").select("submitted_at").eq("member_id", member.id).maybeSingle();
+    const alreadySubmitted = Boolean(existing?.submitted_at);
     const payload = {
       member_id: member.id,
-      current_stage: data.current_stage,
+      current_stage: alreadySubmitted ? 5 : data.current_stage,
       preferred_name: data.preferred_name,
       professional_role: data.professional_role,
       current_organization: data.current_organization,
@@ -122,7 +124,10 @@ export const saveMyProfile = createServerFn({ method: "POST" })
     };
     const { error } = await context.supabase.from("portal_profiles").upsert(payload, { onConflict: "member_id" });
     if (error) throw error;
-    if (data.submit) {
+    if (alreadySubmitted && !data.submit) {
+      await context.supabase.from("portal_activity").insert({ member_id: member.id, actor_user_id: context.userId, event_type: "profile_updated" });
+    }
+    if (data.submit && !alreadySubmitted) {
       await context.supabase.from("portal_activity").insert({ member_id: member.id, actor_user_id: context.userId, event_type: "profile_submitted" });
       const apiKey = process.env["LOVABLE_API_KEY"];
       if (apiKey) {

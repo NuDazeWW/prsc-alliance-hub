@@ -215,24 +215,14 @@ function PortalHome() {
           <div className="lg:px-[12.5%] lg:pt-[clamp(1.5rem,2vw,2.25rem)]">
             <p className="text-[11px] uppercase tracking-[0.22em] text-gold/80">Your Welcome Center</p>
             <div className="mt-5 flex items-center gap-4">
-              {headshot.data?.url ? (
-                <img
-                  src={headshot.data.url}
-                  alt={`${name} ${m.last_name}`}
-                  className="aspect-square w-[64px] shrink-0 rounded-full border border-gold/55 object-cover"
-                />
-              ) : (
-                <span className="grid aspect-square w-[64px] shrink-0 place-items-center rounded-full border border-gold/55 font-display text-xl text-gold">
-                  {initials}
-                </span>
-              )}
+              <AvatarCircle url={headshot.data?.url} initials={initials} alt={`${name} ${m.last_name}`} editable={!asMember} />
               <h2 className="min-w-0 font-display text-[clamp(1.15rem,1.3vw,1.5rem)] leading-tight">
                 {name} {m.last_name}
               </h2>
             </div>
             <div className="mt-4 flex flex-col items-start gap-2 border-t border-gold/15 pt-4">
               {profileComplete && (
-                <Link to="/portal/profile" className="inline-flex items-center gap-2 text-[13px] font-medium text-gold transition-colors hover:text-ivory">
+                <Link to="/portal/profile" search={{ edit: 1 } as never} className="inline-flex items-center gap-2 text-[13px] font-medium text-gold transition-colors hover:text-ivory">
                   <PenLine className="h-3.5 w-3.5" /> Update Private Profile
                 </Link>
               )}
