@@ -357,7 +357,7 @@ export function AdminCenter({ page }: { page: "overview" | "send" }) {
       3: "order-5 lg:col-start-2 lg:row-start-3",
       4: "order-6 lg:col-start-2 lg:row-start-4",
     },
-    send: { 1: "", 2: "", 3: "lg:col-span-2 xl:col-span-1", 4: "lg:col-span-2 xl:col-span-3" },
+    send: { 1: "lg:row-start-1", 2: "lg:col-start-2 lg:row-start-1", 3: "lg:col-span-2 2xl:col-span-1 2xl:col-start-3 2xl:row-start-1", 4: "lg:col-span-2 2xl:col-span-3" },
   };
   const S = (on: "overview" | "send", order: number) => (page === on ? PLACE[on][order] ?? "" : "hidden");
   const [showAllActivity, setShowAllActivity] = useState(false);
@@ -990,7 +990,7 @@ export function AdminCenter({ page }: { page: "overview" | "send" }) {
             ))}
           </div>
         )}
-        <div className={`mt-6 grid gap-5 ${page === "overview" ? "lg:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)]" : "lg:grid-cols-2 xl:grid-cols-[minmax(0,1fr)_minmax(0,1.2fr)_minmax(0,0.85fr)]"}`}>
+        <div className={`mt-6 grid gap-5 ${page === "overview" ? "lg:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)]" : "lg:grid-cols-2 2xl:grid-cols-[minmax(0,1fr)_minmax(0,1.3fr)_minmax(0,0.8fr)]"}`}>
           <div className="contents">
             <section className={`${S("send",1)} admin-card p-6 sm:p-8 ${inviteCollapsed ? "[&>*:not(:first-child)]:hidden" : ""}`}>
               <div className="flex items-start justify-between gap-3">
