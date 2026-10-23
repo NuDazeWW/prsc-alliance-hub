@@ -48,3 +48,5 @@
 
 - [x] Add the ™ mark to every PRSC Readiness Standard mention (site, portal, emails)
 - [x] Split the Admin Center into Overview and Invite & Email pages
+- [x] Five-part recipient journey: staged/sequenced documents, one-off records track, admin activation, header journey tracker, sign-out moved to left nav
+- [ ] Load real journey PDFs per stage/track (waiting on the documents)
