@@ -344,7 +344,7 @@ export function AdminCenter({ page }: { page: "overview" | "send" }) {
   const openPolls: any[] = (polls.data?.polls ?? []).filter((p: any) => p.status === "open");
   const [invitePollId, setInvitePollId] = useState("");
   const [inviteCollapsed, setInviteCollapsed] = useStoredFlag("admin.inviteCollapsed");
-  const S = (on: "overview" | "send", order: number) => (page === on ? `order-${order}` : "hidden");
+  const S = (on: "overview" | "send", order: number) => (page === on ? ["", "order-1", "order-2", "order-3", "order-4", "order-5", "order-6"][order] : "hidden");
   const [composePollId, setComposePollId] = useState("");
   const [previewAsId, setPreviewAsId] = useState("");
   const blockFor = (id: string) => {

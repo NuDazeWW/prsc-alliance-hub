@@ -26,6 +26,7 @@ import { Route as ApiGeoRouteImport } from './routes/api/geo'
 import { Route as GovernanceCharterRouteImport } from './routes/governance_.charter'
 import { Route as GovernanceWrittenStandardsRouteImport } from './routes/governance_.written-standards'
 import { Route as VanguardHomeRouteImport } from './routes/vanguard.home'
+import { Route as AuthenticatedAdminSendRouteImport } from './routes/_authenticated/admin_.send'
 import { Route as AuthenticatedPortalIndexRouteImport } from './routes/_authenticated/portal.index'
 import { Route as AuthenticatedPortalProfileRouteImport } from './routes/_authenticated/portal.profile'
 import { Route as AuthenticatedPortalQuestionsRouteImport } from './routes/_authenticated/portal.questions'
@@ -122,6 +123,11 @@ const VanguardHomeRoute = VanguardHomeRouteImport.update({
   path: '/vanguard/home',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthenticatedAdminSendRoute = AuthenticatedAdminSendRouteImport.update({
+  id: '/admin_/send',
+  path: '/admin/send',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedPortalIndexRoute =
   AuthenticatedPortalIndexRouteImport.update({
     id: '/portal/',
@@ -196,6 +202,7 @@ export interface FileRoutesByFullPath {
   '/governance/charter': typeof GovernanceCharterRoute
   '/governance/written-standards': typeof GovernanceWrittenStandardsRoute
   '/vanguard/home': typeof VanguardHomeRoute
+  '/admin/send': typeof AuthenticatedAdminSendRoute
   '/portal/profile': typeof AuthenticatedPortalProfileRoute
   '/portal/questions': typeof AuthenticatedPortalQuestionsRoute
   '/portal/summary': typeof AuthenticatedPortalSummaryRoute
@@ -224,6 +231,7 @@ export interface FileRoutesByTo {
   '/governance/charter': typeof GovernanceCharterRoute
   '/governance/written-standards': typeof GovernanceWrittenStandardsRoute
   '/vanguard/home': typeof VanguardHomeRoute
+  '/admin/send': typeof AuthenticatedAdminSendRoute
   '/portal/profile': typeof AuthenticatedPortalProfileRoute
   '/portal/questions': typeof AuthenticatedPortalQuestionsRoute
   '/portal/summary': typeof AuthenticatedPortalSummaryRoute
@@ -254,6 +262,7 @@ export interface FileRoutesById {
   '/governance_/charter': typeof GovernanceCharterRoute
   '/governance_/written-standards': typeof GovernanceWrittenStandardsRoute
   '/vanguard/home': typeof VanguardHomeRoute
+  '/_authenticated/admin_/send': typeof AuthenticatedAdminSendRoute
   '/_authenticated/portal/profile': typeof AuthenticatedPortalProfileRoute
   '/_authenticated/portal/questions': typeof AuthenticatedPortalQuestionsRoute
   '/_authenticated/portal/summary': typeof AuthenticatedPortalSummaryRoute
@@ -284,6 +293,7 @@ export interface FileRouteTypes {
     | '/governance/charter'
     | '/governance/written-standards'
     | '/vanguard/home'
+    | '/admin/send'
     | '/portal/profile'
     | '/portal/questions'
     | '/portal/summary'
@@ -312,6 +322,7 @@ export interface FileRouteTypes {
     | '/governance/charter'
     | '/governance/written-standards'
     | '/vanguard/home'
+    | '/admin/send'
     | '/portal/profile'
     | '/portal/questions'
     | '/portal/summary'
@@ -341,6 +352,7 @@ export interface FileRouteTypes {
     | '/governance_/charter'
     | '/governance_/written-standards'
     | '/vanguard/home'
+    | '/_authenticated/admin_/send'
     | '/_authenticated/portal/profile'
     | '/_authenticated/portal/questions'
     | '/_authenticated/portal/summary'
@@ -499,6 +511,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof VanguardHomeRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_authenticated/admin_/send': {
+      id: '/_authenticated/admin_/send'
+      path: '/admin/send'
+      fullPath: '/admin/send'
+      preLoaderRoute: typeof AuthenticatedAdminSendRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/portal/': {
       id: '/_authenticated/portal/'
       path: '/portal'
@@ -574,6 +593,7 @@ declare module '@tanstack/react-router' {
 
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedAdminRoute: typeof AuthenticatedAdminRoute
+  AuthenticatedAdminSendRoute: typeof AuthenticatedAdminSendRoute
   AuthenticatedPortalProfileRoute: typeof AuthenticatedPortalProfileRoute
   AuthenticatedPortalQuestionsRoute: typeof AuthenticatedPortalQuestionsRoute
   AuthenticatedPortalSummaryRoute: typeof AuthenticatedPortalSummaryRoute
@@ -582,6 +602,7 @@ interface AuthenticatedRouteRouteChildren {
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAdminRoute: AuthenticatedAdminRoute,
+  AuthenticatedAdminSendRoute: AuthenticatedAdminSendRoute,
   AuthenticatedPortalProfileRoute: AuthenticatedPortalProfileRoute,
   AuthenticatedPortalQuestionsRoute: AuthenticatedPortalQuestionsRoute,
   AuthenticatedPortalSummaryRoute: AuthenticatedPortalSummaryRoute,
