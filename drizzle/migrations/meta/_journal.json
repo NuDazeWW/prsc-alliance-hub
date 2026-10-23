@@ -71,6 +71,13 @@
       "when": 1792428949654,
       "tag": "0009_meeting_poll_timezone",
       "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1792796723107,
+      "tag": "0010_recipient_journey",
+      "breakpoints": true
     }
   ]
 }
