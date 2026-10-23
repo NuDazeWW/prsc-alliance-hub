@@ -45,7 +45,7 @@ Layout and styling only, plus the new admin account menu. All existing features,
 - Right column: live email preview (Desktop/Mobile switch) and an Email templates table (name, type, last updated, status, Edit) with "+ New template".
 
 ## Every card
-- 2px gold outline, rounded corners, soft glow, dark fill, gold line icon + serif title, actions on the right, "..." to collapse.
+- 2.5px gold outline, rounded corners, soft glow, dark fill, gold line icon + serif title, actions on the right, "..." to collapse.
 - Phones: everything stacks in one column.
 
 ## Technical details
