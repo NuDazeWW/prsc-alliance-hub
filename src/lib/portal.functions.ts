@@ -492,7 +492,8 @@ export const setMemberAccess = createServerFn({ method: "POST" })
   )
   .handler(async ({ context, data }) => {
     await assertAdmin(context);
-    const { error } = await context.supabase
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { error } = await supabaseAdmin
       .from("portal_members")
       .update({ status: data.status })
       .eq("id", data.member_id);
