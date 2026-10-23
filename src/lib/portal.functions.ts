@@ -555,7 +555,8 @@ export const setMemberPackageStatus = createServerFn({ method: "POST" })
   )
   .handler(async ({ context, data }) => {
     await assertAdmin(context);
-    const { error } = await context.supabase
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { error } = await supabaseAdmin
       .from("portal_members")
       .update({ package_status: data.package_status })
       .eq("id", data.member_id);
@@ -907,7 +908,8 @@ export const releaseMemberDocuments = createServerFn({ method: "POST" })
     if (!member) throw new Error("Member not found");
     const docs = await applicableDocuments(context.supabase, member as DocMember);
     if (!docs.length) throw new Error("Add at least one document before releasing");
-    const { error } = await context.supabase
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { error } = await supabaseAdmin
       .from("portal_members")
       .update({
         documents_released_at: new Date().toISOString(),
