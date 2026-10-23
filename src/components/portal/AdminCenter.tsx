@@ -2013,6 +2013,11 @@ export function AdminCenter({ page }: { page: "overview" | "send" }) {
                   </ul>
                 )}
               </div>
+              {d.activity.filter((a: any) => a.event_type).length > 5 && (
+                <button type="button" onClick={() => setShowAllActivity(!showAllActivity)} className="mt-3 inline-flex items-center gap-2 text-sm text-gold hover:text-ivory">
+                  {showAllActivity ? "Show recent only" : "View full activity log"} <ChevronRight className="h-4 w-4" />
+                </button>
+              )}
             </section>
           </div>
         </div>
