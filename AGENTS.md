@@ -16,3 +16,4 @@
 - Meeting details in emails come from the shared `meetingBlockText` helper, and attaching a meeting always enrolls the recipients in that poll, so the email and the Welcome Center card match.
 - Meeting creation UI lives only in `MeetingSetupForm` (used by Meetings and the email pop-ups); keep one form so validation and time-zone handling stay identical.
 - Meeting times are picked as wall-clock values in the poll's `timezone` and converted to UTC on the server via `zonedToUtc`; always render with `formatSlot(iso, poll.timezone)` so old polls fall back to Eastern.
+- The Admin Center UI lives in `src/components/portal/AdminCenter.tsx` with a `page` prop; `/admin` (Overview) and `/admin/send` (Invite & Email) are thin routes so both pages share one state and data source.
