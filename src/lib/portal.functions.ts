@@ -825,8 +825,9 @@ export const setEntityActivation = createServerFn({ method: "POST" })
   .handler(async ({ context, data }) => {
     await assertAdmin(context);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const col = data.entity === "prsc" ? "prsc_activated_at" : "dis_activated_at";
-    const { error } = await supabaseAdmin.from("portal_members").update({ [col]: data.activated ? new Date().toISOString() : null }).eq("id", data.member_id);
+    const at = data.activated ? new Date().toISOString() : null;
+    const patch = data.entity === "prsc" ? { prsc_activated_at: at } : { dis_activated_at: at };
+    const { error } = await supabaseAdmin.from("portal_members").update(patch).eq("id", data.member_id);
     if (error) throw error;
     await supabaseAdmin.from("portal_activity").insert({
       member_id: data.member_id, actor_user_id: context.userId,
