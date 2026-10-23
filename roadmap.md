@@ -47,3 +47,4 @@
 - [ ] Verify in a real signed-in admin session: create a meeting from an email and send (needs live sign-in)
 
 - [x] Add the ™ mark to every PRSC Readiness Standard mention (site, portal, emails)
+- [x] Split the Admin Center into Overview and Invite & Email pages
