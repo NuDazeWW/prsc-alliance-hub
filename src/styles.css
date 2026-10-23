@@ -660,3 +660,10 @@
 @media (prefers-reduced-motion: reduce) {
   .hub-card::after, .hub-card-dis::after, .cta-glow::after, .cta-glow-outline::after { animation: none !important; opacity: 0 !important; }
 }
+
+@utility admin-card {
+  border: 2.5px solid color-mix(in oklab, var(--color-gold) 70%, transparent);
+  border-radius: 0.75rem;
+  background: linear-gradient(160deg, color-mix(in oklab, var(--color-navy-deep) 92%, var(--color-gold) 3%), color-mix(in oklab, var(--color-navy-deep) 80%, transparent));
+  box-shadow: 0 0 0 1px color-mix(in oklab, var(--color-gold) 12%, transparent), 0 10px 32px -14px color-mix(in oklab, var(--color-gold) 45%, transparent);
+}

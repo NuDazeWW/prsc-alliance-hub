@@ -1,6 +1,8 @@
 import { useStoredFlag } from "@/hooks/use-stored-flag";
 import { ChevronDown, ChevronUp } from "lucide-react";
 import { AdminLeadership } from "@/components/portal/AdminLeadership";
+import { AdminSidebar } from "@/components/portal/AdminSidebar";
+import heroRoad from "@/assets/portal-hero-road.jpg";
 import { Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useEffect, useMemo, useRef, useState } from "react";
@@ -9,6 +11,8 @@ import { render } from "@react-email/render";
 import {
   Activity,
   AlertTriangle,
+  ChevronRight,
+  Mail,
   CalendarDays,
   CheckCircle2,
   Download,
@@ -344,7 +348,19 @@ export function AdminCenter({ page }: { page: "overview" | "send" }) {
   const openPolls: any[] = (polls.data?.polls ?? []).filter((p: any) => p.status === "open");
   const [invitePollId, setInvitePollId] = useState("");
   const [inviteCollapsed, setInviteCollapsed] = useStoredFlag("admin.inviteCollapsed");
-  const S = (on: "overview" | "send", order: number) => (page === on ? ["", "order-1", "order-2", "order-3", "order-4", "order-5", "order-6"][order] : "hidden");
+  const PLACE: Record<"overview" | "send", Record<number, string>> = {
+    overview: {
+      1: "order-1 lg:col-start-1 lg:row-start-1 lg:row-span-2",
+      2: "order-2 lg:col-start-1 lg:row-start-3 lg:row-span-2",
+      5: "order-3 lg:col-start-2 lg:row-start-1",
+      6: "order-4 lg:col-start-2 lg:row-start-2",
+      3: "order-5 lg:col-start-2 lg:row-start-3",
+      4: "order-6 lg:col-start-2 lg:row-start-4",
+    },
+    send: { 1: "lg:row-start-1", 2: "lg:col-start-2 lg:row-start-1", 3: "lg:col-span-2 2xl:col-span-1 2xl:col-start-3 2xl:row-start-1", 4: "lg:col-span-2 2xl:col-span-3" },
+  };
+  const S = (on: "overview" | "send", order: number) => (page === on ? PLACE[on][order] ?? "" : "hidden");
+  const [showAllActivity, setShowAllActivity] = useState(false);
   const [composePollId, setComposePollId] = useState("");
   const [previewAsId, setPreviewAsId] = useState("");
   const blockFor = (id: string) => {
@@ -921,40 +937,65 @@ export function AdminCenter({ page }: { page: "overview" | "send" }) {
     URL.revokeObjectURL(url);
   };
 
+  const statCards = [
+    { label: "Members", value: d.members.length, icon: Users, note: "Total members", href: "#tracker" },
+    { label: "Open inquiries", value: d.inquiries.filter((x: any) => x.status === "open").length, icon: MessageSquare, note: "New inquiries", href: "/admin#inquiries" },
+    { label: "Email templates", value: templates.length, icon: Mail, note: "Saved templates", href: "#email-center" },
+    { label: "Recent events", value: d.activity.length, icon: CalendarDays, note: "Recent activity", href: "/admin#activity-log" },
+  ];
+
   return (
     <>
     <PortalShell
       admin
       notifications={notifications}
-      stats={[
-        { label: "Members", value: d.members.length },
-        { label: "Open inquiries", value: d.inquiries.filter((x: any) => x.status === "open").length },
-        { label: "Email templates", value: templates.length },
-        { label: "Recent events", value: d.activity.length },
-      ]}
+      stats={statCards.map(({ label, value, icon }) => ({ label, value, icon }))}
+      sidebar={<AdminSidebar page={page} />}
     >
       <main className="px-4 py-10 sm:px-6 lg:px-8">
-        <div className="flex flex-col justify-between gap-6 border-b border-gold/20 pb-8 md:flex-row md:items-end">
-          <div>
-            <p className="text-sm uppercase text-gold">Administration</p>
-            <h1 className="mt-3 font-display text-5xl">Private center</h1>
+        <div className="relative -mx-4 -mt-10 overflow-hidden border-b border-gold/20 px-4 pb-6 pt-8 sm:-mx-6 sm:px-6 lg:-mx-8 lg:px-8">
+          <img src={heroRoad} alt="" aria-hidden="true" className="pointer-events-none absolute inset-y-0 right-0 hidden h-full w-[60%] object-cover opacity-80 md:block [mask-image:linear-gradient(90deg,transparent,black_35%)]" />
+          <div className="relative flex items-start justify-between gap-6">
+            <div>
+              <p className="text-xs uppercase tracking-[0.22em] text-gold">Administration</p>
+              <h1 className="mt-2 font-display text-5xl sm:text-6xl">Private center</h1>
+              <p className="mt-2 font-display text-lg text-ivory/70 sm:text-xl">
+                {page === "overview" ? "Manage your members, meetings, and communications in one place." : "Member access, communications, and inquiries."}
+              </p>
+              <nav aria-label="Admin pages" className="mt-5 flex gap-2">
+                {([["/admin", "Overview", "overview"], ["/admin/send", "Invite & Email", "send"]] as const).map(([to, label, key]) => (
+                  <Link key={to} to={to} className={`shrink-0 rounded-full border-2 px-6 py-2 text-sm font-medium transition-colors ${page === key ? "border-gold bg-gold text-navy" : "border-ivory/25 bg-navy-deep/60 text-ivory/85 hover:border-gold hover:text-gold"}`}>
+                    {label}
+                  </Link>
+                ))}
+              </nav>
+            </div>
+            <div className="hidden text-right md:block">
+              <p className="max-w-[12rem] text-left text-xs uppercase leading-6 tracking-[0.32em] text-ivory/90">A higher standard for a stronger industry.</p>
+              <span className="mt-3 block h-[2px] w-14 bg-gold" />
+            </div>
           </div>
-          <p className="text-base text-ivory/45">Member access, submissions, and inquiries</p>
         </div>
-
-        <nav aria-label="Admin pages" className="sticky top-0 z-20 -mx-4 mt-6 flex gap-2 overflow-x-auto border-b border-gold/15 bg-navy/95 px-4 py-3 backdrop-blur sm:-mx-6 sm:px-6 lg:-mx-8 lg:px-8">
-          {([["/admin", "Overview", "overview"], ["/admin/send", "Invite & Email", "send"]] as const).map(([to, label, key]) => (
-            <Link key={to} to={to} className={`shrink-0 rounded-full border px-5 py-2 text-sm transition-colors ${page === key ? "border-gold bg-gold text-navy" : "border-gold/30 text-ivory/80 hover:border-gold hover:text-gold"}`}>
-              {label}
-            </Link>
-          ))}
-        </nav>
-        <div className="mt-8 flex flex-col gap-8">
+        {page === "send" && (
+          <div className="mt-6 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+            {statCards.map(({ label, value, icon: Icon, note, href }) => (
+              <a key={label} href={href} className="admin-card group flex items-center gap-4 p-5">
+                <span className="grid h-12 w-12 shrink-0 place-items-center rounded-full border border-gold/40 text-gold"><Icon className="h-6 w-6" /></span>
+                <span className="min-w-0 flex-1">
+                  <span className="block font-display text-xl text-ivory">{label.replace(/^./, (c) => c.toUpperCase())}</span>
+                  <span className="mt-1 flex items-baseline gap-3"><span className="font-display text-3xl text-gold">{value}</span><span className="text-sm text-ivory/60">{note}</span></span>
+                </span>
+                <ChevronRight className="h-5 w-5 text-ivory/50 transition-colors group-hover:text-gold" />
+              </a>
+            ))}
+          </div>
+        )}
+        <div className={`mt-6 grid gap-5 ${page === "overview" ? "lg:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)]" : "lg:grid-cols-2 2xl:grid-cols-[minmax(0,1fr)_minmax(0,1.3fr)_minmax(0,0.8fr)]"}`}>
           <div className="contents">
-            <section className={`${S("send",1)} border border-gold/20 p-6 sm:p-8 ${inviteCollapsed ? "[&>*:not(:first-child)]:hidden" : ""}`}>
+            <section className={`${S("send",1)} admin-card p-6 sm:p-8 ${inviteCollapsed ? "[&>*:not(:first-child)]:hidden" : ""}`}>
               <div className="flex items-start justify-between gap-3">
                 <button type="button" onClick={() => setInviteCollapsed(!inviteCollapsed)} aria-expanded={!inviteCollapsed} className="flex items-center gap-3 text-left">
-                  <MailPlus className="h-5 w-5 text-gold" />
+                  <MailPlus className="h-7 w-7 text-gold" />
                   <h2 id="invite" className="scroll-mt-20 font-display text-3xl">Invite a member</h2>
                   {inviteCollapsed && <span className="text-sm text-ivory/50">Click to expand</span>}
                   {inviteCollapsed ? <ChevronDown className="h-5 w-5 text-gold" /> : <ChevronUp className="h-5 w-5 text-gold" />}
@@ -1062,10 +1103,10 @@ export function AdminCenter({ page }: { page: "overview" | "send" }) {
               </form>
             </section>
 
-            <section className={`${S("overview",6)} border border-gold/20 p-6 sm:p-8`}>
+            <section className={`${S("overview",6)} admin-card p-6 sm:p-8`}>
               <div className="flex items-start justify-between gap-3">
                 <div className="flex items-center gap-3">
-                  <Upload className="h-5 w-5 text-gold" />
+                  <Upload className="h-7 w-7 text-gold" />
                   <h2 className="font-display text-3xl">Upload a member list</h2>
                 </div>
                 <InfoTip
@@ -1177,7 +1218,7 @@ export function AdminCenter({ page }: { page: "overview" | "send" }) {
 
 
             {/* Template sidebar — constrained to the same column width as the invite panel */}
-            <aside className={`${S("send",3)} border border-gold/20`}>
+            <aside className={`${S("send",3)} admin-card overflow-hidden`}>
               <div className="flex items-center justify-between gap-3 border-b border-gold/15 px-5 py-4">
                 <div className="flex min-w-0 items-center gap-2.5">
                   <FileText className="h-4 w-4 shrink-0 text-gold" />
@@ -1254,8 +1295,8 @@ export function AdminCenter({ page }: { page: "overview" | "send" }) {
           </div>
 
           <div className="contents">
-            <div className={S("overview",5)}><AdminLeadership /></div>
-            <section id="email-center" className={`${S("send",2)} border border-gold/20 p-6 sm:p-8`}>
+            <div className={`${S("overview",5)} [&>section]:h-full`}><AdminLeadership /></div>
+            <section id="email-center" className={`${S("send",2)} admin-card p-6 sm:p-8`}>
               <div className="mb-6 flex flex-wrap gap-2" role="tablist">
                 {([
                   ["compose", "Compose & send"],
@@ -1375,7 +1416,7 @@ export function AdminCenter({ page }: { page: "overview" | "send" }) {
                 </div>
               )}
 
-              <div className="mt-6 grid gap-6 2xl:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
+              <div className={`mt-6 grid gap-6 ${page === "overview" ? "2xl:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]" : ""}`}>
               <div className="grid content-start gap-4 sm:grid-cols-2">
                 {isTemplateMode && (
                   <>
@@ -1506,10 +1547,10 @@ export function AdminCenter({ page }: { page: "overview" | "send" }) {
           </div>
 
           <div className="contents">
-            <section className={`${page === "send" ? "order-4" : "order-1"} border border-gold/20 p-6 sm:p-8`}>
+            <section className={`${page === "send" ? PLACE.send[4] : PLACE.overview[1]} admin-card p-6 sm:p-8`}>
               <div className="flex flex-wrap items-center justify-between gap-3">
-                <h2 id="tracker" className="font-display text-3xl">
-                  Members
+                <h2 id="tracker" className="flex scroll-mt-28 items-center gap-3 font-display text-3xl">
+                  <Users className="h-7 w-7 text-gold" /> Members
                 </h2>
                 <div className="flex flex-wrap items-center justify-end gap-2">
                   <Button
@@ -1873,10 +1914,10 @@ export function AdminCenter({ page }: { page: "overview" | "send" }) {
               {memberBusy && <p className="mt-3 text-base text-ivory/60">{memberBusy}</p>}
             </section>
 
-            <section className={`${S("overview",3)} border border-gold/20 p-6 sm:p-8`}>
+            <section className={`${S("overview",3)} admin-card p-6 sm:p-8`}>
               <div className="flex items-start justify-between gap-3">
-                <h2 id="inquiries" className="font-display text-3xl">
-                  Recent inquiries
+                <h2 id="inquiries" className="flex scroll-mt-28 items-center gap-3 font-display text-3xl">
+                  <MessageSquare className="h-7 w-7 text-gold" /> Recent inquiries
                 </h2>
                 <InfoTip
                   title="Recent inquiries"
@@ -1933,9 +1974,9 @@ export function AdminCenter({ page }: { page: "overview" | "send" }) {
               </div>
             </section>
 
-            <section className={`${S("overview",2)} border border-gold/20 p-6 sm:p-8`}>
+            <section className={`${S("overview",2)} admin-card p-6 sm:p-8`}>
               <div className="flex items-start justify-between gap-3">
-                <h2 id="meetings" className="font-display text-3xl">Meetings &amp; calendar</h2>
+                <h2 id="meetings" className="flex scroll-mt-28 items-center gap-3 font-display text-3xl"><CalendarDays className="h-7 w-7 text-gold" /> Meetings &amp; calendar</h2>
                 <InfoTip
                   title="Meetings & calendar"
                   body="Propose a board, advisory, or methodology committee meeting with a few time options. The right members are pre-selected by meeting type — committee meetings go only to Methodology Committee members. Everyone invited gets an email asking for their availability; their answers appear in the grid below. When a time works, click Confirm next to it and each member receives a confirmation email with an add-to-calendar file. Members who haven't answered after two days get an automatic reminder."
@@ -1945,17 +1986,17 @@ export function AdminCenter({ page }: { page: "overview" | "send" }) {
                 <AdminMeetings />
               </div>
             </section>
-            <section className={`${S("overview",4)} border border-gold/20 p-6 sm:p-8`}>
+            <section className={`${S("overview",4)} admin-card p-6 sm:p-8`}>
               <div className="flex items-start justify-between gap-3">
-                <h2 id="activity-log" className="font-display text-3xl">Activity log</h2>
+                <h2 id="activity-log" className="flex scroll-mt-28 items-center gap-3 font-display text-3xl"><Activity className="h-7 w-7 text-gold" /> Activity log</h2>
                 <InfoTip title="Activity log" body="A dated record of key steps: invitations, profile submissions, documents released, signatures, BoldSign check-offs, signed copies sent, and reminders you sent. Kept for your records in case anything is ever questioned." />
               </div>
-              <div className="mt-5 max-h-[28rem] overflow-y-auto border border-gold/15">
+              <div className={`mt-5 overflow-y-auto border border-gold/15 ${showAllActivity ? "max-h-[28rem]" : ""}`}>
                 {d.activity.filter((a: any) => a.event_type).length === 0 ? (
                   <p className="p-4 text-base text-ivory/45">No activity recorded yet.</p>
                 ) : (
                   <ul className="divide-y divide-ivory/10">
-                    {d.activity.filter((a: any) => a.event_type).map((a: any) => {
+                    {d.activity.filter((a: any) => a.event_type).slice(0, showAllActivity ? undefined : 5).map((a: any) => {
                       const who = members.find((x) => x.id === a.member_id);
                       const byAdmin = a.actor_user_id && who && a.actor_user_id !== who.user_id;
                       return (
@@ -1972,6 +2013,11 @@ export function AdminCenter({ page }: { page: "overview" | "send" }) {
                   </ul>
                 )}
               </div>
+              {d.activity.filter((a: any) => a.event_type).length > 5 && (
+                <button type="button" onClick={() => setShowAllActivity(!showAllActivity)} className="mt-3 inline-flex items-center gap-2 text-sm text-gold hover:text-ivory">
+                  {showAllActivity ? "Show recent only" : "View full activity log"} <ChevronRight className="h-4 w-4" />
+                </button>
+              )}
             </section>
           </div>
         </div>

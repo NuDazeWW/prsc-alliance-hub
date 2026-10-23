@@ -1,12 +1,13 @@
 import { useState } from "react";
 import { useNavigate } from "@tanstack/react-router";
-import { Bell, LogOut, User } from "lucide-react";
+import { Bell, LogOut, Menu, User } from "lucide-react";
+import { Sheet, SheetContent, SheetTitle } from "@/components/ui/sheet";
 import { supabase } from "@/integrations/supabase/client";
 import { PrscMark } from "@/components/site/PrscMark";
 
 type NavItem = { label: string; href: string; onSelect?: () => void };
 export type PortalNotification = { id: string; label: string; detail?: string; href?: string };
-export type PortalStat = { label: string; value: React.ReactNode };
+export type PortalStat = { label: string; value: React.ReactNode; icon?: React.ComponentType<{ className?: string }> };
 
 export function PortalShell({
   children,
@@ -16,6 +17,7 @@ export function PortalShell({
   memberProgress,
   notifications = [],
   stats = [],
+  sidebar,
 }: {
   children: React.ReactNode;
   admin?: boolean;
@@ -24,7 +26,9 @@ export function PortalShell({
   memberProgress?: React.ReactNode;
   notifications?: PortalNotification[];
   stats?: PortalStat[];
+  sidebar?: React.ReactNode;
 }) {
+  const [menuOpen, setMenuOpen] = useState(false);
   const navigate = useNavigate();
   const [alertsOpen, setAlertsOpen] = useState(false);
   async function signOut() {
@@ -65,7 +69,8 @@ export function PortalShell({
           {admin && stats.length > 0 && (
             <div className="hidden h-full min-w-0 items-center justify-end gap-[clamp(1rem,2vw,2.25rem)] lg:flex">
               {stats.map((s) => (
-                <div key={s.label} className="flex items-baseline gap-2 leading-tight">
+                <div key={s.label} className="flex items-center gap-2 leading-tight">
+                  {s.icon && <s.icon className="h-5 w-5 text-gold/80" />}
                   <span className="font-display text-3xl text-gold">{s.value}</span>
                   <span className="text-xs uppercase tracking-[0.14em] text-ivory/75">{s.label}</span>
                 </div>
@@ -126,7 +131,11 @@ export function PortalShell({
                 )}
               </div>
             )}
-            {admin ? (
+            {admin && sidebar ? (
+              <button type="button" onClick={() => setMenuOpen(true)} aria-label="Open menu" className="grid h-10 w-10 place-items-center rounded-full border border-gold/40 text-gold lg:hidden">
+                <Menu className="h-[18px] w-[18px]" />
+              </button>
+            ) : admin ? (
               <div className="flex items-center gap-3">
                 <span className="grid h-10 w-10 shrink-0 place-items-center rounded-full border border-gold/55">
                   <User className="h-[18px] w-[18px] text-gold" />
@@ -159,7 +168,22 @@ export function PortalShell({
           </div>
         </div>
       </header>
-      <div className="flex-1">{children}</div>
+      {sidebar ? (
+        <div className="flex flex-1">
+          <aside className="hidden w-[250px] shrink-0 border-r border-gold/15 bg-navy-deep/60 px-5 py-7 lg:block">
+            <div className="sticky top-[132px]">{sidebar}</div>
+          </aside>
+          <Sheet open={menuOpen} onOpenChange={setMenuOpen}>
+            <SheetContent side="left" className="w-[280px] border-gold/25 bg-navy-deep px-5 py-8 text-ivory">
+              <SheetTitle className="sr-only">Admin menu</SheetTitle>
+              <div onClick={(e) => { if ((e.target as HTMLElement).closest("a")) setMenuOpen(false); }}>{sidebar}</div>
+            </SheetContent>
+          </Sheet>
+          <div className="min-w-0 flex-1">{children}</div>
+        </div>
+      ) : (
+        <div className="flex-1">{children}</div>
+      )}
       <PortalFooter />
     </div>
   );
