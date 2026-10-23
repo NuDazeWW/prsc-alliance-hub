@@ -160,20 +160,7 @@ export function PortalShell({
                   <LogOut className="h-[16px] w-[16px]" />
                 </button>
               </div>
-            ) : (
-              <div className="flex items-center gap-3 sm:gap-5">
-                <span className="hidden whitespace-nowrap text-[13px] text-ivory/75 sm:inline">
-                  Welcome{memberName ? `, ${memberName}` : ""}
-                </span>
-                <button
-                  type="button"
-                  onClick={signOut}
-                  className="inline-flex min-h-10 items-center gap-2 whitespace-nowrap text-[12px] text-ivory/55 transition-colors hover:text-gold"
-                >
-                  <LogOut className="h-3.5 w-3.5" /> Sign out
-                </button>
-              </div>
-            )}
+            ) : null}
           </div>
         </div>
       </header>

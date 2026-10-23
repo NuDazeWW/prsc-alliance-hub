@@ -11,7 +11,10 @@ import {
   confirmExternalSignature,
   prepareSignedCopy,
   sendSignedCopy,
+  setEntityActivation,
 } from "@/lib/portal.functions";
+import { STAGES, journeyStatus, lockedDocumentIds, memberTracks } from "@/lib/journey";
+import { JOURNEY_PRESETS } from "@/lib/journey-templates";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -34,6 +37,9 @@ export function AdminMemberDocuments({ memberId, memberName, preview }: Props) {
   const [audEntity, setAudEntity] = useState<"" | "prsc" | "dis" | "both">("");
   const [audRole, setAudRole] = useState<"" | "board_member" | "advisor">("");
   const [releasing, setReleasing] = useState(false);
+  const [stage, setStage] = useState<"" | "1" | "2" | "3" | "4" | "5">("1");
+  const [track, setTrack] = useState<"shared" | "prsc" | "dis">("shared");
+  const [sortOrder, setSortOrder] = useState("0");
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [url, setUrl] = useState("");
@@ -74,6 +80,9 @@ export function AdminMemberDocuments({ memberId, memberName, preview }: Props) {
           file_path: filePath,
           audience_entity: scope === "all" && audEntity ? audEntity : null,
           audience_role: scope === "all" && audRole ? audRole : null,
+          journey_stage: stage ? Number(stage) : null,
+          journey_track: stage === "1" ? "shared" : track,
+          sort_order: Number(sortOrder) || 0,
         },
       });
       reset();
@@ -146,6 +155,27 @@ export function AdminMemberDocuments({ memberId, memberName, preview }: Props) {
   }
   const list = docs.data?.documents ?? [];
   const acks = docs.data?.acknowledgements ?? [];
+  const entity = docs.data?.entity ?? "prsc";
+  const activation = docs.data?.activation ?? { prsc: null, dis: null };
+  const doneIds = new Set<string>(acks.filter((a: any) => a.member_id === memberId).map((a: any) => a.document_id));
+  const journey = journeyStatus(list as any, doneIds, entity, activation);
+  const lockedIds = lockedDocumentIds(list as any, doneIds, entity);
+  async function toggleActivation(t: "prsc" | "dis", on: boolean) {
+    if (preview) return setStatus("Preview mode: activation is recorded on the live admin page.");
+    if (on && !confirm(`Record ${t.toUpperCase()} activation for ${memberName}? Confirm the authorized countersignature and appointment record are complete.`)) return;
+    try { await setEntityActivation({ data: { member_id: memberId, entity: t, activated: on } }); await docs.refetch(); }
+    catch (e) { setStatus(e instanceof Error ? e.message : "Could not update activation"); }
+  }
+  function applyPreset(i: string) {
+    const p = JOURNEY_PRESETS[Number(i)];
+    if (!p) return;
+    setStage(String(p.stage) as typeof stage);
+    setTrack(p.track);
+    setCategory(p.category);
+    setAction(p.category === "sign" ? "esign" : "acknowledge");
+    setTitle(p.title);
+    setDescription(p.description);
+  }
   const selectCls =
     "h-10 w-full border border-gold/25 bg-navy-deep px-3 text-base text-ivory outline-none focus:border-gold";
 
@@ -156,7 +186,49 @@ export function AdminMemberDocuments({ memberId, memberName, preview }: Props) {
         Add documents for this member only, or for all members (optionally by company and role). Members read every document inside the portal and initial or sign there; BoldSign links are also supported. Nothing is visible to the member until you release it.
       </p>
 
+      <div className="mt-5 border border-gold/25 p-4">
+        <p className="text-base text-ivory">Journey status: <span className="text-gold">{journey.label}</span> · Stage {journey.currentStage} of 5</p>
+        <p className="mt-1 text-sm text-ivory/55">The member cannot formally act in a PRSC or DIS role until Stages 2–4 are complete and you record activation. The NDA is a verified prerequisite</p>
+        <div className="mt-3 flex flex-wrap gap-5">
+          {memberTracks(entity).map((t) => (
+            <label key={t} className="flex items-center gap-2 text-base text-ivory/80">
+              <input type="checkbox" className="h-4 w-4" checked={Boolean(activation[t])} onChange={(e) => toggleActivation(t, e.target.checked)} />
+              {t.toUpperCase()} activated (countersigned & appointment recorded){activation[t] ? ` · ${new Date(activation[t]!).toLocaleDateString()}` : ""}
+            </label>
+          ))}
+        </div>
+      </div>
+
       <div className="mt-5 grid gap-3 sm:grid-cols-2">
+        <label className="text-base text-ivory/70 sm:col-span-2">
+          Start from a journey document (optional)
+          <select defaultValue="" onChange={(e) => applyPreset(e.target.value)} className={`mt-1 ${selectCls}`}>
+            <option value="">Choose a standard document…</option>
+            {STAGES.map((st) => (
+              <optgroup key={st.n} label={`Stage ${st.n} · ${st.label}`}>
+                {JOURNEY_PRESETS.map((p, i) => p.stage === st.n ? <option key={i} value={i}>{p.track === "shared" ? "Shared" : p.track.toUpperCase()} — {p.title}</option> : null)}
+              </optgroup>
+            ))}
+          </select>
+        </label>
+        <label className="text-base text-ivory/70">
+          Journey stage
+          <select value={stage} onChange={(e) => setStage(e.target.value as typeof stage)} className={`mt-1 ${selectCls}`}>
+            {STAGES.map((st) => <option key={st.n} value={String(st.n)}>Stage {st.n} · {st.label}{st.n === 5 ? " (one-off)" : ""}</option>)}
+          </select>
+        </label>
+        <label className="text-base text-ivory/70">
+          Track
+          <select value={stage === "1" ? "shared" : track} disabled={stage === "1"} onChange={(e) => setTrack(e.target.value as typeof track)} className={`mt-1 ${selectCls}`}>
+            <option value="shared">Shared Forum</option>
+            <option value="prsc">PRSC</option>
+            <option value="dis">DIS</option>
+          </select>
+        </label>
+        <label className="text-base text-ivory/70">
+          Order within the stage
+          <Input type="number" min={0} value={sortOrder} onChange={(e) => setSortOrder(e.target.value)} className="mt-1 text-base" />
+        </label>
         <label className="text-base text-ivory/70">
           Applies to
           <select value={scope} onChange={(e) => setScope(e.target.value as "member" | "all")} className={`mt-1 ${selectCls}`}>
@@ -273,6 +345,11 @@ export function AdminMemberDocuments({ memberId, memberName, preview }: Props) {
             <div key={d.id} className="flex items-start justify-between gap-4 border border-gold/15 bg-navy-deep/40 p-4">
               <div className="min-w-0">
                 <p className="text-base text-ivory">{d.title}</p>
+                <p className="mt-1 text-sm uppercase tracking-[0.14em] text-gold/80">
+                  {(d as any).journey_stage ? `Stage ${(d as any).journey_stage} · ${STAGES[(d as any).journey_stage - 1].label}` : "Ongoing record"}
+                  {(d as any).journey_track ? ` · ${(d as any).journey_track === "shared" ? "Shared" : (d as any).journey_track.toUpperCase()}` : ""}
+                  {lockedIds.has(d.id) ? " · Waiting on earlier document" : ""}
+                </p>
                 <p className="mt-1 text-base text-ivory/55">
                   {d.category === "sign" ? "Sign and return" : "Read and retain"} ·{" "}
                   {d.action === "boldsign" || d.action === "docusign" ? "BoldSign" : d.action === "esign" ? "Sign in portal" : "Acknowledge in portal"} ·{" "}

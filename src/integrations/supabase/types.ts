@@ -462,6 +462,8 @@ export type Database = {
           external_url: string | null
           file_path: string | null
           id: string
+          journey_stage: number | null
+          journey_track: string | null
           member_id: string | null
           sort_order: number
           title: string
@@ -478,6 +480,8 @@ export type Database = {
           external_url?: string | null
           file_path?: string | null
           id?: string
+          journey_stage?: number | null
+          journey_track?: string | null
           member_id?: string | null
           sort_order?: number
           title: string
@@ -494,6 +498,8 @@ export type Database = {
           external_url?: string | null
           file_path?: string | null
           id?: string
+          journey_stage?: number | null
+          journey_track?: string | null
           member_id?: string | null
           sort_order?: number
           title?: string
@@ -694,6 +700,7 @@ export type Database = {
       portal_members: {
         Row: {
           created_at: string
+          dis_activated_at: string | null
           documents_completed_at: string | null
           documents_released_at: string | null
           documents_reminder_sent_at: string | null
@@ -709,6 +716,7 @@ export type Database = {
           organization: string
           package_status: Database["public"]["Enums"]["portal_package_status"]
           professional_name: string | null
+          prsc_activated_at: string | null
           reminder_sent_at: string | null
           role: Database["public"]["Enums"]["app_role"]
           status: Database["public"]["Enums"]["portal_member_status"]
@@ -719,6 +727,7 @@ export type Database = {
         }
         Insert: {
           created_at?: string
+          dis_activated_at?: string | null
           documents_completed_at?: string | null
           documents_released_at?: string | null
           documents_reminder_sent_at?: string | null
@@ -734,6 +743,7 @@ export type Database = {
           organization: string
           package_status?: Database["public"]["Enums"]["portal_package_status"]
           professional_name?: string | null
+          prsc_activated_at?: string | null
           reminder_sent_at?: string | null
           role: Database["public"]["Enums"]["app_role"]
           status?: Database["public"]["Enums"]["portal_member_status"]
@@ -744,6 +754,7 @@ export type Database = {
         }
         Update: {
           created_at?: string
+          dis_activated_at?: string | null
           documents_completed_at?: string | null
           documents_released_at?: string | null
           documents_reminder_sent_at?: string | null
@@ -759,6 +770,7 @@ export type Database = {
           organization?: string
           package_status?: Database["public"]["Enums"]["portal_package_status"]
           professional_name?: string | null
+          prsc_activated_at?: string | null
           reminder_sent_at?: string | null
           role?: Database["public"]["Enums"]["app_role"]
           status?: Database["public"]["Enums"]["portal_member_status"]

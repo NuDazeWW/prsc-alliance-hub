@@ -1,7 +1,7 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useRef, useState } from "react";
-import { Pencil } from "lucide-react";
+import { Pencil, LogOut } from "lucide-react";
 import { useHeadshotUpload } from "@/hooks/use-headshot-upload";
 import { OrientationHub } from "@/components/portal/OrientationHub";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -35,7 +35,9 @@ import { getMyMeetings } from "@/lib/meetings.functions";
 import { getMyDocuments, getMyHeadshotUrl, getPortalSession } from "@/lib/portal.functions";
 import { memberRoleChips, memberRoleKinds, memberRoleLabel, memberRoleLabels } from "@/lib/member-role-labels";
 import { ROLE_DETAILS } from "@/data/orientation-hub";
-import { StatusTimeline } from "@/components/portal/StatusTimeline";
+import { JourneyTimeline } from "@/components/portal/JourneyTimeline";
+import { journeyStatus, isOnboarding } from "@/lib/journey";
+import { supabase } from "@/integrations/supabase/client";
 import { PortalShell } from "@/components/portal/PortalShell";
 import { isPreviewHost } from "@/routes/_authenticated/route";
 import heroRoad from "@/assets/portal-hero-road.jpg";
@@ -144,15 +146,18 @@ function PortalHome() {
   const packageReady = m.package_status === "package_ready";
   const myDocs = documents.data?.documents ?? [];
   const documentsReleased = myDocs.length > 0;
-  const signDocs = myDocs.filter((d) => d.category === "sign");
-  const readDocs = myDocs.filter((d) => d.category === "read");
   const acknowledged = new Set(documents.data?.acknowledged ?? []);
+  const docEntity = (documents.data as { entity?: string } | null)?.entity ?? m.entity;
+  const journey = journeyStatus(myDocs as any, acknowledged, docEntity, (documents.data as any)?.activation ?? { prsc: null, dis: null });
+  const trackedDocs = myDocs.some((d: any) => isOnboarding(d)) ? myDocs.filter((d: any) => isOnboarding(d)) : myDocs;
+  const signDocs = trackedDocs.filter((d) => d.category === "sign");
+  const readDocs = trackedDocs.filter((d) => d.category === "read");
   const signLeft = signDocs.filter((d) => !acknowledged.has(d.id)).length;
   const readLeft = readDocs.filter((d) => !acknowledged.has(d.id)).length;
   const allDone = documentsReleased && signLeft + readLeft === 0;
   const docSummary = allDone
-    ? `All ${myDocs.length} documents complete — thank you.`
-    : `${myDocs.length - signLeft - readLeft} of ${myDocs.length} complete · ${[signLeft ? `${signLeft} to sign` : "", readLeft ? `${readLeft} to acknowledge` : ""].filter(Boolean).join(", ")}`;
+    ? `${journey.label} · all ${trackedDocs.length} journey documents complete`
+    : `${journey.label} · ${trackedDocs.length - signLeft - readLeft} of ${trackedDocs.length} complete · ${[signLeft ? `${signLeft} to sign` : "", readLeft ? `${readLeft} to acknowledge` : ""].filter(Boolean).join(", ")}`;
 
 
   const sideNav = [
@@ -201,13 +206,7 @@ function PortalHome() {
               </button>
             ))}
           </div>
-          <StatusTimeline
-            horizontal
-            profileComplete={profileComplete}
-            packageStatus={m.package_status}
-            documentsReleased={documentsReleased}
-            allAcknowledged={documentsReleased && myDocs.filter((d) => d.action !== "boldsign" && d.action !== "docusign").every((d) => acknowledged.has(d.id))}
-          />
+          <JourneyTimeline currentStage={journey.currentStage} stageDone={journey.stageDone} />
         </div>
       }
     >
@@ -271,6 +270,18 @@ function PortalHome() {
             <Link to="/portal/questions" className="mt-5 flex min-h-10 items-center gap-3 text-[14px] text-ivory/80 hover:text-gold">
               <LockKeyhole className="h-4 w-4 text-gold" /> Questions? Send a Message
             </Link>
+            {!asMember && (
+              <button
+                type="button"
+                onClick={async () => {
+                  await supabase.auth.signOut();
+                  await navigate({ to: "/auth", search: { redirect: "/portal", mode: undefined, email: undefined, passwordCreated: undefined } as never, replace: true });
+                }}
+                className="mt-1 flex min-h-10 items-center gap-3 text-[14px] text-ivory/60 hover:text-gold"
+              >
+                <LogOut className="h-4 w-4 text-gold" /> Sign out
+              </button>
+            )}
 
           </div>
         </aside>
@@ -502,7 +513,7 @@ function PortalHome() {
               ) : (
                 <>
                   {documentsReleased ? (
-                    <MemberDocuments documents={myDocs as any} completions={documents.data?.completions ?? []} />
+                    <MemberDocuments documents={myDocs as any} completions={documents.data?.completions ?? []} entity={docEntity} />
                   ) : (
                     <div className="mt-8 border border-gold/25 bg-ivory/[.03] p-8 text-center"><FileText className="mx-auto h-7 w-7 text-gold"/><h3 className="mt-5 font-display text-[24px] leading-snug">Your documents are being prepared.</h3><p className="mx-auto mt-4 max-w-[34rem] text-[15px] leading-7 text-ivory/65">Your profile has been received. We will email you as soon as your individualized Board/Advisor documents are ready here.</p></div>
                   )}

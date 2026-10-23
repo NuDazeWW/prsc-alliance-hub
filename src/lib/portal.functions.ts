@@ -614,6 +614,8 @@ export type PortalDocumentRecord = {
   created_at: string;
   audience_entity: "prsc" | "dis" | "both" | null;
   audience_role: "board_member" | "advisor" | null;
+  journey_stage: number | null;
+  journey_track: "shared" | "prsc" | "dis" | null;
 };
 
 export type PortalCompletion = {
@@ -669,7 +671,8 @@ export const getMyDocuments = createServerFn({ method: "GET" })
       context = { supabase: supabaseAdmin };
     }
     const { data: member } = await context.supabase
-      .from("portal_members").select("id, entity, role, documents_released_at").eq(input.asMemberId ? "id" : "user_id", input.asMemberId ?? ctx.userId).maybeSingle();
+      .from("portal_members").select("id, entity, role, documents_released_at, prsc_activated_at, dis_activated_at").eq(input.asMemberId ? "id" : "user_id", input.asMemberId ?? ctx.userId).maybeSingle();
+    const activation = { prsc: (member?.prsc_activated_at as string | null) ?? null, dis: (member?.dis_activated_at as string | null) ?? null };
     if (!member) return { memberId: null, released: false, documents: [], acknowledged: [] as string[], completions: [] as PortalCompletion[] };
     if (!member.documents_released_at) {
       return { memberId: member.id as string, released: false, documents: [], acknowledged: [] as string[], completions: [] as PortalCompletion[] };
@@ -682,6 +685,8 @@ export const getMyDocuments = createServerFn({ method: "GET" })
     const completions = (acks ?? []) as PortalCompletion[];
     return {
       memberId: member.id as string,
+      entity: member.entity as string,
+      activation,
       released: true,
       documents: await signDocumentUrls(docs),
       acknowledged: completions.map((a) => a.document_id),
@@ -697,7 +702,11 @@ export async function maybeCompletePackage(member: { id: string; email: string; 
   const { data: acks } = await supabaseAdmin.from("portal_document_acknowledgements").select("document_id").eq("member_id", member.id);
   const done = new Set((acks ?? []).map((a: { document_id: string }) => a.document_id));
   // BoldSign/DocuSign documents count once the admin manually confirms them.
-  const required = docs;
+  const { isOnboarding } = await import("@/lib/journey");
+  const onboarding = docs.filter(isOnboarding);
+  // Ongoing / one-off records never hold up the onboarding package.
+  const required = onboarding.length ? onboarding : docs.filter((d) => d.journey_stage == null);
+  if (!required.length) return;
   if (!required.every((d) => done.has(d.id))) return;
   await supabaseAdmin
     .from("portal_members")
@@ -758,6 +767,10 @@ export const acknowledgeDocument = createServerFn({ method: "POST" })
     const docs = await applicableDocuments(context.supabase, member as DocMember);
     const doc = docs.find((d) => d.id === data.document_id);
     if (!doc) throw new Error("Document unavailable");
+    const { lockedDocumentIds } = await import("@/lib/journey");
+    const { data: priorAcks } = await context.supabase.from("portal_document_acknowledgements").select("document_id").eq("member_id", member.id);
+    const priorDone = new Set<string>((priorAcks ?? []).map((a: { document_id: string }) => a.document_id));
+    if (lockedDocumentIds(docs, priorDone, member.entity).has(doc.id)) throw new Error("Please complete the earlier documents in your journey first");
     if (data.kind === "signed") {
       if (!data.signed_name || data.signed_name.length < 2) throw new Error("Type your full legal name to sign");
       if (!data.signature_data?.startsWith("data:image/png;base64,")) throw new Error("Add your signature");
@@ -783,6 +796,43 @@ export const acknowledgeDocument = createServerFn({ method: "POST" })
       metadata: { document_id: data.document_id, title: doc.title },
     });
     await maybeCompletePackage(member as any);
+    // Sequential journey: tell the member when this completion unlocks the next document.
+    const before = lockedDocumentIds(docs, priorDone, member.entity);
+    const afterDone = new Set(priorDone).add(doc.id);
+    const after = lockedDocumentIds(docs, afterDone, member.entity);
+    const unlocked = docs.filter((d) => before.has(d.id) && !after.has(d.id) && !afterDone.has(d.id));
+    if (unlocked.length) {
+      const { sendPortalEmail } = await import("@/lib/portal-notify.server");
+      await sendPortalEmail(
+        member.email,
+        {
+          subject: `Your next document is ready: ${unlocked[0].title}`,
+          eyebrow: "Next in your journey",
+          heading: `Thank you, ${member.first_name?.trim() || "there"}.`,
+          body: `We've received ${doc.title}. Your next document is now open in your private Welcome Center:\n\n${unlocked.map((u) => `• ${u.title}`).join("\n")}`,
+          ctaLabel: "Open Your Documents",
+          ctaUrl: "https://access.prscstandards.org/portal",
+        },
+        "journey-next-document",
+      ).catch(() => undefined);
+    }
+    return { ok: true };
+  });
+
+export const setEntityActivation = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input) => z.object({ member_id: z.string().uuid(), entity: z.enum(["prsc", "dis"]), activated: z.boolean() }).parse(input))
+  .handler(async ({ context, data }) => {
+    await assertAdmin(context);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const at = data.activated ? new Date().toISOString() : null;
+    const patch = data.entity === "prsc" ? { prsc_activated_at: at } : { dis_activated_at: at };
+    const { error } = await supabaseAdmin.from("portal_members").update(patch).eq("id", data.member_id);
+    if (error) throw error;
+    await supabaseAdmin.from("portal_activity").insert({
+      member_id: data.member_id, actor_user_id: context.userId,
+      event_type: data.activated ? "entity_activated" : "entity_activation_removed", metadata: { entity: data.entity },
+    });
     return { ok: true };
   });
 
@@ -827,7 +877,7 @@ export const listDocumentsForAdmin = createServerFn({ method: "GET" })
     let documents: PortalDocumentRecord[];
     if (data.member_id) {
       const { data: m } = await context.supabase
-        .from("portal_members").select("id, entity, role, documents_released_at, documents_completed_at").eq("id", data.member_id).maybeSingle();
+        .from("portal_members").select("id, entity, role, documents_released_at, documents_completed_at, prsc_activated_at, dis_activated_at").eq("id", data.member_id).maybeSingle();
       member = m;
       documents = m ? await applicableDocuments(context.supabase, m) : [];
     } else {
@@ -859,6 +909,8 @@ export const listDocumentsForAdmin = createServerFn({ method: "GET" })
       acknowledgements: acks ?? [],
       releasedAt: member?.documents_released_at ?? null,
       completedAt: member?.documents_completed_at ?? null,
+      entity: member?.entity ?? "prsc",
+      activation: { prsc: (member as any)?.prsc_activated_at ?? null, dis: (member as any)?.dis_activated_at ?? null } as { prsc: string | null; dis: string | null },
     };
   });
 
@@ -876,6 +928,9 @@ export const createMemberDocument = createServerFn({ method: "POST" })
         file_path: z.string().trim().max(400).nullable().optional(),
         audience_entity: entitySchema.nullable().optional(),
         audience_role: z.enum(["board_member", "advisor"]).nullable().optional(),
+        journey_stage: z.number().int().min(1).max(5).nullable().optional(),
+        journey_track: z.enum(["shared", "prsc", "dis"]).nullable().optional(),
+        sort_order: z.number().int().min(0).max(999).optional(),
       })
       .parse(input),
   )
@@ -893,6 +948,9 @@ export const createMemberDocument = createServerFn({ method: "POST" })
       file_path: data.file_path || null,
       audience_entity: data.member_id ? null : data.audience_entity ?? null,
       audience_role: data.member_id ? null : data.audience_role ?? null,
+      journey_stage: data.journey_stage ?? null,
+      journey_track: data.journey_stage === 1 ? "shared" : data.journey_track ?? null,
+      sort_order: data.sort_order ?? 0,
       created_by: context.userId,
     });
     if (error) throw error;
