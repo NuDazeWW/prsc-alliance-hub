@@ -363,6 +363,7 @@ export function AdminCenter({ page }: { page: "overview" | "send" }) {
   const [showAllActivity, setShowAllActivity] = useState(false);
   const [composePollId, setComposePollId] = useState("");
   const [previewAsId, setPreviewAsId] = useState("");
+  const [docsMemberId, setDocsMemberId] = useState("");
   const blockFor = (id: string) => {
     const p = openPolls.find((x) => x.id === id);
     return p ? meetingBlockText(p, p.slots ?? []) : null;
@@ -1984,6 +1985,36 @@ export function AdminCenter({ page }: { page: "overview" | "send" }) {
               </div>
               <div className="mt-7">
                 <AdminMeetings />
+              </div>
+            </section>
+            <section className={`${page === "overview" ? "order-7 lg:col-span-2 lg:row-start-5" : "hidden"} admin-card p-6 sm:p-8`}>
+              <div className="flex flex-wrap items-center justify-between gap-3">
+                <h2 id="documents" className="flex scroll-mt-28 items-center gap-3 font-display text-3xl"><FileText className="h-7 w-7 text-gold" /> Documents</h2>
+                <label className="flex items-center gap-3 text-base text-ivory/70">
+                  Member
+                  <select
+                    value={docsMemberId}
+                    onChange={(e) => setDocsMemberId(e.target.value)}
+                    className="h-10 min-w-[240px] border border-gold/25 bg-navy-deep px-3 text-base text-ivory outline-none focus:border-gold"
+                  >
+                    <option value="">Choose a member…</option>
+                    {members.map((m) => (
+                      <option key={m.id} value={m.id}>{m.first_name} {m.last_name} · {memberRoleLabel(m.role, m.entity)}</option>
+                    ))}
+                  </select>
+                </label>
+              </div>
+              <div className="mt-6">
+                {docsMemberId ? (
+                  <AdminMemberDocuments
+                    key={docsMemberId}
+                    memberId={docsMemberId}
+                    memberName={(() => { const m = members.find((x) => x.id === docsMemberId); return m ? `${m.first_name} ${m.last_name}` : "this member"; })()}
+                    preview={preview}
+                  />
+                ) : (
+                  <p className="border border-gold/15 p-5 text-base text-ivory/55">Choose a member to add, release, and track their journey documents and one-off records</p>
+                )}
               </div>
             </section>
             <section className={`${S("overview",4)} admin-card p-6 sm:p-8`}>
