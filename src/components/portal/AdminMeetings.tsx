@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
-import { CalendarDays, Check, Clock, MapPin, Video, X } from "lucide-react";
+import { CalendarDays, Check, Clock, MapPin, Plus, Video, X } from "lucide-react";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { toast } from "sonner";
 import {
   cancelPoll,
@@ -32,6 +33,7 @@ export function AdminMeetings() {
   const [members, setMembers] = useState<any[]>([]);
   const [polls, setPolls] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [proposeOpen, setProposeOpen] = useState(false);
   async function refresh() {
     setLoading(true);
     try {
@@ -73,16 +75,26 @@ export function AdminMeetings() {
     "w-full min-w-0 rounded-md border border-gold/25 bg-navy-deep/60 px-3 py-2 text-sm text-ivory placeholder:text-ivory/30 focus:border-gold focus:outline-none";
 
   return (
-    <div className="space-y-8">
-      <div className="rounded-lg border border-gold/20 bg-navy-deep/40 p-5 sm:p-6">
-        <h3 className="font-display text-xl text-ivory">Propose a meeting</h3>
-        <p className="mt-1 mb-5 text-sm text-ivory/50">
-          Pick the meeting type — the right members are pre-selected automatically (committee meetings go only to
-          Methodology Committee members). Pick dates from the calendar; everyone invited gets an email asking for their
-          availability.
-        </p>
-        <MeetingSetupForm onCreated={() => void refresh()} />
+    <div className="space-y-6">
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <p className="text-sm text-ivory/60">Official board meetings and your calendar. Propose a meeting and members mark their availability.</p>
+        <Button type="button" onClick={() => setProposeOpen(true)} className="rounded-none bg-gold text-navy hover:bg-gold/90">
+          <Plus className="mr-1 h-4 w-4" /> Propose a meeting
+        </Button>
       </div>
+      <Dialog open={proposeOpen} onOpenChange={setProposeOpen}>
+        <DialogContent className="max-h-[90vh] max-w-2xl overflow-y-auto border-gold/30 bg-navy-deep text-ivory">
+          <DialogHeader>
+            <DialogTitle className="font-display text-2xl">Propose a meeting</DialogTitle>
+            <DialogDescription className="text-ivory/55">
+              Pick the meeting type — the right members are pre-selected automatically (committee meetings go only to
+              Methodology Committee members). Pick dates from the calendar; everyone invited gets an email asking for their
+              availability.
+            </DialogDescription>
+          </DialogHeader>
+          <MeetingSetupForm onCreated={() => { setProposeOpen(false); void refresh(); }} />
+        </DialogContent>
+      </Dialog>
 
       <div>
         <h3 className="font-display text-xl text-ivory">Meetings</h3>
