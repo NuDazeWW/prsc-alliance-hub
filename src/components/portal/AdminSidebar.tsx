@@ -4,6 +4,7 @@ import { Activity, CalendarDays, ChevronDown, Eye, EyeOff, HelpCircle, KeyRound,
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { PrscMark } from "@/components/site/PrscMark";
+import { useSidebarCollapse } from "@/components/portal/PortalShell";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
