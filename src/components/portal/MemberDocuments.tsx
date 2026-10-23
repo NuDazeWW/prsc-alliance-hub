@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { ArrowLeft, ArrowRight, BookOpen, Check, Mail, PenLine } from "lucide-react";
+import { ArrowLeft, ArrowRight, BookOpen, Check, Lock, Mail } from "lucide-react";
+import { STAGES, isOnboarding, lockedDocumentIds } from "@/lib/journey";
 
 import { acknowledgeDocument, requestHardCopy } from "@/lib/portal.functions";
 
@@ -11,79 +12,95 @@ type Doc = {
   title: string;
   description: string;
   url: string | null;
+  journey_stage: number | null;
+  journey_track: "shared" | "prsc" | "dis" | null;
+  sort_order: number;
+  created_at: string;
 };
 type Completion = { document_id: string; kind: string; signed_name: string | null; acknowledged_at: string };
 
-type Props = { documents: Doc[]; completions: Completion[] };
+type Props = { documents: Doc[]; completions: Completion[]; entity: string };
 
-export function MemberDocuments({ documents, completions }: Props) {
+const TRACK_LABEL = { shared: "Shared Forum", prsc: "PRSC", dis: "DIS" } as const;
+
+export function MemberDocuments({ documents, completions, entity }: Props) {
   const [openId, setOpenId] = useState<string | null>(null);
   const open = documents.find((d) => d.id === openId) ?? null;
   const doneMap = new Map(completions.map((c) => [c.document_id, c]));
-  const countable = documents.filter((d) => d.action !== "boldsign" && d.action !== "docusign");
-  const doneCount = countable.filter((d) => doneMap.has(d.id)).length;
+  const locked = lockedDocumentIds(documents, new Set(doneMap.keys()), entity);
+  const onboarding = documents.filter(isOnboarding);
+  const ongoing = documents.filter((d) => !isOnboarding(d));
+  const doneCount = onboarding.filter((d) => doneMap.has(d.id)).length;
 
   if (open) return <DocumentReader doc={open} completion={doneMap.get(open.id) ?? null} onBack={() => setOpenId(null)} />;
-
-  const sign = documents.filter((d) => d.category === "sign");
-  const read = documents.filter((d) => d.category === "read");
 
   return (
     <div className="mt-6">
       <div className="flex flex-wrap items-center justify-between gap-3 border border-gold/20 bg-ivory/[.03] px-5 py-4">
         <p className="text-[15px] text-ivory/75">
-          Open each document, read it here, then initial or sign. Everything stays inside your private portal.
+          Your journey documents open one at a time. Complete each one and the next opens automatically
         </p>
-        <p className="text-[12px] uppercase tracking-[0.2em] text-gold">
-          {doneCount} of {countable.length} complete
-        </p>
+        {onboarding.length > 0 && (
+          <p className="text-[12px] uppercase tracking-[0.2em] text-gold">
+            {doneCount} of {onboarding.length} complete
+          </p>
+        )}
       </div>
-      <div className="mt-8 grid gap-10 lg:grid-cols-2">
-        <DocList title="Read and sign" icon={<PenLine className="h-[18px] w-[18px] text-gold" />} docs={sign} doneMap={doneMap} onOpen={setOpenId} />
-        <DocList title="Read and acknowledge" icon={<BookOpen className="h-[18px] w-[18px] text-gold" />} docs={read} doneMap={doneMap} onOpen={setOpenId} />
-      </div>
+      {STAGES.slice(0, 4).map((stage) => {
+        const docs = onboarding.filter((d) => d.journey_stage === stage.n);
+        if (!docs.length) return null;
+        return (
+          <div key={stage.n} className="mt-8">
+            <p className="text-[11px] uppercase tracking-[0.24em] text-gold">Stage {stage.n} · {stage.label}</p>
+            <div className="mt-4 grid gap-4 lg:grid-cols-2">
+              {docs.map((d) => <DocCard key={d.id} d={d} done={doneMap.get(d.id)} locked={locked.has(d.id)} onOpen={setOpenId} />)}
+            </div>
+          </div>
+        );
+      })}
+      {ongoing.length > 0 && (
+        <div className="mt-10 border-t border-gold/20 pt-8">
+          <div className="flex items-center gap-3">
+            <BookOpen className="h-[18px] w-[18px] text-gold" />
+            <p className="text-[11px] uppercase tracking-[0.24em] text-gold">Forum Materials & Ongoing Records</p>
+          </div>
+          <p className="mt-2 text-[14px] text-ivory/55">These don't change your onboarding progress</p>
+          <div className="mt-4 grid gap-4 lg:grid-cols-2">
+            {ongoing.map((d) => <DocCard key={d.id} d={d} done={doneMap.get(d.id)} locked={false} onOpen={setOpenId} />)}
+          </div>
+        </div>
+      )}
     </div>
   );
 }
 
-function DocList({ title, icon, docs, doneMap, onOpen }: { title: string; icon: React.ReactNode; docs: Doc[]; doneMap: Map<string, Completion>; onOpen: (id: string) => void }) {
+function DocCard({ d, done, locked, onOpen }: { d: Doc; done?: Completion; locked: boolean; onOpen: (id: string) => void }) {
   return (
-    <div>
-      <div className="flex items-center gap-3">
-        {icon}
-        <p className="text-[11px] uppercase tracking-[0.24em] text-gold">{title}</p>
-      </div>
-      <div className="mt-5 space-y-4">
-        {docs.length === 0 && <p className="text-[14px] leading-6 text-ivory/50">Nothing here for you.</p>}
-        {docs.map((d) => {
-          const done = doneMap.get(d.id);
-          return (
-            <div key={d.id} className="border border-gold/20 bg-ivory/[.03] p-5">
-              <h3 className="font-display text-[19px] leading-snug">{d.title}</h3>
-              {d.description && <p className="mt-2 text-[14px] leading-6 text-ivory/60">{d.description}</p>}
-              {done ? (
-                <p className="mt-4 inline-flex items-center gap-2 text-[13px] text-gold">
-                  <Check className="h-4 w-4" /> {done.kind === "signed" ? "Signed" : "Acknowledged"} on {new Date(done.acknowledged_at).toLocaleDateString()}
-                </p>
-              ) : null}
-              <div className="mt-4">
-                {d.action === "boldsign" || d.action === "docusign" ? (
-                  d.url && (
-                    <a href={d.url} target="_blank" rel="noreferrer" className="cta-glow-outline inline-flex items-center gap-3 rounded-full px-5 py-2.5 text-[13px] transition-all">
-                      <span className="relative z-10 flex items-center gap-3">Sign in BoldSign <ArrowRight className="h-4 w-4" /></span>
-                    </a>
-                  )
-                ) : (
-                  <button type="button" onClick={() => onOpen(d.id)} className="cta-glow-outline inline-flex items-center gap-3 rounded-full px-5 py-2.5 text-[13px] transition-all">
-                    <span className="relative z-10 flex items-center gap-3">
-                      {done ? "View document" : d.category === "sign" ? "Read & sign" : "Read & acknowledge"} <ArrowRight className="h-4 w-4" />
-                    </span>
-                  </button>
-                )}
-              </div>
-            </div>
-          );
-        })}
+    <div className={`border border-gold/20 bg-ivory/[.03] p-5 ${locked ? "opacity-55" : ""}`}>
+      {d.journey_track && <p className="text-[10px] uppercase tracking-[0.2em] text-ivory/45">{TRACK_LABEL[d.journey_track]}</p>}
+      <h3 className="mt-1 font-display text-[19px] leading-snug">{d.title}</h3>
+      {d.description && <p className="mt-2 text-[14px] leading-6 text-ivory/60">{d.description}</p>}
+      {done && (
+        <p className="mt-4 inline-flex items-center gap-2 text-[13px] text-gold">
+          <Check className="h-4 w-4" /> {done.kind === "signed" ? "Signed" : done.kind === "external_confirmed" ? "Confirmed" : "Acknowledged"} on {new Date(done.acknowledged_at).toLocaleDateString()}
+        </p>
+      )}
+      <div className="mt-4">
+        {locked ? (
+          <p className="inline-flex items-center gap-2 text-[13px] text-ivory/60"><Lock className="h-4 w-4" /> Opens after the previous document</p>
+        ) : d.action === "boldsign" || d.action === "docusign" ? (
+          d.url && (
+            <a href={d.url} target="_blank" rel="noreferrer" className="cta-glow-outline inline-flex items-center gap-3 rounded-full px-5 py-2.5 text-[13px] transition-all">
+              <span className="relative z-10 flex items-center gap-3">Sign in BoldSign <ArrowRight className="h-4 w-4" /></span>
+            </a>
+          )
+        ) : (
+          <button type="button" onClick={() => onOpen(d.id)} className="cta-glow-outline inline-flex items-center gap-3 rounded-full px-5 py-2.5 text-[13px] transition-all">
+            <span className="relative z-10 flex items-center gap-3">
+              {done ? "View document" : d.category === "sign" ? "Read & sign" : "Read & acknowledge"} <ArrowRight className="h-4 w-4" />
+            </span>
+          </button>
+        )}
       </div>
     </div>
   );
