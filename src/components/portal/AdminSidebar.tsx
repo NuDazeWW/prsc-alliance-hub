@@ -25,6 +25,8 @@ export function AdminSidebar({ page, onNavigate }: { page: "overview" | "send"; 
   const navigate = useNavigate();
   const [name, setName] = useState("Administrator");
   const [dialog, setDialog] = useState<null | "password" | "admins">(null);
+  const collapse = useSidebarCollapse();
+  const collapsed = collapse?.collapsed ?? false;
 
   useEffect(() => {
     void supabase.auth.getUser().then(({ data }) => {
