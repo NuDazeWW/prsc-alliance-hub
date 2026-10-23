@@ -17,3 +17,4 @@
 - Meeting creation UI lives only in `MeetingSetupForm` (used by Meetings and the email pop-ups); keep one form so validation and time-zone handling stay identical.
 - Meeting times are picked as wall-clock values in the poll's `timezone` and converted to UTC on the server via `zonedToUtc`; always render with `formatSlot(iso, poll.timezone)` so old polls fall back to Eastern.
 - The Admin Center UI lives in `src/components/portal/AdminCenter.tsx` with a `page` prop; `/admin` (Overview) and `/admin/send` (Invite & Email) are thin routes so both pages share one state and data source.
+- Admin pages render inside PortalShell's `sidebar` slot (AdminSidebar: nav + admin account menu); admin role changes go through `admin-accounts.functions.ts`, which blocks removing yourself or the last admin. Why: one shared frame for both admin pages and safe admin management.
