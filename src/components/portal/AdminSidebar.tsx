@@ -88,10 +88,15 @@ export function AdminSidebar({ page, onNavigate }: { page: "overview" | "send"; 
       </nav>
 
       <div className="mt-6 border-t border-gold/15 pt-5">
-        <p className="text-[11px] uppercase tracking-[0.24em] text-ivory/45">Need help?</p>
-        <a href="mailto:info@readinessterminal.com" className="mt-3 flex items-start gap-3 text-ivory/80 hover:text-gold">
-          <HelpCircle className="mt-0.5 h-6 w-6 text-gold" />
-          <span><span className="block text-[15px]">Questions?</span><span className="block text-sm text-ivory/55">Send a message</span></span>
+        {!collapsed && <p className="text-[11px] uppercase tracking-[0.24em] text-ivory/45">Need help?</p>}
+        <a
+          href="mailto:info@readinessterminal.com"
+          title={collapsed ? "Questions? Send a message" : undefined}
+          aria-label={collapsed ? "Questions? Send a message" : undefined}
+          className={`text-ivory/80 hover:text-gold ${collapsed ? "mt-4 flex justify-center" : "mt-3 flex items-start gap-3"}`}
+        >
+          <HelpCircle className={`${collapsed ? "h-6 w-6" : "mt-0.5 h-6 w-6"} text-gold`} />
+          {!collapsed && <span><span className="block text-[15px]">Questions?</span><span className="block text-sm text-ivory/55">Send a message</span></span>}
         </a>
       </div>
 
