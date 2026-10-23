@@ -535,3 +535,24 @@ function PortalHome() {
     </>
   );
 }
+
+function AvatarCircle({ url, initials, alt, editable }: { url?: string | null; initials: string; alt: string; editable: boolean }) {
+  const fileRef = useRef<HTMLInputElement>(null);
+  const { upload, busy, msg } = useHeadshotUpload();
+  const circle = url ? (
+    <img src={url} alt={alt} className="aspect-square w-[64px] rounded-full border border-gold/55 object-cover" />
+  ) : (
+    <span className="grid aspect-square w-[64px] place-items-center rounded-full border border-gold/55 font-display text-xl text-gold">{initials}</span>
+  );
+  if (!editable) return <div className="shrink-0">{circle}</div>;
+  return (
+    <div className="relative shrink-0">
+      <button type="button" disabled={busy} onClick={() => fileRef.current?.click()} aria-label={url ? "Change your photo" : "Upload your photo"} title={url ? "Change your photo" : "Upload your photo"} className={`relative block rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold ${busy ? "opacity-60" : ""}`}>
+        {circle}
+        <span className="absolute -bottom-0.5 -right-0.5 grid h-6 w-6 place-items-center rounded-full border border-navy-deep bg-gold text-navy-deep shadow"><Pencil className="h-3 w-3" /></span>
+      </button>
+      <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={(e) => { const f = e.target.files?.[0]; if (f) void upload(f); e.target.value = ""; }} />
+      {msg && msg !== "Photo saved." && <p role="status" className="absolute left-0 top-full mt-1 w-48 text-[11px] text-ivory/60">{msg}</p>}
+    </div>
+  );
+}
