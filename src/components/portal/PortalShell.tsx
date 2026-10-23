@@ -179,8 +179,29 @@ export function PortalShell({
       </header>
       {sidebar ? (
         <div className="flex flex-1">
-          <aside className="hidden w-[250px] shrink-0 border-r border-gold/15 bg-navy-deep/60 px-5 py-7 lg:block">
-            <div className="sticky top-[132px]">{sidebar}</div>
+          <aside className={`hidden shrink-0 border-r border-gold/15 bg-navy-deep/60 py-7 transition-[width] duration-300 lg:block ${navCollapsed ? "w-[84px] px-4" : "w-[250px] px-5"}`}>
+            <div className="sticky top-[132px] flex min-h-[calc(100vh-190px)] flex-col">
+              <SidebarCollapseContext.Provider value={{ collapsed: navCollapsed, toggle: () => setNavCollapsed(!navCollapsed) }}>
+                <div className="min-h-0 flex-1">{sidebar}</div>
+              </SidebarCollapseContext.Provider>
+              <button
+                type="button"
+                onClick={() => setNavCollapsed(!navCollapsed)}
+                aria-expanded={!navCollapsed}
+                aria-label={navCollapsed ? "Expand menu" : "Collapse menu"}
+                title={navCollapsed ? "Expand menu" : "Collapse menu"}
+                className={`mt-6 flex w-full items-center justify-center border-t border-gold/15 pt-4 text-gold/70 transition-colors hover:text-gold ${navCollapsed ? "" : "gap-2"}`}
+              >
+                {navCollapsed ? (
+                  <ChevronsRight className="h-4 w-4" />
+                ) : (
+                  <>
+                    <ChevronsLeft className="h-4 w-4" />
+                    <span className="text-[10px] uppercase tracking-[0.2em]">Collapse</span>
+                  </>
+                )}
+              </button>
+            </div>
           </aside>
           <Sheet open={menuOpen} onOpenChange={setMenuOpen}>
             <SheetContent side="left" className="w-[280px] border-gold/25 bg-navy-deep px-5 py-8 text-ivory">
