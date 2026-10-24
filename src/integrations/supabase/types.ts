@@ -101,6 +101,42 @@ export type Database = {
         }
         Relationships: []
       }
+      forum_communication_sends: {
+        Row: {
+          created_at: string
+          email_key: string
+          forum_key: string
+          id: string
+          member_id: string
+          recipient_email: string
+          sent_by: string | null
+          status: string
+          version: number
+        }
+        Insert: {
+          created_at?: string
+          email_key: string
+          forum_key: string
+          id?: string
+          member_id: string
+          recipient_email: string
+          sent_by?: string | null
+          status?: string
+          version?: number
+        }
+        Update: {
+          created_at?: string
+          email_key?: string
+          forum_key?: string
+          id?: string
+          member_id?: string
+          recipient_email?: string
+          sent_by?: string | null
+          status?: string
+          version?: number
+        }
+        Relationships: []
+      }
       governance_reviews: {
         Row: {
           created_at: string
@@ -796,6 +832,7 @@ export type Database = {
           nda_verified_at: string | null
           nda_verified_by: string | null
           organization: string
+          orientation_acknowledged_at: string | null
           package_status: Database["public"]["Enums"]["portal_package_status"]
           participates_in_forum: boolean
           professional_name: string | null
@@ -836,6 +873,7 @@ export type Database = {
           nda_verified_at?: string | null
           nda_verified_by?: string | null
           organization: string
+          orientation_acknowledged_at?: string | null
           package_status?: Database["public"]["Enums"]["portal_package_status"]
           participates_in_forum?: boolean
           professional_name?: string | null
@@ -876,6 +914,7 @@ export type Database = {
           nda_verified_at?: string | null
           nda_verified_by?: string | null
           organization?: string
+          orientation_acknowledged_at?: string | null
           package_status?: Database["public"]["Enums"]["portal_package_status"]
           participates_in_forum?: boolean
           professional_name?: string | null
