@@ -1,0 +1,1 @@
+ALTER TABLE public.portal_members ADD COLUMN IF NOT EXISTS participates_in_forum boolean NOT NULL DEFAULT true;

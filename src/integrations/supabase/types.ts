@@ -715,6 +715,7 @@ export type Database = {
           last_name: string
           organization: string
           package_status: Database["public"]["Enums"]["portal_package_status"]
+          participates_in_forum: boolean
           professional_name: string | null
           prsc_activated_at: string | null
           reminder_sent_at: string | null
@@ -742,6 +743,7 @@ export type Database = {
           last_name: string
           organization: string
           package_status?: Database["public"]["Enums"]["portal_package_status"]
+          participates_in_forum?: boolean
           professional_name?: string | null
           prsc_activated_at?: string | null
           reminder_sent_at?: string | null
@@ -769,6 +771,7 @@ export type Database = {
           last_name?: string
           organization?: string
           package_status?: Database["public"]["Enums"]["portal_package_status"]
+          participates_in_forum?: boolean
           professional_name?: string | null
           prsc_activated_at?: string | null
           reminder_sent_at?: string | null
