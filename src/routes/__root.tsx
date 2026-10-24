@@ -19,6 +19,7 @@ import { SiteFooter } from "@/components/site/SiteFooter";
 import { AnalyticsGate } from "@/components/site/AnalyticsGate";
 import { FaqLauncher } from "@/components/site/FaqLauncher";
 import { getRequestHost } from "@/lib/portal.functions";
+import { Toaster } from "@/components/ui/sonner";
 
 const FAVICON = "/prsc-favicon.png";
 const PORTAL_HOSTS = new Set(["access.prscstandards.org", "access.prscstandards.com"]);
@@ -235,6 +236,7 @@ function RootComponent() {
       {isChrome && <SiteNav />}
       <main className="min-h-screen">
         <Outlet />
+        <Toaster />
       </main>
       {isChrome && <SiteFooter />}
       {!isPrivate && <FaqLauncher />}
