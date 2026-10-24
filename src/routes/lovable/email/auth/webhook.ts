@@ -45,7 +45,7 @@ export const Route = createFileRoute("/lovable/email/auth/webhook")({
                 const { supabaseAdmin } = await import('@/integrations/supabase/client.server')
                 const { data: member } = await supabaseAdmin
                   .from('portal_members')
-                  .select('first_name, entity, role')
+                  .select('first_name, entity, role, why_you')
                   .eq('email', data.email.toLowerCase())
                   .maybeSingle()
                 const { data: inviteCopy } = await supabaseAdmin
@@ -72,6 +72,7 @@ export const Route = createFileRoute("/lovable/email/auth/webhook")({
                   roleLabel: memberCandidateLabel(role, entity),
                   copy: inviteCopy,
                   meetingBlock,
+                  whyYou: member?.why_you ?? null,
                 })
               },
             },

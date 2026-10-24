@@ -13,6 +13,7 @@ export interface InviteEmailProps {
   roleLabel?: string
   copy?: InviteEmailCopy | null
   meetingBlock?: string | null
+  whyYou?: string | null
 }
 
 function MeetingSection({ block }: { block?: string | null }) {
@@ -70,13 +71,14 @@ export const InviteEmail = ({
   roleLabel = 'Board or Advisor Candidate',
   copy,
   meetingBlock,
+  whyYou,
 }: InviteEmailProps) => {
   const inviteeName = capitalizeInviteName(firstName) || 'There'
   const selectedEntity = inviteEntityCopy[entity]
   const showPrsc = entity === 'prsc' || entity === 'both'
   const showDis = entity === 'dis' || entity === 'both'
   if (copy?.body?.trim()) {
-    const tokens = { first_name: inviteeName, full_name: inviteeName, entity_full: selectedEntity.full, entity: selectedEntity.short, role: roleLabel, email: recipientEmail }
+    const tokens = { first_name: inviteeName, full_name: inviteeName, entity_full: selectedEntity.full, entity: selectedEntity.short, role: roleLabel, email: recipientEmail, why_you: whyYou?.trim() || 'We have been intentional about who we invite into this next chapter, and your experience and judgment are a meaningful part of why you were selected.' }
     const fill = (v?: string | null, d = '') => fillInviteTokens(v?.trim() || d, tokens)
     const blocks = fill(copy.body).split(/\n\s*\n/).map((b) => b.split('\n').map((l) => l.trim()).filter(Boolean)).filter((b) => b.length)
     const [sigName, ...sigTitle] = (copy.signatures?.trim() || 'Shirley Johnson|Founder').split('|')
@@ -114,6 +116,7 @@ export const InviteEmail = ({
           </Section>
           <Section style={securityFooter}>
             <Text style={securityText}>This invitation was sent specifically to <Link href={`mailto:${recipientEmail}`} style={footerLink}>{recipientEmail}</Link> in connection with your previously discussed {roleLabel} role. If you have questions about this invitation before accessing the portal, contact us at <Link href="mailto:info@readinessterminal.com" style={footerLink}>info@readinessterminal.com</Link>.</Text>
+            <Text style={securityText}>This invitation provides access to the private onboarding process. Formal entity appointments and authority are governed by separate documentation and authorization.</Text>
           </Section>
         </Container>
       </Body>

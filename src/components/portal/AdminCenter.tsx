@@ -707,6 +707,7 @@ export function AdminCenter({ page }: { page: "overview" | "send" }) {
           roleLabel={memberRoleLabel(inviteDraft.role, inviteDraft.entity)}
           copy={inviteTemplate}
           meetingBlock={invitePollBlock}
+          whyYou={inviteDraft.why_you}
         />,
       );
       setInvitePreviewHtml(html);
@@ -852,6 +853,7 @@ export function AdminCenter({ page }: { page: "overview" | "send" }) {
         roleLabel={memberRoleLabel(m?.role ?? "advisor", entity)}
         copy={draft}
         meetingBlock={composePollBlock}
+        whyYou={m?.why_you}
       />,
     ).then((html) => alive && setInviteComposeHtml(html));
     return () => {
