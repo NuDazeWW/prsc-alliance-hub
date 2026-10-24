@@ -29,15 +29,27 @@ async function graph(path: string, init: { method?: string; body?: unknown } = {
   return res.status === 204 ? null : res.json();
 }
 
-/** Which mailbox and calendar the holds will be written to. */
+/** Which mailbox and calendar the holds will be written to.
+ *  The calendar's owner is authoritative — some connections lack the /me
+ *  (profile) scope, so /me is only a best-effort extra detail. */
 export async function getConnectedCalendar() {
   try {
-    const me: any = await graph("/me?$select=displayName,mail,userPrincipalName");
     const cal: any = await graph("/me/calendar?$select=name,canEdit,owner");
+    const owner = cal?.owner ?? {};
+    const email = owner.address ?? "";
+    let name = owner.name ?? "";
+    if (!email || !name) {
+      try {
+        const me: any = await graph("/me?$select=displayName,mail,userPrincipalName");
+        name = name || me?.displayName || "";
+      } catch {
+        // Profile scope not granted — calendar owner above is sufficient.
+      }
+    }
     return {
       connected: true as const,
-      name: me?.displayName ?? "",
-      email: me?.mail || me?.userPrincipalName || "",
+      name,
+      email,
       calendar: cal?.name ?? "Calendar",
       canEdit: cal?.canEdit !== false,
       error: cal?.canEdit === false ? "The connected account cannot write to its calendar" : null,
