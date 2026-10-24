@@ -1,0 +1,91 @@
+import { createServerFn } from "@tanstack/react-start";
+import { z } from "zod";
+import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+import { FORUM_EMAILS, forumEmailBlock, forumIdempotencyKey, type ForumEmailKey } from "@/lib/forum-communications";
+
+async function assertAdmin(context: { supabase: any; userId: string }) {
+  const { data } = await context.supabase.from("user_roles").select("role").eq("user_id", context.userId).eq("role", "admin").maybeSingle();
+  if (!data) throw new Error("Unauthorized");
+}
+
+const KEYS = FORUM_EMAILS.map((d) => d.key) as [ForumEmailKey, ...ForumEmailKey[]];
+const input = z.object({
+  email_key: z.enum(KEYS),
+  forum_key: z.string().trim().min(1).max(80).regex(/^[a-z0-9-]+$/i),
+  version: z.number().int().min(1).max(99),
+  document_id: z.string().uuid().nullable().optional(),
+  tokens: z.record(z.string().max(60), z.string().trim().max(300)).default({}),
+});
+
+async function evaluate(context: any, data: z.infer<typeof input>) {
+  const [{ data: members }, docRes, { data: sent }] = await Promise.all([
+    context.supabase.from("portal_members").select("id, first_name, last_name, email, status, participates_in_forum, nda_verified_at, forum_clearance_status").order("last_name"),
+    data.document_id
+      ? context.supabase.from("portal_documents").select("id, title, classification, superseded_at, is_forum_prep, member_id").eq("id", data.document_id).maybeSingle()
+      : Promise.resolve({ data: null }),
+    context.supabase.from("forum_communication_sends").select("member_id, created_at").eq("forum_key", data.forum_key).eq("email_key", data.email_key).eq("version", data.version),
+  ]);
+  const doc = docRes.data;
+  const sentMap = new Map((sent ?? []).map((r: any) => [r.member_id, r.created_at]));
+  return (members ?? []).map((m: any) => {
+    let reason = forumEmailBlock(data.email_key, m, doc, false);
+    if (!reason && doc?.member_id && doc.member_id !== m.id) reason = "No access to briefing";
+    return { id: m.id, name: `${m.first_name} ${m.last_name}`.trim(), email: m.email, reason, sent_at: sentMap.get(m.id) ?? null };
+  });
+}
+
+export const getForumRecipients = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((i) => input.parse(i))
+  .handler(async ({ context, data }) => {
+    await assertAdmin(context);
+    const { data: docs } = await context.supabase.from("portal_documents").select("id, title, classification").is("superseded_at", null).order("created_at", { ascending: false });
+    return { recipients: await evaluate(context, data), documents: docs ?? [] };
+  });
+
+export const sendForumEmail = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((i) => input.extend({ member_ids: z.array(z.string().uuid()).min(1).max(200) }).parse(i))
+  .handler(async ({ context, data }) => {
+    await assertAdmin(context);
+    const def = FORUM_EMAILS.find((d) => d.key === data.email_key)!;
+    if (!def.enabled) throw new Error(def.disabledReason ?? "This email is not yet available");
+    const rows = await evaluate(context, data);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { sendPortalEmail, loadSystemEmail } = await import("@/lib/portal-notify.server");
+    const build = await loadSystemEmail(data.email_key);
+    let sent = 0, skipped = 0;
+    for (const id of data.member_ids) {
+      const r = rows.find((x) => x.id === id);
+      if (!r || r.reason || r.sent_at) { skipped++; continue; }
+      // Reserve the send first so a retry can never email the same person twice.
+      const { error } = await supabaseAdmin.from("forum_communication_sends").insert({
+        forum_key: data.forum_key, email_key: data.email_key, version: data.version, member_id: id, recipient_email: r.email, sent_by: context.userId,
+      });
+      if (error) { skipped++; continue; }
+      const first = r.name.split(" ")[0] || "there";
+      const ok = await sendPortalEmail(r.email, build({ ...data.tokens, first_name: first }), `forum-${data.email_key}`, forumIdempotencyKey(data.forum_key, data.email_key, data.version, id));
+      if (!ok) {
+        await supabaseAdmin.from("forum_communication_sends").update({ status: "failed" }).eq("forum_key", data.forum_key).eq("email_key", data.email_key).eq("version", data.version).eq("member_id", id);
+        skipped++; continue;
+      }
+      await supabaseAdmin.from("portal_activity").insert({ member_id: id, actor_user_id: context.userId, event_type: "forum_email_sent", metadata: { email_key: data.email_key, forum_key: data.forum_key, version: data.version } });
+      sent++;
+    }
+    return { sent, skipped };
+  });
+
+/** Member records their own non-legal orientation review. The time is set by the server. */
+export const acknowledgeOrientation = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { data: m } = await supabaseAdmin.from("portal_members").select("id, orientation_acknowledged_at").eq("user_id", context.userId).maybeSingle();
+    if (!m) throw new Error("Member not found");
+    if (m.orientation_acknowledged_at) return { acknowledged_at: m.orientation_acknowledged_at };
+    const now = new Date().toISOString();
+    const { error } = await supabaseAdmin.from("portal_members").update({ orientation_acknowledged_at: now }).eq("id", m.id).is("orientation_acknowledged_at", null);
+    if (error) throw error;
+    await supabaseAdmin.from("portal_activity").insert({ member_id: m.id, actor_user_id: context.userId, event_type: "orientation_reviewed", metadata: {} });
+    return { acknowledged_at: now };
+  });
