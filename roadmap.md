@@ -64,4 +64,4 @@
 - [ ] Approve review package and production preview before any live invitation (waiting on user)
 - [ ] Priority B: Forum question workflow with "No additional questions", follow-up assignments; then enable Emails 4, 5, 8
 - [x] Outlook calendar holds for meeting polls (Busy organizer holds, reconcile on confirm/cancel, re-sync, best-effort executive holds)
-- [ ] Outlook acceptance demonstration (waiting on the founder connecting her working Microsoft calendar)
+- [ ] Outlook acceptance demonstration (blocked: sign-in returned shirley.johnson@nudaze.com; prscstandards.com mailbox needed)
