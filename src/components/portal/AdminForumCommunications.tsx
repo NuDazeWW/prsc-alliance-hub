@@ -1,5 +1,4 @@
 import { useEffect, useMemo, useState } from "react";
-import { render } from "@react-email/render";
 import { Button } from "@/components/ui/button";
 import { FORUM_EMAILS, type ForumEmailKey } from "@/lib/forum-communications";
 import { SYSTEM_EMAIL_DEFAULTS } from "@/lib/system-email-defaults";
@@ -57,7 +56,6 @@ export function AdminForumCommunications() {
       setBusy(false);
     }
   }
-  void render;
 
   return (
     <div>
