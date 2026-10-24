@@ -1,50 +1,56 @@
-# Initial Member Journey: Forum-First Sequence
+# Outlook Calendar Holds for Meeting Polls
 
-Preserves the five-stage onboarding, document requirements, portal design, invitation template, confidentiality controls and audit history. No new member features, and the Orientation Hub does not grow. No live sends.
+Keeps the existing portal availability poll as the only way to schedule. No portal redesign, no second voting process, no automatic scheduling. The admin still picks the final time.
 
-## 1. Revised first-login sequence (for founder approval)
+## 1. Evaluation and recommendation
 
-```text
-1. Accept invitation -> set password -> sign in
-2. Orientation Hub opens on its own -> 5-Minute Orientation -> "I've reviewed this overview"
-3. Meetings & Calendar  (NEW landing step: mark availability for the inaugural Forum)
-4. Executive Profile + Forum participation controls
-5. Controlled strategic briefing (Email 3, sent by admin to Forum-cleared members with document permission)
-6. United Strategic Coordination Forum
--> Formal agreements, disclosures and activation continue through Stages 2-4 afterwards
-```
+**Option A: native Microsoft Scheduling Poll. Not recommended.**
+- Microsoft has no public way for another system to create, read or close a Scheduling Poll (formerly FindTime). It only works inside Outlook.
+- Using it would mean executives vote in Microsoft and again in the portal, or the portal would stop tracking availability. Votes cannot be synced either way. This fails the "no voting twice, no second process" rule.
 
-Change: after the orientation acknowledgment, the member now goes to the Welcome Center's Meetings & Calendar section instead of the Executive Profile. The note reads "Next: mark your availability for the inaugural Forum, then complete your executive profile." The profile stays one click away and keeps its current steps.
+**Option B: the existing portal poll plus Outlook holds. Recommended.**
+- It is the simplest reliable solution and meets the minimum requirement in full.
 
-Confirmed in the current portal: marking availability does not require a submitted profile. That stays as it is.
+## 2. What will happen (organizer calendar: minimum requirement)
 
-## 2. Orientation Hub: essential factual correction only
-The Readiness Vanguard chapter currently says "The first 25 teams and drivers" and calls it a "fixed, curated first group". Proposed wording:
-- Heading: "A planned first cohort of 25 teams and drivers."
-- Opening line: "The Readiness Vanguard™ is planned as a curated first cohort of up to 25 teams and drivers... Recruitment and enrollment are under way; the cohort is not yet fully recruited or contractually enrolled."
-- Locked principle: "Designed as a 25-slot, supply-side-first program"
+- **Publishing a poll:** each proposed time is put on the organizer's Outlook calendar as a tentative hold, titled "HOLD: [meeting title] (proposed)". Only the organizer's own calendar gets these holds. No invitations go to anyone.
+- **Live availability:** each hold's notes update as responses come in, for example "Available 4/7 · If needed 1".
+- **Confirming a time:** the chosen hold becomes the real meeting, marked Busy, with the virtual link or location. Every other hold is deleted.
+- **Cancelling a poll:** all of its holds are deleted.
+- **Changing dates:** holds are added for new times and deleted for times that were removed.
+- **Safety net:** every hold is recorded against its poll. A "Re-sync calendar" button on each meeting repairs anything missing or left over, and no hold is ever created twice.
+- **If Outlook is down or disconnected:** the poll works exactly as it does today. The meeting card shows "Calendar not synced", with a retry button.
 
-Nothing else changes. Jared Odrick and NASCAR are not mentioned in the hub.
+## 3. Executive holds (preferred enhancement, opt-in and needing no calendar access)
 
-## 3. Documentation journey (confirmed, no change to controls)
-- The five-stage document journey stays a core function. Documents are released one at a time: each one unlocks after the previous one is completed.
-- Stage 1 Forum documents come first. Once Stage 1 is cleared (signed and cleared by an admin), the entity-specific Stages 2–4 open, so members can work on them while preparing for the Forum.
-- Forum participation never requires appointment packages, agreements or activation. Those stay in Stages 3–4 and keep the existing admin activation checks.
-- Verification step: an automated check confirms that Stage 2 opens once Stage 1 is cleared, and that Forum eligibility does not depend on Stage 2–4 completion.
+- Changing an executive's calendar automatically needs their own permission. We will not ask for that, because the rules say no one has to grant calendar access just to respond.
+- Instead, when an executive marks a time "Available" or "If needed", the portal offers "Hold this time on my calendar". This downloads a tentative calendar entry that works in Outlook, Apple and Google.
+- When the admin confirms the final time, the existing confirmation email (no new email) includes:
+  - the final meeting entry;
+  - a cancellation for any time held this way, so most calendar apps remove the unused holds on their own.
+- If a poll is cancelled, the existing cancellation notice includes the same removals.
+- This will be tested with Outlook.com and Gmail attendee accounts, and the results written up (cancellation behaviour differs between calendar apps).
 
-## 4. Forum framing in member-facing copy
-Check the Forum email templates (2, 3, 6, 7) and the Meetings card wording. Each must describe the Forum as strategic coordination that leads to recommendations, not as a joint Board meeting, and must not replace separate entity approvals. Wording is adjusted only where a sentence suggests otherwise, and every change is listed for approval.
+## 4. Prerequisites (from you)
 
-## 5. Remaining Priority A blockers (to be reported back)
-- NDA verification records for every invited member (Governance panel)
-- Two cross-entity role reviews
-- Stage 1 Forum documents (Protocol, Pre-Read Packet, Conflict/Recusal form) approved and loaded
-- An inaugural Forum availability poll created in Meetings (dates and slots from you)
-- Confirmation of the data-acquisition description in the Orientation Hub
-- Founder approval of the review package and the production preview
+- A designated organizer mailbox with a calendar: Microsoft 365 Business or Exchange Online (for example admin@readinessterminal.com or your own).
+- Connect that mailbox through Lovable's Outlook connection, which I will start in chat. It needs permission to read and write the calendar (Calendars.ReadWrite). There is no app registration for you to manage.
+- One separate external test account (Outlook.com or Gmail) for the attendee test.
+
+## 5. Acceptance tests (documented in a short report)
+
+- Publishing three proposed times shows three tentative holds on the organizer's calendar.
+- Confirming one time leaves one busy meeting and zero holds.
+- Cancelling or changing dates leaves no orphaned holds, and re-running sync creates no duplicates.
+- With the connection turned off, the poll still works and shows the warning.
+- The external attendee's hold and its removal are observed and recorded.
+- No executive needs to grant calendar access at any point.
 
 ## Technical details
-- `portal.index.tsx` `handleAcknowledge`: navigate to `/portal` with hash `meetings` (scroll to `#meetings`) instead of `/portal/profile`; update the toast text.
-- `src/data/orientation-hub.ts` `vanguard` chapter: three string edits only.
-- `system-email-defaults.ts`: wording check of the forum templates only. The keys and the shape of `loadSystemEmail` stay the same.
-- Update the walkthrough test step 4 so it expects Meetings. Re-run the existing tests.
+
+- New table `meeting_calendar_holds` (poll_id, slot_id, outlook_event_id, kind hold|final, status, last_synced_at). It is admin-only under RLS, and UNIQUE(slot_id, kind) prevents duplicates.
+- New `src/lib/outlook-calendar.server.ts`: Graph calls through the connector gateway (`POST/PATCH/DELETE /me/events`). Holds use showAs=tentative and the poll's timezone. A `reconcilePollHolds(pollId)` function brings the calendar in line with the poll and is safe to run repeatedly.
+- `meetings.functions.ts`: after createMeetingPoll, confirmPollSlot, cancelPoll, slot edits and member responses, call reconcile in a try/catch so failures are logged and never block the poll. Add a `resyncPollCalendar` admin server function.
+- `ics.ts`: add tentative per-slot holds with stable UID `{slotId}@prscstandards.org`, plus METHOD:CANCEL entries. These go into the existing confirmed and cancel emails only.
+- UI: a sync status pill and re-sync button in AdminMeetings, and a hold-download link in MemberMeetings. No layout changes.
+- Tests: reconcile planning logic (which holds to create, update or delete) as a pure function with node:test.
