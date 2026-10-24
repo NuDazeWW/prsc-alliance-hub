@@ -16,6 +16,9 @@ import {
 } from "@/lib/portal.functions";
 import { STAGES, journeyStatus, lockedDocumentIds, memberTracks } from "@/lib/journey";
 import { JOURNEY_PRESETS } from "@/lib/journey-templates";
+import { CLASSIFICATIONS, type Classification } from "@/lib/governance";
+import { updateDocumentGovernance } from "@/lib/governance.functions";
+import { AdminGovernancePanel } from "@/components/portal/AdminGovernancePanel";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -46,6 +49,10 @@ export function AdminMemberDocuments({ memberId, memberName, preview }: Props) {
   const [url, setUrl] = useState("");
   const [file, setFile] = useState<File | null>(null);
   const [busy, setBusy] = useState(false);
+  const [classification, setClassification] = useState<Classification>("confidential_forum");
+  const [supersedes, setSupersedes] = useState("");
+  const [versionLabel, setVersionLabel] = useState("");
+  const [permission, setPermission] = useState("");
   const [status, setStatus] = useState("");
 
   function reset() {
@@ -84,6 +91,11 @@ export function AdminMemberDocuments({ memberId, memberName, preview }: Props) {
           journey_stage: stage ? Number(stage) : null,
           journey_track: stage === "1" ? "shared" : track,
           sort_order: Number(sortOrder) || 0,
+          classification,
+          is_forum_prep: stage === "1",
+          version_label: versionLabel.trim() || null,
+          supersedes_id: supersedes || null,
+          third_party_permission: permission.trim() || undefined,
         },
       });
       reset();
@@ -160,17 +172,35 @@ export function AdminMemberDocuments({ memberId, memberName, preview }: Props) {
   const activation = docs.data?.activation ?? { prsc: null, dis: null };
   const doneIds = new Set<string>(acks.filter((a: any) => a.member_id === memberId).map((a: any) => a.document_id));
   const forum = (docs.data as any)?.forum !== false;
-  const journey = journeyStatus(list as any, doneIds, entity, activation, forum);
+  const cleared = (docs.data as any)?.forumCleared === true;
+  const active = list.filter((d: any) => !d.superseded_at);
+  const journey = journeyStatus(active as any, doneIds, entity, activation, forum, cleared);
+  async function setDocGov(id: string, patch: { classification?: Classification; superseded?: boolean }) {
+    if (preview) return setStatus("Preview mode: classification is saved on the live admin page.");
+    let third_party_permission: string | undefined;
+    if (patch.classification === "restricted_opportunity") {
+      third_party_permission = prompt("Record the source's permission (source, permitted use, who confirmed it):") ?? "";
+      if (!third_party_permission.trim()) return setStatus("Restricted Opportunity needs a recorded source permission.");
+    }
+    if (patch.superseded && !confirm("Mark as superseded? It leaves active queues; signed copies and history are kept.")) return;
+    try { await updateDocumentGovernance({ data: { document_id: id, ...patch, third_party_permission } }); await docs.refetch(); }
+    catch (e) { setStatus(e instanceof Error ? e.message : "Could not update"); }
+  }
   async function toggleForum(on: boolean) {
     if (preview) return setStatus("Preview mode: Forum participation is changed on the live admin page.");
     try { await setForumParticipation({ data: { member_id: memberId, participates: on } }); await docs.refetch(); }
     catch (e) { setStatus(e instanceof Error ? e.message : "Could not update Forum participation"); }
   }
-  const lockedIds = lockedDocumentIds(list as any, doneIds, entity);
+  const lockedIds = lockedDocumentIds(active as any, doneIds, entity, cleared);
   async function toggleActivation(t: "prsc" | "dis", on: boolean) {
     if (preview) return setStatus("Preview mode: activation is recorded on the live admin page.");
-    if (on && !confirm(`Record ${t.toUpperCase()} activation for ${memberName}? Confirm the authorized countersignature and appointment record are complete.`)) return;
-    try { await setEntityActivation({ data: { member_id: memberId, entity: t, activated: on } }); await docs.refetch(); }
+    let appointment_ref: string | undefined;
+    if (on) {
+      if (!confirm(`Confirm the authorized ${t.toUpperCase()} countersignature has been executed for ${memberName}?`)) return;
+      appointment_ref = prompt(`Reference for the ${t.toUpperCase()} appointment action (e.g. board resolution or Master Ops entry):`) ?? "";
+      if (!appointment_ref.trim()) return setStatus("Appointment needs a recorded appointment action reference.");
+    }
+    try { await setEntityActivation({ data: { member_id: memberId, entity: t, activated: on, countersigned: on, appointment_ref } }); await docs.refetch(); }
     catch (e) { setStatus(e instanceof Error ? e.message : "Could not update activation"); }
   }
   function applyPreset(i: string) {
@@ -204,11 +234,13 @@ export function AdminMemberDocuments({ memberId, memberName, preview }: Props) {
           {memberTracks(entity).map((t) => (
             <label key={t} className="flex items-center gap-2 text-base text-ivory/80">
               <input type="checkbox" className="h-4 w-4" checked={Boolean(activation[t])} onChange={(e) => toggleActivation(t, e.target.checked)} />
-              {t.toUpperCase()} activated (countersigned & appointment recorded){activation[t] ? ` · ${new Date(activation[t]!).toLocaleDateString()}` : ""}
+              {t.toUpperCase()} appointed (verified agreements, countersignature & appointment action){activation[t] ? ` · ${new Date(activation[t]!).toLocaleDateString()}` : ""}
             </label>
           ))}
         </div>
       </div>
+
+      <AdminGovernancePanel memberId={memberId} preview={preview} onChange={() => docs.refetch()} />
 
       <div className="mt-5 grid gap-3 sm:grid-cols-2">
         <label className="text-base text-ivory/70 sm:col-span-2">
@@ -297,6 +329,29 @@ export function AdminMemberDocuments({ memberId, memberName, preview }: Props) {
           </>
         )}
         <label className="text-base text-ivory/70">
+          Classification
+          <select value={classification} onChange={(e) => setClassification(e.target.value as Classification)} className={`mt-1 ${selectCls}`}>
+            {CLASSIFICATIONS.map((c) => <option key={c.value} value={c.value}>{c.label}</option>)}
+          </select>
+        </label>
+        {classification === "restricted_opportunity" && (
+          <label className="text-base text-ivory/70">
+            Source permission (required)
+            <Input value={permission} onChange={(e) => setPermission(e.target.value)} placeholder="Source, permitted use, confirmed by" className="mt-1 text-base" />
+          </label>
+        )}
+        <label className="text-base text-ivory/70">
+          Replaces an earlier version (new acknowledgment required)
+          <select value={supersedes} onChange={(e) => setSupersedes(e.target.value)} className={`mt-1 ${selectCls}`}>
+            <option value="">None: this is a new document</option>
+            {active.map((d: any) => <option key={d.id} value={d.id}>{d.title}{d.version_label ? ` (${d.version_label})` : ""}</option>)}
+          </select>
+        </label>
+        <label className="text-base text-ivory/70">
+          Version label
+          <Input value={versionLabel} onChange={(e) => setVersionLabel(e.target.value)} placeholder="v2 · Oct 2026" className="mt-1 text-base" />
+        </label>
+        <label className="text-base text-ivory/70">
           Title
           <Input value={title} onChange={(e) => setTitle(e.target.value)} placeholder="Advisor Appointment Agreement" className="mt-1 text-base" />
         </label>
@@ -360,7 +415,16 @@ export function AdminMemberDocuments({ memberId, memberName, preview }: Props) {
                   {(d as any).journey_stage ? `Stage ${(d as any).journey_stage} · ${STAGES[(d as any).journey_stage - 1].label}` : "Ongoing record"}
                   {(d as any).journey_track ? ` · ${(d as any).journey_track === "shared" ? "Shared" : (d as any).journey_track.toUpperCase()}` : ""}
                   {lockedIds.has(d.id) ? " · Waiting on earlier document" : ""}
+                  {(d as any).version_label ? ` · ${(d as any).version_label}` : ""}
+                  {(d as any).superseded_at ? " · Superseded (history only)" : ""}
+                  {!(d as any).classification_reviewed_at ? " · Classification needs review" : ""}
                 </p>
+                <div className="mt-2 flex flex-wrap items-center gap-3">
+                  <select aria-label={`Classification for ${d.title}`} value={(d as any).classification ?? "entity_confidential"} onChange={(e) => setDocGov(d.id, { classification: e.target.value as Classification })} className="h-9 border border-gold/25 bg-navy-deep px-2 text-sm text-ivory">
+                    {CLASSIFICATIONS.map((c) => <option key={c.value} value={c.value}>{c.label}</option>)}
+                  </select>
+                  {!(d as any).superseded_at && <Button type="button" variant="outline" size="sm" onClick={() => setDocGov(d.id, { superseded: true })}>Mark superseded</Button>}
+                </div>
                 <p className="mt-1 text-base text-ivory/55">
                   {d.category === "sign" ? "Sign and return" : "Read and retain"} ·{" "}
                   {d.action === "boldsign" || d.action === "docusign" ? "BoldSign" : d.action === "esign" ? "Sign in portal" : "Acknowledge in portal"} ·{" "}
