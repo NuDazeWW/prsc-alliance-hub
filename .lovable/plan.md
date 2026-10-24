@@ -46,3 +46,13 @@ Each is added as an editable template with your copy, one main button that opens
 - `system-email-defaults.ts`: update `invite`, add `forum_confirmed`, `briefing_released`, `input_requested`, `input_reminder`, `final_agenda`, `coordination_summary`, `followup_assigned`. These load through `loadSystemEmail`.
 - New `forum-communications.functions.ts` (admin-checked). Eligibility comes from `governance.ts` (NDA, Forum clearance, `documentVisible`) and `journey.ts` (forum opt-out). Each send uses an idempotency key made from the email key, the member and the event.
 - Tests: eligibility rules (NDA missing, not cleared, opted out, document hidden → excluded; reminder skips anyone who already submitted). The acknowledgment does not change journey status.
+
+## Final controls (approved)
+- The orientation acknowledgment time is set by the server only. It is kept separate from Stage 2 and from every legal document acknowledgment.
+- Every member who hasn't acknowledged sees the refreshed orientation once, including existing accounts. Onboarding status is never reset.
+- The question form is not built now. The full question workflow comes in Priority B and will include a "No additional questions" option, which stops reminders for that round.
+- Two separate checks decide who gets each email: whether a member can be invited to the Forum, and whether they have completed Forum clearance. The briefing email needs both clearance and permission for that document.
+- Emails 4, 5 and 8 stay switched off until their Priority B pages are working and tested.
+- Each email is recognized by its forum, its email type and version, and its recipient. This prevents duplicates while still allowing future forums and revised emails.
+- The walkthrough uses a test account with made-up details. Screenshots and reports show no real member information.
+- No live sends. Invitations start only after you approve the production preview.
