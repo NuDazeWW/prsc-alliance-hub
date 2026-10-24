@@ -123,3 +123,7 @@ export function governanceStatusLabel(s: { status: string; forumCleared: boolean
   if (s.forumCleared) return "Forum Participant";
   return "Invited Candidate";
 }
+
+export function memberTracksFor(entity: string): ("prsc" | "dis")[] {
+  return entity === "both" ? ["prsc", "dis"] : entity === "dis" ? ["dis"] : ["prsc"];
+}

@@ -5,6 +5,7 @@ import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { renderBrandedEmail, renderBrandedEmailText } from "@/lib/branded-email";
 import { memberRoleLabel } from "@/lib/member-role-labels";
 import { journeyStatus, type JourneyStatus } from "@/lib/journey";
+import { documentVisible, forumCleared, isActive, ndaProblem, roleCombinationTier, initialRoleReviewStatus, roleReviewBlocks, appointmentProblems, memberTracksFor } from "@/lib/governance";
 
 type PortalMember = {
   id: string; user_id: string; email: string; first_name: string; last_name: string;
@@ -267,7 +268,43 @@ const inviteSchema = z.object({
   is_methodology_committee: z.boolean().optional(),
   participates_in_forum: z.boolean().optional(),
   poll_id: z.string().uuid().nullable().optional(),
+  nda_confirmed: z.boolean().optional(),
+  nda_reference: z.string().trim().max(400).optional(),
+  nda_entities: entitySchema.optional(),
+  nda_scope: z.string().trim().max(600).optional(),
+  role_review: z.object({
+    decision: z.literal("approved"),
+    notes: z.string().trim().min(5).max(2000),
+    prsc_scope: z.string().trim().min(3).max(1000),
+    dis_scope: z.string().trim().min(3).max(1000),
+    conflict_controls: z.string().trim().min(3).max(1000),
+  }).optional(),
 });
+type InviteInput = z.infer<typeof inviteSchema>;
+
+/** NDA and role-combination gates every invitation must pass, before any account is created. */
+function invitationGates(m: InviteInput, adminId: string) {
+  const nda = { verified_at: m.nda_confirmed ? new Date().toISOString() : null, verified_by: m.nda_confirmed ? adminId : null, reference: m.nda_reference ?? null, entities: m.nda_entities ?? null, scope: m.nda_scope ?? null };
+  const ndaErr = ndaProblem(nda, m.entity);
+  if (ndaErr) throw new Error(`${m.email}: ${ndaErr}`);
+  const combo = roleCombinationTier(m.entity, m.role, m.is_methodology_committee ?? false);
+  if (combo.tier === "prohibited") throw new Error(`${m.email}: this role combination is prohibited (${combo.clause}) and cannot be approved by an administrator`);
+  if (combo.tier === "review" && !m.role_review) throw new Error(`${m.email}: this cross-entity combination is blocked pending a recorded governance/legal review (decision, separate engagement scopes, conflict controls)`);
+  return {
+    nda,
+    columns: {
+      nda_verified_at: nda.verified_at, nda_verified_by: nda.verified_by, nda_reference: nda.reference, nda_entities: nda.entities, nda_scope: nda.scope,
+      role_review_status: combo.tier === "review" ? "approved" : initialRoleReviewStatus(m.entity, m.role, m.is_methodology_committee ?? false),
+    },
+    review: combo.tier === "review" ? m.role_review! : null,
+  };
+}
+
+async function recordInviteReviews(admin: any, memberId: string, adminId: string, gates: ReturnType<typeof invitationGates>) {
+  const rows: any[] = [{ member_id: memberId, kind: "nda", decision: "verified", reviewer_id: adminId, notes: gates.nda.reference, details: { entities: gates.nda.entities, scope: gates.nda.scope } }];
+  if (gates.review) rows.push({ member_id: memberId, kind: "role_combination", decision: "approved", reviewer_id: adminId, notes: gates.review.notes, details: { prsc_scope: gates.review.prsc_scope, dis_scope: gates.review.dis_scope, conflict_controls: gates.review.conflict_controls } });
+  await admin.from("governance_reviews").insert(rows);
+}
 function portalInviteRedirect(member: { first_name: string; entity: string; role: string; poll_id?: string | null }) {
   const url = new URL("https://access.prscstandards.org/accept-invitation");
   url.searchParams.set("first_name", member.first_name);
@@ -281,8 +318,9 @@ export const invitePortalMember = createServerFn({ method: "POST" })
   .inputValidator((input) => inviteSchema.parse(input))
   .handler(async ({ context, data }) => {
     await assertAdmin(context);
+    const gates = invitationGates(data, context.userId);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const { poll_id: pollId, ...member } = data;
+    const { poll_id: pollId, nda_confirmed: _n, nda_reference: _r, nda_entities: _e, nda_scope: _s, role_review: _rv, ...member } = data;
     if (pollId) {
       const { loadOpenPoll } = await import("@/lib/meeting-poll.server");
       if (!(await loadOpenPoll(pollId))) throw new Error("That meeting is no longer open for availability. Pick another or remove it.");
@@ -298,8 +336,10 @@ export const invitePortalMember = createServerFn({ method: "POST" })
       entity: member.entity, role: member.role, why_you: member.why_you, status: "invited",
       is_methodology_committee: member.is_methodology_committee ?? false,
       participates_in_forum: member.participates_in_forum ?? true,
+      ...gates.columns,
     }, { onConflict: "email" }).select("id").single();
     if (memberError) throw memberError;
+    if (saved) await recordInviteReviews(supabaseAdmin, saved.id, context.userId, gates);
     if (pollId && saved) {
       const { addMembersToPoll } = await import("@/lib/meeting-poll.server");
       await addMembersToPoll(pollId, [saved.id]);
@@ -325,6 +365,8 @@ export const importPortalMembers = createServerFn({ method: "POST" })
       const email = row.email.toLowerCase();
       try {
         let userId: string | null = null;
+        // Staged rows may wait for NDA/review; invitations may not.
+        const gates = data.send_invitations ? invitationGates(row, context.userId) : null;
 
         const { data: existingMember } = await supabaseAdmin
           .from("portal_members").select("user_id").eq("email", email).maybeSingle();
@@ -353,8 +395,13 @@ export const importPortalMembers = createServerFn({ method: "POST" })
           organization: row.organization, title: row.title || null, entity: row.entity,
           role: row.role, why_you: row.why_you, status: "invited",
           is_methodology_committee: row.is_methodology_committee ?? false,
+          ...(gates ? gates.columns : { role_review_status: initialRoleReviewStatus(row.entity, row.role, row.is_methodology_committee ?? false) }),
         }, { onConflict: "email" });
         if (memberError) throw memberError;
+        if (gates) {
+          const { data: saved } = await supabaseAdmin.from("portal_members").select("id").eq("email", email).single();
+          if (saved) await recordInviteReviews(supabaseAdmin, saved.id, context.userId, gates);
+        }
 
         const { error: roleError } = await supabaseAdmin
           .from("user_roles").upsert({ user_id: userId, role: row.role }, { onConflict: "user_id,role" });
@@ -390,8 +437,9 @@ export const getAdminOverview = createServerFn({ method: "GET" })
     await Promise.all(list.map(async (m) => {
       const docs = await applicableDocuments(context.supabase, m as unknown as DocMember);
       const done = new Set((acks ?? []).filter((a: any) => a.member_id === m.id).map((a: any) => a.document_id));
-      journeys[m.id] = journeyStatus(docs, done, m.entity, { prsc: m.prsc_activated_at ?? null, dis: m.dis_activated_at ?? null }, m.participates_in_forum !== false);
-      if (m.documents_released_at) docProgress[m.id] = { total: docs.length, done: docs.filter((d) => done.has(d.id)).length };
+      const active = docs.filter(isActive);
+      journeys[m.id] = journeyStatus(active, done, m.entity, { prsc: m.prsc_activated_at ?? null, dis: m.dis_activated_at ?? null }, m.participates_in_forum !== false, forumCleared((m as any).forum_clearance_status));
+      if (m.documents_released_at) docProgress[m.id] = { total: active.length, done: active.filter((d) => done.has(d.id)).length };
     }));
     return { members: list, inquiries: inquiries ?? [], activity: activity ?? [], profiles: profiles ?? [], docProgress, journeys };
   });
@@ -630,7 +678,14 @@ export type PortalCompletion = {
   acknowledged_at: string;
 };
 
-type DocMember = { id: string; entity: string; role: string; participates_in_forum?: boolean | null };
+type DocMember = { id: string; entity: string; role: string; participates_in_forum?: boolean | null; nda_verified_at?: string | null; forum_clearance_status?: string | null; role_review_status?: string | null };
+const GOV_COLS = "nda_verified_at, forum_clearance_status, role_review_status";
+
+/** What the member may actually open: mirrors the database read policy. */
+function memberVisible(docs: PortalDocumentRecord[], m: DocMember, done: Set<string>) {
+  const vm = { nda_verified_at: m.nda_verified_at ?? null, forum_clearance_status: m.forum_clearance_status ?? "not_reviewed" };
+  return docs.filter((d: any) => documentVisible({ classification: d.classification ?? "entity_confidential", superseded_at: d.superseded_at ?? null, is_forum_prep: !!d.is_forum_prep }, vm, done.has(d.id)));
+}
 
 function appliesTo(doc: PortalDocumentRecord, m: DocMember) {
   // Members opted out of the Forum never receive Stage 1 documents.
@@ -677,22 +732,25 @@ export const getMyDocuments = createServerFn({ method: "GET" })
       context = { supabase: supabaseAdmin };
     }
     const { data: member } = await context.supabase
-      .from("portal_members").select("id, entity, role, participates_in_forum, documents_released_at, prsc_activated_at, dis_activated_at").eq(input.asMemberId ? "id" : "user_id", input.asMemberId ?? ctx.userId).maybeSingle();
+      .from("portal_members").select("id, entity, role, participates_in_forum, nda_verified_at, forum_clearance_status, role_review_status, documents_released_at, prsc_activated_at, dis_activated_at").eq(input.asMemberId ? "id" : "user_id", input.asMemberId ?? ctx.userId).maybeSingle();
     const activation = { prsc: (member?.prsc_activated_at as string | null) ?? null, dis: (member?.dis_activated_at as string | null) ?? null };
     if (!member) return { memberId: null, released: false, documents: [], acknowledged: [] as string[], completions: [] as PortalCompletion[] };
     if (!member.documents_released_at) {
       return { memberId: member.id as string, released: false, documents: [], acknowledged: [] as string[], completions: [] as PortalCompletion[] };
     }
-    const docs = await applicableDocuments(context.supabase, member as DocMember);
+    const all = await applicableDocuments(context.supabase, member as DocMember);
     const { data: acks } = await context.supabase
       .from("portal_document_acknowledgements")
       .select("document_id, kind, initials, signed_name, acknowledged_at")
       .eq("member_id", member.id);
     const completions = (acks ?? []) as PortalCompletion[];
+    const docs = memberVisible(all, member as DocMember, new Set(completions.map((c) => c.document_id)));
     return {
       memberId: member.id as string,
       entity: member.entity as string,
       forum: member.participates_in_forum !== false,
+      forumCleared: forumCleared(member.forum_clearance_status as string),
+      ndaVerified: !!member.nda_verified_at,
       activation,
       released: true,
       documents: await signDocumentUrls(docs),
@@ -704,7 +762,7 @@ export const getMyDocuments = createServerFn({ method: "GET" })
 export async function maybeCompletePackage(member: { id: string; email: string; first_name: string | null; last_name: string | null; entity: string; role: string; documents_completed_at: string | null }) {
   const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
   if (member.documents_completed_at) return;
-  const docs = await applicableDocuments(supabaseAdmin, member);
+  const docs = (await applicableDocuments(supabaseAdmin, member)).filter(isActive);
   if (!docs.length) return;
   const { data: acks } = await supabaseAdmin.from("portal_document_acknowledgements").select("document_id").eq("member_id", member.id);
   const done = new Set((acks ?? []).map((a: { document_id: string }) => a.document_id));
@@ -760,24 +818,29 @@ export const acknowledgeDocument = createServerFn({ method: "POST" })
         signed_name: z.string().trim().max(160).optional(),
         signature_data: z.string().max(200000).optional(),
         consent: z.boolean().default(false),
+        conflict_answer: z.enum(["none", "changed", "unsure"]).optional(),
+        conflict_details: z.string().trim().max(4000).optional(),
       })
       .parse(input),
   )
   .handler(async ({ context, data }) => {
     const { data: member, error: memberError } = await context.supabase
       .from("portal_members")
-      .select("id, email, first_name, last_name, entity, role, participates_in_forum, documents_released_at, documents_completed_at")
+      .select("id, email, first_name, last_name, entity, role, participates_in_forum, nda_verified_at, forum_clearance_status, role_review_status, documents_released_at, documents_completed_at")
       .eq("user_id", context.userId)
       .single();
     if (memberError || !member) throw new Error("Member profile unavailable");
     if (!member.documents_released_at) throw new Error("Documents have not been released yet");
-    const docs = await applicableDocuments(context.supabase, member as DocMember);
-    const doc = docs.find((d) => d.id === data.document_id);
-    if (!doc) throw new Error("Document unavailable");
     const { lockedDocumentIds } = await import("@/lib/journey");
     const { data: priorAcks } = await context.supabase.from("portal_document_acknowledgements").select("document_id").eq("member_id", member.id);
     const priorDone = new Set<string>((priorAcks ?? []).map((a: { document_id: string }) => a.document_id));
-    if (lockedDocumentIds(docs, priorDone, member.entity).has(doc.id)) throw new Error("Please complete the earlier documents in your journey first");
+    const docs = memberVisible(await applicableDocuments(context.supabase, member as DocMember), member as DocMember, priorDone).filter(isActive);
+    const doc = docs.find((d) => d.id === data.document_id);
+    if (!doc) throw new Error("Document unavailable");
+    const isConflictForm = /conflict|recusal/i.test(doc.title);
+    if (isConflictForm && !data.conflict_answer) throw new Error("Choose your conflict answer before signing");
+    const cleared = forumCleared(member.forum_clearance_status as string);
+    if (lockedDocumentIds(docs, priorDone, member.entity, cleared).has(doc.id)) throw new Error("Please complete the earlier documents in your journey first");
     if (data.kind === "signed") {
       if (!data.signed_name || data.signed_name.length < 2) throw new Error("Type your full legal name to sign");
       if (!data.signature_data?.startsWith("data:image/png;base64,")) throw new Error("Add your signature");
@@ -795,6 +858,8 @@ export const acknowledgeDocument = createServerFn({ method: "POST" })
       consent: data.consent,
       ip_address: ip,
       user_agent: request.headers.get("user-agent")?.slice(0, 400) ?? null,
+      conflict_answer: isConflictForm ? data.conflict_answer : null,
+      conflict_details: isConflictForm ? data.conflict_details || null : null,
     });
     if (error && error.code !== "23505") throw error;
     await context.supabase.from("portal_activity").insert({
@@ -802,11 +867,26 @@ export const acknowledgeDocument = createServerFn({ method: "POST" })
       event_type: data.kind === "signed" ? "document_signed" : "document_acknowledged",
       metadata: { document_id: data.document_id, title: doc.title },
     });
+    if (isConflictForm) {
+      // A signed confirmation never resolves a conflict by itself: the admin must review.
+      await context.supabase.from("portal_activity").insert({
+        member_id: member.id, actor_user_id: context.userId, event_type: "conflict_confirmation_submitted",
+        metadata: { document_id: doc.id, answer: data.conflict_answer, review_required: true },
+      });
+      const { sendPortalEmail } = await import("@/lib/portal-notify.server");
+      await sendPortalEmail(ADMIN_EMAIL, {
+        subject: `Forum clearance review needed: ${member.first_name ?? ""} ${member.last_name ?? ""}`.trim(),
+        eyebrow: "Clearance pending review",
+        heading: "A conflict / recusal confirmation was submitted.",
+        body: `Answer: ${data.conflict_answer === "none" ? "No conflict" : data.conflict_answer === "changed" ? "New or changed conflict" : "Unsure, please review"}\n\nReview the member's disclosures, restrictions, NDA status and meeting eligibility, then record the clearance decision.`,
+        ctaLabel: "Open Administrator Center", ctaUrl: "https://access.prscstandards.org/admin",
+      }, "forum-clearance-review").catch(() => undefined);
+    }
     await maybeCompletePackage(member as any);
     // Sequential journey: tell the member when this completion unlocks the next document.
-    const before = lockedDocumentIds(docs, priorDone, member.entity);
+    const before = lockedDocumentIds(docs, priorDone, member.entity, cleared);
     const afterDone = new Set(priorDone).add(doc.id);
-    const after = lockedDocumentIds(docs, afterDone, member.entity);
+    const after = lockedDocumentIds(docs, afterDone, member.entity, cleared);
     const unlocked = docs.filter((d) => before.has(d.id) && !after.has(d.id) && !afterDone.has(d.id));
     if (unlocked.length) {
       const { sendPortalEmail } = await import("@/lib/portal-notify.server");
@@ -828,12 +908,35 @@ export const acknowledgeDocument = createServerFn({ method: "POST" })
 
 export const setEntityActivation = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((input) => z.object({ member_id: z.string().uuid(), entity: z.enum(["prsc", "dis"]), activated: z.boolean() }).parse(input))
+  .inputValidator((input) => z.object({
+    member_id: z.string().uuid(), entity: z.enum(["prsc", "dis"]), activated: z.boolean(),
+    countersigned: z.boolean().optional(), appointment_ref: z.string().trim().max(400).optional(),
+  }).parse(input))
   .handler(async ({ context, data }) => {
     await assertAdmin(context);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    if (data.activated) {
+      const { data: m } = await supabaseAdmin.from("portal_members").select("*").eq("id", data.member_id).single();
+      if (!m) throw new Error("Member not found");
+      const docs = (await applicableDocuments(supabaseAdmin, m as any)).filter(isActive);
+      const { data: acks } = await supabaseAdmin.from("portal_document_acknowledgements").select("document_id").eq("member_id", m.id);
+      const done = new Set((acks ?? []).map((a: any) => a.document_id));
+      const first = memberTracksFor(m.entity)[0];
+      const trackDocs = docs.filter((d: any) => (d.journey_stage === 2 || d.journey_stage === 3) && ((d.journey_track && d.journey_track !== "shared" ? d.journey_track : first) === data.entity));
+      const problems = appointmentProblems({
+        ndaOk: !ndaProblem({ verified_at: m.nda_verified_at, verified_by: m.nda_verified_by, reference: m.nda_reference, entities: m.nda_entities, scope: m.nda_scope }, m.entity),
+        roleReviewOk: !roleReviewBlocks(m.role_review_status),
+        forumOk: m.participates_in_forum === false || forumCleared(m.forum_clearance_status),
+        trackDocsComplete: trackDocs.length > 0 && trackDocs.every((d: any) => done.has(d.id)),
+        countersigned: !!data.countersigned,
+        appointmentRef: data.appointment_ref,
+      });
+      if (problems.length) throw new Error(`Cannot record appointment yet: ${problems.join("; ")}`);
+      await supabaseAdmin.from("governance_reviews").insert({ member_id: m.id, kind: "appointment", decision: "verified", reviewer_id: context.userId, notes: data.appointment_ref, details: { entity: data.entity, countersigned: true } });
+    }
     const at = data.activated ? new Date().toISOString() : null;
-    const patch = data.entity === "prsc" ? { prsc_activated_at: at } : { dis_activated_at: at };
+    const ref = data.activated ? data.appointment_ref ?? null : null;
+    const patch = data.entity === "prsc" ? { prsc_activated_at: at, prsc_appointment_ref: ref } : { dis_activated_at: at, dis_appointment_ref: ref };
     const { error } = await supabaseAdmin.from("portal_members").update(patch).eq("id", data.member_id);
     if (error) throw error;
     await supabaseAdmin.from("portal_activity").insert({
@@ -899,7 +1002,7 @@ export const listDocumentsForAdmin = createServerFn({ method: "GET" })
     let documents: PortalDocumentRecord[];
     if (data.member_id) {
       const { data: m } = await context.supabase
-        .from("portal_members").select("id, entity, role, participates_in_forum, documents_released_at, documents_completed_at, prsc_activated_at, dis_activated_at").eq("id", data.member_id).maybeSingle();
+        .from("portal_members").select("id, entity, role, participates_in_forum, nda_verified_at, forum_clearance_status, role_review_status, documents_released_at, documents_completed_at, prsc_activated_at, dis_activated_at").eq("id", data.member_id).maybeSingle();
       member = m;
       documents = m ? await applicableDocuments(context.supabase, m) : [];
     } else {
@@ -933,6 +1036,7 @@ export const listDocumentsForAdmin = createServerFn({ method: "GET" })
       completedAt: member?.documents_completed_at ?? null,
       entity: member?.entity ?? "prsc",
       forum: (member as any)?.participates_in_forum !== false,
+      forumCleared: forumCleared((member as any)?.forum_clearance_status),
       activation: { prsc: (member as any)?.prsc_activated_at ?? null, dis: (member as any)?.dis_activated_at ?? null } as { prsc: string | null; dis: string | null },
     };
   });
@@ -954,11 +1058,18 @@ export const createMemberDocument = createServerFn({ method: "POST" })
         journey_stage: z.number().int().min(1).max(5).nullable().optional(),
         journey_track: z.enum(["shared", "prsc", "dis"]).nullable().optional(),
         sort_order: z.number().int().min(0).max(999).optional(),
+        classification: z.enum(["general_orientation", "confidential_forum", "restricted_opportunity", "entity_confidential", "secretariat_only"]).optional(),
+        is_forum_prep: z.boolean().optional(),
+        version_label: z.string().trim().max(60).nullable().optional(),
+        supersedes_id: z.string().uuid().nullable().optional(),
+        third_party_permission: z.string().trim().max(1000).optional(),
       })
       .parse(input),
   )
   .handler(async ({ context, data }) => {
     await assertAdmin(context);
+    if (data.classification === "restricted_opportunity" && !data.third_party_permission)
+      throw new Error("Record the source's permission before storing Restricted Opportunity material");
     if (!data.external_url && !data.file_path) throw new Error("Upload a file or add a BoldSign link");
     if ((data.action === "esign" || data.action === "acknowledge") && !data.file_path) throw new Error("Upload the file so members can read it in the portal");
     const { error } = await context.supabase.from("portal_documents").insert({
@@ -975,8 +1086,20 @@ export const createMemberDocument = createServerFn({ method: "POST" })
       journey_track: data.journey_stage === 1 ? "shared" : data.journey_track ?? null,
       sort_order: data.sort_order ?? 0,
       created_by: context.userId,
+      classification: data.classification ?? (data.journey_stage === 1 ? "confidential_forum" : "entity_confidential"),
+      classification_reviewed_at: data.classification ? new Date().toISOString() : null,
+      is_forum_prep: data.is_forum_prep ?? data.journey_stage === 1,
+      version_label: data.version_label ?? null,
+      supersedes_id: data.supersedes_id ?? null,
     });
     if (error) throw error;
+    if (data.supersedes_id) {
+      // A materially revised version needs a new acknowledgement; the old one leaves active queues.
+      await context.supabase.from("portal_documents").update({ superseded_at: new Date().toISOString() }).eq("id", data.supersedes_id);
+    }
+    if (data.third_party_permission && data.member_id) {
+      await context.supabase.from("governance_reviews").insert({ member_id: data.member_id, kind: "third_party_permission", decision: "confirmed", reviewer_id: context.userId, notes: data.third_party_permission, details: { title: data.title } });
+    }
     return { ok: true };
   });
 
@@ -986,8 +1109,9 @@ export const releaseMemberDocuments = createServerFn({ method: "POST" })
   .handler(async ({ context, data }) => {
     await assertAdmin(context);
     const { data: member } = await context.supabase
-      .from("portal_members").select("id, email, first_name, entity, role, package_status").eq("id", data.member_id).single();
+      .from("portal_members").select("id, email, first_name, entity, role, package_status, role_review_status").eq("id", data.member_id).single();
     if (!member) throw new Error("Member not found");
+    if (roleReviewBlocks(member.role_review_status)) throw new Error("This member's role combination is blocked pending a recorded governance/legal review");
     const docs = await applicableDocuments(context.supabase, member as DocMember);
     if (!docs.length) throw new Error("Add at least one document before releasing");
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
