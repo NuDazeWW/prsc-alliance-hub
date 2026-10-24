@@ -70,12 +70,14 @@ export function journeyStatus(
   done: Set<string>,
   entity: string,
   activated: { prsc: string | null; dis: string | null },
+  forum = true,
 ): JourneyStatus {
   const tracks = memberTracks(entity);
   const onboarding = docs.filter(isOnboarding);
   const stageComplete = (n: number) => onboarding.filter((d) => d.journey_stage === n).every((d) => done.has(d.id));
   const allActivated = tracks.every((t) => activated[t]);
-  const s1 = stageComplete(1) && onboarding.some((d) => d.journey_stage === 1);
+  // Members opted out of the Forum skip Stage 1 entirely (4-stage journey).
+  const s1 = !forum || (stageComplete(1) && onboarding.some((d) => d.journey_stage === 1));
   const s2 = s1 && stageComplete(2);
   const s3 = s2 && stageComplete(3);
   const s4 = s3 && stageComplete(4) && allActivated;
@@ -86,7 +88,7 @@ export function journeyStatus(
     : s3
       ? "Pending Activation"
       : s1
-        ? "Forum Cleared — In Entity Qualification"
+        ? forum ? "Forum Cleared — In Entity Qualification" : "In Entity Qualification"
         : "Needs Forum Clearance";
   return { currentStage, stageDone, label, forumCleared: s1 };
 }
