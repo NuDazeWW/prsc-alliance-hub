@@ -655,6 +655,11 @@ const ADMIN_EMAIL = "admin@readinessterminal.com";
 
 export type PortalDocumentRecord = {
   id: string;
+  superseded_at?: string | null;
+  classification?: string;
+  is_forum_prep?: boolean;
+  version_label?: string | null;
+  classification_reviewed_at?: string | null;
   member_id: string | null;
   category: "sign" | "read";
   action: "docusign" | "download" | "acknowledge" | "esign" | "boldsign";
