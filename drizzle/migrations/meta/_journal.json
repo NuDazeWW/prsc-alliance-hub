@@ -92,6 +92,13 @@
       "when": 1792811663669,
       "tag": "0012_governance_priority_a",
       "breakpoints": true
+    },
+    {
+      "idx": 13,
+      "version": "7",
+      "when": 1792813833306,
+      "tag": "0013_orientation_ack_and_forum_comms",
+      "breakpoints": true
     }
   ]
 }

@@ -8,6 +8,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { render } from "@react-email/render";
+import { AdminForumCommunications } from "@/components/portal/AdminForumCommunications";
 import {
   Activity,
   AlertTriangle,
@@ -707,6 +708,7 @@ export function AdminCenter({ page }: { page: "overview" | "send" }) {
           roleLabel={memberRoleLabel(inviteDraft.role, inviteDraft.entity)}
           copy={inviteTemplate}
           meetingBlock={invitePollBlock}
+          whyYou={inviteDraft.why_you}
         />,
       );
       setInvitePreviewHtml(html);
@@ -852,6 +854,7 @@ export function AdminCenter({ page }: { page: "overview" | "send" }) {
         roleLabel={memberRoleLabel(m?.role ?? "advisor", entity)}
         copy={draft}
         meetingBlock={composePollBlock}
+        whyYou={m?.why_you}
       />,
     ).then((html) => alive && setInviteComposeHtml(html));
     return () => {
@@ -1333,6 +1336,9 @@ export function AdminCenter({ page }: { page: "overview" | "send" }) {
 
           <div className="contents">
             <div className={`${S("overview",5)} [&>section]:h-full`}><AdminLeadership /></div>
+            <section id="forum-communications" className={`${page === "send" ? "order-last lg:col-span-2 2xl:col-span-3" : "hidden"} admin-card p-6 sm:p-8`}>
+              {page === "send" && <AdminForumCommunications />}
+            </section>
             <section id="email-center" className={`${S("send",2)} admin-card p-6 sm:p-8`}>
               <div className="mb-6 flex flex-wrap gap-2" role="tablist">
                 {([
@@ -1743,6 +1749,7 @@ export function AdminCenter({ page }: { page: "overview" | "send" }) {
                             </div>
                           )}
                           {st.detail && <span className="mt-1 block text-sm text-ivory/55">{st.detail}</span>}
+                          <span className="mt-1 block text-xs text-ivory/45">Orientation reviewed: {(m as { orientation_acknowledged_at?: string | null }).orientation_acknowledged_at ? new Date((m as { orientation_acknowledged_at: string }).orientation_acknowledged_at).toLocaleDateString() : "Not yet"}</span>
                           {st.progress > 0 && (
                             <span className="mt-2 block h-1.5 w-28 bg-ivory/10"><span className="block h-full bg-gold" style={{ width: `${st.progress}%` }} /></span>
                           )}

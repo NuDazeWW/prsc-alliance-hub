@@ -3,9 +3,9 @@ import { SYSTEM_EMAIL_DEFAULTS } from "@/lib/system-email-defaults";
 
 type BrandedEmail = Parameters<typeof renderBrandedEmail>[0];
 
-export async function sendPortalEmail(to: string, email: BrandedEmail, label: string) {
+export async function sendPortalEmail(to: string, email: BrandedEmail, label: string, idempotencyKey?: string): Promise<boolean> {
   const apiKey = process.env["LOVABLE_API_KEY"];
-  if (!apiKey) return;
+  if (!apiKey) return false;
   try {
     const { sendLovableEmail } = await import("@lovable.dev/email-js");
     await sendLovableEmail(
@@ -19,12 +19,14 @@ export async function sendPortalEmail(to: string, email: BrandedEmail, label: st
         text: renderBrandedEmailText(email),
         label,
         purpose: "transactional",
-        idempotency_key: `${label}-${to.toLowerCase()}-${crypto.randomUUID()}`,
+        idempotency_key: idempotencyKey ?? `${label}-${to.toLowerCase()}-${crypto.randomUUID()}`,
       },
       { apiKey, sendUrl: process.env["LOVABLE_SEND_URL"] },
     );
+    return true;
   } catch (err) {
     console.error(`Portal email "${label}" failed`, err);
+    return false;
   }
 }
 

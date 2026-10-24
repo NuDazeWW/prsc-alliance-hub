@@ -59,3 +59,7 @@
 - [ ] Confirm hard-prohibited combinations against operative governance documents (waiting on user)
 - [ ] Signed-in acceptance walkthrough (needs a signed-in admin session)
 - [ ] Priority B: Strategic Forum Center (queued for next release)
+- [x] Orientation-first sign-in, Email 1 update, Forum Communications (Emails 2, 3, 6, 7) and review package
+- [ ] Record NDA verifications and cross-entity role reviews before invitations (admin task)
+- [ ] Approve review package and production preview before any live invitation (waiting on user)
+- [ ] Priority B: Forum question workflow with "No additional questions", follow-up assignments; then enable Emails 4, 5, 8

@@ -14,7 +14,7 @@ type View = { kind: "hub" } | { kind: "guided"; step: number } | { kind: "explor
 const toneText: Record<Tone, string> = { prsc: "text-gold", dis: "text-dis-cyan", bridge: "text-gold-light" };
 const toneBorder: Record<Tone, string> = { prsc: "border-gold/40", dis: "border-dis-cyan/40", bridge: "border-dis-silver/30" };
 
-export function OrientationHub({ onClose, onOpenDocuments, onOpenRoleDetails }: { onClose: () => void; onOpenDocuments: () => void; onOpenRoleDetails: () => void }) {
+export function OrientationHub({ onClose, onOpenDocuments, onOpenRoleDetails, onAcknowledge, firstVisit = false }: { onClose: () => void; onOpenDocuments: () => void; onOpenRoleDetails: () => void; onAcknowledge?: () => Promise<void> | void; firstVisit?: boolean }) {
   const [view, setView] = useState<View>({ kind: "hub" });
   const top = useRef<HTMLDivElement>(null);
   useLayoutEffect(() => {
@@ -52,6 +52,7 @@ export function OrientationHub({ onClose, onOpenDocuments, onOpenRoleDetails }: 
           </DialogHeader>
           <p className="mt-5 max-w-3xl text-[15px] leading-7 text-ivory/80">{HUB_INTRO}</p>
           <p className="mt-3 text-xs text-ivory/50">{HUB_SCOPE}</p>
+          {firstVisit && <p className="mt-4 max-w-3xl border-l-2 border-gold pl-4 text-[14px] leading-6 text-ivory/85">Welcome. Before your executive profile, please begin with the 5-minute orientation. It gives everyone the same current picture of PRSC and DIS.</p>}
           <div className="mt-8 grid gap-4 md:grid-cols-3">
             {ROLE_CARDS.map((c) => (
               <div key={c.title} className={`${c.tone === "dis" ? "hub-card-dis" : "hub-card"} rounded-lg p-5`}>
@@ -70,7 +71,7 @@ export function OrientationHub({ onClose, onOpenDocuments, onOpenRoleDetails }: 
       )}
 
       {view.kind === "guided" && (
-        <Guided step={view.step} setStep={(s) => setView({ kind: "guided", step: s })} onExplore={() => setView({ kind: "explore" })} onMaterials={onOpenDocuments} onRole={onOpenRoleDetails} btn={btn} onPick={(id) => setView({ kind: "topic", id })} />
+        <Guided onAcknowledge={onAcknowledge} step={view.step} setStep={(s) => setView({ kind: "guided", step: s })} onExplore={() => setView({ kind: "explore" })} onMaterials={onOpenDocuments} onRole={onOpenRoleDetails} btn={btn} onPick={(id) => setView({ kind: "topic", id })} />
       )}
 
       {view.kind === "explore" && (
@@ -121,9 +122,10 @@ export function OrientationHub({ onClose, onOpenDocuments, onOpenRoleDetails }: 
   );
 }
 
-function Guided({ step, setStep, onExplore, onMaterials, onRole, btn, onPick }: { step: number; setStep: (n: number) => void; onExplore: () => void; onMaterials: () => void; onRole: () => void; btn: string; onPick: (id: string) => void }) {
+function Guided({ step, setStep, onExplore, onMaterials, onRole, btn, onPick, onAcknowledge }: { onAcknowledge?: () => Promise<void> | void; step: number; setStep: (n: number) => void; onExplore: () => void; onMaterials: () => void; onRole: () => void; btn: string; onPick: (id: string) => void }) {
   const ch = GUIDED[step];
   const last = step === GUIDED.length - 1;
+  const [saving, setSaving] = useState(false);
   return (
     <div className="grid gap-8 lg:grid-cols-[200px_1fr]">
       <aside>
@@ -152,7 +154,11 @@ function Guided({ step, setStep, onExplore, onMaterials, onRole, btn, onPick }: 
         <div className={`mt-8 flex flex-col gap-3 sm:flex-row sm:gap-2.5 ${last ? "hub-cta-row sm:flex-wrap [&>button]:shrink-0 [&>button]:max-w-full [&>button]:whitespace-normal [&>button]:py-3 sm:[&>button]:whitespace-nowrap" : "sm:flex-nowrap"}`}>
           {step > 0 && <button type="button" onClick={() => setStep(step - 1)} className={`${btn} cta-glow-outline whitespace-nowrap sm:px-5`}><span>Previous</span></button>}
           {!last && <button type="button" onClick={() => setStep(step + 1)} className={`${btn} cta-glow whitespace-nowrap sm:px-5`}><span>Next chapter</span></button>}
-          {last && (
+          {last && onAcknowledge && <p className="basis-full text-xs leading-5 text-ivory/55 sm:order-last">This simply notes that you've seen the overview. It is not a signature and is separate from your formal orientation documents.</p>}
+          {last && onAcknowledge && (
+            <button type="button" disabled={saving} onClick={async () => { setSaving(true); try { await onAcknowledge(); } finally { setSaving(false); } }} className={`${btn} cta-glow whitespace-nowrap sm:px-5`}><span>{saving ? "Saving…" : "I've reviewed this overview"}</span></button>
+          )}
+          {last && !onAcknowledge && (
             <>
               <button type="button" onClick={onExplore} className={`${btn} cta-glow whitespace-nowrap sm:px-5`}><span>Explore the System</span></button>
               <button type="button" onClick={onRole} className={`${btn} cta-glow-outline whitespace-nowrap sm:px-5`}><span>View Your Role Details</span></button>
