@@ -4,6 +4,7 @@ import { getRequest } from "@tanstack/react-start/server";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { renderBrandedEmail, renderBrandedEmailText } from "@/lib/branded-email";
 import { memberRoleLabel } from "@/lib/member-role-labels";
+import { journeyStatus, type JourneyStatus } from "@/lib/journey";
 
 type PortalMember = {
   id: string; user_id: string; email: string; first_name: string; last_name: string;
@@ -383,15 +384,16 @@ export const getAdminOverview = createServerFn({ method: "GET" })
       context.supabase.from("portal_profiles").select("member_id, current_stage, submitted_at, updated_at, preferred_name, professional_role, current_organization, preferred_email, preferred_phone, experience_answers, visibility_instructions, restriction_status, restriction_details, final_notes, questions"),
       context.supabase.from("portal_document_acknowledgements").select("member_id, document_id"),
     ]);
-    const list = (members ?? []) as (PortalMember & { documents_released_at?: string | null; documents_completed_at?: string | null })[];
+    const list = (members ?? []) as (PortalMember & { documents_released_at?: string | null; documents_completed_at?: string | null; participates_in_forum?: boolean; prsc_activated_at?: string | null; dis_activated_at?: string | null })[];
     const docProgress: Record<string, { total: number; done: number }> = {};
+    const journeys: Record<string, JourneyStatus> = {};
     await Promise.all(list.map(async (m) => {
-      if (!m.documents_released_at) return;
       const docs = await applicableDocuments(context.supabase, m as unknown as DocMember);
       const done = new Set((acks ?? []).filter((a: any) => a.member_id === m.id).map((a: any) => a.document_id));
-      docProgress[m.id] = { total: docs.length, done: docs.filter((d) => done.has(d.id)).length };
+      journeys[m.id] = journeyStatus(docs, done, m.entity, { prsc: m.prsc_activated_at ?? null, dis: m.dis_activated_at ?? null }, m.participates_in_forum !== false);
+      if (m.documents_released_at) docProgress[m.id] = { total: docs.length, done: docs.filter((d) => done.has(d.id)).length };
     }));
-    return { members: list, inquiries: inquiries ?? [], activity: activity ?? [], profiles: profiles ?? [], docProgress };
+    return { members: list, inquiries: inquiries ?? [], activity: activity ?? [], profiles: profiles ?? [], docProgress, journeys };
   });
 
 export const nudgeMember = createServerFn({ method: "POST" })
