@@ -12,6 +12,7 @@ import {
   prepareSignedCopy,
   sendSignedCopy,
   setEntityActivation,
+  setForumParticipation,
 } from "@/lib/portal.functions";
 import { STAGES, journeyStatus, lockedDocumentIds, memberTracks } from "@/lib/journey";
 import { JOURNEY_PRESETS } from "@/lib/journey-templates";
@@ -158,7 +159,13 @@ export function AdminMemberDocuments({ memberId, memberName, preview }: Props) {
   const entity = docs.data?.entity ?? "prsc";
   const activation = docs.data?.activation ?? { prsc: null, dis: null };
   const doneIds = new Set<string>(acks.filter((a: any) => a.member_id === memberId).map((a: any) => a.document_id));
-  const journey = journeyStatus(list as any, doneIds, entity, activation);
+  const forum = (docs.data as any)?.forum !== false;
+  const journey = journeyStatus(list as any, doneIds, entity, activation, forum);
+  async function toggleForum(on: boolean) {
+    if (preview) return setStatus("Preview mode: Forum participation is changed on the live admin page.");
+    try { await setForumParticipation({ data: { member_id: memberId, participates: on } }); await docs.refetch(); }
+    catch (e) { setStatus(e instanceof Error ? e.message : "Could not update Forum participation"); }
+  }
   const lockedIds = lockedDocumentIds(list as any, doneIds, entity);
   async function toggleActivation(t: "prsc" | "dis", on: boolean) {
     if (preview) return setStatus("Preview mode: activation is recorded on the live admin page.");
@@ -187,8 +194,12 @@ export function AdminMemberDocuments({ memberId, memberName, preview }: Props) {
       </p>
 
       <div className="mt-5 border border-gold/25 p-4">
-        <p className="text-base text-ivory">Journey status: <span className="text-gold">{journey.label}</span> · Stage {journey.currentStage} of 5</p>
+        <p className="text-base text-ivory">Journey status: <span className="text-gold">{journey.label}</span> · Stage {forum ? journey.currentStage : journey.currentStage - 1} of {forum ? 5 : 4}</p>
         <p className="mt-1 text-sm text-ivory/55">The member cannot formally act in a PRSC or DIS role until Stages 2–4 are complete and you record activation. The NDA is a verified prerequisite</p>
+        <label className="mt-3 flex items-center gap-2 text-base text-ivory/80">
+          <input type="checkbox" className="h-4 w-4" checked={forum} onChange={(e) => toggleForum(e.target.checked)} />
+          Participates in Readiness Vanguard Forum{forum ? "" : " · opted out: Stage 1 documents are hidden and the member sees a 4-stage journey"}
+        </label>
         <div className="mt-3 flex flex-wrap gap-5">
           {memberTracks(entity).map((t) => (
             <label key={t} className="flex items-center gap-2 text-base text-ivory/80">
