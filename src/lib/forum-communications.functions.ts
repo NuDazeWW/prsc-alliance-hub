@@ -56,7 +56,7 @@ export const sendForumEmail = createServerFn({ method: "POST" })
     const build = await loadSystemEmail(data.email_key);
     let sent = 0, skipped = 0;
     for (const id of data.member_ids) {
-      const r = rows.find((x) => x.id === id);
+      const r = rows.find((x: { id: string }) => x.id === id) as { id: string; name: string; email: string; reason: string | null; sent_at: string | null } | undefined;
       if (!r || r.reason || r.sent_at) { skipped++; continue; }
       // Reserve the send first so a retry can never email the same person twice.
       const { error } = await supabaseAdmin.from("forum_communication_sends").insert({
