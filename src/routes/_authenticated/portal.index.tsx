@@ -116,14 +116,20 @@ function PortalHome() {
     if (data?.isAdmin && !data?.viewingAs) navigate({ to: "/admin", replace: true });
   }, [data, navigate]);
   // Show the refreshed orientation once to any member who hasn't reviewed it (existing accounts included).
-  const needsOrientation = Boolean(data?.member && !data?.viewingAs && !data?.isAdmin && !(data.member as any).orientation_acknowledged_at);
+  // Preview-only demo (synthetic "Alex Smith") also walks through first sign-in; nothing is recorded for it.
+  const [demoReviewed, setDemoReviewed] = useState(false);
+  const isDemo = !isLoading && !data?.member && isPreviewHost() && !asMember;
+  const needsOrientation = isDemo ? !demoReviewed : Boolean(data?.member && !data?.viewingAs && !data?.isAdmin && !(data.member as any).orientation_acknowledged_at);
   const autoOpened = useRef(false);
   useEffect(() => {
     if (needsOrientation && !autoOpened.current) { autoOpened.current = true; setPanel("hub"); }
   }, [needsOrientation]);
   async function acknowledgeOrientationReview() {
-    await acknowledgeOrientation();
-    await queryClient.invalidateQueries({ queryKey: ["portal-session"] });
+    if (isDemo) setDemoReviewed(true);
+    else {
+      await acknowledgeOrientation();
+      await queryClient.invalidateQueries({ queryKey: ["portal-session"] });
+    }
     setPanel(null);
     toast.success("Thank you. Next: complete your executive profile.");
     navigate({ to: "/portal/profile" });
