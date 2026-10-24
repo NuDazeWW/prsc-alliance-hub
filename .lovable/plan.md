@@ -1,56 +1,55 @@
-# Outlook Calendar Holds for Meeting Polls
+# Outlook Calendar Holds for Meeting Polls (Option B, approved)
 
-Keeps the existing portal availability poll as the only way to schedule. No portal redesign, no second voting process, no automatic scheduling. The admin still picks the final time.
+Keeps the existing portal availability poll as the only way to schedule. No portal redesign, no second voting process, no automatic confirmation. The admin still picks the final time. All approved onboarding, governance, email and Forum features stay as they are. This work runs alongside the rest and does not hold up the first safe invitations. No live meeting or invitation emails go out until you approve the production preview.
 
-## 1. Evaluation and recommendation
+## 1. Why Option B
+Microsoft has no public way for another system to create or read a Scheduling Poll. Using one would mean a second vote and no sync, so the portal poll stays the single source of truth.
 
-**Option A: native Microsoft Scheduling Poll. Not recommended.**
-- Microsoft has no public way for another system to create, read or close a Scheduling Poll (formerly FindTime). It only works inside Outlook.
-- Using it would mean executives vote in Microsoft and again in the portal, or the portal would stop tracking availability. Votes cannot be synced either way. This fails the "no voting twice, no second process" rule.
+## 2. Your calendar: protecting the proposed times
+- **When holds are created:** only when a poll is published, never while it is a draft.
+- **What the holds look like:** each proposed time appears as a Busy event titled "HOLD: [Meeting Title] — Proposed", so Outlook treats those times as taken.
+- **Confirming a time:** that hold turns into the confirmed meeting. It stays Busy and gets the link or location. The other holds are removed.
+- **Cancelling a poll, or adding or removing times:** the holds are brought back in line with the poll automatically.
+- **Only our own events are touched:** the integration only ever edits or deletes events it created and recorded. Nothing else on your calendar is touched.
+- **No duplicates:** each hold has a fixed identifier, so a retry finds the existing event instead of creating a new one.
+- **If Outlook is disconnected or fails:** the portal poll keeps working normally. The meeting shows "Calendar not synced" until a later sync confirms it has recovered. A Re-sync button is available.
+- **Vote counts:** these stay in the portal dashboard. Outlook events are not rewritten after each response.
 
-**Option B: the existing portal poll plus Outlook holds. Recommended.**
-- It is the simplest reliable solution and meets the minimum requirement in full.
+## 3. Connecting the right calendar (configuration check)
+- You connect the Microsoft account where your day-to-day availability is actually kept.
+- Before any hold is created, the system reads that account's name and default calendar and shows them in Meetings ("Holds go to: [name / email]") for you to confirm.
+- If the connected account is not your working calendar, or cannot write to it, the system reports a configuration blocker. It never falls back to another mailbox on its own.
 
-## 2. What will happen (organizer calendar: minimum requirement)
+## 4. Executive holds (best effort, no permissions needed)
+- An optional "Hold this time on my calendar" download appears next to times an executive marks Available or If needed.
+- The existing confirmation and cancellation emails include calendar updates that try to release unused holds. No new emails are added.
+- We do not promise automatic removal. Each downloaded hold carries a clear title ("HOLD (tentative): [Meeting Title] — may be released") and a note.
+- After a time is confirmed, the executive's meeting card lists the released times: "You can delete these holds from your calendar."
+- Updates and cancellations will be tested in Outlook and Google Calendar, and the real behaviour written up.
 
-- **Publishing a poll:** each proposed time is put on the organizer's Outlook calendar as a tentative hold, titled "HOLD: [meeting title] (proposed)". Only the organizer's own calendar gets these holds. No invitations go to anyone.
-- **Live availability:** each hold's notes update as responses come in, for example "Available 4/7 · If needed 1".
-- **Confirming a time:** the chosen hold becomes the real meeting, marked Busy, with the virtual link or location. Every other hold is deleted.
-- **Cancelling a poll:** all of its holds are deleted.
-- **Changing dates:** holds are added for new times and deleted for times that were removed.
-- **Safety net:** every hold is recorded against its poll. A "Re-sync calendar" button on each meeting repairs anything missing or left over, and no hold is ever created twice.
-- **If Outlook is down or disconnected:** the poll works exactly as it does today. The meeting card shows "Calendar not synced", with a retry button.
+## 5. Acceptance demonstration (test meeting data only, no live emails)
+1. Publish three proposed times.
+2. Show all three Busy holds on your designated calendar.
+3. Confirm one time.
+4. Show that the final event is Busy and the other two holds are gone.
+5. Cancel a second test poll and show it cleans up completely.
+6. Disconnect Outlook and show that portal polling still works.
+7. Test one external attendee's optional hold and record how its cancellation actually behaves.
 
-## 3. Executive holds (preferred enhancement, opt-in and needing no calendar access)
+Report: the outcome of each step with screenshots, plus the external-attendee findings.
 
-- Changing an executive's calendar automatically needs their own permission. We will not ask for that, because the rules say no one has to grant calendar access just to respond.
-- Instead, when an executive marks a time "Available" or "If needed", the portal offers "Hold this time on my calendar". This downloads a tentative calendar entry that works in Outlook, Apple and Google.
-- When the admin confirms the final time, the existing confirmation email (no new email) includes:
-  - the final meeting entry;
-  - a cancellation for any time held this way, so most calendar apps remove the unused holds on their own.
-- If a poll is cancelled, the existing cancellation notice includes the same removals.
-- This will be tested with Outlook.com and Gmail attendee accounts, and the results written up (cancellation behaviour differs between calendar apps).
-
-## 4. Prerequisites (from you)
-
-- A designated organizer mailbox with a calendar: Microsoft 365 Business or Exchange Online (for example admin@readinessterminal.com or your own).
-- Connect that mailbox through Lovable's Outlook connection, which I will start in chat. It needs permission to read and write the calendar (Calendars.ReadWrite). There is no app registration for you to manage.
-- One separate external test account (Outlook.com or Gmail) for the attendee test.
-
-## 5. Acceptance tests (documented in a short report)
-
-- Publishing three proposed times shows three tentative holds on the organizer's calendar.
-- Confirming one time leaves one busy meeting and zero holds.
-- Cancelling or changing dates leaves no orphaned holds, and re-running sync creates no duplicates.
-- With the connection turned off, the poll still works and shows the warning.
-- The external attendee's hold and its removal are observed and recorded.
-- No executive needs to grant calendar access at any point.
+## Prerequisite from you
+Connect your working Microsoft calendar through the Outlook connection prompt, which I'll show when building starts. It needs calendar read/write permission. If this is still pending, everything else carries on and invitations are not blocked.
 
 ## Technical details
-
-- New table `meeting_calendar_holds` (poll_id, slot_id, outlook_event_id, kind hold|final, status, last_synced_at). It is admin-only under RLS, and UNIQUE(slot_id, kind) prevents duplicates.
-- New `src/lib/outlook-calendar.server.ts`: Graph calls through the connector gateway (`POST/PATCH/DELETE /me/events`). Holds use showAs=tentative and the poll's timezone. A `reconcilePollHolds(pollId)` function brings the calendar in line with the poll and is safe to run repeatedly.
-- `meetings.functions.ts`: after createMeetingPoll, confirmPollSlot, cancelPoll, slot edits and member responses, call reconcile in a try/catch so failures are logged and never block the poll. Add a `resyncPollCalendar` admin server function.
-- `ics.ts`: add tentative per-slot holds with stable UID `{slotId}@prscstandards.org`, plus METHOD:CANCEL entries. These go into the existing confirmed and cancel emails only.
-- UI: a sync status pill and re-sync button in AdminMeetings, and a hold-download link in MemberMeetings. No layout changes.
-- Tests: reconcile planning logic (which holds to create, update or delete) as a pure function with node:test.
+- New table `meeting_calendar_holds`: poll_id, slot_id, kind (hold|final), outlook_event_id, transaction_id, status, last_error, last_synced_at. It has UNIQUE(slot_id, kind), is admin-only under RLS, and carries grants. Only events tracked in this table may be updated or deleted.
+- New `src/lib/outlook-calendar.server.ts`, which works through the gateway:
+  - Events are created with `POST /me/events`, using `transactionId` = deterministic hash(poll, slot, kind), showAs=busy and the poll's timezone.
+  - A pure planner `planHoldChanges(poll, slots, holds)` returns the creates, updates and deletes, and `reconcilePollHolds` applies them.
+  - Drafts are skipped.
+- A connected-calendar check (`GET /me`, `GET /me/calendar`) is shown in AdminMeetings. A mismatch or missing write access is reported as a blocker.
+- `meetings.functions.ts`: after poll publish, slot changes, confirm and cancel, run reconcile in a try/catch. Errors are stored on the hold rows and never block the poll. Add an admin `resyncPollCalendar` server function.
+- `ics.ts`: a per-slot hold with stable UID `{slotId}-hold@prscstandards.org`, plus METHOD:CANCEL entries added only to the existing confirmed and cancel emails.
+- UI additions only: a sync status pill, a "Holds go to" line and a Re-sync button in AdminMeetings, and the hold download plus released-holds list in MemberMeetings.
+- Tests (node:test): the planner only touches tracked events, never duplicates, ignores drafts, and on confirmation keeps one final event and removes the rest.
+- roadmap.md gets this task added when building starts.
