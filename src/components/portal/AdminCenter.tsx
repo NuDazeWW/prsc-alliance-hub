@@ -1704,7 +1704,7 @@ export function AdminCenter({ page }: { page: "overview" | "send" }) {
                             </button>
                           </div>
                         </td>
-                        <td>{memberRoleLabel(m.role, m.entity)}</td>
+                        <td>{memberRoleLabel(m.role, m.entity)}{(m as { participates_in_forum?: boolean }).participates_in_forum === false && <span className="ml-2 whitespace-nowrap border border-gold/30 px-1.5 py-0.5 text-[10px] uppercase tracking-[0.12em] text-gold/80">No Forum</span>}</td>
                         <td className="py-4 pr-3">
                           <span className={`inline-block border px-2 py-1 text-xs uppercase tracking-[0.12em] ${st.tone}`}>{st.label}</span>
                           {st.detail && <span className="mt-1 block text-sm text-ivory/55">{st.detail}</span>}
