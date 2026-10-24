@@ -50,3 +50,4 @@
 - [x] Split the Admin Center into Overview and Invite & Email pages
 - [x] Five-part recipient journey: staged/sequenced documents, one-off records track, admin activation, header journey tracker, sign-out moved to left nav
 - [ ] Load real journey PDFs per stage/track (waiting on the documents)
+- [x] Add member-list journey stage badges with four-stage numbering for Forum opt-outs

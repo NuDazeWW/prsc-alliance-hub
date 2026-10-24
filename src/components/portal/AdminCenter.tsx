@@ -68,6 +68,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { InviteEmail, capitalizeInviteName } from "@/lib/email-templates/invite";
 import { INVITE_EMAIL_PREVIEW_URL, INVITE_EMAIL_REPLY_TO, INVITE_EMAIL_SUBJECT } from "@/lib/invite-email-config";
 import { memberRoleLabel } from "@/lib/member-role-labels";
+import { STAGES, type JourneyStatus } from "@/lib/journey";
 import type { InviteEmailReview } from "@/lib/portal-invite-email.functions";
 import { PORTAL_EXPERIENCE_QUESTIONS, PORTAL_PERMISSION_LABELS, PORTAL_PROFILE_STAGES, PORTAL_VISIBILITY_PERMISSIONS } from "@/lib/portal-profile-fields";
 
@@ -882,6 +883,7 @@ export function AdminCenter({ page }: { page: "overview" | "send" }) {
   const d = overview.data;
   const profilesById = new Map<string, any>(((d as any).profiles ?? []).map((p: any) => [p.member_id, p]));
   const docProgress: Record<string, { total: number; done: number }> = (d as any).docProgress ?? {};
+  const journeys: Record<string, JourneyStatus> = d.journeys ?? {};
   const stageOf = (m: any) => {
     const p = profilesById.get(m.id);
     const prog = docProgress[m.id];
@@ -1672,6 +1674,8 @@ export function AdminCenter({ page }: { page: "overview" | "send" }) {
                   )}
                   {filteredMembers.map((m: any) => {
                     const st = stageOf(m);
+                    const journey = journeys[m.id];
+                    const forum = m.participates_in_forum !== false;
                     const all = sendsByMember.get(m.id) ?? [];
                     const list = all.filter((s) => s.status === "sent");
                     const failed = all.filter((s) => s.status !== "sent");
@@ -1707,6 +1711,14 @@ export function AdminCenter({ page }: { page: "overview" | "send" }) {
                         <td>{memberRoleLabel(m.role, m.entity)}{(m as { participates_in_forum?: boolean }).participates_in_forum === false && <span className="ml-2 whitespace-nowrap border border-gold/30 px-1.5 py-0.5 text-[10px] uppercase tracking-[0.12em] text-gold/80">No Forum</span>}</td>
                         <td className="py-4 pr-3">
                           <span className={`inline-block border px-2 py-1 text-xs uppercase tracking-[0.12em] ${st.tone}`}>{st.label}</span>
+                          {journey && (
+                            <div className="mt-2" aria-label="Recipient journey stage">
+                              <span className="inline-block border border-gold/30 px-2 py-1 text-xs text-gold">
+                                Stage {journey.currentStage - (forum ? 0 : 1)} of {forum ? 5 : 4} · {STAGES[journey.currentStage - 1]?.label}
+                              </span>
+                              <span className="mt-1 block text-xs text-ivory/55">{journey.label}</span>
+                            </div>
+                          )}
                           {st.detail && <span className="mt-1 block text-sm text-ivory/55">{st.detail}</span>}
                           {st.progress > 0 && (
                             <span className="mt-2 block h-1.5 w-28 bg-ivory/10"><span className="block h-full bg-gold" style={{ width: `${st.progress}%` }} /></span>
