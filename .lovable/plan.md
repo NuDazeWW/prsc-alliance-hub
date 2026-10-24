@@ -21,11 +21,21 @@ This adds to the existing portal. Nothing gets redesigned, and no existing membe
    - Appointed: activation recorded for that entity, PRSC and DIS tracked separately
 
    Invitations say "PRSC Board Candidate" (and the like) instead of "Board Member". The Leadership Team panel shows only appointed members, or marks the others "Candidate".
-3. **NDA gate:** admin records "NDA verified" (date and who verified) on each member. An invitation cannot be sent until it is recorded. The invite form adds a checkbox for this.
-4. **Dual-role review:** choosing "Both" or a mixed PRSC/DIS role flags the member "Governance review required". Invitations, documents and activation stay blocked until an admin records a review decision (approved or declined, reviewer, note). Every past decision is kept.
-5. **Conflict review:** the Conflict / Recusal form asks for: No conflict / New or changed conflict / Unsure, please review, plus details. Any answer except "No conflict" sets the status to "Clearance pending review". The admin can then clear, clear with restrictions (a note listing which sessions or materials are limited), or escalate. Every step is logged. Stage 1 is cleared only when the answer is "No conflict" or the admin has cleared it.
-6. **Meeting-specific confirmations:** each new Forum session can request a fresh conflict confirmation and an agenda acknowledgment, tied to that meeting. People who are Forum-cleared but not yet appointed can open permitted Forum materials without finishing their role appointment.
-7. **Outdated materials:** documents can be marked "Superseded". Superseded documents disappear from member views but stay in the audit history.
+3. **NDA verification:** admin records, on each member, the verification date, the verifying administrator, and the NDA's document reference or controlled storage location. An invitation cannot be sent until all three are recorded. Existing accounts with no verification on file are locked out of confidential Forum materials (fail-closed) until an admin records it.
+4. **Role-combination rules (two tiers):**
+   - **Hard-prohibited:** cannot be activated by ordinary admin approval. There is no "approve" button, only a recorded override path requiring a written legal reference. Proposed default, pending confirmation of the operative legal documents: a voting or governing seat on both entities (PRSC Board + DIS Board), PRSC Board + DIS Advisor, PRSC Advisor + DIS Board, and Methodology Committee combined with any DIS role.
+   - **Review-required:** non-voting dual advisory roles (PRSC Advisor + DIS Advisor). Invitations, documents and activation stay blocked until an admin records a review: decision, reviewer, date, a separate engagement scope for each entity, and the conflict controls applied.
+   - Every decision is kept in history.
+5. **Conflict clearance:** the Conflict / Recusal form asks: No conflict / New or changed conflict / Unsure, please review, plus details. A signed confirmation never resolves a conflict by itself, including "No conflict". Before Stage 1 Forum clearance, an admin completes a clearance check covering current disclosures, existing restrictions, NDA status, and eligibility for the specific meeting. The admin records their identity, decision (clear / clear with restrictions / escalate / decline), date, and any restrictions. Every step is logged.
+6. **Forum preparation vs. clearance:** NDA-verified invitees can open only the materials needed to finish Stage 1: the Protocol, the approved Pre-Read, and the Conflict / Recusal Confirmation. They do not need clearance first. Other Forum content opens only after clearance, filtered by the person's permissions and restrictions. Each new Forum session can request a fresh conflict confirmation and agenda acknowledgment tied to that meeting.
+7. **Superseded and revised documents:** marking a document "Superseded" removes it from active onboarding and acknowledgment lists. Signed copies, signatures and audit history are kept, and the member can still see their own signed copy under historical records. When a materially revised version is issued, it is a new document that needs a new acknowledgment. The earlier signature stays linked to the earlier version.
+8. **Server-side permissions:** every document and question check runs on the server (shared workstream access, individual restrictions, and who may edit as an admin). Hiding something on screen is never the only protection.
+
+## Release gate
+
+- No live invitations go out until Priority A acceptance testing confirms: correct legal names, candidate labels, NDA controls, role restrictions, current Forum materials, and a working invitation process.
+- You get back an updated implementation checklist and the Priority A test results before production release.
+- Priority B follows without holding up safe onboarding.
 
 ## Priority B — Strategic Forum Center
 
@@ -37,7 +47,7 @@ This adds to the existing portal. Nothing gets redesigned, and no existing membe
   - **E. Follow-Up:** the approved Coordination Note, your assigned tasks and open questions
 - **Admin Question Register:** review, merge duplicates, group, set owner and priority, choose the source and route ([C]/[P]/[D]/[X]), track the six statuses, and export an approved list. Sharing anything outside the portal takes a separate admin action that is logged.
 - **Coordination Dashboard:** the 7 workstreams, each with summary, evidence state, principal open question, next action, owner, target date, route and status. It has no voting, approval or certification features. Restricted [X] items appear only to authorized users.
-- **Material classification:** each document gets one of five levels (General Orientation, Confidential Forum, Restricted Opportunity, Entity-Specific Confidential, Secretariat Only). The server enforces access, including per-person permission for Restricted Opportunity. Jared Odrick / NASCAR source files can only go in at Restricted.
+- **Material classification:** each document gets one of five levels (General Orientation, Confidential Forum, Restricted Opportunity, Entity-Specific Confidential, Secretariat Only). The server enforces access, including per-person permission for Restricted Opportunity. The Restricted label alone does not allow anything to be uploaded or shared. Before an original third-party file (for example Jared Odrick / NASCAR material) can be stored or released, the admin must confirm and record the source's permission.
 - **Emails:** eight new admin-editable notification templates. The admin picks recipients and approves every send, and nothing goes to the whole membership. Emails link into the portal and carry no attachments.
 - **Records wording:** these are "Coordination Records", never minutes. Conflict disclosures and agreements stay separate from general Forum records.
 
@@ -55,10 +65,10 @@ This adds to the existing portal. Nothing gets redesigned, and no existing membe
   - documents: classification, superseded marker and optional meeting link
 - **New tables:** governance reviews, forum question rounds and questions, workstreams, and restricted-material grants. All have security rules that allow admins full access and members access only to their own rows.
 - **Rules location:** the journey rules file holds the new clearance logic, so the portal, admin and server stay in agreement. Labels come from the shared role helper.
-- **Rollback:** columns default to today's behavior, and new tables can be ignored by switching the code back.
+- **Rollback:** reverting the code must never reopen access. Database rules enforce NDA verification, classification and restrictions on their own, so older code still gets fail-closed results. Signatures, audit records and NDA restrictions are never deleted or reset.
 
 ## Open decisions (defaults are used unless you say otherwise)
 
-- **Prohibited combinations:** by default, every cross-entity mixed role ("Both", PRSC Board/DIS Advisor, PRSC Advisor/DIS Board) needs a recorded review. Tell me which combinations are outright prohibited.
+- **Prohibited combinations:** the two-tier matrix above is the default until you confirm it against the operative legal documents.
 - **Leadership panel:** by default it shows appointed members only.
-- **Legal documents:** their text is not rewritten. Only names and labels in the portal's own wording change.
+- **Legal documents:** no redesign and no rewriting of legal documents. Only names and labels in the portal's own wording change.
