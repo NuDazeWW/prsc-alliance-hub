@@ -56,3 +56,8 @@ Each is added as an editable template with your copy, one main button that opens
 - Each email is recognized by its forum, its email type and version, and its recipient. This prevents duplicates while still allowing future forums and revised emails.
 - The walkthrough uses a test account with made-up details. Screenshots and reports show no real member information.
 - No live sends. Invitations start only after you approve the production preview.
+
+## Executive experience and review package
+- Tone: Email 1 and the first sign-in should feel like an invitation into the next chapter of an important institution, not an administrative process. Warm welcome first, then personal recognition, then the 5-minute refresher. Forum logistics come later. Administrative steps are kept light and calm.
+- One review package, delivered together for you to judge as a whole: (1) the actual Email 1 preview, (2) the first-login walkthrough with a test account, (3) the Orientation Hub content-change report.
+- Before invitations: the NDA verification records for each member must be filled in through the admin Governance panel (entity coverage, date, sharing scope). The invitation stays blocked for anyone whose record is missing, even if they signed an NDA.
