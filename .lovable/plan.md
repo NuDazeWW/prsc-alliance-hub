@@ -26,10 +26,16 @@ The Readiness Vanguard chapter currently says "The first 25 teams and drivers" a
 
 Nothing else changes. Jared Odrick and NASCAR are not mentioned in the hub.
 
-## 3. Forum framing in member-facing copy
+## 3. Documentation journey (confirmed, no change to controls)
+- The five-stage document journey stays a core function. Documents are released one at a time: each one unlocks after the previous one is completed.
+- Stage 1 Forum documents come first. Once Stage 1 is cleared (signed and cleared by an admin), the entity-specific Stages 2–4 open, so members can work on them while preparing for the Forum.
+- Forum participation never requires appointment packages, agreements or activation. Those stay in Stages 3–4 and keep the existing admin activation checks.
+- Verification step: an automated check confirms that Stage 2 opens once Stage 1 is cleared, and that Forum eligibility does not depend on Stage 2–4 completion.
+
+## 4. Forum framing in member-facing copy
 Check the Forum email templates (2, 3, 6, 7) and the Meetings card wording. Each must describe the Forum as strategic coordination that leads to recommendations, not as a joint Board meeting, and must not replace separate entity approvals. Wording is adjusted only where a sentence suggests otherwise, and every change is listed for approval.
 
-## 4. Remaining Priority A blockers (to be reported back)
+## 5. Remaining Priority A blockers (to be reported back)
 - NDA verification records for every invited member (Governance panel)
 - Two cross-entity role reviews
 - Stage 1 Forum documents (Protocol, Pre-Read Packet, Conflict/Recusal form) approved and loaded
