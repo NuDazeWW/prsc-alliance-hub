@@ -4,6 +4,8 @@ import { useEffect, useRef, useState } from "react";
 import { Pencil, LogOut } from "lucide-react";
 import { useHeadshotUpload } from "@/hooks/use-headshot-upload";
 import { OrientationHub } from "@/components/portal/OrientationHub";
+import { acknowledgeOrientation } from "@/lib/forum-communications.functions";
+import { toast } from "sonner";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import {
   ArrowRight,
@@ -113,6 +115,19 @@ function PortalHome() {
   useEffect(() => {
     if (data?.isAdmin && !data?.viewingAs) navigate({ to: "/admin", replace: true });
   }, [data, navigate]);
+  // Show the refreshed orientation once to any member who hasn't reviewed it (existing accounts included).
+  const needsOrientation = Boolean(data?.member && !data?.viewingAs && !data?.isAdmin && !(data.member as any).orientation_acknowledged_at);
+  const autoOpened = useRef(false);
+  useEffect(() => {
+    if (needsOrientation && !autoOpened.current) { autoOpened.current = true; setPanel("hub"); }
+  }, [needsOrientation]);
+  async function acknowledgeOrientationReview() {
+    await acknowledgeOrientation();
+    await queryClient.invalidateQueries({ queryKey: ["portal-session"] });
+    setPanel(null);
+    toast.success("Thank you. Next: complete your executive profile.");
+    navigate({ to: "/portal/profile" });
+  }
 
   if (isLoading)
     return (
@@ -482,7 +497,7 @@ function PortalHome() {
             </div>
           )}
 
-          {panel === "hub" && <OrientationHub onClose={() => setPanel(null)} onOpenDocuments={() => setPanel("documents")} onOpenRoleDetails={() => setPanel("role")} />}
+          {panel === "hub" && <OrientationHub firstVisit={needsOrientation} onAcknowledge={needsOrientation ? acknowledgeOrientationReview : undefined} onClose={() => setPanel(null)} onOpenDocuments={() => setPanel("documents")} onOpenRoleDetails={() => setPanel("role")} />}
 
           {panel === "documents" && (
             <>

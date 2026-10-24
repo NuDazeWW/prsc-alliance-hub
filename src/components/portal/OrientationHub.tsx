@@ -154,6 +154,7 @@ function Guided({ step, setStep, onExplore, onMaterials, onRole, btn, onPick, on
         <div className={`mt-8 flex flex-col gap-3 sm:flex-row sm:gap-2.5 ${last ? "hub-cta-row sm:flex-wrap [&>button]:shrink-0 [&>button]:max-w-full [&>button]:whitespace-normal [&>button]:py-3 sm:[&>button]:whitespace-nowrap" : "sm:flex-nowrap"}`}>
           {step > 0 && <button type="button" onClick={() => setStep(step - 1)} className={`${btn} cta-glow-outline whitespace-nowrap sm:px-5`}><span>Previous</span></button>}
           {!last && <button type="button" onClick={() => setStep(step + 1)} className={`${btn} cta-glow whitespace-nowrap sm:px-5`}><span>Next chapter</span></button>}
+          {last && onAcknowledge && <p className="basis-full text-xs leading-5 text-ivory/55 sm:order-last">This simply notes that you've seen the overview. It is not a signature and is separate from your formal orientation documents.</p>}
           {last && onAcknowledge && (
             <button type="button" disabled={saving} onClick={async () => { setSaving(true); try { await onAcknowledge(); } finally { setSaving(false); } }} className={`${btn} cta-glow whitespace-nowrap sm:px-5`}><span>{saving ? "Saving…" : "I've reviewed this overview"}</span></button>
           )}
