@@ -85,6 +85,8 @@ export const createMeetingPoll = createServerFn({ method: "POST" })
       slotIsos.map((starts_at) => ({ poll_id: poll.id, starts_at })),
     );
     if (slotsError) throw slotsError;
+    const { safeReconcile } = await import("@/lib/outlook-calendar.server");
+    await safeReconcile(poll.id);
 
     const { data: members } = data.invited_member_ids.length
       ? await supabaseAdmin.from("portal_members").select("id, email, first_name").in("id", data.invited_member_ids)
@@ -190,6 +192,8 @@ export const confirmPollSlot = createServerFn({ method: "POST" })
       .from("meeting_polls")
       .update({ status: "confirmed", confirmed_slot_id: data.slot_id })
       .eq("id", data.poll_id);
+    const { safeReconcile } = await import("@/lib/outlook-calendar.server");
+    await safeReconcile(data.poll_id);
 
     const token = await meetingIcsToken(data.poll_id);
     const icsUrl = `https://access.prscstandards.org/api/public/meeting-ics?poll=${data.poll_id}&token=${token}`;
@@ -243,7 +247,26 @@ export const cancelPoll = createServerFn({ method: "POST" })
       .update({ status: "cancelled" })
       .eq("id", data.poll_id);
     if (error) throw error;
+    const { safeReconcile } = await import("@/lib/outlook-calendar.server");
+    await safeReconcile(data.poll_id);
     return { ok: true };
+  });
+
+export const resyncPollCalendar = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input) => z.object({ poll_id: z.string().uuid() }).parse(input))
+  .handler(async ({ context, data }) => {
+    await assertAdmin(context);
+    const { safeReconcile } = await import("@/lib/outlook-calendar.server");
+    return await safeReconcile(data.poll_id);
+  });
+
+export const getCalendarConnection = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    await assertAdmin(context);
+    const { getConnectedCalendar } = await import("@/lib/outlook-calendar.server");
+    return await getConnectedCalendar();
   });
 
 export const getMyMeetings = createServerFn({ method: "GET" })
