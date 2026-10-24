@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { CalendarDays, Check, Clock, MapPin, Plus, Video, X } from "lucide-react";
+import { CalendarDays, Check, Clock, MapPin, Plus, RefreshCw, Video, X } from "lucide-react";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { toast } from "sonner";
 import {
@@ -8,6 +8,8 @@ import {
   createMeetingPoll,
   listAdminPolls,
   listInvitableMembers,
+  resyncPollCalendar,
+  getCalendarConnection,
 } from "@/lib/meetings.functions";
 import { Button } from "@/components/ui/button";
 import { MeetingSetupForm } from "@/components/portal/MeetingSetupForm";
@@ -34,6 +36,20 @@ export function AdminMeetings() {
   const [polls, setPolls] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [proposeOpen, setProposeOpen] = useState(false);
+  const [cal, setCal] = useState<any>(null);
+  const [syncing, setSyncing] = useState<string | null>(null);
+
+  async function resync(pollId: string) {
+    setSyncing(pollId);
+    try {
+      const r = await resyncPollCalendar({ data: { poll_id: pollId } });
+      if (r.ok) toast.success("Outlook calendar is in sync");
+      else toast.error(`Calendar not synced: ${r.error}`);
+      await refresh();
+    } finally {
+      setSyncing(null);
+    }
+  }
   async function refresh() {
     setLoading(true);
     try {
@@ -49,6 +65,7 @@ export function AdminMeetings() {
 
   useEffect(() => {
     void refresh();
+    getCalendarConnection().then(setCal).catch(() => setCal({ connected: false, error: "Could not check Outlook" }));
   }, []);
 
   async function confirm(pollId: string, slotId: string) {
@@ -81,6 +98,14 @@ export function AdminMeetings() {
         <Button type="button" onClick={() => setProposeOpen(true)} className="rounded-none bg-gold text-navy hover:bg-gold/90">
           <Plus className="mr-1 h-4 w-4" /> Propose a meeting
         </Button>
+      </div>
+      <div className="rounded-md border border-gold/20 bg-navy-deep/40 px-4 py-3 text-xs text-ivory/70">
+        <CalendarDays className="mr-1 inline h-3.5 w-3.5 text-gold" />
+        {!cal ? "Checking Outlook calendar…" : cal.connected && !cal.error ? (
+          <>Holds go to: <span className="text-ivory">{cal.name} · {cal.email}</span> ({cal.calendar}). Confirm this is your working calendar.</>
+        ) : (
+          <span className="text-amber-300">Outlook calendar not connected{cal.error ? ` — ${cal.error}` : ""}. Polls still work; proposed times are not held on your calendar.</span>
+        )}
       </div>
       <Dialog open={proposeOpen} onOpenChange={setProposeOpen}>
         <DialogContent className="max-h-[90vh] max-w-2xl overflow-y-auto border-gold/30 bg-navy-deep text-ivory">
@@ -132,6 +157,16 @@ export function AdminMeetings() {
                     >
                       {p.status === "open" ? "Collecting availability" : p.status}
                     </span>
+                  </div>
+                  <div className="mt-2 flex flex-wrap items-center gap-2 text-[11px]">
+                    {p.calendar_sync_error ? (
+                      <span className="rounded-full border border-amber-400/40 px-2 py-0.5 text-amber-300" title={p.calendar_sync_error}>Calendar not synced</span>
+                    ) : p.calendar_synced_at ? (
+                      <span className="rounded-full border border-emerald-400/40 px-2 py-0.5 text-emerald-300">Outlook in sync</span>
+                    ) : null}
+                    <button type="button" disabled={syncing === p.id} onClick={() => void resync(p.id)} className="inline-flex items-center gap-1 text-ivory/50 hover:text-gold">
+                      <RefreshCw className={`h-3 w-3 ${syncing === p.id ? "animate-spin" : ""}`} /> Re-sync calendar
+                    </button>
                   </div>
 
                   <div className="mt-4 overflow-x-auto">

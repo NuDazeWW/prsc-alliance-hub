@@ -252,6 +252,45 @@ export type Database = {
           },
         ]
       }
+      meeting_calendar_holds: {
+        Row: {
+          created_at: string
+          id: string
+          kind: string
+          last_error: string | null
+          last_synced_at: string | null
+          outlook_event_id: string | null
+          poll_id: string
+          slot_id: string
+          status: string
+          transaction_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          kind?: string
+          last_error?: string | null
+          last_synced_at?: string | null
+          outlook_event_id?: string | null
+          poll_id: string
+          slot_id: string
+          status?: string
+          transaction_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          kind?: string
+          last_error?: string | null
+          last_synced_at?: string | null
+          outlook_event_id?: string | null
+          poll_id?: string
+          slot_id?: string
+          status?: string
+          transaction_id?: string
+        }
+        Relationships: []
+      }
       meeting_poll_notes: {
         Row: {
           member_id: string
@@ -369,6 +408,8 @@ export type Database = {
       meeting_polls: {
         Row: {
           auto_nudge_sent_at: string | null
+          calendar_sync_error: string | null
+          calendar_synced_at: string | null
           confirmed_slot_id: string | null
           created_at: string
           created_by: string | null
@@ -388,6 +429,8 @@ export type Database = {
         }
         Insert: {
           auto_nudge_sent_at?: string | null
+          calendar_sync_error?: string | null
+          calendar_synced_at?: string | null
           confirmed_slot_id?: string | null
           created_at?: string
           created_by?: string | null
@@ -407,6 +450,8 @@ export type Database = {
         }
         Update: {
           auto_nudge_sent_at?: string | null
+          calendar_sync_error?: string | null
+          calendar_synced_at?: string | null
           confirmed_slot_id?: string | null
           created_at?: string
           created_by?: string | null

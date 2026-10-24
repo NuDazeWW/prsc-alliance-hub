@@ -40,6 +40,24 @@ export function buildMeetingIcs(input: {
   return lines.join("\r\n");
 }
 
+/** Optional tentative hold an executive can import. Best effort: removal is not guaranteed. */
+export function buildSlotHoldIcs(input: { slotId: string; title: string; startsAt: string; durationMinutes: number }) {
+  const start = new Date(input.startsAt);
+  const end = new Date(start.getTime() + input.durationMinutes * 60000);
+  return [
+    "BEGIN:VCALENDAR", "VERSION:2.0", "PRODID:-//PRSC//Board & Advisor Center//EN", "CALSCALE:GREGORIAN", "METHOD:PUBLISH",
+    "BEGIN:VEVENT",
+    `UID:${input.slotId}-hold@prscstandards.org`,
+    `DTSTAMP:${icsDateTime(new Date().toISOString())}`,
+    `DTSTART:${icsDateTime(start.toISOString())}`,
+    `DTEND:${icsDateTime(end.toISOString())}`,
+    `SUMMARY:${escapeIcs(`HOLD (tentative): ${input.title} — may be released`)}`,
+    `DESCRIPTION:${escapeIcs("Proposed time from the PRSC Board & Advisor Center. If another time is confirmed, the portal will list this hold as released so you can delete it.")}`,
+    "STATUS:TENTATIVE", "TRANSP:OPAQUE",
+    "END:VEVENT", "END:VCALENDAR",
+  ].join("\r\n");
+}
+
 export async function meetingIcsToken(pollId: string) {
   const secret = process.env["SETUP_SECRET"] ?? "prsc-meetings";
   const digest = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(`${pollId}:${secret}`));

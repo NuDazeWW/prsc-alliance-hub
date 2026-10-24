@@ -4,6 +4,17 @@ import { CalendarDays, Check, Clock, Download, MapPin, Video } from "lucide-reac
 import { toast } from "sonner";
 import { getMyMeetings, submitMyAvailability } from "@/lib/meetings.functions";
 import { Button } from "@/components/ui/button";
+import { buildSlotHoldIcs } from "@/lib/ics";
+
+function downloadHold(p: any, s: any) {
+  const ics = buildSlotHoldIcs({ slotId: s.id, title: p.title, startsAt: s.starts_at, durationMinutes: p.duration_minutes });
+  const url = URL.createObjectURL(new Blob([ics], { type: "text/calendar" }));
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = "prsc-hold.ics";
+  a.click();
+  URL.revokeObjectURL(url);
+}
 import { isPreviewHost } from "@/routes/_authenticated/route";
 
 function demoPolls() {
@@ -196,6 +207,15 @@ export function MemberMeetings({ hideWhenEmpty = false, hideIntro = false, asMem
                         {c.label}
                       </button>
                     ))}
+                    {(answers[s.id] === "available" || answers[s.id] === "if_needed") && (
+                      <button
+                        type="button"
+                        onClick={() => downloadHold(p, s)}
+                        className="inline-flex items-center gap-1 rounded-full border border-gold/30 px-3 py-1 text-xs text-gold/85 hover:bg-gold/10"
+                      >
+                        <Download className="h-3 w-3" /> Hold this time on my calendar
+                      </button>
+                    )}
                   </div>
                 </div>
               ))}
@@ -250,6 +270,12 @@ export function MemberMeetings({ hideWhenEmpty = false, hideIntro = false, asMem
                         p.location || "In person"
                       )}
                     </p>
+                    {p.slots.length > 1 && (
+                      <p className="mt-2 text-xs text-ivory/50">
+                        Released times — if you saved a hold for any of these, you can delete it from your calendar:{" "}
+                        {p.slots.filter((s: any) => s.id !== p.confirmed_slot_id).map((s: any) => fmt(s.starts_at, p.timezone)).join("; ")}
+                      </p>
+                    )}
                   </div>
                   {p.ics_token && (
                     <a
