@@ -116,7 +116,7 @@ export const updateDocumentGovernance = createServerFn({ method: "POST" })
     await assertAdmin(context);
     if (data.classification === "restricted_opportunity" && !data.third_party_permission)
       throw new Error("Record the source's permission before classifying material as Restricted Opportunity");
-    const patch: Record<string, unknown> = {};
+    const patch: { classification?: string; classification_reviewed_at?: string; is_forum_prep?: boolean; superseded_at?: string | null } = {};
     if (data.classification) { patch.classification = data.classification; patch.classification_reviewed_at = new Date().toISOString(); }
     if (data.is_forum_prep != null) patch.is_forum_prep = data.is_forum_prep;
     if (data.superseded != null) patch.superseded_at = data.superseded ? new Date().toISOString() : null;

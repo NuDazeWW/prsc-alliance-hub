@@ -87,7 +87,7 @@ export function documentVisible(doc: VisibilityDoc, m: VisibilityMember, hasComp
 }
 
 /** Superseded documents never sit in active onboarding or acknowledgement queues. */
-export function isActive(doc: { superseded_at: string | null }) {
+export function isActive(doc: { superseded_at?: string | null }) {
   return !doc.superseded_at;
 }
 
