@@ -34,3 +34,13 @@ describe("journey sequencing", () => {
     strictEqual(lockedDocumentIds(entityDocs, new Set(), "prsc").has("p2"), false);
   });
 });
+
+describe("forum clearance", () => {
+  it("signing every Forum document does not clear Stage 1 without an admin clearance", () => {
+    const done = new Set(["f1", "f2"]);
+    const st = journeyStatus(docs, done, "prsc", { prsc: null, dis: null }, true, false);
+    strictEqual(st.forumCleared, false);
+    strictEqual(st.label, "Clearance Pending Review");
+    strictEqual(lockedDocumentIds(docs, done, "prsc", false).has("p2"), true);
+  });
+});

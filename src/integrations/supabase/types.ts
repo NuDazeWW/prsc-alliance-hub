@@ -101,6 +101,47 @@ export type Database = {
         }
         Relationships: []
       }
+      governance_reviews: {
+        Row: {
+          created_at: string
+          decision: string
+          details: Json
+          id: string
+          kind: string
+          member_id: string
+          notes: string | null
+          reviewer_id: string
+        }
+        Insert: {
+          created_at?: string
+          decision: string
+          details?: Json
+          id?: string
+          kind: string
+          member_id: string
+          notes?: string | null
+          reviewer_id: string
+        }
+        Update: {
+          created_at?: string
+          decision?: string
+          details?: Json
+          id?: string
+          kind?: string
+          member_id?: string
+          notes?: string | null
+          reviewer_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "governance_reviews_member_id_fkey"
+            columns: ["member_id"]
+            isOneToOne: false
+            referencedRelation: "portal_members"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       leadership_settings: {
         Row: {
           eyebrow: string
@@ -388,6 +429,8 @@ export type Database = {
         Row: {
           acknowledged_at: string
           confirmed_by: string | null
+          conflict_answer: string | null
+          conflict_details: string | null
           consent: boolean
           document_id: string
           id: string
@@ -404,6 +447,8 @@ export type Database = {
         Insert: {
           acknowledged_at?: string
           confirmed_by?: string | null
+          conflict_answer?: string | null
+          conflict_details?: string | null
           consent?: boolean
           document_id: string
           id?: string
@@ -420,6 +465,8 @@ export type Database = {
         Update: {
           acknowledged_at?: string
           confirmed_by?: string | null
+          conflict_answer?: string | null
+          conflict_details?: string | null
           consent?: boolean
           document_id?: string
           id?: string
@@ -456,54 +503,72 @@ export type Database = {
           audience_entity: string | null
           audience_role: string | null
           category: string
+          classification: string
+          classification_reviewed_at: string | null
           created_at: string
           created_by: string | null
           description: string
           external_url: string | null
           file_path: string | null
           id: string
+          is_forum_prep: boolean
           journey_stage: number | null
           journey_track: string | null
           member_id: string | null
           sort_order: number
+          superseded_at: string | null
+          supersedes_id: string | null
           title: string
           updated_at: string
+          version_label: string | null
         }
         Insert: {
           action: string
           audience_entity?: string | null
           audience_role?: string | null
           category: string
+          classification?: string
+          classification_reviewed_at?: string | null
           created_at?: string
           created_by?: string | null
           description?: string
           external_url?: string | null
           file_path?: string | null
           id?: string
+          is_forum_prep?: boolean
           journey_stage?: number | null
           journey_track?: string | null
           member_id?: string | null
           sort_order?: number
+          superseded_at?: string | null
+          supersedes_id?: string | null
           title: string
           updated_at?: string
+          version_label?: string | null
         }
         Update: {
           action?: string
           audience_entity?: string | null
           audience_role?: string | null
           category?: string
+          classification?: string
+          classification_reviewed_at?: string | null
           created_at?: string
           created_by?: string | null
           description?: string
           external_url?: string | null
           file_path?: string | null
           id?: string
+          is_forum_prep?: boolean
           journey_stage?: number | null
           journey_track?: string | null
           member_id?: string | null
           sort_order?: number
+          superseded_at?: string | null
+          supersedes_id?: string | null
           title?: string
           updated_at?: string
+          version_label?: string | null
         }
         Relationships: [
           {
@@ -511,6 +576,13 @@ export type Database = {
             columns: ["member_id"]
             isOneToOne: false
             referencedRelation: "portal_members"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "portal_documents_supersedes_id_fkey"
+            columns: ["supersedes_id"]
+            isOneToOne: false
+            referencedRelation: "portal_documents"
             referencedColumns: ["id"]
           },
         ]
@@ -701,6 +773,7 @@ export type Database = {
         Row: {
           created_at: string
           dis_activated_at: string | null
+          dis_appointment_ref: string | null
           documents_completed_at: string | null
           documents_released_at: string | null
           documents_reminder_sent_at: string | null
@@ -708,18 +781,29 @@ export type Database = {
           entity: Database["public"]["Enums"]["portal_entity"]
           first_access_at: string | null
           first_name: string
+          forum_clearance_status: string
+          forum_cleared_at: string | null
+          forum_cleared_by: string | null
+          forum_restrictions: string | null
           id: string
           invited_at: string
           is_methodology_committee: boolean
           last_access_at: string | null
           last_name: string
+          nda_entities: Database["public"]["Enums"]["portal_entity"] | null
+          nda_reference: string | null
+          nda_scope: string | null
+          nda_verified_at: string | null
+          nda_verified_by: string | null
           organization: string
           package_status: Database["public"]["Enums"]["portal_package_status"]
           participates_in_forum: boolean
           professional_name: string | null
           prsc_activated_at: string | null
+          prsc_appointment_ref: string | null
           reminder_sent_at: string | null
           role: Database["public"]["Enums"]["app_role"]
+          role_review_status: string
           status: Database["public"]["Enums"]["portal_member_status"]
           title: string | null
           updated_at: string
@@ -729,6 +813,7 @@ export type Database = {
         Insert: {
           created_at?: string
           dis_activated_at?: string | null
+          dis_appointment_ref?: string | null
           documents_completed_at?: string | null
           documents_released_at?: string | null
           documents_reminder_sent_at?: string | null
@@ -736,18 +821,29 @@ export type Database = {
           entity: Database["public"]["Enums"]["portal_entity"]
           first_access_at?: string | null
           first_name: string
+          forum_clearance_status?: string
+          forum_cleared_at?: string | null
+          forum_cleared_by?: string | null
+          forum_restrictions?: string | null
           id?: string
           invited_at?: string
           is_methodology_committee?: boolean
           last_access_at?: string | null
           last_name: string
+          nda_entities?: Database["public"]["Enums"]["portal_entity"] | null
+          nda_reference?: string | null
+          nda_scope?: string | null
+          nda_verified_at?: string | null
+          nda_verified_by?: string | null
           organization: string
           package_status?: Database["public"]["Enums"]["portal_package_status"]
           participates_in_forum?: boolean
           professional_name?: string | null
           prsc_activated_at?: string | null
+          prsc_appointment_ref?: string | null
           reminder_sent_at?: string | null
           role: Database["public"]["Enums"]["app_role"]
+          role_review_status?: string
           status?: Database["public"]["Enums"]["portal_member_status"]
           title?: string | null
           updated_at?: string
@@ -757,6 +853,7 @@ export type Database = {
         Update: {
           created_at?: string
           dis_activated_at?: string | null
+          dis_appointment_ref?: string | null
           documents_completed_at?: string | null
           documents_released_at?: string | null
           documents_reminder_sent_at?: string | null
@@ -764,18 +861,29 @@ export type Database = {
           entity?: Database["public"]["Enums"]["portal_entity"]
           first_access_at?: string | null
           first_name?: string
+          forum_clearance_status?: string
+          forum_cleared_at?: string | null
+          forum_cleared_by?: string | null
+          forum_restrictions?: string | null
           id?: string
           invited_at?: string
           is_methodology_committee?: boolean
           last_access_at?: string | null
           last_name?: string
+          nda_entities?: Database["public"]["Enums"]["portal_entity"] | null
+          nda_reference?: string | null
+          nda_scope?: string | null
+          nda_verified_at?: string | null
+          nda_verified_by?: string | null
           organization?: string
           package_status?: Database["public"]["Enums"]["portal_package_status"]
           participates_in_forum?: boolean
           professional_name?: string | null
           prsc_activated_at?: string | null
+          prsc_appointment_ref?: string | null
           reminder_sent_at?: string | null
           role?: Database["public"]["Enums"]["app_role"]
+          role_review_status?: string
           status?: Database["public"]["Enums"]["portal_member_status"]
           title?: string | null
           updated_at?: string

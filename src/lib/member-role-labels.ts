@@ -11,7 +11,13 @@ export function memberRoleLabels(role: string | null | undefined, entity: string
 export function memberRoleLabel(role: string | null | undefined, entity: string | null | undefined): string {
   return memberRoleLabels(role, entity).join(" / ");
 }
-const ENTITY_FULL: Record<string, string> = { PRSC: "Partnership Readiness Standards Council", DIS: "Decision Intelligence Systems" };
+const ENTITY_FULL: Record<string, string> = { PRSC: "Partnership Readiness Standards Council, LLC", DIS: "Decision Intelligence Systems, Inc." };
+
+/** Pre-appointment wording, e.g. "PRSC Board Candidate / DIS Advisor Candidate". */
+export function memberCandidateLabel(role: string | null | undefined, entity: string | null | undefined): string {
+  const labels = memberRoleLabels(role, entity);
+  return labels.length ? labels.map((l) => `${l} Candidate`).join(" / ") : "Board or Advisor Candidate";
+}
 
 /** One chip per role/entity pair, e.g. "Advisor · Partnership Readiness Standards Council". */
 export function memberRoleChips(role: string | null | undefined, entity: string | null | undefined): string[] {

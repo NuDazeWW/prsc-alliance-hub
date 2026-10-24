@@ -148,7 +148,7 @@ function PortalHome() {
   const documentsReleased = myDocs.length > 0;
   const acknowledged = new Set(documents.data?.acknowledged ?? []);
   const docEntity = (documents.data as { entity?: string } | null)?.entity ?? m.entity;
-  const journey = journeyStatus(myDocs as any, acknowledged, docEntity, (documents.data as any)?.activation ?? { prsc: null, dis: null }, (documents.data as any)?.forum !== false);
+  const journey = journeyStatus((myDocs as any[]).filter((d) => !d.superseded_at), acknowledged, docEntity, (documents.data as any)?.activation ?? { prsc: null, dis: null }, (documents.data as any)?.forum !== false, (documents.data as any)?.forumCleared === true);
   const trackedDocs = myDocs.some((d: any) => isOnboarding(d)) ? myDocs.filter((d: any) => isOnboarding(d)) : myDocs;
   const signDocs = trackedDocs.filter((d) => d.category === "sign");
   const readDocs = trackedDocs.filter((d) => d.category === "read");
@@ -513,7 +513,7 @@ function PortalHome() {
               ) : (
                 <>
                   {documentsReleased ? (
-                    <MemberDocuments documents={myDocs as any} completions={documents.data?.completions ?? []} entity={docEntity} />
+                    <MemberDocuments documents={myDocs as any} completions={documents.data?.completions ?? []} entity={docEntity} forumCleared={(documents.data as any)?.forumCleared === true} />
                   ) : (
                     <div className="mt-8 border border-gold/25 bg-ivory/[.03] p-8 text-center"><FileText className="mx-auto h-7 w-7 text-gold"/><h3 className="mt-5 font-display text-[24px] leading-snug">Your documents are being prepared.</h3><p className="mx-auto mt-4 max-w-[34rem] text-[15px] leading-7 text-ivory/65">Your profile has been received. We will email you as soon as your individualized Board/Advisor documents are ready here.</p></div>
                   )}

@@ -42,9 +42,9 @@ export const EMAIL_TOKENS = [
 ] as const;
 
 const ENTITY_FULL: Record<string, string> = {
-  prsc: "Partnership Readiness Standards Council (PRSC)",
-  dis: "Decision Intelligence Systems (DIS)",
-  both: "Partnership Readiness Standards Council (PRSC) and Decision Intelligence Systems (DIS)",
+  prsc: "Partnership Readiness Standards Council, LLC (PRSC)",
+  dis: "Decision Intelligence Systems, Inc. (DIS)",
+  both: "Partnership Readiness Standards Council, LLC (PRSC) and Decision Intelligence Systems, Inc. (DIS)",
 };
 
 const PACKAGE_LABEL: Record<string, string> = {
@@ -228,5 +228,5 @@ export function renderBrandedEmailText(input: BrandedEmailInput) {
     .map((s) => (s.title ? `${s.name}, ${s.title}` : s.name))
     .join("\n");
   const signatureText = signatures ? `\n\n${signatures}` : "";
-  return `${input.heading?.trim() || input.subject}\n\n${input.body.trim()}${cta}${subtext}${signatureText}\n\nPrivate & confidential — Partnership Readiness Standards Council`;
+  return `${input.heading?.trim() || input.subject}\n\n${input.body.trim()}${cta}${subtext}${signatureText}\n\nPrivate & confidential — Partnership Readiness Standards Council, LLC`;
 }

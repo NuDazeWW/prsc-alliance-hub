@@ -16,8 +16,8 @@ describe("entity-specific member capacities", () => {
 import { memberRoleChips, memberRoleKinds } from "./member-role-labels";
 
 describe("role chips and role details", () => {
-  test("single role chip names the full entity", () => deepStrictEqual(memberRoleChips("advisor", "prsc"), ["Advisor · Partnership Readiness Standards Council"]));
-  test("mixed roles render separate chips", () => deepStrictEqual(memberRoleChips("prsc_board_dis_advisor", "both"), ["Board · Partnership Readiness Standards Council", "Advisor · Decision Intelligence Systems"]));
+  test("single role chip names the full entity", () => deepStrictEqual(memberRoleChips("advisor", "prsc"), ["Advisor · Partnership Readiness Standards Council, LLC"]));
+  test("mixed roles render separate chips", () => deepStrictEqual(memberRoleChips("prsc_board_dis_advisor", "both"), ["Board · Partnership Readiness Standards Council, LLC", "Advisor · Decision Intelligence Systems, Inc."]));
   test("board member sees only board details", () => deepStrictEqual(memberRoleKinds("board_member"), ["board"]));
   test("advisor sees only advisor details", () => deepStrictEqual(memberRoleKinds("advisor"), ["advisor"]));
   test("mixed role sees board and advisor", () => deepStrictEqual(memberRoleKinds("prsc_advisor_dis_board"), ["board", "advisor"]));

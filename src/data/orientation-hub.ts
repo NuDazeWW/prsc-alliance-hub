@@ -306,7 +306,7 @@ const SOURCE_GROUPS: TopicGroup[] = [
         heading: "PRSC tells motorsport what “ready” means.",
         tone: "prsc",
         blocks: [
-          { kind: "p", text: "The Partnership Readiness Standards Council is the independent council that defines commercial readiness in motorsport." },
+          { kind: "p", text: "The Partnership Readiness Standards Council, LLC is the independent council that defines commercial readiness in motorsport." },
           { kind: "quote", text: "FICO does not give someone a loan. It gives lenders a score they can understand. PRSC does not get someone a sponsor. It gives motorsport a PRSC Readiness Score™ that helps the ecosystem understand sponsorship readiness." },
           { kind: "list", title: "What PRSC does", items: [
             "Governs the PRSC Readiness Standard™",

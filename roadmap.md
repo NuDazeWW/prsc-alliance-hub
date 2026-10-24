@@ -51,3 +51,11 @@
 - [x] Five-part recipient journey: staged/sequenced documents, one-off records track, admin activation, header journey tracker, sign-out moved to left nav
 - [ ] Load real journey PDFs per stage/track (waiting on the documents)
 - [x] Add member-list journey stage badges with four-stage numbering for Forum opt-outs
+
+## Governance Corrections (approved plan, Oct 24)
+- [x] Priority A: legal names, candidate labels, NDA gate with entity coverage, two-tier role rules, admin Forum clearance, Forum prep vs clearance access, superseded/revised documents, restrictive classification defaults, third-party permission records, server + database enforcement
+- [ ] Priority A release gate: upload approved Forum Protocol, Pre-Read and Conflict / Recusal forms (waiting on the approved files)
+- [ ] Priority A release gate: record NDA verification for the 3 existing members and reviews for the 2 cross-entity members (admin action)
+- [ ] Confirm hard-prohibited combinations against operative governance documents (waiting on user)
+- [ ] Signed-in acceptance walkthrough (needs a signed-in admin session)
+- [ ] Priority B: Strategic Forum Center (queued for next release)

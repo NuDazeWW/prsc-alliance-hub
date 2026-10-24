@@ -66,6 +66,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { InviteEmail, capitalizeInviteName } from "@/lib/email-templates/invite";
+import { roleCombinationTier } from "@/lib/governance";
 import { INVITE_EMAIL_PREVIEW_URL, INVITE_EMAIL_REPLY_TO, INVITE_EMAIL_SUBJECT } from "@/lib/invite-email-config";
 import { memberRoleLabel } from "@/lib/member-role-labels";
 import { STAGES, type JourneyStatus } from "@/lib/journey";
@@ -350,6 +351,7 @@ export function AdminCenter({ page }: { page: "overview" | "send" }) {
   });
   const openPolls: any[] = (polls.data?.polls ?? []).filter((p: any) => p.status === "open");
   const [invitePollId, setInvitePollId] = useState("");
+  const [inviteGov, setInviteGov] = useState({ nda_confirmed: false, nda_reference: "", nda_entities: "prsc" as "prsc" | "dis" | "both", nda_scope: "", review_notes: "", prsc_scope: "", dis_scope: "", conflict_controls: "" });
   const [inviteCollapsed, setInviteCollapsed] = useStoredFlag("admin.inviteCollapsed");
   const PLACE: Record<"overview" | "send", Record<number, string>> = {
     overview: {
@@ -676,7 +678,10 @@ export function AdminCenter({ page }: { page: "overview" | "send" }) {
       return;
     }
     try {
-      await invitePortalMember({ data: { ...inviteDraft, poll_id: invitePollId || null } });
+      const needsReview = roleCombinationTier(inviteDraft.entity, inviteDraft.role, inviteDraft.is_methodology_committee ?? false).tier === "review";
+      await invitePortalMember({ data: { ...inviteDraft, poll_id: invitePollId || null,
+        nda_confirmed: inviteGov.nda_confirmed, nda_reference: inviteGov.nda_reference, nda_entities: inviteGov.nda_entities, nda_scope: inviteGov.nda_scope,
+        role_review: needsReview ? { decision: "approved", notes: inviteGov.review_notes, prsc_scope: inviteGov.prsc_scope, dis_scope: inviteGov.dis_scope, conflict_controls: inviteGov.conflict_controls } : undefined } });
       setStatus(invitePollId ? "Invitation sent with the meeting dates attached." : "Invitation sent.");
       setInvitePollId("");
       void polls.refetch();
@@ -1056,6 +1061,24 @@ export function AdminCenter({ page }: { page: "overview" | "send" }) {
                   />
                   <span className="text-base text-ivory/85">Participates in Readiness Vanguard Forum <span className="text-ivory/45">— uncheck to skip Stage 1 and use a 4-stage journey</span></span>
                 </label>
+                <div className="grid gap-3 border border-gold/30 p-4 sm:col-span-2 sm:grid-cols-3">
+                  <span className="text-base font-medium text-ivory/90 sm:col-span-3">NDA verification (required before inviting)</span>
+                  <Input value={inviteGov.nda_reference} onChange={(e) => setInviteGov({ ...inviteGov, nda_reference: e.target.value })} placeholder="NDA reference or storage location" className="text-base" />
+                  <select value={inviteGov.nda_entities} onChange={(e) => setInviteGov({ ...inviteGov, nda_entities: e.target.value as "prsc" | "dis" | "both" })} aria-label="Entities the NDA covers" className="h-9 w-full rounded-md border border-input bg-navy px-3 text-base">
+                    <option value="prsc">NDA covers PRSC</option><option value="dis">NDA covers DIS</option><option value="both">NDA covers PRSC and DIS</option>
+                  </select>
+                  <Input value={inviteGov.nda_scope} onChange={(e) => setInviteGov({ ...inviteGov, nda_scope: e.target.value })} placeholder="Information-sharing scope" className="text-base" />
+                  <label className="flex items-center gap-3 sm:col-span-3"><input type="checkbox" checked={inviteGov.nda_confirmed} onChange={(e) => setInviteGov({ ...inviteGov, nda_confirmed: e.target.checked })} className="h-4 w-4" /><span className="text-base text-ivory/85">I verified this executed NDA today</span></label>
+                </div>
+                {roleCombinationTier(inviteDraft.entity, inviteDraft.role, inviteDraft.is_methodology_committee ?? false).tier === "review" && (
+                  <div className="grid gap-3 border border-amber-400/40 p-4 sm:col-span-2 sm:grid-cols-2">
+                    <span className="text-base font-medium text-amber-200 sm:col-span-2">This cross-entity combination is blocked pending a governance/legal review. Record the review to invite</span>
+                    <Textarea value={inviteGov.prsc_scope} onChange={(e) => setInviteGov({ ...inviteGov, prsc_scope: e.target.value })} placeholder="PRSC engagement scope" rows={2} className="text-base" />
+                    <Textarea value={inviteGov.dis_scope} onChange={(e) => setInviteGov({ ...inviteGov, dis_scope: e.target.value })} placeholder="DIS engagement scope" rows={2} className="text-base" />
+                    <Textarea value={inviteGov.conflict_controls} onChange={(e) => setInviteGov({ ...inviteGov, conflict_controls: e.target.value })} placeholder="Conflict controls applied" rows={2} className="text-base" />
+                    <Textarea value={inviteGov.review_notes} onChange={(e) => setInviteGov({ ...inviteGov, review_notes: e.target.value })} placeholder="Review decision notes (governance/legal basis)" rows={2} className="text-base" />
+                  </div>
+                )}
                 {(() => {
                   const fitting = openPolls.filter((p) => pollFitsMember(p.meeting_type, inviteDraft.role, inviteDraft.is_methodology_committee ?? false));
                   return (

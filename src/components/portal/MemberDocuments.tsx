@@ -19,15 +19,19 @@ type Doc = {
 };
 type Completion = { document_id: string; kind: string; signed_name: string | null; acknowledged_at: string };
 
-type Props = { documents: Doc[]; completions: Completion[]; entity: string };
+type Props = { documents: Doc[]; completions: Completion[]; entity: string; forumCleared?: boolean };
 
 const TRACK_LABEL = { shared: "Shared Forum", prsc: "PRSC", dis: "DIS" } as const;
 
-export function MemberDocuments({ documents, completions, entity }: Props) {
+export function MemberDocuments({ documents: all, completions, entity, forumCleared = true }: Props) {
+  const documents = all.filter((d: any) => !d.superseded_at);
+  const history = all.filter((d: any) => d.superseded_at);
   const [openId, setOpenId] = useState<string | null>(null);
-  const open = documents.find((d) => d.id === openId) ?? null;
+  const open = all.find((d) => d.id === openId) ?? null;
   const doneMap = new Map(completions.map((c) => [c.document_id, c]));
-  const locked = lockedDocumentIds(documents, new Set(doneMap.keys()), entity);
+  const locked = lockedDocumentIds(documents, new Set(doneMap.keys()), entity, forumCleared);
+  const s1 = documents.filter((d) => d.journey_stage === 1);
+  const awaitingClearance = !forumCleared && s1.length > 0 && s1.every((d) => doneMap.has(d.id));
   const onboarding = documents.filter(isOnboarding);
   const ongoing = documents.filter((d) => !isOnboarding(d));
   const doneCount = onboarding.filter((d) => doneMap.has(d.id)).length;
@@ -46,6 +50,9 @@ export function MemberDocuments({ documents, completions, entity }: Props) {
           </p>
         )}
       </div>
+      {awaitingClearance && (
+        <p className="mt-4 border border-gold/30 px-5 py-3 text-[14px] text-gold">Your Forum preparation is complete. Your clearance is now with the Secretariat for review, and we'll email you when the next stage opens</p>
+      )}
       {STAGES.slice(0, 4).map((stage) => {
         const docs = onboarding.filter((d) => d.journey_stage === stage.n);
         if (!docs.length) return null;
@@ -67,6 +74,15 @@ export function MemberDocuments({ documents, completions, entity }: Props) {
           <p className="mt-2 text-[14px] text-ivory/55">These don't change your onboarding progress</p>
           <div className="mt-4 grid gap-4 lg:grid-cols-2">
             {ongoing.map((d) => <DocCard key={d.id} d={d} done={doneMap.get(d.id)} locked={false} onOpen={setOpenId} />)}
+          </div>
+        </div>
+      )}
+      {history.length > 0 && (
+        <div className="mt-10 border-t border-gold/20 pt-8">
+          <p className="text-[11px] uppercase tracking-[0.24em] text-gold">Historical Records</p>
+          <p className="mt-2 text-[14px] text-ivory/55">Earlier versions you completed, kept for your records</p>
+          <div className="mt-4 grid gap-4 lg:grid-cols-2">
+            {history.map((d) => <DocCard key={d.id} d={d} done={doneMap.get(d.id)} locked={false} onOpen={setOpenId} />)}
           </div>
         </div>
       )}
@@ -115,13 +131,17 @@ function DocumentReader({ doc, completion, onBack }: { doc: Doc; completion: Com
   const [signature, setSignature] = useState<string | null>(null);
   const [hardCopy, setHardCopy] = useState<"idle" | "sending" | "sent" | "error">("idle");
   const isSign = doc.category === "sign";
+  const isConflict = /conflict|recusal/i.test(doc.title);
+  const [conflict, setConflict] = useState<"" | "none" | "changed" | "unsure">("");
+  const [conflictDetails, setConflictDetails] = useState("");
+  const conflictFields = isConflict ? { conflict_answer: conflict || undefined, conflict_details: conflictDetails.trim() || undefined } : {};
 
   const complete = useMutation({
     mutationFn: () =>
       acknowledgeDocument({
         data: isSign
-          ? { document_id: doc.id, initials, kind: "signed", signed_name: name, signature_data: signature ?? undefined, consent }
-          : { document_id: doc.id, initials, kind: "acknowledged", consent: true },
+          ? { document_id: doc.id, initials, kind: "signed", signed_name: name, signature_data: signature ?? undefined, consent, ...conflictFields }
+          : { document_id: doc.id, initials, kind: "acknowledged", consent: true, ...conflictFields },
       }),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ["my-documents"] }),
   });
@@ -136,7 +156,7 @@ function DocumentReader({ doc, completion, onBack }: { doc: Doc; completion: Com
     }
   }
 
-  const canSubmit = readConfirmed && initials.trim().length > 0 && (!isSign || (name.trim().length > 1 && signature && consent));
+  const canSubmit = readConfirmed && initials.trim().length > 0 && (!isSign || (name.trim().length > 1 && signature && consent)) && (!isConflict || (conflict !== "" && (conflict === "none" || conflictDetails.trim().length > 0)));
 
   return (
     <div className="mt-6">
@@ -173,6 +193,20 @@ function DocumentReader({ doc, completion, onBack }: { doc: Doc; completion: Com
             <input type="checkbox" checked={readConfirmed} onChange={(e) => setReadConfirmed(e.target.checked)} className="mt-1 h-4 w-4 accent-[var(--color-gold)]" />
             I have read this document in full.
           </label>
+          {isConflict && (
+            <fieldset className="space-y-2">
+              <legend className="text-[14px] text-ivory/70">Your conflict / recusal answer</legend>
+              {([["none", "No conflict"], ["changed", "New or changed conflict"], ["unsure", "Unsure, please review"]] as const).map(([v, l]) => (
+                <label key={v} className="flex items-center gap-3 text-[15px] text-ivory/80">
+                  <input type="radio" name="conflict" checked={conflict === v} onChange={() => setConflict(v)} className="h-4 w-4" /> {l}
+                </label>
+              ))}
+              {conflict && conflict !== "none" && (
+                <textarea value={conflictDetails} onChange={(e) => setConflictDetails(e.target.value)} rows={3} placeholder="Please describe the conflict or question" className="w-full border border-gold/30 bg-transparent p-3 text-[16px] text-ivory outline-none focus:border-gold" />
+              )}
+              <p className="text-[13px] text-ivory/55">The Secretariat reviews every confirmation before Forum clearance</p>
+            </fieldset>
+          )}
           {isSign && (
             <>
               <label className="block text-[14px] text-ivory/70">
