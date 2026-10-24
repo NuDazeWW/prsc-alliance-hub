@@ -6,9 +6,9 @@ export const INVITE_EMAIL_REPLY_TO = "info@readinessterminal.com";
 export const INVITE_EMAIL_PREVIEW_URL = "https://access.prscstandards.org/accept-invitation?preview-only=1";
 
 export const INVITE_ROLE_LABELS = {
-  board_member: "Board Member",
-  advisor: "Advisor",
+  board_member: "Board Candidate",
+  advisor: "Advisor Candidate",
   prsc_board_dis_advisor: "PRSC Board / DIS Advisor",
   prsc_advisor_dis_board: "PRSC Advisor / DIS Board",
-  methodology_committee: "Methodology Committee Member",
+  methodology_committee: "Methodology Committee Candidate",
 } as const;

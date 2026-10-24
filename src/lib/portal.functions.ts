@@ -1203,7 +1203,7 @@ export const prepareSignedCopy = createServerFn({ method: "POST" })
     let y = 720;
     const line = (t: string, f = font, size = 11) => { page.drawText(clean(t), { x: 60, y, size, font: f, color: navy }); y -= size + 10; };
     line("Signature Certificate", bold, 20); y -= 6;
-    line("Partnership Readiness Standards Council / Decision Intelligence Systems", font, 10); y -= 14;
+    line("Partnership Readiness Standards Council, LLC / Decision Intelligence Systems, Inc.", font, 10); y -= 14;
     const fullName = `${member?.first_name ?? ""} ${member?.last_name ?? ""}`.trim();
     line(`Document: ${doc.title}`);
     line(`Member: ${fullName} (${member?.email ?? ""})`);

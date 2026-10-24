@@ -16,9 +16,9 @@ export const Route = createFileRoute("/auth")({
     passwordCreated: search.passwordCreated === true || search.passwordCreated === "true" ? true : undefined,
   }),
   head: () => ({ meta: [
-    { title: "Private Center Access | PRSC" }, { name: "description", content: "Secure access for invited PRSC and DIS board members and advisors." },
+    { title: "Private Center Access | PRSC" }, { name: "description", content: "Secure access for invited PRSC and DIS board and advisor candidates." },
     { name: "robots", content: "noindex,nofollow,noarchive" }, { property: "og:title", content: "Private Center Access | PRSC" },
-    { property: "og:description", content: "Secure access for invited PRSC and DIS board members and advisors." }, { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary" },
+    { property: "og:description", content: "Secure access for invited PRSC and DIS board and advisor candidates." }, { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary" },
   ]}),
   component: AuthPage,
 });
@@ -85,7 +85,7 @@ function AuthPage() {
           <div>
             <p className="mb-5 text-[11px] uppercase tracking-[0.22em] text-gold">Private Board &amp; Advisor Center</p>
             <h1 className="max-w-xl font-display text-[clamp(3.25rem,4.2vw,4.5rem)] leading-[0.95]">Built for those who shape the standard.</h1>
-            <p className="mt-7 max-w-lg text-base leading-7 text-ivory/65">Access is reserved for invited PRSC and DIS board members and advisors.</p>
+            <p className="mt-7 max-w-lg text-base leading-7 text-ivory/65">Access is reserved for invited PRSC and DIS board and advisor candidates.</p>
           </div>
           <p className="flex items-center gap-2 text-xs text-ivory/45"><ShieldCheck className="h-4 w-4 text-gold" /> Invitation-only access</p>
         </div>

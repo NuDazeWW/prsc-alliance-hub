@@ -47,10 +47,10 @@ function renderInline(line: string) {
 const APP_ORIGIN = 'https://access.prscstandards.org'
 
 export const inviteEntityCopy: Record<InviteEntity, { full: string; short: string }> = {
-  prsc: { full: 'Partnership Readiness Standards Council (PRSC)', short: 'PRSC' },
-  dis: { full: 'Decision Intelligence Systems (DIS)', short: 'DIS' },
+  prsc: { full: 'Partnership Readiness Standards Council, LLC (PRSC)', short: 'PRSC' },
+  dis: { full: 'Decision Intelligence Systems, Inc. (DIS)', short: 'DIS' },
   both: {
-    full: 'Partnership Readiness Standards Council (PRSC) / Decision Intelligence Systems (DIS)',
+    full: 'Partnership Readiness Standards Council, LLC (PRSC) / Decision Intelligence Systems, Inc. (DIS)',
     short: 'PRSC and DIS',
   },
 }
@@ -67,7 +67,7 @@ export const InviteEmail = ({
   firstName = 'there',
   recipientEmail,
   entity = 'both',
-  roleLabel = 'Board Member or Advisor',
+  roleLabel = 'Board or Advisor Candidate',
   copy,
   meetingBlock,
 }: InviteEmailProps) => {

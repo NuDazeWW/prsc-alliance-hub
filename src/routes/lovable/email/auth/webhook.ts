@@ -7,7 +7,7 @@ import { PortalMagicLinkEmail } from '@/emails/PortalMagicLinkEmail'
 import { PortalRecoveryEmail } from '@/emails/PortalRecoveryEmail'
 import { PortalEmailChangeEmail } from '@/emails/PortalEmailChangeEmail'
 import { PortalReauthenticationEmail } from '@/emails/PortalReauthenticationEmail'
-import { memberRoleLabel } from '@/lib/member-role-labels'
+import { memberRoleLabel, memberCandidateLabel } from '@/lib/member-role-labels'
 import {
   INVITE_EMAIL_FROM,
   INVITE_EMAIL_SENDER_DOMAIN,
@@ -69,7 +69,7 @@ export const Route = createFileRoute("/lovable/email/auth/webhook")({
                   recipientEmail: data.email,
                   firstName: member?.first_name ?? callback.searchParams.get('first_name') ?? 'there',
                   entity,
-                  roleLabel: role ? memberRoleLabel(role, entity) : 'Board Member or Advisor',
+                  roleLabel: memberCandidateLabel(role, entity),
                   copy: inviteCopy,
                   meetingBlock,
                 })
