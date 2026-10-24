@@ -27,4 +27,10 @@ describe("journey sequencing", () => {
     strictEqual(journeyStatus(prscDocs, done, "prsc", { prsc: null, dis: null }).label, "Pending Activation");
     strictEqual(journeyStatus(prscDocs, done, "prsc", { prsc: "2026-01-02", dis: null }).label, "Fully Activated");
   });
+  it("non-Forum members start in Stage 2 without any Forum documents", () => {
+    const entityDocs = docs.filter((x) => x.journey_stage !== 1 && x.id !== "dis2");
+    const st = journeyStatus(entityDocs, new Set(), "prsc", { prsc: null, dis: null }, false);
+    strictEqual(st.currentStage, 2);
+    strictEqual(lockedDocumentIds(entityDocs, new Set(), "prsc").has("p2"), false);
+  });
 });

@@ -10,6 +10,7 @@ const inviteReviewSchema = z.object({
   role: z.enum(["board_member", "advisor", "prsc_board_dis_advisor", "prsc_advisor_dis_board", "methodology_committee"]),
   why_you: z.string().trim().min(20).max(2000),
   is_methodology_committee: z.boolean().optional(),
+  participates_in_forum: z.boolean().optional(),
 });
 
 export type InviteEmailReview = z.infer<typeof inviteReviewSchema>;

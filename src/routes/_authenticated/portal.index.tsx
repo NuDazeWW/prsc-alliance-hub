@@ -148,7 +148,7 @@ function PortalHome() {
   const documentsReleased = myDocs.length > 0;
   const acknowledged = new Set(documents.data?.acknowledged ?? []);
   const docEntity = (documents.data as { entity?: string } | null)?.entity ?? m.entity;
-  const journey = journeyStatus(myDocs as any, acknowledged, docEntity, (documents.data as any)?.activation ?? { prsc: null, dis: null });
+  const journey = journeyStatus(myDocs as any, acknowledged, docEntity, (documents.data as any)?.activation ?? { prsc: null, dis: null }, (documents.data as any)?.forum !== false);
   const trackedDocs = myDocs.some((d: any) => isOnboarding(d)) ? myDocs.filter((d: any) => isOnboarding(d)) : myDocs;
   const signDocs = trackedDocs.filter((d) => d.category === "sign");
   const readDocs = trackedDocs.filter((d) => d.category === "read");
@@ -192,7 +192,7 @@ function PortalHome() {
                 {profileComplete
                   ? documentsReleased
                     ? docSummary
-                    : "Your profile is received; your documents are being prepared."
+                    : "Your profile is received. Your document package is being prepared — we will email you when it is ready."
                   : "Complete your private profile to begin."}
               </p>
             </div>
@@ -206,7 +206,7 @@ function PortalHome() {
               </button>
             ))}
           </div>
-          <JourneyTimeline currentStage={journey.currentStage} stageDone={journey.stageDone} />
+          <JourneyTimeline currentStage={journey.currentStage} stageDone={journey.stageDone} forum={(documents.data as any)?.forum !== false} />
         </div>
       }
     >

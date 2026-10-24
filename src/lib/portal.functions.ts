@@ -264,6 +264,7 @@ const inviteSchema = z.object({
   title: z.string().trim().max(160), entity: entitySchema, role: roleSchema,
   why_you: z.string().trim().min(20).max(2000),
   is_methodology_committee: z.boolean().optional(),
+  participates_in_forum: z.boolean().optional(),
   poll_id: z.string().uuid().nullable().optional(),
 });
 function portalInviteRedirect(member: { first_name: string; entity: string; role: string; poll_id?: string | null }) {
@@ -295,6 +296,7 @@ export const invitePortalMember = createServerFn({ method: "POST" })
       last_name: member.last_name, organization: member.organization, title: member.title || null,
       entity: member.entity, role: member.role, why_you: member.why_you, status: "invited",
       is_methodology_committee: member.is_methodology_committee ?? false,
+      participates_in_forum: member.participates_in_forum ?? true,
     }, { onConflict: "email" }).select("id").single();
     if (memberError) throw memberError;
     if (pollId && saved) {
@@ -626,9 +628,11 @@ export type PortalCompletion = {
   acknowledged_at: string;
 };
 
-type DocMember = { id: string; entity: string; role: string };
+type DocMember = { id: string; entity: string; role: string; participates_in_forum?: boolean | null };
 
 function appliesTo(doc: PortalDocumentRecord, m: DocMember) {
+  // Members opted out of the Forum never receive Stage 1 documents.
+  if (m.participates_in_forum === false && (doc as any).journey_stage === 1) return false;
   if (doc.member_id) return doc.member_id === m.id;
   if (doc.audience_entity && doc.audience_entity !== "both" && m.entity !== "both" && doc.audience_entity !== m.entity) return false;
   if (doc.audience_entity === "both" && m.entity !== "both") return false;
@@ -671,7 +675,7 @@ export const getMyDocuments = createServerFn({ method: "GET" })
       context = { supabase: supabaseAdmin };
     }
     const { data: member } = await context.supabase
-      .from("portal_members").select("id, entity, role, documents_released_at, prsc_activated_at, dis_activated_at").eq(input.asMemberId ? "id" : "user_id", input.asMemberId ?? ctx.userId).maybeSingle();
+      .from("portal_members").select("id, entity, role, participates_in_forum, documents_released_at, prsc_activated_at, dis_activated_at").eq(input.asMemberId ? "id" : "user_id", input.asMemberId ?? ctx.userId).maybeSingle();
     const activation = { prsc: (member?.prsc_activated_at as string | null) ?? null, dis: (member?.dis_activated_at as string | null) ?? null };
     if (!member) return { memberId: null, released: false, documents: [], acknowledged: [] as string[], completions: [] as PortalCompletion[] };
     if (!member.documents_released_at) {
@@ -686,6 +690,7 @@ export const getMyDocuments = createServerFn({ method: "GET" })
     return {
       memberId: member.id as string,
       entity: member.entity as string,
+      forum: member.participates_in_forum !== false,
       activation,
       released: true,
       documents: await signDocumentUrls(docs),
@@ -759,7 +764,7 @@ export const acknowledgeDocument = createServerFn({ method: "POST" })
   .handler(async ({ context, data }) => {
     const { data: member, error: memberError } = await context.supabase
       .from("portal_members")
-      .select("id, email, first_name, last_name, entity, role, documents_released_at, documents_completed_at")
+      .select("id, email, first_name, last_name, entity, role, participates_in_forum, documents_released_at, documents_completed_at")
       .eq("user_id", context.userId)
       .single();
     if (memberError || !member) throw new Error("Member profile unavailable");
@@ -836,6 +841,21 @@ export const setEntityActivation = createServerFn({ method: "POST" })
     return { ok: true };
   });
 
+export const setForumParticipation = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input) => z.object({ member_id: z.string().uuid(), participates: z.boolean() }).parse(input))
+  .handler(async ({ context, data }) => {
+    await assertAdmin(context);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { error } = await supabaseAdmin.from("portal_members").update({ participates_in_forum: data.participates }).eq("id", data.member_id);
+    if (error) throw error;
+    await supabaseAdmin.from("portal_activity").insert({
+      member_id: data.member_id, actor_user_id: context.userId,
+      event_type: data.participates ? "forum_opt_in" : "forum_opt_out", metadata: {},
+    });
+    return { ok: true };
+  });
+
 export const requestHardCopy = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input) => z.object({ document_id: z.string().uuid(), note: z.string().trim().max(600).default("") }).parse(input))
@@ -877,7 +897,7 @@ export const listDocumentsForAdmin = createServerFn({ method: "GET" })
     let documents: PortalDocumentRecord[];
     if (data.member_id) {
       const { data: m } = await context.supabase
-        .from("portal_members").select("id, entity, role, documents_released_at, documents_completed_at, prsc_activated_at, dis_activated_at").eq("id", data.member_id).maybeSingle();
+        .from("portal_members").select("id, entity, role, participates_in_forum, documents_released_at, documents_completed_at, prsc_activated_at, dis_activated_at").eq("id", data.member_id).maybeSingle();
       member = m;
       documents = m ? await applicableDocuments(context.supabase, m) : [];
     } else {
@@ -910,6 +930,7 @@ export const listDocumentsForAdmin = createServerFn({ method: "GET" })
       releasedAt: member?.documents_released_at ?? null,
       completedAt: member?.documents_completed_at ?? null,
       entity: member?.entity ?? "prsc",
+      forum: (member as any)?.participates_in_forum !== false,
       activation: { prsc: (member as any)?.prsc_activated_at ?? null, dis: (member as any)?.dis_activated_at ?? null } as { prsc: string | null; dis: string | null },
     };
   });

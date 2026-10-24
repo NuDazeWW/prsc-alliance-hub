@@ -202,6 +202,7 @@ type MemberRow = {
   first_name: string; last_name: string; email: string; organization: string;
   title: string; entity: "prsc" | "dis" | "both"; role: "board_member" | "advisor" | "prsc_board_dis_advisor" | "prsc_advisor_dis_board" | "methodology_committee"; why_you: string;
   is_methodology_committee?: boolean;
+  participates_in_forum?: boolean;
 };
 type StagedRow = MemberRow & { linkedin_url: string; background: string };
 
@@ -215,6 +216,7 @@ const emptyInvite: InviteEmailReview = {
   role: "board_member",
   why_you: "",
   is_methodology_committee: false,
+  participates_in_forum: true,
 };
 
 const LIST_HEADERS = "first_name,last_name,email,organization,title,entity,role,methodology_committee,linkedin_url,background,why_you";
@@ -1043,6 +1045,15 @@ export function AdminCenter({ page }: { page: "overview" | "send" }) {
                   <span className="text-base text-ivory/85">Also appoint to the Methodology Committee <span className="text-ivory/45">— they will be included in committee meetings</span></span>
                 </label>
                 )}
+                <label className="flex cursor-pointer items-center gap-3 border border-gold/20 px-4 py-3 sm:col-span-2">
+                  <input
+                    type="checkbox"
+                    checked={inviteDraft.participates_in_forum ?? true}
+                    onChange={(e) => setInviteDraft({ ...inviteDraft, participates_in_forum: e.target.checked })}
+                    className="h-4 w-4 accent-[#d4af37]"
+                  />
+                  <span className="text-base text-ivory/85">Participates in Readiness Vanguard Forum <span className="text-ivory/45">— uncheck to skip Stage 1 and use a 4-stage journey</span></span>
+                </label>
                 {(() => {
                   const fitting = openPolls.filter((p) => pollFitsMember(p.meeting_type, inviteDraft.role, inviteDraft.is_methodology_committee ?? false));
                   return (
@@ -1693,7 +1704,7 @@ export function AdminCenter({ page }: { page: "overview" | "send" }) {
                             </button>
                           </div>
                         </td>
-                        <td>{memberRoleLabel(m.role, m.entity)}</td>
+                        <td>{memberRoleLabel(m.role, m.entity)}{(m as { participates_in_forum?: boolean }).participates_in_forum === false && <span className="ml-2 whitespace-nowrap border border-gold/30 px-1.5 py-0.5 text-[10px] uppercase tracking-[0.12em] text-gold/80">No Forum</span>}</td>
                         <td className="py-4 pr-3">
                           <span className={`inline-block border px-2 py-1 text-xs uppercase tracking-[0.12em] ${st.tone}`}>{st.label}</span>
                           {st.detail && <span className="mt-1 block text-sm text-ivory/55">{st.detail}</span>}
