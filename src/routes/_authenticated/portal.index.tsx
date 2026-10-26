@@ -170,7 +170,7 @@ function PortalHome() {
   const documentsReleased = myDocs.length > 0;
   const acknowledged = new Set(documents.data?.acknowledged ?? []);
   const docEntity = (documents.data as { entity?: string } | null)?.entity ?? m.entity;
-  const journey = journeyStatus((myDocs as any[]).filter((d) => !d.superseded_at), acknowledged, docEntity, (documents.data as any)?.activation ?? { prsc: null, dis: null }, (documents.data as any)?.forum !== false, (documents.data as any)?.forumCleared === true);
+  const journey = journeyStatus((myDocs as any[]).filter((d) => !d.superseded_at), acknowledged, docEntity, (documents.data as any)?.activation ?? { prsc: null, dis: null }, m.participates_in_forum !== false, (documents.data as any)?.forumCleared === true);
   const trackedDocs = myDocs.some((d: any) => isOnboarding(d)) ? myDocs.filter((d: any) => isOnboarding(d)) : myDocs;
   const signDocs = trackedDocs.filter((d) => d.category === "sign");
   const readDocs = trackedDocs.filter((d) => d.category === "read");
@@ -228,7 +228,7 @@ function PortalHome() {
               </button>
             ))}
           </div>
-          <JourneyTimeline currentStage={journey.currentStage} stageDone={journey.stageDone} forum={(documents.data as any)?.forum !== false} />
+          <JourneyTimeline currentStage={journey.currentStage} stageDone={journey.stageDone} forum={m.participates_in_forum !== false} />
         </div>
       }
     >
