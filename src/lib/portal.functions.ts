@@ -707,6 +707,9 @@ function appliesTo(doc: PortalDocumentRecord, m: DocMember) {
   // Members opted out of the Forum never receive Stage 1 documents.
   if (m.participates_in_forum === false && (doc as any).journey_stage === 1) return false;
   if (doc.member_id) return doc.member_id === m.id;
+  // Forum candidates are not on an appointment track: Stages 2–4 never apply until promotion.
+  const stage = (doc as any).journey_stage as number | null | undefined;
+  if (m.is_candidate && stage != null && stage >= 2 && stage <= 4) return false;
   if (doc.audience_entity && doc.audience_entity !== "both" && m.entity !== "both" && doc.audience_entity !== m.entity) return false;
   if (doc.audience_entity === "both" && m.entity !== "both") return false;
   if (doc.audience_role) {
