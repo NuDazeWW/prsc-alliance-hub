@@ -1359,6 +1359,7 @@ export type Database = {
       }
       question_rounds: {
         Row: {
+          briefing_document_id: string | null
           created_at: string
           created_by: string | null
           deadline: string
@@ -1369,6 +1370,7 @@ export type Database = {
           title: string
         }
         Insert: {
+          briefing_document_id?: string | null
           created_at?: string
           created_by?: string | null
           deadline: string
@@ -1379,6 +1381,7 @@ export type Database = {
           title: string
         }
         Update: {
+          briefing_document_id?: string | null
           created_at?: string
           created_by?: string | null
           deadline?: string
@@ -1388,7 +1391,15 @@ export type Database = {
           status?: string
           title?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "question_rounds_briefing_document_id_fkey"
+            columns: ["briefing_document_id"]
+            isOneToOne: false
+            referencedRelation: "portal_documents"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       user_roles: {
         Row: {

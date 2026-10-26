@@ -1,0 +1,1 @@
+ALTER TABLE public.question_rounds ADD COLUMN briefing_document_id uuid REFERENCES public.portal_documents(id) ON DELETE SET NULL;
