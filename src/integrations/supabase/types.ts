@@ -111,9 +111,11 @@ export type Database = {
           notify_attempts: number
           notify_error: string | null
           notify_status: string
+          reason: string | null
           released_at: string
           released_by: string
           role: string
+          source: string
         }
         Insert: {
           documents?: Json
@@ -124,9 +126,11 @@ export type Database = {
           notify_attempts?: number
           notify_error?: string | null
           notify_status?: string
+          reason?: string | null
           released_at?: string
           released_by: string
           role: string
+          source?: string
         }
         Update: {
           documents?: Json
@@ -137,9 +141,11 @@ export type Database = {
           notify_attempts?: number
           notify_error?: string | null
           notify_status?: string
+          reason?: string | null
           released_at?: string
           released_by?: string
           role?: string
+          source?: string
         }
         Relationships: [
           {
@@ -147,6 +153,70 @@ export type Database = {
             columns: ["member_id"]
             isOneToOne: false
             referencedRelation: "portal_members"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      executive_questions: {
+        Row: {
+          context: string | null
+          created_at: string
+          group_id: string | null
+          id: string
+          member_id: string
+          priority: number
+          question: string
+          round_id: string
+          source: string
+          updated_at: string
+          why_it_matters: string
+        }
+        Insert: {
+          context?: string | null
+          created_at?: string
+          group_id?: string | null
+          id?: string
+          member_id: string
+          priority: number
+          question: string
+          round_id: string
+          source: string
+          updated_at?: string
+          why_it_matters: string
+        }
+        Update: {
+          context?: string | null
+          created_at?: string
+          group_id?: string | null
+          id?: string
+          member_id?: string
+          priority?: number
+          question?: string
+          round_id?: string
+          source?: string
+          updated_at?: string
+          why_it_matters?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "executive_questions_group_id_fkey"
+            columns: ["group_id"]
+            isOneToOne: false
+            referencedRelation: "question_groups"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "executive_questions_member_id_fkey"
+            columns: ["member_id"]
+            isOneToOne: false
+            referencedRelation: "portal_members"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "executive_questions_round_id_fkey"
+            columns: ["round_id"]
+            isOneToOne: false
+            referencedRelation: "question_rounds"
             referencedColumns: ["id"]
           },
         ]
@@ -1111,6 +1181,214 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      question_groups: {
+        Row: {
+          category: string
+          consolidated_text: string
+          created_at: string
+          id: string
+          list_target: string
+          priority: number | null
+          review_status: string
+          round_id: string
+          route: string | null
+          source: string
+        }
+        Insert: {
+          category?: string
+          consolidated_text: string
+          created_at?: string
+          id?: string
+          list_target?: string
+          priority?: number | null
+          review_status?: string
+          round_id: string
+          route?: string | null
+          source?: string
+        }
+        Update: {
+          category?: string
+          consolidated_text?: string
+          created_at?: string
+          id?: string
+          list_target?: string
+          priority?: number | null
+          review_status?: string
+          round_id?: string
+          route?: string | null
+          source?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "question_groups_round_id_fkey"
+            columns: ["round_id"]
+            isOneToOne: false
+            referencedRelation: "question_rounds"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      question_notification_sends: {
+        Row: {
+          created_at: string
+          error: string | null
+          kind: string
+          member_id: string
+          round_id: string
+          status: string
+        }
+        Insert: {
+          created_at?: string
+          error?: string | null
+          kind: string
+          member_id: string
+          round_id: string
+          status: string
+        }
+        Update: {
+          created_at?: string
+          error?: string | null
+          kind?: string
+          member_id?: string
+          round_id?: string
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "question_notification_sends_member_id_fkey"
+            columns: ["member_id"]
+            isOneToOne: false
+            referencedRelation: "portal_members"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "question_notification_sends_round_id_fkey"
+            columns: ["round_id"]
+            isOneToOne: false
+            referencedRelation: "question_rounds"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      question_outbound: {
+        Row: {
+          approved_at: string | null
+          approved_by: string | null
+          created_at: string
+          id: string
+          prepared_by: string
+          questions: Json
+          recipient: string
+          responses: string | null
+          round_id: string
+          shared_at: string | null
+          unresolved: string | null
+        }
+        Insert: {
+          approved_at?: string | null
+          approved_by?: string | null
+          created_at?: string
+          id?: string
+          prepared_by: string
+          questions: Json
+          recipient: string
+          responses?: string | null
+          round_id: string
+          shared_at?: string | null
+          unresolved?: string | null
+        }
+        Update: {
+          approved_at?: string | null
+          approved_by?: string | null
+          created_at?: string
+          id?: string
+          prepared_by?: string
+          questions?: Json
+          recipient?: string
+          responses?: string | null
+          round_id?: string
+          shared_at?: string | null
+          unresolved?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "question_outbound_round_id_fkey"
+            columns: ["round_id"]
+            isOneToOne: false
+            referencedRelation: "question_rounds"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      question_round_responses: {
+        Row: {
+          member_id: string
+          round_id: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          member_id: string
+          round_id: string
+          status: string
+          updated_at?: string
+        }
+        Update: {
+          member_id?: string
+          round_id?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "question_round_responses_member_id_fkey"
+            columns: ["member_id"]
+            isOneToOne: false
+            referencedRelation: "portal_members"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "question_round_responses_round_id_fkey"
+            columns: ["round_id"]
+            isOneToOne: false
+            referencedRelation: "question_rounds"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      question_rounds: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          deadline: string
+          forum_key: string
+          id: string
+          opens_at: string
+          status: string
+          title: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          deadline: string
+          forum_key: string
+          id?: string
+          opens_at: string
+          status?: string
+          title: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          deadline?: string
+          forum_key?: string
+          id?: string
+          opens_at?: string
+          status?: string
+          title?: string
+        }
+        Relationships: []
       }
       user_roles: {
         Row: {
