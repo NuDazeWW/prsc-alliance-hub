@@ -72,8 +72,8 @@ export function forumCleared(status: string | null | undefined) {
   return status === "cleared" || status === "cleared_restricted";
 }
 
-export type VisibilityDoc = { classification: string; superseded_at: string | null; is_forum_prep: boolean };
-export type VisibilityMember = { nda_verified_at: string | null; forum_clearance_status: string };
+export type VisibilityDoc = { classification: string; superseded_at: string | null; is_forum_prep: boolean; journey_stage?: number | null; member_specific?: boolean };
+export type VisibilityMember = { nda_verified_at: string | null; forum_clearance_status: string; is_candidate?: boolean };
 
 /** Mirrors the database read policy. hasCompletion keeps a member's own signed historical copies visible. */
 export function documentVisible(doc: VisibilityDoc, m: VisibilityMember, hasCompletion: boolean) {
@@ -83,6 +83,8 @@ export function documentVisible(doc: VisibilityDoc, m: VisibilityMember, hasComp
     if (!m.nda_verified_at || m.forum_clearance_status === "declined") return false;
     if (!doc.is_forum_prep && !forumCleared(m.forum_clearance_status)) return false;
   }
+  // Forum candidates hold no PRSC/DIS seat: appointment-track stages (2–4) stay hidden.
+  if (m.is_candidate && !doc.member_specific && doc.journey_stage != null && doc.journey_stage >= 2 && doc.journey_stage <= 4) return false;
   return true;
 }
 
