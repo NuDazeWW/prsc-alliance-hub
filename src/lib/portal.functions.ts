@@ -12,6 +12,7 @@ type PortalMember = {
   id: string; user_id: string; email: string; first_name: string; last_name: string;
   professional_name: string | null; organization: string; title: string | null;
   entity: "prsc" | "dis" | "both"; role: "board_member" | "advisor" | "prsc_board_dis_advisor" | "prsc_advisor_dis_board"; is_candidate?: boolean;
+  participates_in_forum?: boolean;
   why_you: string; status: "invited" | "active" | "revoked";
   package_status: "awaiting_profile" | "in_preparation" | "profile_received" | "package_ready";
   invited_at: string; first_access_at: string | null; last_access_at: string | null;
