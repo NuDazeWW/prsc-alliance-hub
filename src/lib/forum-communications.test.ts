@@ -1,6 +1,6 @@
 import { describe, it } from "node:test";
 import { strictEqual, notStrictEqual } from "node:assert";
-import { forumEmailBlock, forumInviteEligible, forumIdempotencyKey } from "./forum-communications";
+import { confirmedThroughPoll, forumEmailBlock, forumInviteEligible, forumIdempotencyKey } from "./forum-communications";
 
 const cleared = { status: "active", participates_in_forum: true, nda_verified_at: "2026-10-01", forum_clearance_status: "cleared" };
 const invitable = { ...cleared, forum_clearance_status: "not_reviewed" };
@@ -34,5 +34,12 @@ describe("Forum email recipients", () => {
     notStrictEqual(a, forumIdempotencyKey("forum-1", "final_agenda", 2, "m1"));
     notStrictEqual(a, forumIdempotencyKey("forum-1", "final_agenda", 1, "m2"));
     strictEqual(a, forumIdempotencyKey("forum-1", "final_agenda", 1, "m1"));
+  });
+  it("blocks a second confirmation when the Meetings poll already confirmed the member", () => {
+    const polls = [{ invited_member_ids: ["m1", "m2"] }];
+    strictEqual(confirmedThroughPoll("m1", polls), true);
+    strictEqual(confirmedThroughPoll("m3", polls), false);
+    strictEqual(confirmedThroughPoll("m1", []), false);
+    strictEqual(confirmedThroughPoll("m1", [{ invited_member_ids: null }]), false);
   });
 });
