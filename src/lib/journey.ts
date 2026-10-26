@@ -37,8 +37,17 @@ function trackOf(d: JourneyDoc, entity: string): JourneyTrack {
   return d.journey_track && d.journey_track !== "shared" ? d.journey_track : memberTracks(entity)[0];
 }
 
-/** IDs of onboarding documents still locked behind an earlier incomplete one. */
-export function lockedDocumentIds(docs: JourneyDoc[], done: Set<string>, entity: string, cleared = true): Set<string> {
+export type LockOptions = {
+  /** Explicit admin Stage 2 release per entity. Forum status never opens entity tracks. */
+  released: { prsc: boolean; dis: boolean };
+};
+
+/**
+ * IDs of onboarding documents still locked. Stage 1 (Forum) is sequential on its own;
+ * each entity track opens only after that entity's explicit administrative release,
+ * independently of Forum participation or clearance.
+ */
+export function lockedDocumentIds(docs: JourneyDoc[], done: Set<string>, entity: string, opts: LockOptions): Set<string> {
   const locked = new Set<string>();
   const onboarding = docs.filter(isOnboarding);
   const shared = onboarding.filter((d) => trackOf(d, entity) === "shared").sort(order);
@@ -47,13 +56,12 @@ export function lockedDocumentIds(docs: JourneyDoc[], done: Set<string>, entity:
     if (blocked) locked.add(d.id);
     else if (!done.has(d.id)) blocked = true;
   }
-  // Signing Stage 1 never clears it alone: an admin clearance record is also required.
-  const forumOpen = !blocked && cleared;
   for (const t of ["prsc", "dis"] as const) {
-    let tBlocked = !forumOpen;
+    let tBlocked = !opts.released[t];
     for (const d of onboarding.filter((x) => trackOf(x, entity) === t).sort(order)) {
+      if (done.has(d.id)) continue; // historical completions always stay counted and visible
       if (tBlocked) locked.add(d.id);
-      else if (!done.has(d.id)) tBlocked = true;
+      else tBlocked = true;
     }
   }
   return locked;
