@@ -1,5 +1,11 @@
 // Presentation only: stored roles and their permissions are unchanged.
-export const FORUM_CANDIDATE_LABEL = "Readiness Vanguard Forum Candidate";
+export const FORUM_INVITEE_LABEL = "United Forum Invitee";
+export const FORUM_PARTICIPANT_LABEL = "Forum Participant";
+/** Forum-only members: "United Forum Invitee" before clearance, "Forum Participant" after. */
+export function forumMemberLabel(forumClearance?: string | null) {
+  return forumClearance === "cleared" || forumClearance === "cleared_restricted" ? FORUM_PARTICIPANT_LABEL : FORUM_INVITEE_LABEL;
+}
+const FORUM_CANDIDATE_LABEL = FORUM_INVITEE_LABEL;
 
 export function memberRoleLabels(role: string | null | undefined, entity: string | null | undefined, isCandidate = false): string[] {
   if (isCandidate) return [FORUM_CANDIDATE_LABEL];
@@ -42,4 +48,21 @@ export function memberRoleKinds(role: string | null | undefined, isCommittee = f
   if (role === "advisor" || role === "prsc_board_dis_advisor" || role === "prsc_advisor_dis_board") kinds.add("advisor");
   if (role === "methodology_committee" || isCommittee) kinds.add("committee");
   return (["board", "advisor", "committee"] as RoleKind[]).filter((k) => kinds.has(k));
+}
+
+export type DesignationMember = {
+  role: string | null | undefined; entity: string | null | undefined; is_candidate?: boolean | null;
+  forum_clearance_status?: string | null; prsc_activated_at?: string | null; dis_activated_at?: string | null;
+};
+
+/** What a member may be called: a PRSC/DIS title only once that entity's activation is recorded; otherwise "… Candidate". */
+export function memberDesignationLabels(m: DesignationMember): string[] {
+  if (m.is_candidate) return [forumMemberLabel(m.forum_clearance_status)];
+  return memberRoleLabels(m.role, m.entity).map((label) => {
+    const activated = label.startsWith("PRSC ") ? m.prsc_activated_at : label.startsWith("DIS ") ? m.dis_activated_at : null;
+    return activated ? label : `${label} Candidate`;
+  });
+}
+export function memberDesignation(m: DesignationMember): string {
+  return memberDesignationLabels(m).join(" / ");
 }
