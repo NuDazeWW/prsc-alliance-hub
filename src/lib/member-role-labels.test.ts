@@ -24,3 +24,10 @@ describe("role chips and role details", () => {
   test("committee flag adds committee details", () => deepStrictEqual(memberRoleKinds("board_member", true), ["board", "committee"]));
   test("committee role sees only committee", () => deepStrictEqual(memberRoleKinds("methodology_committee"), ["committee"]));
 });
+
+describe("forum candidates", () => {
+  it("shows the Forum candidate designation instead of any PRSC/DIS seat", () => {
+    expect(memberRoleLabel("advisor", "prsc", true)).toBe("Readiness Vanguard Forum Candidate");
+    expect(memberRoleKinds("board_member", true, true)).toEqual([]);
+  });
+});
