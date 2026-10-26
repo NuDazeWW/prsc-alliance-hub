@@ -19,17 +19,17 @@ type Doc = {
 };
 type Completion = { document_id: string; kind: string; signed_name: string | null; acknowledged_at: string };
 
-type Props = { documents: Doc[]; completions: Completion[]; entity: string; forumCleared?: boolean };
+type Props = { documents: Doc[]; completions: Completion[]; entity: string; forumCleared?: boolean; entityReleased?: { prsc: boolean; dis: boolean } };
 
 const TRACK_LABEL = { shared: "Shared Forum", prsc: "PRSC", dis: "DIS" } as const;
 
-export function MemberDocuments({ documents: all, completions, entity, forumCleared = true }: Props) {
+export function MemberDocuments({ documents: all, completions, entity, forumCleared = true, entityReleased = { prsc: false, dis: false } }: Props) {
   const documents = all.filter((d: any) => !d.superseded_at);
   const history = all.filter((d: any) => d.superseded_at);
   const [openId, setOpenId] = useState<string | null>(null);
   const open = all.find((d) => d.id === openId) ?? null;
   const doneMap = new Map(completions.map((c) => [c.document_id, c]));
-  const locked = lockedDocumentIds(documents, new Set(doneMap.keys()), entity, forumCleared);
+  const locked = lockedDocumentIds(documents, new Set(doneMap.keys()), entity, { released: entityReleased });
   const s1 = documents.filter((d) => d.journey_stage === 1);
   const awaitingClearance = !forumCleared && s1.length > 0 && s1.every((d) => doneMap.has(d.id));
   const onboarding = documents.filter(isOnboarding);

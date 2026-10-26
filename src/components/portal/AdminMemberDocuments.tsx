@@ -183,6 +183,7 @@ export function AdminMemberDocuments({ memberId, memberName, preview }: Props) {
   const doneIds = new Set<string>(acks.filter((a: any) => a.member_id === memberId).map((a: any) => a.document_id));
   const forum = (docs.data as any)?.forum !== false;
   const cleared = (docs.data as any)?.forumCleared === true;
+  const releases: any[] = (docs.data as any)?.entityReleases ?? [];
   const active = list.filter((d: any) => !d.superseded_at);
   const journey = journeyStatus(active as any, doneIds, entity, activation, forum, cleared);
   async function setDocGov(id: string, patch: { classification?: Classification; superseded?: boolean }) {
@@ -201,7 +202,7 @@ export function AdminMemberDocuments({ memberId, memberName, preview }: Props) {
     try { await setForumParticipation({ data: { member_id: memberId, participates: on } }); await docs.refetch(); }
     catch (e) { setStatus(e instanceof Error ? e.message : "Could not update Forum participation"); }
   }
-  const lockedIds = lockedDocumentIds(active as any, doneIds, entity, cleared);
+  const lockedIds = lockedDocumentIds(active as any, doneIds, entity, { released: { prsc: releases.some((r: any) => r.entity === "prsc"), dis: releases.some((r: any) => r.entity === "dis") } });
   async function toggleActivation(t: "prsc" | "dis", on: boolean) {
     if (preview) return setStatus("Preview mode: activation is recorded on the live admin page.");
     let appointment_ref: string | undefined;
