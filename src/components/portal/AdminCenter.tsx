@@ -683,7 +683,7 @@ export function AdminCenter({ page }: { page: "overview" | "send" }) {
       return;
     }
     try {
-      const needsReview = roleCombinationTier(inviteDraft.entity, inviteDraft.role, inviteDraft.is_methodology_committee ?? false).tier === "review";
+      const needsReview = !inviteDraft.is_candidate && roleCombinationTier(inviteDraft.entity, inviteDraft.role, inviteDraft.is_methodology_committee ?? false).tier === "review";
       await invitePortalMember({ data: { ...inviteDraft, poll_id: invitePollId || null,
         nda_confirmed: inviteGov.nda_confirmed, nda_reference: inviteGov.nda_reference, nda_entities: inviteGov.nda_entities, nda_scope: inviteGov.nda_scope,
         role_review: needsReview ? { decision: "approved", notes: inviteGov.review_notes, prsc_scope: inviteGov.prsc_scope, dis_scope: inviteGov.dis_scope, conflict_controls: inviteGov.conflict_controls } : undefined } });
@@ -1026,8 +1026,24 @@ export function AdminCenter({ page }: { page: "overview" | "send" }) {
                 <Input name="first_name" value={inviteDraft.first_name} onChange={(e) => setInviteDraft({ ...inviteDraft, first_name: e.target.value })} placeholder="First name" required className="text-base" />
                 <Input name="last_name" value={inviteDraft.last_name} onChange={(e) => setInviteDraft({ ...inviteDraft, last_name: e.target.value })} placeholder="Last name" required className="text-base" />
                 <Input name="email" type="email" value={inviteDraft.email} onChange={(e) => setInviteDraft({ ...inviteDraft, email: e.target.value })} placeholder="Email" required className="text-base" />
-                <Input name="organization" value={inviteDraft.organization} onChange={(e) => setInviteDraft({ ...inviteDraft, organization: e.target.value })} placeholder="Organization" required className="text-base" />
-                <Input name="title" value={inviteDraft.title} onChange={(e) => setInviteDraft({ ...inviteDraft, title: e.target.value })} placeholder="Title" required className="text-base" />
+                <p className="text-sm uppercase tracking-[0.16em] text-gold/80 sm:col-span-2">Current position</p>
+                <Input name="organization" value={inviteDraft.organization} onChange={(e) => setInviteDraft({ ...inviteDraft, organization: e.target.value })} placeholder="Current company / organization" aria-label="Current company or organization" required className="text-base" />
+                <Input name="title" value={inviteDraft.title} onChange={(e) => setInviteDraft({ ...inviteDraft, title: e.target.value })} placeholder="Current professional title" aria-label="Current professional title" required className="text-base" />
+                <fieldset className="grid gap-2 border border-gold/30 p-4 sm:col-span-2 sm:grid-cols-2">
+                  <legend className="px-1 text-sm uppercase tracking-[0.16em] text-gold/80">PRSC / DIS status</legend>
+                  {([
+                    { value: true, title: "Forum candidate", note: "Invited to the Readiness Vanguard Forum — no PRSC/DIS seat yet" },
+                    { value: false, title: "Selected for a PRSC / DIS role", note: "Choose the entity and role below" },
+                  ] as const).map((opt) => (
+                    <label key={String(opt.value)} className={`flex cursor-pointer items-start gap-3 border px-4 py-3 ${!!inviteDraft.is_candidate === opt.value ? "border-gold bg-gold/10" : "border-gold/20"}`}>
+                      <input type="radio" name="alliance_status" checked={!!inviteDraft.is_candidate === opt.value}
+                        onChange={() => setInviteDraft({ ...inviteDraft, is_candidate: opt.value, ...(opt.value ? { role: "advisor" as const, is_methodology_committee: false, participates_in_forum: true } : {}) })}
+                        className="mt-1 h-4 w-4 accent-[#d4af37]" />
+                      <span><span className="block text-base text-ivory">{opt.title}</span><span className="block text-sm text-ivory/55">{opt.note}</span></span>
+                    </label>
+                  ))}
+                </fieldset>
+                {!inviteDraft.is_candidate && (<>
                 <select name="entity" value={inviteDraft.entity} onChange={(e) => { const entity = e.target.value as InviteEmailReview["entity"]; setInviteDraft({ ...inviteDraft, entity, role: entity !== "both" && inviteDraft.role.startsWith("prsc_") ? "board_member" : inviteDraft.role }); }} required className="h-9 w-full min-w-0 rounded-md border border-input bg-navy px-3 text-base">
                   <option value="prsc">PRSC</option>
                   <option value="dis">DIS</option>
@@ -1040,6 +1056,7 @@ export function AdminCenter({ page }: { page: "overview" | "send" }) {
                   <option value="prsc_advisor_dis_board">PRSC Advisor / DIS Board</option>
                   <option value="methodology_committee">{memberRoleLabel("methodology_committee", inviteDraft.entity)}</option>
                 </select>
+                </>)}
                 {(() => {
                   const dup = members.find((m) => m.email?.toLowerCase() === inviteDraft.email.trim().toLowerCase());
                   return dup && inviteDraft.email.trim() ? (
@@ -1048,7 +1065,7 @@ export function AdminCenter({ page }: { page: "overview" | "send" }) {
                     </p>
                   ) : null;
                 })()}
-                {inviteDraft.role !== "methodology_committee" && (
+                {!inviteDraft.is_candidate && inviteDraft.role !== "methodology_committee" && (
                 <label className="flex cursor-pointer items-center gap-3 border border-gold/20 px-4 py-3 sm:col-span-2">
                   <input
                     type="checkbox"
@@ -1059,6 +1076,7 @@ export function AdminCenter({ page }: { page: "overview" | "send" }) {
                   <span className="text-base text-ivory/85">Also appoint to the Methodology Committee <span className="text-ivory/45">— they will be included in committee meetings</span></span>
                 </label>
                 )}
+                {!inviteDraft.is_candidate && (
                 <label className="flex cursor-pointer items-center gap-3 border border-gold/20 px-4 py-3 sm:col-span-2">
                   <input
                     type="checkbox"
@@ -1068,6 +1086,7 @@ export function AdminCenter({ page }: { page: "overview" | "send" }) {
                   />
                   <span className="text-base text-ivory/85">Participates in Readiness Vanguard Forum <span className="text-ivory/45">— uncheck to skip Stage 1 and use a 4-stage journey</span></span>
                 </label>
+                )}
                 <div className="grid gap-3 border border-gold/30 p-4 sm:col-span-2 sm:grid-cols-3">
                   <span className="text-base font-medium text-ivory/90 sm:col-span-3">NDA verification (required before inviting)</span>
                   <Input value={inviteGov.nda_reference} onChange={(e) => setInviteGov({ ...inviteGov, nda_reference: e.target.value })} placeholder="NDA reference or storage location" className="text-base" />
@@ -1077,7 +1096,7 @@ export function AdminCenter({ page }: { page: "overview" | "send" }) {
                   <Input value={inviteGov.nda_scope} onChange={(e) => setInviteGov({ ...inviteGov, nda_scope: e.target.value })} placeholder="Information-sharing scope" className="text-base" />
                   <label className="flex items-center gap-3 sm:col-span-3"><input type="checkbox" checked={inviteGov.nda_confirmed} onChange={(e) => setInviteGov({ ...inviteGov, nda_confirmed: e.target.checked })} className="h-4 w-4" /><span className="text-base text-ivory/85">I verified this executed NDA today</span></label>
                 </div>
-                {roleCombinationTier(inviteDraft.entity, inviteDraft.role, inviteDraft.is_methodology_committee ?? false).tier === "review" && (
+                {!inviteDraft.is_candidate && roleCombinationTier(inviteDraft.entity, inviteDraft.role, inviteDraft.is_methodology_committee ?? false).tier === "review" && (
                   <div className="grid gap-3 border border-amber-400/40 p-4 sm:col-span-2 sm:grid-cols-2">
                     <span className="text-base font-medium text-amber-200 sm:col-span-2">This cross-entity combination is blocked pending a governance/legal review. Record the review to invite</span>
                     <Textarea value={inviteGov.prsc_scope} onChange={(e) => setInviteGov({ ...inviteGov, prsc_scope: e.target.value })} placeholder="PRSC engagement scope" rows={2} className="text-base" />
