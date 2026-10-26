@@ -278,7 +278,7 @@ function parseMemberList(text: string): { rows: StagedRow[]; errors: string[] } 
     committee: "methodology_committee", methodology: "methodology_committee", is_methodology_committee: "methodology_committee",
   };
   const keys = headers.map((h) => alias[h] ?? h);
-  const required = ["first_name", "last_name", "email", "organization", "entity", "role"];
+  const required = ["first_name", "last_name", "email", "role"];
   const missing = required.filter((r) => !keys.includes(r));
   if (missing.length) return { rows: [], errors: [`Missing column${missing.length > 1 ? "s" : ""}: ${missing.join(", ")}`] };
 
@@ -301,7 +301,6 @@ function parseMemberList(text: string): { rows: StagedRow[]; errors: string[] } 
 
     if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(record["email"] ?? "")) return errors.push(`${label}: a valid email is required.`);
     if (!record["first_name"] || !record["last_name"]) return errors.push(`${label}: first and last name are required.`);
-    if (!record["organization"]) return errors.push(`${label}: organization is required.`);
     if (!entity) return errors.push(`${label}: designation must be PRSC, DIS, or Both.`);
     if (!role) return errors.push(`${label}: role must be candidate, board_member, advisor, methodology_committee, prsc_board_dis_advisor, or prsc_advisor_dis_board.`);
     if (role.startsWith("prsc_") && entity !== "both") return errors.push(`${label}: mixed PRSC/DIS roles require designation Both.`);
@@ -1027,14 +1026,14 @@ export function AdminCenter({ page }: { page: "overview" | "send" }) {
                 <Input name="first_name" value={inviteDraft.first_name} onChange={(e) => setInviteDraft({ ...inviteDraft, first_name: e.target.value })} placeholder="First name" required className="text-base" />
                 <Input name="last_name" value={inviteDraft.last_name} onChange={(e) => setInviteDraft({ ...inviteDraft, last_name: e.target.value })} placeholder="Last name" required className="text-base" />
                 <Input name="email" type="email" value={inviteDraft.email} onChange={(e) => setInviteDraft({ ...inviteDraft, email: e.target.value })} placeholder="Email" required className="text-base" />
-                <p className="text-sm uppercase tracking-[0.16em] text-gold/80 sm:col-span-2">Current position</p>
-                <Input name="organization" value={inviteDraft.organization} onChange={(e) => setInviteDraft({ ...inviteDraft, organization: e.target.value })} placeholder="Current company / organization" aria-label="Current company or organization" required className="text-base" />
-                <Input name="title" value={inviteDraft.title} onChange={(e) => setInviteDraft({ ...inviteDraft, title: e.target.value })} placeholder="Current professional title" aria-label="Current professional title" required className="text-base" />
+                <p className="text-sm uppercase tracking-[0.16em] text-gold/80 sm:col-span-2">Current position <span className="normal-case tracking-normal text-ivory/45">— optional</span></p>
+                <Input name="organization" value={inviteDraft.organization} onChange={(e) => setInviteDraft({ ...inviteDraft, organization: e.target.value })} placeholder="Current company / organization (optional)" aria-label="Current company or organization (optional)" className="text-base" />
+                <Input name="title" value={inviteDraft.title} onChange={(e) => setInviteDraft({ ...inviteDraft, title: e.target.value })} placeholder="Current professional title (optional)" aria-label="Current professional title (optional)" className="text-base" />
                 <fieldset className="grid gap-2 border border-gold/30 p-4 sm:col-span-2 sm:grid-cols-2">
                   <legend className="px-1 text-sm uppercase tracking-[0.16em] text-gold/80">PRSC / DIS status</legend>
                   {([
-                    { value: true, title: "Forum candidate", note: "Invited to the Readiness Vanguard Forum — no PRSC/DIS seat yet" },
-                    { value: false, title: "Selected for a PRSC / DIS role", note: "Choose the entity and role below" },
+                    { value: true, title: "United Forum invitee", note: "Invited to strategic coordination only — no PRSC/DIS role identified" },
+                    { value: false, title: "Identified for a PRSC / DIS role", note: "Intended role — shown as Candidate until appointment is activated" },
                   ] as const).map((opt) => (
                     <label key={String(opt.value)} className={`flex cursor-pointer items-start gap-3 border px-4 py-3 ${!!inviteDraft.is_candidate === opt.value ? "border-gold bg-gold/10" : "border-gold/20"}`}>
                       <input type="radio" name="alliance_status" checked={!!inviteDraft.is_candidate === opt.value}
