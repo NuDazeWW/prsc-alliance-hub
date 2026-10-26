@@ -750,6 +750,13 @@ export async function withAppointmentProgress<T extends DocMember & DesignationM
   return { ...member, acceptance_complete: entityAcceptanceComplete(docs.filter(isActive), done, member.entity ?? "") };
 }
 
+async function entityReleases(client: any, memberId: string) {
+  const { data, error } = await client.from("entity_onboarding_releases").select("*").eq("member_id", memberId);
+  if (error) throw error;
+  const rows = (data ?? []) as any[];
+  return { rows, released: { prsc: rows.some((r) => r.entity === "prsc"), dis: rows.some((r) => r.entity === "dis") } };
+}
+
 async function signDocumentUrls(documents: PortalDocumentRecord[]) {
   const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
   return Promise.all(
@@ -792,6 +799,7 @@ export const getMyDocuments = createServerFn({ method: "GET" })
       forumCleared: forumCleared(member.forum_clearance_status as string),
       ndaVerified: !!member.nda_verified_at,
       activation,
+      entityReleased: (await entityReleases(context.supabase, member.id as string)).released,
       released: true,
       documents: await signDocumentUrls(docs),
       acknowledged: completions.map((a) => a.document_id),
@@ -879,8 +887,8 @@ export const acknowledgeDocument = createServerFn({ method: "POST" })
     if (!doc) throw new Error("Document unavailable");
     const isConflictForm = /conflict|recusal/i.test(doc.title);
     if (isConflictForm && !data.conflict_answer) throw new Error("Choose your conflict answer before signing");
-    const cleared = forumCleared(member.forum_clearance_status as string);
-    if (lockedDocumentIds(docs, priorDone, member.entity, cleared).has(doc.id)) throw new Error("Please complete the earlier documents in your journey first");
+    const { released } = await entityReleases(context.supabase, member.id);
+    if (lockedDocumentIds(docs, priorDone, member.entity, { released }).has(doc.id)) throw new Error("Please complete the earlier documents in your journey first");
     if (data.kind === "signed") {
       if (!data.signed_name || data.signed_name.length < 2) throw new Error("Type your full legal name to sign");
       if (!data.signature_data?.startsWith("data:image/png;base64,")) throw new Error("Add your signature");
@@ -924,9 +932,9 @@ export const acknowledgeDocument = createServerFn({ method: "POST" })
     }
     await maybeCompletePackage(member as any);
     // Sequential journey: tell the member when this completion unlocks the next document.
-    const before = lockedDocumentIds(docs, priorDone, member.entity, cleared);
+    const before = lockedDocumentIds(docs, priorDone, member.entity, { released });
     const afterDone = new Set(priorDone).add(doc.id);
-    const after = lockedDocumentIds(docs, afterDone, member.entity, cleared);
+    const after = lockedDocumentIds(docs, afterDone, member.entity, { released });
     const unlocked = docs.filter((d) => before.has(d.id) && !after.has(d.id) && !afterDone.has(d.id));
     if (unlocked.length) {
       const { sendPortalEmail } = await import("@/lib/portal-notify.server");
@@ -1078,6 +1086,7 @@ export const listDocumentsForAdmin = createServerFn({ method: "GET" })
       entity: member?.entity ?? "prsc",
       forum: (member as any)?.participates_in_forum !== false,
       forumCleared: forumCleared((member as any)?.forum_clearance_status),
+      entityReleases: data.member_id ? (await entityReleases(context.supabase, data.member_id)).rows : [],
       activation: { prsc: (member as any)?.prsc_activated_at ?? null, dis: (member as any)?.dis_activated_at ?? null } as { prsc: string | null; dis: string | null },
     };
   });
