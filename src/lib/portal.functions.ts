@@ -937,6 +937,7 @@ export const setEntityActivation = createServerFn({ method: "POST" })
     if (data.activated) {
       const { data: m } = await supabaseAdmin.from("portal_members").select("*").eq("id", data.member_id).single();
       if (!m) throw new Error("Member not found");
+      if ((m as any).is_candidate) throw new Error("Forum candidates hold no PRSC/DIS role. Assign an appointed role in Edit member details first.");
       const docs = (await applicableDocuments(supabaseAdmin, m as any)).filter(isActive);
       const { data: acks } = await supabaseAdmin.from("portal_document_acknowledgements").select("document_id").eq("member_id", m.id);
       const done = new Set((acks ?? []).map((a: any) => a.document_id));
@@ -1282,4 +1283,47 @@ export const getRequestHost = createServerFn({ method: "GET" })
     const request = getRequest();
     const host = request?.headers.get("host") ?? "";
     return { host, isPortalDomain: PORTAL_HOSTS.has(host.split(":")[0]) };
+  });
+
+const memberDetailsSchema = z.object({
+  member_id: z.string().uuid(),
+  first_name: z.string().trim().min(1).max(80), last_name: z.string().trim().min(1).max(80),
+  organization: z.string().trim().min(1).max(180), title: z.string().trim().max(160),
+  is_candidate: z.boolean(),
+  entity: entitySchema, role: roleSchema,
+  is_methodology_committee: z.boolean().optional(),
+});
+
+/** Admin edit of a member's employment and alliance designation (including candidate → appointed promotion). */
+export const updateMemberDetails = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input) => memberDetailsSchema.parse(input))
+  .handler(async ({ context, data }) => {
+    await assertAdmin(context);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { data: m } = await supabaseAdmin.from("portal_members").select("id, user_id, entity, role, is_candidate, is_methodology_committee, nda_entities, prsc_activated_at, dis_activated_at").eq("id", data.member_id).maybeSingle();
+    if (!m) throw new Error("Member not found");
+    const entity = data.is_candidate ? (m.nda_entities === "dis" ? "dis" : "prsc") : data.entity;
+    const role = data.is_candidate ? "advisor" : data.role;
+    const committee = data.is_candidate ? false : data.is_methodology_committee ?? false;
+    if (data.is_candidate && (m.prsc_activated_at || m.dis_activated_at)) throw new Error("This member already has an activated appointment and cannot be returned to candidate status.");
+    const combo = roleCombinationTier(entity, role, committee);
+    if (combo.tier === "prohibited") throw new Error(`This role combination is prohibited (${combo.clause}).`);
+    const designationChanged = entity !== m.entity || role !== m.role || committee !== m.is_methodology_committee || data.is_candidate !== m.is_candidate;
+    const { error } = await supabaseAdmin.from("portal_members").update({
+      first_name: data.first_name, last_name: data.last_name, organization: data.organization, title: data.title || null,
+      is_candidate: data.is_candidate, entity, role, is_methodology_committee: committee,
+      ...(designationChanged ? { role_review_status: initialRoleReviewStatus(entity, role, committee) } : {}),
+    }).eq("id", m.id);
+    if (error) throw error;
+    if (role !== m.role) {
+      await supabaseAdmin.from("user_roles").delete().eq("user_id", m.user_id).neq("role", "admin");
+      const { error: roleError } = await supabaseAdmin.from("user_roles").upsert({ user_id: m.user_id, role }, { onConflict: "user_id,role" });
+      if (roleError) throw roleError;
+    }
+    await context.supabase.from("portal_activity").insert({
+      member_id: m.id, actor_user_id: context.userId, event_type: "member_details_updated",
+      metadata: { is_candidate: data.is_candidate, entity, role, promoted: m.is_candidate && !data.is_candidate },
+    });
+    return { ok: true };
   });
