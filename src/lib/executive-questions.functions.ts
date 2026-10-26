@@ -176,7 +176,7 @@ export const updateOutbound = createServerFn({ method: "POST" })
     const { data: o } = await supabaseAdmin.from("question_outbound").select("*").eq("id", data.id).maybeSingle();
     if (!o) throw new Error("Not found");
     const now = new Date().toISOString();
-    let patch: Record<string, unknown> = {};
+    let patch: any = {};
     if (data.action === "approve") patch = { approved_by: context.userId, approved_at: now };
     if (data.action === "mark_shared") { const b = shareBlock(o); if (b) throw new Error(b); patch = { shared_at: now }; }
     if (data.action === "record") patch = { responses: data.responses ?? o.responses, unresolved: data.unresolved ?? o.unresolved };
