@@ -35,7 +35,7 @@ import { MemberMeetings } from "@/components/portal/MemberMeetings";
 import { LeadershipTeam } from "@/components/portal/LeadershipTeam";
 import { getMyMeetings } from "@/lib/meetings.functions";
 import { getMyDocuments, getMyHeadshotUrl, getPortalSession } from "@/lib/portal.functions";
-import { memberRoleChips, memberRoleKinds, memberRoleLabel, memberRoleLabels } from "@/lib/member-role-labels";
+import { memberRoleChips, memberRoleKinds, memberRoleLabel, memberRoleLabels, memberDesignation, memberDesignationChips } from "@/lib/member-role-labels";
 import { ROLE_DETAILS } from "@/data/orientation-hub";
 import { JourneyTimeline } from "@/components/portal/JourneyTimeline";
 import { journeyStatus, isOnboarding } from "@/lib/journey";

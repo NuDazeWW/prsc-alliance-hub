@@ -1,4 +1,4 @@
-import { memberRoleLabel } from "./member-role-labels";
+import { memberRoleLabel, memberDesignation } from "./member-role-labels";
 
 export type EmailSignature = { name: string; title: string };
 
