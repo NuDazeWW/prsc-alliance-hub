@@ -1,6 +1,6 @@
 import { describe, test } from "node:test";
 import { deepStrictEqual } from "node:assert";
-import { memberRoleLabels } from "./member-role-labels";
+import { memberRoleLabels, memberRoleLabel } from "./member-role-labels";
 
 describe("entity-specific member capacities", () => {
   test("PRSC advisor", () => deepStrictEqual(memberRoleLabels("advisor", "prsc"), ["PRSC Advisor"]));
@@ -23,4 +23,11 @@ describe("role chips and role details", () => {
   test("mixed role sees board and advisor", () => deepStrictEqual(memberRoleKinds("prsc_advisor_dis_board"), ["board", "advisor"]));
   test("committee flag adds committee details", () => deepStrictEqual(memberRoleKinds("board_member", true), ["board", "committee"]));
   test("committee role sees only committee", () => deepStrictEqual(memberRoleKinds("methodology_committee"), ["committee"]));
+});
+
+describe("forum candidates", () => {
+  test("shows the Forum candidate designation instead of any PRSC/DIS seat", () => {
+    deepStrictEqual(memberRoleLabel("advisor", "prsc", true), "Readiness Vanguard Forum Candidate");
+    deepStrictEqual(memberRoleKinds("board_member", true, true), []);
+  });
 });

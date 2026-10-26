@@ -67,3 +67,13 @@ describe("appointment", () => {
     strictEqual(governanceStatusLabel({ status: "active", forumCleared: true, stage3Done: true, appointed: { prsc: false, dis: false }, tracks: ["prsc"] }), "Pending Appointment");
   });
 });
+
+describe("forum candidate document visibility", () => {
+  const m = { nda_verified_at: "2026-01-01", forum_clearance_status: "cleared", is_candidate: true };
+  const doc = (stage: number | null) => ({ classification: "entity_confidential", superseded_at: null, is_forum_prep: false, journey_stage: stage });
+  it("hides Stages 2–4 from candidates but keeps Stage 1", () => {
+    strictEqual(documentVisible(doc(1), m, false), true);
+    strictEqual(documentVisible(doc(3), m, false), false);
+    strictEqual(documentVisible(doc(3), { ...m, is_candidate: false }, false), true);
+  });
+});

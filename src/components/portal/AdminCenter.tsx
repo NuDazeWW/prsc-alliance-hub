@@ -72,6 +72,7 @@ import { INVITE_EMAIL_PREVIEW_URL, INVITE_EMAIL_REPLY_TO, INVITE_EMAIL_SUBJECT }
 import { memberRoleLabel } from "@/lib/member-role-labels";
 import { STAGES, type JourneyStatus } from "@/lib/journey";
 import type { InviteEmailReview } from "@/lib/portal-invite-email.functions";
+import { MemberDetailsEditor } from "@/components/portal/MemberDetailsEditor";
 import { PORTAL_EXPERIENCE_QUESTIONS, PORTAL_PERMISSION_LABELS, PORTAL_PROFILE_STAGES, PORTAL_VISIBILITY_PERMISSIONS } from "@/lib/portal-profile-fields";
 
 
@@ -206,6 +207,7 @@ type MemberRow = {
   title: string; entity: "prsc" | "dis" | "both"; role: "board_member" | "advisor" | "prsc_board_dis_advisor" | "prsc_advisor_dis_board" | "methodology_committee"; why_you: string;
   is_methodology_committee?: boolean;
   participates_in_forum?: boolean;
+  is_candidate?: boolean;
 };
 type StagedRow = MemberRow & { linkedin_url: string; background: string };
 
@@ -220,6 +222,7 @@ const emptyInvite: InviteEmailReview = {
   why_you: "",
   is_methodology_committee: false,
   participates_in_forum: true,
+  is_candidate: false,
 };
 
 const LIST_HEADERS = "first_name,last_name,email,organization,title,entity,role,methodology_committee,linkedin_url,background,why_you";
@@ -287,19 +290,20 @@ function parseMemberList(text: string): { rows: StagedRow[]; errors: string[] } 
     const label = `Row ${index + 2}`;
 
     const entityRaw = record["entity"]?.toLowerCase();
-    const entity = entityRaw === "prsc" || entityRaw === "dis" || entityRaw === "both" ? entityRaw : null;
     const roleRaw = record["role"]?.toLowerCase().replace(/[\s-]+/g, "_");
+    const isCandidate = roleRaw === "candidate" || roleRaw === "forum_candidate";
+    const entity = entityRaw === "prsc" || entityRaw === "dis" || entityRaw === "both" ? entityRaw : isCandidate ? "prsc" : null;
     const mixed: Record<string, MemberRow["role"]> = {
       prsc_board_dis_advisor: "prsc_board_dis_advisor", prsc_board_member_dis_advisor: "prsc_board_dis_advisor", "prsc_board_+_dis_advisor": "prsc_board_dis_advisor",
       prsc_advisor_dis_board: "prsc_advisor_dis_board", prsc_advisor_dis_board_member: "prsc_advisor_dis_board", "prsc_advisor_+_dis_board": "prsc_advisor_dis_board",
     };
-    const role = roleRaw === "advisor" ? "advisor" : roleRaw === "board_member" || roleRaw === "board" ? "board_member" : roleRaw === "methodology_committee" || roleRaw === "committee" || roleRaw === "methodology_committee_member" ? "methodology_committee" : roleRaw ? mixed[roleRaw] ?? null : null;
+    const role = isCandidate ? "advisor" : roleRaw === "advisor" ? "advisor" : roleRaw === "board_member" || roleRaw === "board" ? "board_member" : roleRaw === "methodology_committee" || roleRaw === "committee" || roleRaw === "methodology_committee_member" ? "methodology_committee" : roleRaw ? mixed[roleRaw] ?? null : null;
 
     if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(record["email"] ?? "")) return errors.push(`${label}: a valid email is required.`);
     if (!record["first_name"] || !record["last_name"]) return errors.push(`${label}: first and last name are required.`);
     if (!record["organization"]) return errors.push(`${label}: organization is required.`);
     if (!entity) return errors.push(`${label}: designation must be PRSC, DIS, or Both.`);
-    if (!role) return errors.push(`${label}: role must be board_member, advisor, methodology_committee, prsc_board_dis_advisor, or prsc_advisor_dis_board.`);
+    if (!role) return errors.push(`${label}: role must be candidate, board_member, advisor, methodology_committee, prsc_board_dis_advisor, or prsc_advisor_dis_board.`);
     if (role.startsWith("prsc_") && entity !== "both") return errors.push(`${label}: mixed PRSC/DIS roles require designation Both.`);
     const why = (record["why_you"] ?? "").trim();
     const background = (record["background"] ?? "").trim().slice(0, 8000);
@@ -308,7 +312,8 @@ function parseMemberList(text: string): { rows: StagedRow[]; errors: string[] } 
       first_name: record["first_name"], last_name: record["last_name"], email: record["email"],
       organization: record["organization"], title: record["title"] ?? "",
       entity, role, why_you: why,
-      is_methodology_committee: /^(yes|true|1|y)$/i.test((record["methodology_committee"] ?? "").trim()),
+      is_methodology_committee: !isCandidate && /^(yes|true|1|y)$/i.test((record["methodology_committee"] ?? "").trim()),
+      is_candidate: isCandidate,
       linkedin_url: (record["linkedin_url"] ?? "").slice(0, 300), background,
     });
   });
@@ -410,7 +415,7 @@ export function AdminCenter({ page }: { page: "overview" | "send" }) {
     try {
       const { draft: text } = await (preview ? draftWhyYouPreview : draftWhyYou)({ data: {
         first_name: inviteDraft.first_name, last_name: inviteDraft.last_name, organization: inviteDraft.organization,
-        title: inviteDraft.title, entity: inviteDraft.entity, role: inviteDraft.role,
+        title: inviteDraft.title, entity: inviteDraft.entity, role: inviteDraft.role, is_candidate: !!inviteDraft.is_candidate,
         linkedin_url: aiLinkedin, background: aiBackground,
       } });
       setInviteDraft((d) => ({ ...d, why_you: text }));
@@ -679,7 +684,7 @@ export function AdminCenter({ page }: { page: "overview" | "send" }) {
       return;
     }
     try {
-      const needsReview = roleCombinationTier(inviteDraft.entity, inviteDraft.role, inviteDraft.is_methodology_committee ?? false).tier === "review";
+      const needsReview = !inviteDraft.is_candidate && roleCombinationTier(inviteDraft.entity, inviteDraft.role, inviteDraft.is_methodology_committee ?? false).tier === "review";
       await invitePortalMember({ data: { ...inviteDraft, poll_id: invitePollId || null,
         nda_confirmed: inviteGov.nda_confirmed, nda_reference: inviteGov.nda_reference, nda_entities: inviteGov.nda_entities, nda_scope: inviteGov.nda_scope,
         role_review: needsReview ? { decision: "approved", notes: inviteGov.review_notes, prsc_scope: inviteGov.prsc_scope, dis_scope: inviteGov.dis_scope, conflict_controls: inviteGov.conflict_controls } : undefined } });
@@ -705,7 +710,7 @@ export function AdminCenter({ page }: { page: "overview" | "send" }) {
           firstName={inviteDraft.first_name}
           recipientEmail={inviteDraft.email}
           entity={inviteDraft.entity}
-          roleLabel={memberRoleLabel(inviteDraft.role, inviteDraft.entity)}
+          roleLabel={memberRoleLabel(inviteDraft.role, inviteDraft.entity, !!inviteDraft.is_candidate)}
           copy={inviteTemplate}
           meetingBlock={invitePollBlock}
           whyYou={inviteDraft.why_you}
@@ -936,7 +941,7 @@ export function AdminCenter({ page }: { page: "overview" | "send" }) {
       const prog = docProgress[m.id];
       const ans = p.experience_answers ?? {};
       const vis = p.visibility_instructions ?? {};
-      return [m.first_name, m.last_name, m.email, m.organization, m.title, String(m.entity).toUpperCase(), memberRoleLabel(m.role, m.entity), m.status, stageOf(m).label,
+      return [m.first_name, m.last_name, m.email, m.organization, m.title, String(m.entity).toUpperCase(), memberRoleLabel(m.role, m.entity, !!(m as { is_candidate?: boolean }).is_candidate), m.status, stageOf(m).label,
         date(m.invited_at), date(m.last_access_at), date(p.submitted_at), prog?.done ?? "", prog?.total ?? "", date(m.documents_completed_at),
         p.preferred_name, p.professional_role, p.current_organization, p.preferred_email, p.preferred_phone,
         ...PORTAL_EXPERIENCE_QUESTIONS.map((_, i) => ans[`q${i + 1}`] ?? ""),
@@ -1022,8 +1027,24 @@ export function AdminCenter({ page }: { page: "overview" | "send" }) {
                 <Input name="first_name" value={inviteDraft.first_name} onChange={(e) => setInviteDraft({ ...inviteDraft, first_name: e.target.value })} placeholder="First name" required className="text-base" />
                 <Input name="last_name" value={inviteDraft.last_name} onChange={(e) => setInviteDraft({ ...inviteDraft, last_name: e.target.value })} placeholder="Last name" required className="text-base" />
                 <Input name="email" type="email" value={inviteDraft.email} onChange={(e) => setInviteDraft({ ...inviteDraft, email: e.target.value })} placeholder="Email" required className="text-base" />
-                <Input name="organization" value={inviteDraft.organization} onChange={(e) => setInviteDraft({ ...inviteDraft, organization: e.target.value })} placeholder="Organization" required className="text-base" />
-                <Input name="title" value={inviteDraft.title} onChange={(e) => setInviteDraft({ ...inviteDraft, title: e.target.value })} placeholder="Title" required className="text-base" />
+                <p className="text-sm uppercase tracking-[0.16em] text-gold/80 sm:col-span-2">Current position</p>
+                <Input name="organization" value={inviteDraft.organization} onChange={(e) => setInviteDraft({ ...inviteDraft, organization: e.target.value })} placeholder="Current company / organization" aria-label="Current company or organization" required className="text-base" />
+                <Input name="title" value={inviteDraft.title} onChange={(e) => setInviteDraft({ ...inviteDraft, title: e.target.value })} placeholder="Current professional title" aria-label="Current professional title" required className="text-base" />
+                <fieldset className="grid gap-2 border border-gold/30 p-4 sm:col-span-2 sm:grid-cols-2">
+                  <legend className="px-1 text-sm uppercase tracking-[0.16em] text-gold/80">PRSC / DIS status</legend>
+                  {([
+                    { value: true, title: "Forum candidate", note: "Invited to the Readiness Vanguard Forum — no PRSC/DIS seat yet" },
+                    { value: false, title: "Selected for a PRSC / DIS role", note: "Choose the entity and role below" },
+                  ] as const).map((opt) => (
+                    <label key={String(opt.value)} className={`flex cursor-pointer items-start gap-3 border px-4 py-3 ${!!inviteDraft.is_candidate === opt.value ? "border-gold bg-gold/10" : "border-gold/20"}`}>
+                      <input type="radio" name="alliance_status" checked={!!inviteDraft.is_candidate === opt.value}
+                        onChange={() => setInviteDraft({ ...inviteDraft, is_candidate: opt.value, ...(opt.value ? { role: "advisor" as const, is_methodology_committee: false, participates_in_forum: true } : {}) })}
+                        className="mt-1 h-4 w-4 accent-[#d4af37]" />
+                      <span><span className="block text-base text-ivory">{opt.title}</span><span className="block text-sm text-ivory/55">{opt.note}</span></span>
+                    </label>
+                  ))}
+                </fieldset>
+                {!inviteDraft.is_candidate && (<>
                 <select name="entity" value={inviteDraft.entity} onChange={(e) => { const entity = e.target.value as InviteEmailReview["entity"]; setInviteDraft({ ...inviteDraft, entity, role: entity !== "both" && inviteDraft.role.startsWith("prsc_") ? "board_member" : inviteDraft.role }); }} required className="h-9 w-full min-w-0 rounded-md border border-input bg-navy px-3 text-base">
                   <option value="prsc">PRSC</option>
                   <option value="dis">DIS</option>
@@ -1036,6 +1057,7 @@ export function AdminCenter({ page }: { page: "overview" | "send" }) {
                   <option value="prsc_advisor_dis_board">PRSC Advisor / DIS Board</option>
                   <option value="methodology_committee">{memberRoleLabel("methodology_committee", inviteDraft.entity)}</option>
                 </select>
+                </>)}
                 {(() => {
                   const dup = members.find((m) => m.email?.toLowerCase() === inviteDraft.email.trim().toLowerCase());
                   return dup && inviteDraft.email.trim() ? (
@@ -1044,7 +1066,7 @@ export function AdminCenter({ page }: { page: "overview" | "send" }) {
                     </p>
                   ) : null;
                 })()}
-                {inviteDraft.role !== "methodology_committee" && (
+                {!inviteDraft.is_candidate && inviteDraft.role !== "methodology_committee" && (
                 <label className="flex cursor-pointer items-center gap-3 border border-gold/20 px-4 py-3 sm:col-span-2">
                   <input
                     type="checkbox"
@@ -1055,6 +1077,7 @@ export function AdminCenter({ page }: { page: "overview" | "send" }) {
                   <span className="text-base text-ivory/85">Also appoint to the Methodology Committee <span className="text-ivory/45">— they will be included in committee meetings</span></span>
                 </label>
                 )}
+                {!inviteDraft.is_candidate && (
                 <label className="flex cursor-pointer items-center gap-3 border border-gold/20 px-4 py-3 sm:col-span-2">
                   <input
                     type="checkbox"
@@ -1064,6 +1087,7 @@ export function AdminCenter({ page }: { page: "overview" | "send" }) {
                   />
                   <span className="text-base text-ivory/85">Participates in Readiness Vanguard Forum <span className="text-ivory/45">— uncheck to skip Stage 1 and use a 4-stage journey</span></span>
                 </label>
+                )}
                 <div className="grid gap-3 border border-gold/30 p-4 sm:col-span-2 sm:grid-cols-3">
                   <span className="text-base font-medium text-ivory/90 sm:col-span-3">NDA verification (required before inviting)</span>
                   <Input value={inviteGov.nda_reference} onChange={(e) => setInviteGov({ ...inviteGov, nda_reference: e.target.value })} placeholder="NDA reference or storage location" className="text-base" />
@@ -1073,7 +1097,7 @@ export function AdminCenter({ page }: { page: "overview" | "send" }) {
                   <Input value={inviteGov.nda_scope} onChange={(e) => setInviteGov({ ...inviteGov, nda_scope: e.target.value })} placeholder="Information-sharing scope" className="text-base" />
                   <label className="flex items-center gap-3 sm:col-span-3"><input type="checkbox" checked={inviteGov.nda_confirmed} onChange={(e) => setInviteGov({ ...inviteGov, nda_confirmed: e.target.checked })} className="h-4 w-4" /><span className="text-base text-ivory/85">I verified this executed NDA today</span></label>
                 </div>
-                {roleCombinationTier(inviteDraft.entity, inviteDraft.role, inviteDraft.is_methodology_committee ?? false).tier === "review" && (
+                {!inviteDraft.is_candidate && roleCombinationTier(inviteDraft.entity, inviteDraft.role, inviteDraft.is_methodology_committee ?? false).tier === "review" && (
                   <div className="grid gap-3 border border-amber-400/40 p-4 sm:col-span-2 sm:grid-cols-2">
                     <span className="text-base font-medium text-amber-200 sm:col-span-2">This cross-entity combination is blocked pending a governance/legal review. Record the review to invite</span>
                     <Textarea value={inviteGov.prsc_scope} onChange={(e) => setInviteGov({ ...inviteGov, prsc_scope: e.target.value })} placeholder="PRSC engagement scope" rows={2} className="text-base" />
@@ -1197,7 +1221,7 @@ export function AdminCenter({ page }: { page: "overview" | "send" }) {
                         <span className="font-medium">{r.first_name} {r.last_name}</span>
                         <span className="text-ivory/60">{r.email}</span>
                         <span className="text-ivory/60">{[r.title, r.organization].filter(Boolean).join(", ")}</span>
-                        <span className="text-ivory/60">{memberRoleLabel(r.role, r.entity)}</span>
+                        <span className="text-ivory/60">{memberRoleLabel(r.role, r.entity, !!r.is_candidate)}</span>
                         <Button type="button" variant="outline" size="sm" disabled={batchDrafting || rowDrafting === r.email} className="ml-auto rounded-none" onClick={() => void draftRow(i)}>
                           {rowDrafting === r.email ? "Drafting…" : r.why_you.trim() ? "Regenerate" : "Draft with AI"}
                         </Button>
@@ -1737,7 +1761,7 @@ export function AdminCenter({ page }: { page: "overview" | "send" }) {
                             </button>
                           </div>
                         </td>
-                        <td>{memberRoleLabel(m.role, m.entity)}{(m as { participates_in_forum?: boolean }).participates_in_forum === false && <span className="ml-2 whitespace-nowrap border border-gold/30 px-1.5 py-0.5 text-[10px] uppercase tracking-[0.12em] text-gold/80">No Forum</span>}</td>
+                        <td>{memberRoleLabel(m.role, m.entity, !!(m as { is_candidate?: boolean }).is_candidate)}{(m as { participates_in_forum?: boolean }).participates_in_forum === false && <span className="ml-2 whitespace-nowrap border border-gold/30 px-1.5 py-0.5 text-[10px] uppercase tracking-[0.12em] text-gold/80">No Forum</span>}</td>
                         <td className="py-4 pr-3">
                           <span className={`inline-block border px-2 py-1 text-xs uppercase tracking-[0.12em] ${st.tone}`}>{st.label}</span>
                           {journey && (
@@ -1871,7 +1895,7 @@ export function AdminCenter({ page }: { page: "overview" | "send" }) {
                             Access: {m.status}
                           </span>
                         </button>
-                        <span className="max-w-[45%] text-right text-xs text-ivory/70">{memberRoleLabel(m.role, m.entity)}</span>
+                        <span className="max-w-[45%] text-right text-xs text-ivory/70">{memberRoleLabel(m.role, m.entity, !!(m as { is_candidate?: boolean }).is_candidate)}</span>
                       </div>
 
                       <div className="mt-3 border-t border-ivory/10 pt-3">
@@ -2052,7 +2076,7 @@ export function AdminCenter({ page }: { page: "overview" | "send" }) {
                   >
                     <option value="">Choose a member…</option>
                     {members.map((m) => (
-                      <option key={m.id} value={m.id}>{m.first_name} {m.last_name} · {memberRoleLabel(m.role, m.entity)}</option>
+                      <option key={m.id} value={m.id}>{m.first_name} {m.last_name} · {memberRoleLabel(m.role, m.entity, !!(m as { is_candidate?: boolean }).is_candidate)}</option>
                     ))}
                   </select>
                 </label>
@@ -2144,6 +2168,7 @@ export function AdminCenter({ page }: { page: "overview" | "send" }) {
                     const profileState = profile?.submitted_at ? "Submitted" : profile ? "In progress" : "Not started";
                     const openInquiries = journey.inquiries.filter((inquiry: any) => inquiry.status === "open").length;
                     return <>
+                      <MemberDetailsEditor key={member.id} member={member as any} preview={preview} onSaved={() => { void overview.refetch(); void detail.refetch(); }} />
                       <section className="border border-gold/20 bg-ivory/[.025] p-5">
                         <div className="flex flex-wrap items-start justify-between gap-4">
                           <div>
@@ -2256,7 +2281,7 @@ export function AdminCenter({ page }: { page: "overview" | "send" }) {
               </div>
               <div className="bg-navy px-5 py-3">
                 <p className="text-xs uppercase tracking-[0.14em] text-gold">Company &amp; role</p>
-                <p className="mt-1 text-base text-ivory">{memberRoleLabel(inviteDraft.role, inviteDraft.entity)}</p>
+                <p className="mt-1 text-base text-ivory">{memberRoleLabel(inviteDraft.role, inviteDraft.entity, !!inviteDraft.is_candidate)}</p>
               </div>
               <div className="bg-navy px-5 py-3">
                 <p className="text-xs uppercase tracking-[0.14em] text-gold">Logos shown</p>

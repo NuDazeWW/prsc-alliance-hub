@@ -11,6 +11,7 @@ const inviteReviewSchema = z.object({
   why_you: z.string().trim().min(20).max(2000),
   is_methodology_committee: z.boolean().optional(),
   participates_in_forum: z.boolean().optional(),
+  is_candidate: z.boolean().optional(),
 });
 
 export type InviteEmailReview = z.infer<typeof inviteReviewSchema>;

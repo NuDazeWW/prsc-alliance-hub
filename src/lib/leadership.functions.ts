@@ -6,6 +6,7 @@ export type LeaderRow = {
   id: string;
   name: string;
   title: string;
+  affiliation: string | null;
   bio: string | null;
   photo_url: string | null;
   member_id: string | null;
@@ -54,6 +55,7 @@ export const getLeadershipTeam = createServerFn({ method: "GET" })
           id: r.id,
           name: r.name,
           title: r.title,
+          affiliation: r.affiliation ?? null,
           bio: r.bio?.trim() ? r.bio : prof?.bio ?? null,
           own_bio: r.bio,
           photo_url,
@@ -80,6 +82,7 @@ const leaderSchema = z.object({
   id: z.string().uuid().optional(),
   name: z.string().trim().min(1).max(160),
   title: z.string().trim().max(160),
+  affiliation: z.string().trim().max(200).nullable().optional(),
   bio: z.string().trim().max(3000).nullable(),
   member_id: z.string().uuid().nullable(),
   visible: z.boolean(),
@@ -93,7 +96,7 @@ export const saveLeader = createServerFn({ method: "POST" })
   .handler(async ({ context, data }) => {
     if (!(await isAdmin(context))) throw new Error("Unauthorized");
     const { id, ...rest } = data;
-    const row = { ...rest, bio: rest.bio || null, is_placeholder: false };
+    const row = { ...rest, bio: rest.bio || null, affiliation: rest.affiliation || null, is_placeholder: false };
     const q = id
       ? context.supabase.from("leadership_team").update(row).eq("id", id)
       : context.supabase.from("leadership_team").insert(row);
