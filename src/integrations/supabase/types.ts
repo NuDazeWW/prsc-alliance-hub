@@ -204,6 +204,7 @@ export type Database = {
       }
       leadership_team: {
         Row: {
+          affiliation: string | null
           bio: string | null
           created_at: string
           id: string
@@ -217,6 +218,7 @@ export type Database = {
           visible: boolean
         }
         Insert: {
+          affiliation?: string | null
           bio?: string | null
           created_at?: string
           id?: string
@@ -230,6 +232,7 @@ export type Database = {
           visible?: boolean
         }
         Update: {
+          affiliation?: string | null
           bio?: string | null
           created_at?: string
           id?: string
@@ -868,6 +871,7 @@ export type Database = {
           forum_restrictions: string | null
           id: string
           invited_at: string
+          is_candidate: boolean
           is_methodology_committee: boolean
           last_access_at: string | null
           last_name: string
@@ -909,6 +913,7 @@ export type Database = {
           forum_restrictions?: string | null
           id?: string
           invited_at?: string
+          is_candidate?: boolean
           is_methodology_committee?: boolean
           last_access_at?: string | null
           last_name: string
@@ -950,6 +955,7 @@ export type Database = {
           forum_restrictions?: string | null
           id?: string
           invited_at?: string
+          is_candidate?: boolean
           is_methodology_committee?: boolean
           last_access_at?: string | null
           last_name?: string
