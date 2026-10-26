@@ -25,8 +25,8 @@ describe("Forum email recipients", () => {
     strictEqual(forumEmailBlock("briefing_released", cleared, { ...briefing, classification: "restricted_opportunity" }), "No access to briefing");
     strictEqual(forumEmailBlock("briefing_released", cleared, briefing), null);
   });
-  it("keeps Emails 4, 5 and 8 switched off", () => {
-    for (const k of ["input_requested", "input_reminder", "followup_assigned"] as const) notStrictEqual(forumEmailBlock(k, cleared), null);
+  it("keeps Email 8 switched off until follow-up assignments exist", () => {
+    notStrictEqual(forumEmailBlock("followup_assigned", cleared), null);
   });
   it("makes duplicate protection specific to forum, version and recipient", () => {
     const a = forumIdempotencyKey("forum-1", "final_agenda", 1, "m1");
