@@ -1357,3 +1357,68 @@ export const updateMemberDetails = createServerFn({ method: "POST" })
     });
     return { ok: true };
   });
+
+async function sendReleaseNotice(supabaseAdmin: any, release: any) {
+  const { data: m } = await supabaseAdmin.from("portal_members").select("email, first_name").eq("id", release.member_id).single();
+  const { loadSystemEmail, sendPortalEmail } = await import("@/lib/portal-notify.server");
+  const docs = (release.documents ?? []) as { title: string }[];
+  const email = (await loadSystemEmail("entity_documents_ready"))({
+    first_name: m?.first_name?.trim() || "there",
+    entity: release.entity.toUpperCase(),
+    stage_name: "Stage 2 · Entity Orientation",
+    action_summary: docs[0]?.title ?? "Review your onboarding materials",
+    due_date: "",
+  });
+  let ok = false;
+  let err: string | null = null;
+  try { ok = await sendPortalEmail(m.email, email, "entity-documents-ready", `entity-release-${release.id}`); }
+  catch (e) { err = e instanceof Error ? e.message : String(e); }
+  if (!ok && !err) err = "Email delivery did not complete";
+  await supabaseAdmin.from("entity_onboarding_releases").update({
+    notify_status: ok ? "sent" : "failed", notify_error: ok ? null : err,
+    notify_attempts: (release.notify_attempts ?? 0) + 1, notified_at: ok ? new Date().toISOString() : null,
+  }).eq("id", release.id);
+  return { notified: ok, error: ok ? null : err };
+}
+
+/** Explicit admin start of one entity's Stage 2. Never advances Stage 3 or activates a role. */
+export const releaseEntityOnboarding = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input) => z.object({ member_id: z.string().uuid(), entity: z.enum(["prsc", "dis"]) }).parse(input))
+  .handler(async ({ context, data }) => {
+    await assertAdmin(context);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { stage2ReleaseProblems } = await import("@/lib/governance");
+    const { data: m } = await supabaseAdmin.from("portal_members").select("*").eq("id", data.member_id).single();
+    if (!m) throw new Error("Member not found");
+    const first = memberTracksFor(m.entity)[0];
+    const docs = (await applicableDocuments(supabaseAdmin, m as any)).filter(isActive)
+      .filter((d: any) => d.journey_stage === 2 && ((d.journey_track && d.journey_track !== "shared" ? d.journey_track : first) === data.entity));
+    const { released } = await entityReleases(supabaseAdmin, m.id);
+    const problems = stage2ReleaseProblems({
+      target: data.entity, memberEntity: m.entity, role: m.role, isCandidate: !!m.is_candidate, isCommittee: !!m.is_methodology_committee,
+      nda: { verified_at: m.nda_verified_at, verified_by: m.nda_verified_by, reference: m.nda_reference, entities: m.nda_entities, scope: m.nda_scope },
+      roleReviewStatus: m.role_review_status, stage2DocCount: docs.length, alreadyReleased: released[data.entity],
+    });
+    if (problems.length) throw new Error(`Cannot start ${data.entity.toUpperCase()} onboarding: ${problems.join("; ")}`);
+    if (!m.documents_released_at) await supabaseAdmin.from("portal_members").update({ documents_released_at: new Date().toISOString() }).eq("id", m.id);
+    const { data: release, error } = await supabaseAdmin.from("entity_onboarding_releases").insert({
+      member_id: m.id, entity: data.entity, role: m.role, released_by: context.userId,
+      documents: docs.map((d: any) => ({ id: d.id, title: d.title, version: d.version_label ?? null })),
+    }).select("*").single();
+    if (error) throw error;
+    await supabaseAdmin.from("portal_activity").insert({ member_id: m.id, actor_user_id: context.userId, event_type: "entity_onboarding_released", metadata: { entity: data.entity, release_id: release.id, documents: docs.length } });
+    return { ok: true, ...(await sendReleaseNotice(supabaseAdmin, release)) };
+  });
+
+export const retryReleaseNotice = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input) => z.object({ release_id: z.string().uuid() }).parse(input))
+  .handler(async ({ context, data }) => {
+    await assertAdmin(context);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { data: release } = await supabaseAdmin.from("entity_onboarding_releases").select("*").eq("id", data.release_id).single();
+    if (!release) throw new Error("Release not found");
+    if (release.notify_status === "sent") return { notified: true, error: null };
+    return sendReleaseNotice(supabaseAdmin, release);
+  });
