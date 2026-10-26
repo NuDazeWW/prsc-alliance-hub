@@ -64,6 +64,9 @@ export function buildMemberTokens(member: {
   role?: string | null;
   email?: string | null;
   is_candidate?: boolean | null;
+  forum_clearance_status?: string | null;
+  prsc_activated_at?: string | null;
+  dis_activated_at?: string | null;
 }): EmailTokens {
   const entity = String(member.entity ?? "");
   const role = String(member.role ?? "");
@@ -75,9 +78,9 @@ export function buildMemberTokens(member: {
     title: member.title ?? "",
     entity: entity.toUpperCase(),
     entity_full: ENTITY_FULL[entity] ?? entity.toUpperCase(),
-    role: memberRoleLabel(role, entity, !!member.is_candidate),
-    role_label: memberRoleLabel(role, entity, !!member.is_candidate),
-    package_label: member.is_candidate ? "Readiness Vanguard Forum" : PACKAGE_LABEL[role] ?? "Board / Advisor",
+    role: memberDesignation({ ...member, role, entity }),
+    role_label: memberDesignation({ ...member, role, entity }),
+    package_label: member.is_candidate ? "United Forum" : PACKAGE_LABEL[role] ?? "Board / Advisor",
     email: member.email ?? "",
   };
 }

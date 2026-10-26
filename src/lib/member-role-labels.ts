@@ -66,3 +66,12 @@ export function memberDesignationLabels(m: DesignationMember): string[] {
 export function memberDesignation(m: DesignationMember): string {
   return memberDesignationLabels(m).join(" / ");
 }
+
+/** Chips for the member's own portal, e.g. "Advisor Candidate · Partnership Readiness Standards Council, LLC". */
+export function memberDesignationChips(m: DesignationMember): string[] {
+  if (m.is_candidate) return [forumMemberLabel(m.forum_clearance_status)];
+  return memberDesignationLabels(m).map((label) => {
+    const [org, ...rest] = label.split(" ");
+    return `${rest.join(" ")} · ${ENTITY_FULL[org] ?? org}`;
+  });
+}

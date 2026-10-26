@@ -15,7 +15,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { memberRoleLabel } from "@/lib/member-role-labels";
+import { memberDesignation } from "@/lib/member-role-labels";
 
 type Draft = { id?: string; name: string; title: string; affiliation: string; bio: string; member_id: string | null; visible: boolean; sort_order: number; photo_path: string | null; photo_url?: string | null };
 
@@ -27,7 +27,7 @@ export function AdminLeadership() {
   const members = useQuery({
     queryKey: ["leadership-member-options"],
     queryFn: async () => {
-      const { data } = await supabase.from("portal_members").select("id, first_name, last_name, organization, title, entity, role, is_candidate").neq("status", "revoked").order("last_name");
+      const { data } = await supabase.from("portal_members").select("id, first_name, last_name, entity, role, is_candidate, forum_clearance_status, prsc_activated_at, dis_activated_at").neq("status", "revoked").order("last_name");
       return data ?? [];
     },
   });
@@ -164,8 +164,7 @@ export function AdminLeadership() {
                 setEditing({
                   ...editing, member_id: e.target.value || null,
                   ...(m && !editing.name.trim() ? { name: `${m.first_name} ${m.last_name}` } : {}),
-                  ...(m && !editing.title.trim() && !m.is_candidate ? { title: memberRoleLabel(m.role, m.entity) } : {}),
-                  ...(m && !editing.affiliation.trim() ? { affiliation: [m.title, m.organization].filter(Boolean).join(", ") } : {}),
+                  ...(m && !editing.title.trim() && !m.is_candidate ? { title: memberDesignation(m) } : {}),
                 });
               }} className="mt-2 h-10 w-full border border-ivory/20 bg-navy-deep px-3 text-sm normal-case text-ivory">
                 <option value="">Not linked</option>

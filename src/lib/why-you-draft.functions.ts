@@ -45,7 +45,7 @@ async function generateDraft(data: z.infer<typeof schema>) {
     if (!key) throw new Error("AI drafting is not configured.");
 
     const { INVITE_ROLE_LABELS } = await import("@/lib/invite-email-config");
-    const role = data.is_candidate ? "Readiness Vanguard Forum participant (a candidate invited to the Forum, not appointed to any PRSC or DIS board, advisory, or committee seat; never imply a seat)" : INVITE_ROLE_LABELS[data.role];
+    const role = data.is_candidate ? "United Forum invitee (invited to strategic coordination in the United Strategic Coordination Forum; not appointed to any PRSC or DIS board, advisory, or committee seat and not a participant in the Readiness Vanguard benchmarking program; never imply a seat)" : INVITE_ROLE_LABELS[data.role];
     const instructions = `Write a private, personal note from Shirley Johnson, Founder, on behalf of ${ENTITY[data.entity]}, explaining directly to an invited ${role} why we chose them.
 
 Voice and point of view:
