@@ -138,66 +138,24 @@ export const saveMyProfile = createServerFn({ method: "POST" })
     }
     if (data.submit && !alreadySubmitted) {
       await context.supabase.from("portal_activity").insert({ member_id: member.id, actor_user_id: context.userId, event_type: "profile_submitted" });
-      const apiKey = process.env["LOVABLE_API_KEY"];
-      if (apiKey) {
-        const fullName = `${member.first_name ?? ""} ${member.last_name ?? ""}`.trim() || member.email;
-        const roleLabel = memberRoleLabel(member.role, member.entity, !!(member as any).is_candidate);
-        const entityLabel = member.entity === "both" ? "PRSC and DIS" : String(member.entity).toUpperCase();
-        const subject = `Profile submitted — ${fullName}`;
-        const email = {
-          subject,
-          eyebrow: "Profile received",
-          heading: `${fullName} has submitted their profile`,
-          body: `${fullName} (${roleLabel}) has completed and submitted their private profile.\n\nThe profile is now marked Profile Received. Review their answers and load the next-step documents in the administrator center.\n\nPreferred email: ${data.preferred_email}\nPreferred phone: ${data.preferred_phone || "Not provided"}\nContact requested: ${data.contact_requested ? "Yes" : "No"}`,
-          ctaLabel: "Review Profile & Prepare Next Step",
-          ctaUrl: "https://access.prscstandards.org/admin",
-          ctaSubtext: "Open the member record, review the submitted profile, then upload or release the appropriate documents.",
-          signatures: [],
-        };
-        try {
-          const { sendLovableEmail } = await import("@lovable.dev/email-js");
-          await sendLovableEmail(
-            {
-              to: "admin@readinessterminal.com",
-              from: "PRSC Board & Advisor Center <no-reply@readinessterminal.com>",
-              sender_domain: "notify.readinessterminal.com",
-              reply_to: "info@readinessterminal.com",
-              subject,
-              html: renderBrandedEmail(email),
-              text: renderBrandedEmailText(email),
-              label: "profile-submitted-admin-alert",
-              purpose: "transactional",
-              idempotency_key: `profile-submitted-admin-${member.id}-${crypto.randomUUID()}`,
-            },
-            { apiKey, sendUrl: process.env["LOVABLE_SEND_URL"] },
-          );
-        } catch (notificationError) {
-          console.error("Profile submission admin notification failed", notificationError);
-        }
-        try {
-          const { sendLovableEmail } = await import("@lovable.dev/email-js");
-          const firstName = member.first_name?.trim() || "there";
-          const { loadSystemEmail } = await import("@/lib/portal-notify.server");
-          void entityLabel;
-          const confirmation = (await loadSystemEmail("profile_received"))({ first_name: firstName, role: roleLabel });
-          await sendLovableEmail(
-            {
-              to: member.email,
-              from: "PRSC Board & Advisor Center <no-reply@readinessterminal.com>",
-              sender_domain: "notify.readinessterminal.com",
-              reply_to: "info@readinessterminal.com",
-              subject: confirmation.subject,
-              html: renderBrandedEmail(confirmation),
-              text: renderBrandedEmailText(confirmation),
-              label: "profile-submitted-member-confirmation",
-              purpose: "transactional",
-              idempotency_key: `profile-submitted-member-${member.id}-${crypto.randomUUID()}`,
-            },
-            { apiKey, sendUrl: process.env["LOVABLE_SEND_URL"] },
-          );
-        } catch (confirmationError) {
-          console.error("Profile submission member confirmation failed", confirmationError);
-        }
+      // Stable per-submission key: a retry of the same submission never sends twice.
+      const submissionId = `${member.id}-${String((payload as any).submitted_at)}`;
+      const fullName = `${member.first_name ?? ""} ${member.last_name ?? ""}`.trim() || member.email;
+      const roleLabel = memberRoleLabel(member.role, member.entity, !!(member as any).is_candidate);
+      const { loadSystemEmail, sendPortalEmail } = await import("@/lib/portal-notify.server");
+      try {
+        const alert = (await loadSystemEmail("profile_submitted_admin_alert"))({
+          member_name: fullName, submitted_at: new Date((payload as any).submitted_at).toUTCString(), submission_id: submissionId,
+        });
+        await sendPortalEmail(ADMIN_EMAIL, alert, "profile-submitted-admin-alert", `profile-submitted-admin-${submissionId}`);
+      } catch (notificationError) {
+        console.error("Profile submission admin notification failed", notificationError);
+      }
+      try {
+        const confirmation = (await loadSystemEmail("profile_received"))({ first_name: member.first_name?.trim() || "there", role: roleLabel });
+        await sendPortalEmail(member.email, confirmation, "profile-submitted-member-confirmation", `profile-submitted-member-${submissionId}`);
+      } catch (confirmationError) {
+        console.error("Profile submission member confirmation failed", confirmationError);
       }
     }
     return { ok: true, submitted: data.submit };
