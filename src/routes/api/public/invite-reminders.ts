@@ -11,7 +11,7 @@ export const Route = createFileRoute("/api/public/invite-reminders")({
           return new Response("Unauthorized", { status: 401 });
         }
         const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-        const { sendPortalEmail, founderSignature } = await import("@/lib/portal-notify.server");
+        const { sendPortalEmail, founderSignature, loadSystemEmail } = await import("@/lib/portal-notify.server");
         const cutoff = new Date(Date.now() - REMINDER_AFTER_DAYS * 86400000).toISOString();
         const { data: pending, error } = await supabaseAdmin
           .from("portal_members")
@@ -105,19 +105,8 @@ export const Route = createFileRoute("/api/public/invite-reminders")({
             .select("id, email, first_name")
             .in("id", pendingIds);
           for (const m of pendingMembers ?? []) {
-            await sendPortalEmail(
-              m.email,
-              {
-                subject: `Quick reminder: your availability for ${poll.title}`,
-                eyebrow: "Gentle reminder",
-                heading: `${m.first_name?.trim() || "Hello"}, we are still collecting availability.`,
-                body: `We are finding a time for "${poll.title}" and your answer is one of the few still outstanding.\n\nIt takes under a minute — open your private Welcome Center, go to Meetings, and mark each proposed time Available, If needed, or Unavailable.`,
-                ctaLabel: "Share Your Availability",
-                ctaUrl: "https://access.prscstandards.org/portal",
-                signatures: founderSignature(),
-              },
-              "meeting-poll-nudge",
-            );
+            const build = await loadSystemEmail("meeting_poll_reminder");
+            await sendPortalEmail(m.email, build({ first_name: m.first_name?.trim() || "there", meeting_title: poll.title }), "meeting-poll-nudge", `meeting-poll-reminder-${poll.id}-${m.id}`);
             sent++;
           }
           await supabaseAdmin.from("meeting_polls").update({ auto_nudge_sent_at: new Date().toISOString() }).eq("id", poll.id);
