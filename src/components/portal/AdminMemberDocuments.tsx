@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Trash2, Upload } from "lucide-react";
 
 import { supabase } from "@/integrations/supabase/client";
@@ -28,11 +28,21 @@ const DOCUMENT_BUCKET = "member-documents";
 type Props = { memberId: string; memberName: string; preview: boolean };
 
 export function AdminMemberDocuments({ memberId, memberName, preview }: Props) {
+  const queryClient = useQueryClient();
   const docs = useQuery({
     queryKey: ["admin-documents", memberId],
     enabled: !preview,
     retry: false,
-    queryFn: () => listDocumentsForAdmin({ data: { member_id: memberId } }),
+    queryFn: async () => {
+      const result = await listDocumentsForAdmin({ data: { member_id: memberId } });
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: ["portal-admin"] }),
+        queryClient.invalidateQueries({ queryKey: ["portal-admin-member", memberId] }),
+        queryClient.invalidateQueries({ queryKey: ["leadership-member-options"] }),
+        queryClient.invalidateQueries({ queryKey: ["portal-session"] }),
+      ]);
+      return result;
+    },
   });
 
   const [scope, setScope] = useState<"member" | "all">("member");

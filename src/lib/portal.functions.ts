@@ -4,7 +4,8 @@ import { getRequest } from "@tanstack/react-start/server";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { renderBrandedEmail, renderBrandedEmailText } from "@/lib/branded-email";
 import { memberRoleLabel } from "@/lib/member-role-labels";
-import { journeyStatus, type JourneyStatus } from "@/lib/journey";
+import { entityAcceptanceComplete, journeyStatus, type JourneyStatus } from "@/lib/journey";
+import type { DesignationMember } from "@/lib/member-role-labels";
 import { documentVisible, forumCleared, isActive, ndaProblem, roleCombinationTier, initialRoleReviewStatus, roleReviewBlocks, appointmentProblems, memberTracksFor } from "@/lib/governance";
 
 type PortalMember = {
@@ -14,6 +15,7 @@ type PortalMember = {
   why_you: string; status: "invited" | "active" | "revoked";
   package_status: "awaiting_profile" | "in_preparation" | "profile_received" | "package_ready";
   invited_at: string; first_access_at: string | null; last_access_at: string | null;
+  acceptance_complete?: { prsc: boolean; dis: boolean };
 };
 
 type PortalProfile = {
@@ -45,7 +47,8 @@ export const getPortalSession = createServerFn({ method: "GET" })
       const { data: viewed } = await supabaseAdmin.from("portal_members").select("*").eq("id", input.asMemberId).maybeSingle();
       if (!viewed) throw new Error("Member not found");
       const { data: vp } = await supabaseAdmin.from("portal_profiles").select("submitted_at").eq("member_id", viewed.id).maybeSingle();
-      return { member: viewed as PortalMember | null, isAdmin: true, hasProfile: Boolean(vp?.submitted_at), viewingAs: true };
+      const designated = await withAppointmentProgress(supabaseAdmin, viewed);
+      return { member: designated as PortalMember | null, isAdmin: true, hasProfile: Boolean(vp?.submitted_at), viewingAs: true };
     }
     const [{ data: member }, { data: roles }] = await Promise.all([
       context.supabase.from("portal_members").select("*").eq("user_id", context.userId).maybeSingle(),
@@ -63,7 +66,11 @@ export const getPortalSession = createServerFn({ method: "GET" })
         .maybeSingle();
       hasProfile = Boolean(profile?.submitted_at);
     }
-    return { member: member as PortalMember | null, isAdmin: roleNames.includes("admin"), hasProfile, viewingAs: false };
+    // Ownership was verified above. Read canonical requirements (including hidden
+    // requirements) but return only completion booleans, never their private content.
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const designated = member ? await withAppointmentProgress(supabaseAdmin, member) : null;
+    return { member: designated as PortalMember | null, isAdmin: roleNames.includes("admin"), hasProfile, viewingAs: false };
   });
 
 export const getMyProfile = createServerFn({ method: "GET" })
@@ -450,6 +457,7 @@ export const getAdminOverview = createServerFn({ method: "GET" })
       const docs = await applicableDocuments(context.supabase, m as unknown as DocMember);
       const done = new Set((acks ?? []).filter((a: any) => a.member_id === m.id).map((a: any) => a.document_id));
       const active = docs.filter(isActive);
+      m.acceptance_complete = entityAcceptanceComplete(active, done, m.entity);
       journeys[m.id] = journeyStatus(active, done, m.entity, { prsc: m.prsc_activated_at ?? null, dis: m.dis_activated_at ?? null }, m.participates_in_forum !== false, forumCleared((m as any).forum_clearance_status));
       if (m.documents_released_at) docProgress[m.id] = { total: active.length, done: active.filter((d) => done.has(d.id)).length };
     }));
@@ -537,7 +545,7 @@ export const getMemberDetail = createServerFn({ method: "GET" })
       headshotUrl = signed?.signedUrl ?? null;
     }
     return {
-      member: member as PortalMember,
+      member: await withAppointmentProgress(context.supabase, member) as PortalMember,
       profile: (profile ?? null) as PortalProfile | null,
       headshotUrl,
       journey: {
@@ -721,13 +729,25 @@ function appliesTo(doc: PortalDocumentRecord, m: DocMember) {
 }
 
 async function applicableDocuments(supabase: any, member: DocMember) {
-  const { data } = await supabase
+  const { data, error } = await supabase
     .from("portal_documents")
     .select("*")
     .or(`member_id.is.null,member_id.eq.${member.id}`)
     .order("sort_order", { ascending: true })
     .order("created_at", { ascending: true });
+  if (error) throw error;
   return ((data ?? []) as PortalDocumentRecord[]).filter((d) => appliesTo(d, member));
+}
+
+/** Read existing journey records only; never updates appointment or historical data. */
+export async function withAppointmentProgress<T extends DocMember & DesignationMember>(client: any, member: T) {
+  const [docs, acknowledgements] = await Promise.all([
+    applicableDocuments(client, member),
+    client.from("portal_document_acknowledgements").select("document_id").eq("member_id", member.id),
+  ]);
+  if (acknowledgements.error) throw acknowledgements.error;
+  const done = new Set<string>((acknowledgements.data ?? []).map((a: { document_id: string }) => a.document_id));
+  return { ...member, acceptance_complete: entityAcceptanceComplete(docs.filter(isActive), done, member.entity ?? "") };
 }
 
 async function signDocumentUrls(documents: PortalDocumentRecord[]) {

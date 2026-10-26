@@ -28,7 +28,7 @@ export function isOnboarding(d: Pick<JourneyDoc, "journey_stage">) {
 }
 
 function order(a: JourneyDoc, b: JourneyDoc) {
-  return (a.journey_stage! - b.journey_stage!) || a.sort_order - b.sort_order || a.created_at.localeCompare(b.created_at);
+  return ((a.journey_stage ?? 0) - (b.journey_stage ?? 0)) || a.sort_order - b.sort_order || a.created_at.localeCompare(b.created_at);
 }
 
 /** Stage 1 is always shared; later onboarding docs without a track belong to the member's first track. */
@@ -65,6 +65,16 @@ export type JourneyStatus = {
   label: string;
   forumCleared: boolean;
 };
+
+/** Per-entity acceptance completion; an empty Stage 3 is never acceptance. */
+export function entityAcceptanceComplete(docs: JourneyDoc[], done: Set<string>, entity: string): { prsc: boolean; dis: boolean } {
+  const complete = (track: "prsc" | "dis") => {
+    if (!memberTracks(entity).includes(track)) return false;
+    const requirements = docs.filter((d) => (d.journey_stage === 2 || d.journey_stage === 3) && trackOf(d, entity) === track);
+    return requirements.some((d) => d.journey_stage === 3) && requirements.every((d) => done.has(d.id));
+  };
+  return { prsc: complete("prsc"), dis: complete("dis") };
+}
 
 export function journeyStatus(
   docs: JourneyDoc[],

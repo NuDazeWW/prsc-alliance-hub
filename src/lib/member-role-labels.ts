@@ -1,4 +1,5 @@
 // Presentation only: stored roles and their permissions are unchanged.
+import { entityAppointmentStatus } from "./governance";
 export const FORUM_INVITEE_LABEL = "United Forum Invitee";
 export const FORUM_PARTICIPANT_LABEL = "Forum Participant";
 /** Forum-only members: "United Forum Invitee" before clearance, "Forum Participant" after. */
@@ -53,14 +54,23 @@ export function memberRoleKinds(role: string | null | undefined, isCommittee = f
 export type DesignationMember = {
   role: string | null | undefined; entity: string | null | undefined; is_candidate?: boolean | null;
   forum_clearance_status?: string | null; prsc_activated_at?: string | null; dis_activated_at?: string | null;
+  role_review_status?: string | null; participates_in_forum?: boolean | null;
+  acceptance_complete?: { prsc: boolean; dis: boolean };
 };
 
-/** What a member may be called: a PRSC/DIS title only once that entity's activation is recorded; otherwise "… Candidate". */
+/** Each entity independently progresses from Candidate to Pending Appointment to its verified title. */
 export function memberDesignationLabels(m: DesignationMember): string[] {
   if (m.is_candidate) return [forumMemberLabel(m.forum_clearance_status)];
   return memberRoleLabels(m.role, m.entity).map((label) => {
-    const activated = label.startsWith("PRSC ") ? m.prsc_activated_at : label.startsWith("DIS ") ? m.dis_activated_at : null;
-    return activated ? label : `${label} Candidate`;
+    const track = label.startsWith("PRSC ") ? "prsc" : "dis";
+    const status = entityAppointmentStatus({
+      activatedAt: track === "prsc" ? m.prsc_activated_at : m.dis_activated_at,
+      acceptanceComplete: m.acceptance_complete?.[track] === true,
+      roleReviewStatus: m.role_review_status,
+      participatesInForum: m.participates_in_forum,
+      forumClearanceStatus: m.forum_clearance_status,
+    });
+    return status === "appointed" ? label : `${label} ${status === "pending_appointment" ? "Pending Appointment" : "Candidate"}`;
   });
 }
 export function memberDesignation(m: DesignationMember): string {
