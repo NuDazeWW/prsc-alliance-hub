@@ -66,7 +66,10 @@ export const getPortalSession = createServerFn({ method: "GET" })
         .maybeSingle();
       hasProfile = Boolean(profile?.submitted_at);
     }
-    const designated = member ? await withAppointmentProgress(context.supabase, member) : null;
+    // Ownership was verified above. Read canonical requirements (including hidden
+    // requirements) but return only completion booleans, never their private content.
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const designated = member ? await withAppointmentProgress(supabaseAdmin, member) : null;
     return { member: designated as PortalMember | null, isAdmin: roleNames.includes("admin"), hasProfile, viewingAs: false };
   });
 

@@ -143,7 +143,12 @@ function DocumentReader({ doc, completion, onBack }: { doc: Doc; completion: Com
           ? { document_id: doc.id, initials, kind: "signed", signed_name: name, signature_data: signature ?? undefined, consent, ...conflictFields }
           : { document_id: doc.id, initials, kind: "acknowledged", consent: true, ...conflictFields },
       }),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["my-documents"] }),
+    onSuccess: async () => {
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: ["my-documents"] }),
+        queryClient.invalidateQueries({ queryKey: ["portal-session"] }),
+      ]);
+    },
   });
 
   async function askHardCopy() {
