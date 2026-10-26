@@ -113,6 +113,13 @@
       "when": 1793039041293,
       "tag": "0015_migration",
       "breakpoints": true
+    },
+    {
+      "idx": 16,
+      "version": "7",
+      "when": 1793053405890,
+      "tag": "0016_entity_onboarding_releases",
+      "breakpoints": true
     }
   ]
 }
