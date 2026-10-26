@@ -1433,6 +1433,7 @@ export const reconcileEntityRelease = createServerFn({ method: "POST" })
     if (!row) throw new Error("No reconciliation needed for this member and entity");
     if (row.kind !== "authorized") throw new Error("Prior authorization is not on record; use Start Entity Onboarding after review");
     const { data: m } = await supabaseAdmin.from("portal_members").select("*").eq("id", data.member_id).single();
+    if (!m) throw new Error("Member not found");
     const problems = stage2ReleaseProblems({
       target: data.entity, memberEntity: m.entity, role: m.role, isCandidate: !!m.is_candidate, isCommittee: !!m.is_methodology_committee,
       nda: { verified_at: m.nda_verified_at, verified_by: m.nda_verified_by, reference: m.nda_reference, entities: m.nda_entities, scope: m.nda_scope },
