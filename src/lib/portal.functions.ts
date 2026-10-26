@@ -138,25 +138,12 @@ export const saveMyProfile = createServerFn({ method: "POST" })
     }
     if (data.submit && !alreadySubmitted) {
       await context.supabase.from("portal_activity").insert({ member_id: member.id, actor_user_id: context.userId, event_type: "profile_submitted" });
-      // Stable per-submission key: a retry of the same submission never sends twice.
-      const submissionId = `${member.id}-${String((payload as any).submitted_at)}`;
-      const fullName = `${member.first_name ?? ""} ${member.last_name ?? ""}`.trim() || member.email;
-      const roleLabel = memberRoleLabel(member.role, member.entity, !!(member as any).is_candidate);
+      const { planProfileEmails, deliverProfileEmails } = await import("@/lib/profile-emails");
       const { loadSystemEmail, sendPortalEmail } = await import("@/lib/portal-notify.server");
-      try {
-        const alert = (await loadSystemEmail("profile_submitted_admin_alert"))({
-          member_name: fullName, submitted_at: new Date((payload as any).submitted_at).toUTCString(), submission_id: submissionId,
-        });
-        await sendPortalEmail(ADMIN_EMAIL, alert, "profile-submitted-admin-alert", `profile-submitted-admin-${submissionId}`);
-      } catch (notificationError) {
-        console.error("Profile submission admin notification failed", notificationError);
-      }
-      try {
-        const confirmation = (await loadSystemEmail("profile_received"))({ first_name: member.first_name?.trim() || "there", role: roleLabel });
-        await sendPortalEmail(member.email, confirmation, "profile-submitted-member-confirmation", `profile-submitted-member-${submissionId}`);
-      } catch (confirmationError) {
-        console.error("Profile submission member confirmation failed", confirmationError);
-      }
+      await deliverProfileEmails(planProfileEmails({
+        submit: data.submit, alreadySubmitted, memberId: member.id, submittedAt: String((payload as any).submitted_at), adminEmail: ADMIN_EMAIL,
+        member, roleLabel: memberRoleLabel(member.role, member.entity, !!(member as any).is_candidate),
+      }), { load: loadSystemEmail, send: sendPortalEmail });
     }
     return { ok: true, submitted: data.submit };
   });
