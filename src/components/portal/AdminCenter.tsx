@@ -345,18 +345,18 @@ export function AdminCenter({ page }: { page: "overview" | "send" }) {
   // Test mode only when viewing an unsigned builder preview; signed-in admins always run real actions.
   const preview = isPreviewHost() && !hasSession;
   const overview = useQuery({
-    queryKey: ["portal-admin"],
+    queryKey: ["portal-admin", preview],
     queryFn: () => (preview ? Promise.resolve(demoOverview) : getAdminOverview()),
     retry: false,
   });
   const email = useQuery({
-    queryKey: ["portal-admin-email"],
+    queryKey: ["portal-admin-email", preview],
     queryFn: () => (preview ? Promise.resolve(demoEmailCenter) : getEmailCenter()),
     retry: false,
   });
 
   const polls = useQuery({
-    queryKey: ["portal-admin-polls"],
+    queryKey: ["portal-admin-polls", preview],
     queryFn: () => (preview ? Promise.resolve({ polls: [] as any[] }) : listAdminPolls()),
     retry: false,
   });
@@ -544,7 +544,7 @@ export function AdminCenter({ page }: { page: "overview" | "send" }) {
   }
 
   const detail = useQuery({
-    queryKey: ["portal-admin-member", detailId],
+    queryKey: ["portal-admin-member", detailId, preview],
     enabled: Boolean(detailId),
     retry: false,
     queryFn: () => {
