@@ -189,7 +189,7 @@ export function renderBrandedEmail(input: BrandedEmailInput) {
     <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#F4F1EA;padding:40px 16px;">
       <tr>
         <td align="center">
-          <table role="presentation" width="600" cellpadding="0" cellspacing="0" style="max-width:600px;background:#FFFFFF;border:1px solid #E8E4DA;">
+          <table role="presentation" width="600" cellpadding="0" cellspacing="0" style="width:100%;max-width:600px;background:#FFFFFF;border:1px solid #E8E4DA;">
             <tr>
               <td style="background:#0A1322;padding:30px 32px;text-align:center;">
                 <div style="font-family:Georgia,serif;font-size:11px;letter-spacing:0.28em;text-transform:uppercase;color:#D4AF37;">Partnership Readiness Standards Council</div>
