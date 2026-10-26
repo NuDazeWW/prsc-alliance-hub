@@ -414,7 +414,7 @@ export function AdminCenter({ page }: { page: "overview" | "send" }) {
     try {
       const { draft: text } = await (preview ? draftWhyYouPreview : draftWhyYou)({ data: {
         first_name: inviteDraft.first_name, last_name: inviteDraft.last_name, organization: inviteDraft.organization,
-        title: inviteDraft.title, entity: inviteDraft.entity, role: inviteDraft.role,
+        title: inviteDraft.title, entity: inviteDraft.entity, role: inviteDraft.role, is_candidate: !!inviteDraft.is_candidate,
         linkedin_url: aiLinkedin, background: aiBackground,
       } });
       setInviteDraft((d) => ({ ...d, why_you: text }));
