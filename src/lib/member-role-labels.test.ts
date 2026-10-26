@@ -1,6 +1,6 @@
 import { describe, test } from "node:test";
 import { deepStrictEqual } from "node:assert";
-import { memberRoleLabels } from "./member-role-labels";
+import { memberRoleLabels, memberRoleLabel, memberRoleKinds } from "./member-role-labels";
 
 describe("entity-specific member capacities", () => {
   test("PRSC advisor", () => deepStrictEqual(memberRoleLabels("advisor", "prsc"), ["PRSC Advisor"]));
@@ -26,8 +26,8 @@ describe("role chips and role details", () => {
 });
 
 describe("forum candidates", () => {
-  it("shows the Forum candidate designation instead of any PRSC/DIS seat", () => {
-    expect(memberRoleLabel("advisor", "prsc", true)).toBe("Readiness Vanguard Forum Candidate");
-    expect(memberRoleKinds("board_member", true, true)).toEqual([]);
+  test("shows the Forum candidate designation instead of any PRSC/DIS seat", () => {
+    deepStrictEqual(memberRoleLabel("advisor", "prsc", true), "Readiness Vanguard Forum Candidate");
+    deepStrictEqual(memberRoleKinds("board_member", true, true), []);
   });
 });
