@@ -145,3 +145,29 @@ export function governanceStatusLabel(s: { status: string; forumCleared: boolean
 export function memberTracksFor(entity: string): ("prsc" | "dis")[] {
   return entity === "both" ? ["prsc", "dis"] : entity === "dis" ? ["dis"] : ["prsc"];
 }
+
+export type Stage2ReleaseCheck = {
+  target: "prsc" | "dis";
+  memberEntity: string;
+  role: string | null | undefined;
+  isCandidate: boolean;
+  isCommittee?: boolean;
+  nda: NdaRecord;
+  roleReviewStatus: string | null | undefined;
+  stage2DocCount: number;
+  alreadyReleased: boolean;
+};
+
+/** Explicit Stage 2 release gate. Forum participation or clearance never factors in. */
+export function stage2ReleaseProblems(c: Stage2ReleaseCheck): string[] {
+  const p: string[] = [];
+  if (c.alreadyReleased) p.push(`${c.target.toUpperCase()} onboarding has already been started`);
+  if (c.isCandidate || !c.role) p.push("Record an intended PRSC/DIS role in Edit member details first");
+  if (!memberTracksFor(c.memberEntity).includes(c.target)) p.push(`The member's intended role does not include ${c.target.toUpperCase()}`);
+  if (roleCombinationTier(c.memberEntity, c.role ?? "", c.isCommittee).tier === "prohibited") p.push("This role combination is prohibited and cannot be released");
+  const nda = ndaProblem(c.nda, c.target);
+  if (nda) p.push(nda);
+  if (roleReviewBlocks(c.roleReviewStatus)) p.push("The role-combination review must be approved first");
+  if (c.stage2DocCount === 0) p.push(`No approved ${c.target.toUpperCase()} Stage 2 documents are assigned to this role yet`);
+  return p;
+}
