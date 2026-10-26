@@ -2,7 +2,7 @@ import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { roundOpen, needsReminder } from "@/lib/executive-questions";
-import { FORUM_EMAILS, forumEmailBlock, forumIdempotencyKey, type ForumEmailKey } from "@/lib/forum-communications";
+import { FORUM_EMAILS, confirmedThroughPoll, forumEmailBlock, forumIdempotencyKey, type ForumEmailKey } from "@/lib/forum-communications";
 
 async function assertAdmin(context: { supabase: any; userId: string }) {
   const { data } = await context.supabase.from("user_roles").select("role").eq("user_id", context.userId).eq("role", "admin").maybeSingle();
@@ -38,8 +38,16 @@ async function evaluate(context: any, data: z.infer<typeof input>) {
     responded = new Set((resp ?? []).map((r: any) => r.member_id));
   }
   const sentMap = new Map((sent ?? []).map((r: any) => [r.member_id, r.created_at]));
+  // A confirmed Meetings poll already emailed its confirmation: the manual
+  // Forum confirmation must not duplicate it for the same members.
+  let confirmedPolls: { invited_member_ids: unknown }[] = [];
+  if (data.email_key === "forum_confirmed") {
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    confirmedPolls = (await supabaseAdmin.from("meeting_polls").select("invited_member_ids").eq("status", "confirmed")).data ?? [];
+  }
   const rows = (members ?? []).map((m: any) => {
     let reason = forumEmailBlock(data.email_key, m, doc, false);
+    if (!reason && data.email_key === "forum_confirmed" && confirmedThroughPoll(m.id, confirmedPolls)) reason = "Meeting confirmation already sent from Meetings";
     if (!reason && doc?.member_id && doc.member_id !== m.id) reason = "No access to briefing";
     if (!reason && isQuestion) {
       if (!round) reason = "Choose the question round";

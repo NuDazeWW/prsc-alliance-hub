@@ -879,7 +879,9 @@ export function AdminCenter({ page }: { page: "overview" | "send" }) {
     heading: applyTokens(draft.heading, tokens),
     body: applyTokens(draft.body || "Your email content will appear here.", tokens),
     ctaLabel: draft.cta_label || null,
-    ctaUrl: draft.cta_url || null,
+    // Automatic emails (e.g. the invitation) carry a per-recipient link, so the
+    // stored URL is empty; the preview shows the button with the portal address.
+    ctaUrl: draft.cta_url || (draft.cta_label ? "https://access.prscstandards.org/portal" : null),
     ctaSubtext: applyTokens(draft.cta_subtext, tokens) || null,
     signatures: parseSignatures(draft.signatures),
   });
