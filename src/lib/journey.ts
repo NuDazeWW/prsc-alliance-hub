@@ -94,11 +94,12 @@ export function journeyStatus(
 ): JourneyStatus {
   const tracks = memberTracks(entity);
   const onboarding = docs.filter(isOnboarding);
-  // A stage is complete only when it has applicable documents and all are done —
-  // an unreleased stage must never count as complete (empty every() would pass).
+  // Document-driven stages (1–3) are complete only when they have applicable
+  // documents and all are done — an unreleased stage must never count as
+  // complete (empty every() would pass). Stage 4 is gated by activation records.
   const stageComplete = (n: number) => {
     const stageDocs = onboarding.filter((d) => d.journey_stage === n);
-    return stageDocs.length > 0 && stageDocs.every((d) => done.has(d.id));
+    return stageDocs.every((d) => done.has(d.id)) && (n >= 4 || stageDocs.length > 0);
   };
   const allActivated = tracks.every((t) => activated[t]);
   // Members opted out of the Forum skip Stage 1 entirely (4-stage journey).
