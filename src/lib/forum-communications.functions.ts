@@ -49,6 +49,12 @@ async function evaluate(context: any, data: z.infer<typeof input>) {
     }
     return { id: m.id, member: m, name: `${m.first_name} ${m.last_name}`.trim(), email: m.email, reason, sent_at: sentMap.get(m.id) ?? null };
   });
+  if (isQuestion && round) {
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { memberRoundAccess } = await import("@/lib/executive-questions.functions");
+    for (const r of rows) if (!r.reason) r.reason = (await memberRoundAccess(supabaseAdmin, r.member, round)) ?? null;
+  }
+  return rows.map(({ member: _m, ...r }: any) => r);
 }
 
 export const getForumRecipients = createServerFn({ method: "POST" })
