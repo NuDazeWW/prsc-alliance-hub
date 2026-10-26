@@ -267,6 +267,7 @@ const inviteSchema = z.object({
   why_you: z.string().trim().min(20).max(2000),
   is_methodology_committee: z.boolean().optional(),
   participates_in_forum: z.boolean().optional(),
+  is_candidate: z.boolean().optional(),
   poll_id: z.string().uuid().nullable().optional(),
   nda_confirmed: z.boolean().optional(),
   nda_reference: z.string().trim().max(400).optional(),
@@ -281,6 +282,12 @@ const inviteSchema = z.object({
   }).optional(),
 });
 type InviteInput = z.infer<typeof inviteSchema>;
+
+/** Forum candidates hold no PRSC/DIS seat: store a neutral single-entity record (no board/committee claims). */
+function normalizeCandidate<T extends InviteInput>(m: T): T {
+  if (!m.is_candidate) return m;
+  return { ...m, role: "advisor", entity: m.nda_entities === "dis" ? "dis" : "prsc", is_methodology_committee: false, role_review: undefined, participates_in_forum: true };
+}
 
 /** NDA and role-combination gates every invitation must pass, before any account is created. */
 function invitationGates(m: InviteInput, adminId: string) {
@@ -316,8 +323,9 @@ function portalInviteRedirect(member: { first_name: string; entity: string; role
 export const invitePortalMember = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input) => inviteSchema.parse(input))
-  .handler(async ({ context, data }) => {
+  .handler(async ({ context, data: rawData }) => {
     await assertAdmin(context);
+    const data = normalizeCandidate(rawData);
     const gates = invitationGates(data, context.userId);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { poll_id: pollId, nda_confirmed: _n, nda_reference: _r, nda_entities: _e, nda_scope: _s, role_review: _rv, ...member } = data;
@@ -336,6 +344,7 @@ export const invitePortalMember = createServerFn({ method: "POST" })
       entity: member.entity, role: member.role, why_you: member.why_you, status: "invited",
       is_methodology_committee: member.is_methodology_committee ?? false,
       participates_in_forum: member.participates_in_forum ?? true,
+      is_candidate: member.is_candidate ?? false,
       ...gates.columns,
     }, { onConflict: "email" }).select("id").single();
     if (memberError) throw memberError;
@@ -361,7 +370,8 @@ export const importPortalMembers = createServerFn({ method: "POST" })
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const results: { email: string; ok: boolean; message: string }[] = [];
 
-    for (const row of data.rows) {
+    for (const rawRow of data.rows) {
+      const row = normalizeCandidate(rawRow);
       const email = row.email.toLowerCase();
       try {
         let userId: string | null = null;
@@ -395,6 +405,7 @@ export const importPortalMembers = createServerFn({ method: "POST" })
           organization: row.organization, title: row.title || null, entity: row.entity,
           role: row.role, why_you: row.why_you, status: "invited",
           is_methodology_committee: row.is_methodology_committee ?? false,
+          is_candidate: row.is_candidate ?? false,
           ...(gates ? gates.columns : { role_review_status: initialRoleReviewStatus(row.entity, row.role, row.is_methodology_committee ?? false) }),
         }, { onConflict: "email" });
         if (memberError) throw memberError;
@@ -683,13 +694,13 @@ export type PortalCompletion = {
   acknowledged_at: string;
 };
 
-type DocMember = { id: string; entity: string; role: string; participates_in_forum?: boolean | null; nda_verified_at?: string | null; forum_clearance_status?: string | null; role_review_status?: string | null };
+type DocMember = { id: string; entity: string; role: string; is_candidate?: boolean | null; participates_in_forum?: boolean | null; nda_verified_at?: string | null; forum_clearance_status?: string | null; role_review_status?: string | null };
 const GOV_COLS = "nda_verified_at, forum_clearance_status, role_review_status";
 
 /** What the member may actually open: mirrors the database read policy. */
 function memberVisible(docs: PortalDocumentRecord[], m: DocMember, done: Set<string>) {
-  const vm = { nda_verified_at: m.nda_verified_at ?? null, forum_clearance_status: m.forum_clearance_status ?? "not_reviewed" };
-  return docs.filter((d: any) => documentVisible({ classification: d.classification ?? "entity_confidential", superseded_at: d.superseded_at ?? null, is_forum_prep: !!d.is_forum_prep }, vm, done.has(d.id)));
+  const vm = { nda_verified_at: m.nda_verified_at ?? null, forum_clearance_status: m.forum_clearance_status ?? "not_reviewed", is_candidate: !!m.is_candidate };
+  return docs.filter((d: any) => documentVisible({ classification: d.classification ?? "entity_confidential", superseded_at: d.superseded_at ?? null, is_forum_prep: !!d.is_forum_prep, journey_stage: d.journey_stage ?? null, member_specific: !!d.member_id }, vm, done.has(d.id)));
 }
 
 function appliesTo(doc: PortalDocumentRecord, m: DocMember) {
@@ -737,7 +748,7 @@ export const getMyDocuments = createServerFn({ method: "GET" })
       context = { supabase: supabaseAdmin };
     }
     const { data: member } = await context.supabase
-      .from("portal_members").select("id, entity, role, participates_in_forum, nda_verified_at, forum_clearance_status, role_review_status, documents_released_at, prsc_activated_at, dis_activated_at").eq(input.asMemberId ? "id" : "user_id", input.asMemberId ?? ctx.userId).maybeSingle();
+      .from("portal_members").select("id, entity, role, participates_in_forum, is_candidate, nda_verified_at, forum_clearance_status, role_review_status, documents_released_at, prsc_activated_at, dis_activated_at").eq(input.asMemberId ? "id" : "user_id", input.asMemberId ?? ctx.userId).maybeSingle();
     const activation = { prsc: (member?.prsc_activated_at as string | null) ?? null, dis: (member?.dis_activated_at as string | null) ?? null };
     if (!member) return { memberId: null, released: false, documents: [], acknowledged: [] as string[], completions: [] as PortalCompletion[] };
     if (!member.documents_released_at) {
@@ -831,7 +842,7 @@ export const acknowledgeDocument = createServerFn({ method: "POST" })
   .handler(async ({ context, data }) => {
     const { data: member, error: memberError } = await context.supabase
       .from("portal_members")
-      .select("id, email, first_name, last_name, entity, role, participates_in_forum, nda_verified_at, forum_clearance_status, role_review_status, documents_released_at, documents_completed_at")
+      .select("id, email, first_name, last_name, entity, role, participates_in_forum, is_candidate, nda_verified_at, forum_clearance_status, role_review_status, documents_released_at, documents_completed_at")
       .eq("user_id", context.userId)
       .single();
     if (memberError || !member) throw new Error("Member profile unavailable");
@@ -1007,7 +1018,7 @@ export const listDocumentsForAdmin = createServerFn({ method: "GET" })
     let documents: PortalDocumentRecord[];
     if (data.member_id) {
       const { data: m } = await context.supabase
-        .from("portal_members").select("id, entity, role, participates_in_forum, nda_verified_at, forum_clearance_status, role_review_status, documents_released_at, documents_completed_at, prsc_activated_at, dis_activated_at").eq("id", data.member_id).maybeSingle();
+        .from("portal_members").select("id, entity, role, participates_in_forum, is_candidate, nda_verified_at, forum_clearance_status, role_review_status, documents_released_at, documents_completed_at, prsc_activated_at, dis_activated_at").eq("id", data.member_id).maybeSingle();
       member = m;
       documents = m ? await applicableDocuments(context.supabase, m) : [];
     } else {
