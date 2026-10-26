@@ -279,7 +279,7 @@ export function AdminMemberDocuments({ memberId, memberName, preview }: Props) {
                 {r ? (
                   <>
                     <span>Started {new Date(r.released_at).toLocaleDateString()} · {(r.documents ?? []).length} document(s) · notice {r.notify_status}{r.notify_error ? ` (${r.notify_error})` : ""}</span>
-                    {r.notify_status !== "sent" && <Button type="button" size="sm" variant="outline" onClick={() => retryNotice(r.id)}>Retry notice</Button>}
+                    {r.source === "reconciled" ? <span className="text-ivory/55">Reconciled from prior records — no email sent</span> : r.notify_status !== "sent" && <Button type="button" size="sm" variant="outline" onClick={() => retryNotice(r.id)}>Retry notice</Button>}
                   </>
                 ) : (
                   <Button type="button" size="sm" onClick={() => startOnboarding(t)}>Start Entity Onboarding / Release Stage 2 &amp; Notify</Button>

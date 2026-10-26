@@ -1377,6 +1377,73 @@ export const retryReleaseNotice = createServerFn({ method: "POST" })
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { data: release } = await supabaseAdmin.from("entity_onboarding_releases").select("*").eq("id", data.release_id).single();
     if (!release) throw new Error("Release not found");
+    if (release.source === "reconciled") throw new Error("Reconciled releases never send onboarding emails");
     if (release.notify_status === "sent") return { notified: true, error: null };
     return sendReleaseNotice(supabaseAdmin, release);
+  });
+
+async function legacyReleaseRows(supabaseAdmin: any) {
+  const { legacyReleaseCase } = await import("@/lib/governance");
+  const { data: members } = await supabaseAdmin.from("portal_members").select("*").neq("status", "revoked").eq("is_candidate", false);
+  const out: any[] = [];
+  for (const m of members ?? []) {
+    const [docs, acks, rel] = await Promise.all([
+      applicableDocuments(supabaseAdmin, m as any),
+      supabaseAdmin.from("portal_document_acknowledgements").select("document_id, acknowledged_at, kind").eq("member_id", m.id),
+      entityReleases(supabaseAdmin, m.id),
+    ]);
+    const done = new Map<string, any>((acks.data ?? []).map((a: any) => [a.document_id, a]));
+    const first = memberTracksFor(m.entity)[0];
+    for (const t of memberTracksFor(m.entity)) {
+      const trackDocs = docs.filter((d: any) => d.journey_stage >= 2 && d.journey_stage <= 4 && ((d.journey_track && d.journey_track !== "shared" ? d.journey_track : first) === t));
+      const signed = trackDocs.filter((d: any) => done.has(d.id));
+      const unsigned = trackDocs.filter((d: any) => !done.has(d.id) && isActive(d));
+      const activatedAt = t === "prsc" ? m.prsc_activated_at : m.dis_activated_at;
+      const kind = legacyReleaseCase({ hasRelease: rel.released[t], activatedAt, signedEntityDocs: signed.length, unsignedEntityDocs: unsigned.length });
+      if (!kind) continue;
+      out.push({
+        member_id: m.id, name: `${m.first_name} ${m.last_name}`.trim(), entity: t, role: m.role, kind,
+        appointment: activatedAt ? "Activated" : "Not activated",
+        signed: signed.map((d: any) => ({ title: d.title, version: d.version_label, at: done.get(d.id)?.acknowledged_at })),
+        unsigned: unsigned.map((d: any) => ({ title: d.title, version: d.version_label, stage: d.journey_stage })),
+      });
+    }
+  }
+  return out;
+}
+
+/** Admin report of existing members affected by the per-entity Stage 2 gate. Read-only. */
+export const getLegacyReleaseReport = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    await assertAdmin(context);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    return { rows: await legacyReleaseRows(supabaseAdmin) };
+  });
+
+/** Records a release for a member whose prior entity onboarding is on record. Sends no email. */
+export const reconcileEntityRelease = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input) => z.object({ member_id: z.string().uuid(), entity: z.enum(["prsc", "dis"]), reason: z.string().trim().min(5).max(1000) }).parse(input))
+  .handler(async ({ context, data }) => {
+    await assertAdmin(context);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { stage2ReleaseProblems } = await import("@/lib/governance");
+    const row = (await legacyReleaseRows(supabaseAdmin)).find((r) => r.member_id === data.member_id && r.entity === data.entity);
+    if (!row) throw new Error("No reconciliation needed for this member and entity");
+    if (row.kind !== "authorized") throw new Error("Prior authorization is not on record; use Start Entity Onboarding after review");
+    const { data: m } = await supabaseAdmin.from("portal_members").select("*").eq("id", data.member_id).single();
+    const problems = stage2ReleaseProblems({
+      target: data.entity, memberEntity: m.entity, role: m.role, isCandidate: !!m.is_candidate, isCommittee: !!m.is_methodology_committee,
+      nda: { verified_at: m.nda_verified_at, verified_by: m.nda_verified_by, reference: m.nda_reference, entities: m.nda_entities, scope: m.nda_scope },
+      roleReviewStatus: m.role_review_status, stage2DocCount: 1, alreadyReleased: false,
+    });
+    if (problems.length) throw new Error(`Cannot reconcile: ${problems.join("; ")}`);
+    const { data: release, error } = await supabaseAdmin.from("entity_onboarding_releases").insert({
+      member_id: m.id, entity: data.entity, role: m.role, released_by: context.userId, source: "reconciled", reason: data.reason,
+      documents: row.unsigned, notify_status: "pending", notify_error: "Reconciled — no notice sent",
+    }).select("id").single();
+    if (error) throw error;
+    await supabaseAdmin.from("portal_activity").insert({ member_id: m.id, actor_user_id: context.userId, event_type: "entity_release_reconciled", metadata: { entity: data.entity, release_id: release.id, reason: data.reason, prior_signed: row.signed.length } });
+    return { ok: true };
   });
