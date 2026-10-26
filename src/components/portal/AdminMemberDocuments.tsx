@@ -13,6 +13,8 @@ import {
   sendSignedCopy,
   setEntityActivation,
   setForumParticipation,
+  releaseEntityOnboarding,
+  retryReleaseNotice,
 } from "@/lib/portal.functions";
 import { STAGES, journeyStatus, lockedDocumentIds, memberTracks } from "@/lib/journey";
 import { JOURNEY_PRESETS } from "@/lib/journey-templates";
@@ -202,6 +204,20 @@ export function AdminMemberDocuments({ memberId, memberName, preview }: Props) {
     try { await setForumParticipation({ data: { member_id: memberId, participates: on } }); await docs.refetch(); }
     catch (e) { setStatus(e instanceof Error ? e.message : "Could not update Forum participation"); }
   }
+  async function startOnboarding(t: "prsc" | "dis") {
+    if (preview) return setStatus("Preview mode: Stage 2 is released on the live admin page.");
+    if (!confirm(`Start ${t.toUpperCase()} onboarding for ${memberName}? Their first approved Stage 2 document opens and one notification email is sent. This does not advance Stage 3 or appoint anyone.`)) return;
+    try {
+      const r = await releaseEntityOnboarding({ data: { member_id: memberId, entity: t } });
+      setStatus(r.notified ? `${t.toUpperCase()} Stage 2 released and the member was notified.` : `${t.toUpperCase()} Stage 2 released, but the email failed: ${r.error}. Use Retry notice.`);
+      await docs.refetch();
+    } catch (e) { setStatus(e instanceof Error ? e.message : "Could not start onboarding"); }
+  }
+  async function retryNotice(id: string) {
+    if (preview) return;
+    try { const r = await retryReleaseNotice({ data: { release_id: id } }); setStatus(r.notified ? "Notice sent." : `Notice failed again: ${r.error}`); await docs.refetch(); }
+    catch (e) { setStatus(e instanceof Error ? e.message : "Could not retry"); }
+  }
   const lockedIds = lockedDocumentIds(active as any, doneIds, entity, { released: { prsc: releases.some((r: any) => r.entity === "prsc"), dis: releases.some((r: any) => r.entity === "dis") } });
   async function toggleActivation(t: "prsc" | "dis", on: boolean) {
     if (preview) return setStatus("Preview mode: activation is recorded on the live admin page.");
@@ -248,6 +264,29 @@ export function AdminMemberDocuments({ memberId, memberName, preview }: Props) {
               {t.toUpperCase()} appointed (verified agreements, countersignature & appointment action){activation[t] ? ` · ${new Date(activation[t]!).toLocaleDateString()}` : ""}
             </label>
           ))}
+        </div>
+      </div>
+
+      <div className="mt-5 border border-gold/25 p-4">
+        <p className="text-base text-ivory">Entity onboarding (Stage 2)</p>
+        <p className="mt-1 text-sm text-ivory/55">Stage 2 opens only when you start it here, separately for each entity. Forum participation or clearance never opens it</p>
+        <div className="mt-3 space-y-2">
+          {memberTracks(entity).map((t) => {
+            const r = releases.find((x: any) => x.entity === t);
+            return (
+              <div key={t} className="flex flex-wrap items-center gap-3 text-base text-ivory/80">
+                <span className="w-12 text-gold">{t.toUpperCase()}</span>
+                {r ? (
+                  <>
+                    <span>Started {new Date(r.released_at).toLocaleDateString()} · {(r.documents ?? []).length} document(s) · notice {r.notify_status}{r.notify_error ? ` (${r.notify_error})` : ""}</span>
+                    {r.notify_status !== "sent" && <Button type="button" size="sm" variant="outline" onClick={() => retryNotice(r.id)}>Retry notice</Button>}
+                  </>
+                ) : (
+                  <Button type="button" size="sm" onClick={() => startOnboarding(t)}>Start Entity Onboarding / Release Stage 2 &amp; Notify</Button>
+                )}
+              </div>
+            );
+          })}
         </div>
       </div>
 

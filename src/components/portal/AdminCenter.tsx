@@ -331,7 +331,7 @@ function downloadListTemplate() {
 
 type InviteGov = { nda_confirmed: boolean; nda_reference: string; nda_entities: "" | "prsc" | "dis" | "both"; nda_scope: string; review_notes: string; prsc_scope: string; dis_scope: string; conflict_controls: string };
 /** Fresh per-recipient governance state; NDA coverage is never preselected. */
-export const EMPTY_INVITE_GOV: InviteGov = { nda_confirmed: false, nda_reference: "", nda_entities: "", nda_scope: "", review_notes: "", prsc_scope: "", dis_scope: "", conflict_controls: "" };
+const EMPTY_INVITE_GOV: InviteGov = { nda_confirmed: false, nda_reference: "", nda_entities: "", nda_scope: "", review_notes: "", prsc_scope: "", dis_scope: "", conflict_controls: "" };
 
 export function AdminCenter({ page }: { page: "overview" | "send" }) {
   const [hasSession, setHasSession] = useState(false);
