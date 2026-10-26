@@ -72,6 +72,7 @@ import { INVITE_EMAIL_PREVIEW_URL, INVITE_EMAIL_REPLY_TO, INVITE_EMAIL_SUBJECT }
 import { memberRoleLabel } from "@/lib/member-role-labels";
 import { STAGES, type JourneyStatus } from "@/lib/journey";
 import type { InviteEmailReview } from "@/lib/portal-invite-email.functions";
+import { MemberDetailsEditor } from "@/components/portal/MemberDetailsEditor";
 import { PORTAL_EXPERIENCE_QUESTIONS, PORTAL_PERMISSION_LABELS, PORTAL_PROFILE_STAGES, PORTAL_VISIBILITY_PERMISSIONS } from "@/lib/portal-profile-fields";
 
 
@@ -2167,6 +2168,7 @@ export function AdminCenter({ page }: { page: "overview" | "send" }) {
                     const profileState = profile?.submitted_at ? "Submitted" : profile ? "In progress" : "Not started";
                     const openInquiries = journey.inquiries.filter((inquiry: any) => inquiry.status === "open").length;
                     return <>
+                      <MemberDetailsEditor key={member.id} member={member as any} preview={preview} onSaved={() => { void overview.refetch(); void detail.refetch(); }} />
                       <section className="border border-gold/20 bg-ivory/[.025] p-5">
                         <div className="flex flex-wrap items-start justify-between gap-4">
                           <div>
