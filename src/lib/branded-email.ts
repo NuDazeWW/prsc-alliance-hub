@@ -63,6 +63,7 @@ export function buildMemberTokens(member: {
   entity?: string | null;
   role?: string | null;
   email?: string | null;
+  is_candidate?: boolean | null;
 }): EmailTokens {
   const entity = String(member.entity ?? "");
   const role = String(member.role ?? "");
@@ -74,9 +75,9 @@ export function buildMemberTokens(member: {
     title: member.title ?? "",
     entity: entity.toUpperCase(),
     entity_full: ENTITY_FULL[entity] ?? entity.toUpperCase(),
-    role: memberRoleLabel(role, entity),
-    role_label: memberRoleLabel(role, entity),
-    package_label: PACKAGE_LABEL[role] ?? "Board / Advisor",
+    role: memberRoleLabel(role, entity, !!member.is_candidate),
+    role_label: memberRoleLabel(role, entity, !!member.is_candidate),
+    package_label: member.is_candidate ? "Readiness Vanguard Forum" : PACKAGE_LABEL[role] ?? "Board / Advisor",
     email: member.email ?? "",
   };
 }

@@ -705,7 +705,7 @@ export function AdminCenter({ page }: { page: "overview" | "send" }) {
           firstName={inviteDraft.first_name}
           recipientEmail={inviteDraft.email}
           entity={inviteDraft.entity}
-          roleLabel={memberRoleLabel(inviteDraft.role, inviteDraft.entity)}
+          roleLabel={memberRoleLabel(inviteDraft.role, inviteDraft.entity, !!inviteDraft.is_candidate)}
           copy={inviteTemplate}
           meetingBlock={invitePollBlock}
           whyYou={inviteDraft.why_you}
@@ -936,7 +936,7 @@ export function AdminCenter({ page }: { page: "overview" | "send" }) {
       const prog = docProgress[m.id];
       const ans = p.experience_answers ?? {};
       const vis = p.visibility_instructions ?? {};
-      return [m.first_name, m.last_name, m.email, m.organization, m.title, String(m.entity).toUpperCase(), memberRoleLabel(m.role, m.entity), m.status, stageOf(m).label,
+      return [m.first_name, m.last_name, m.email, m.organization, m.title, String(m.entity).toUpperCase(), memberRoleLabel(m.role, m.entity, !!(m as { is_candidate?: boolean }).is_candidate), m.status, stageOf(m).label,
         date(m.invited_at), date(m.last_access_at), date(p.submitted_at), prog?.done ?? "", prog?.total ?? "", date(m.documents_completed_at),
         p.preferred_name, p.professional_role, p.current_organization, p.preferred_email, p.preferred_phone,
         ...PORTAL_EXPERIENCE_QUESTIONS.map((_, i) => ans[`q${i + 1}`] ?? ""),
@@ -1197,7 +1197,7 @@ export function AdminCenter({ page }: { page: "overview" | "send" }) {
                         <span className="font-medium">{r.first_name} {r.last_name}</span>
                         <span className="text-ivory/60">{r.email}</span>
                         <span className="text-ivory/60">{[r.title, r.organization].filter(Boolean).join(", ")}</span>
-                        <span className="text-ivory/60">{memberRoleLabel(r.role, r.entity)}</span>
+                        <span className="text-ivory/60">{memberRoleLabel(r.role, r.entity, !!r.is_candidate)}</span>
                         <Button type="button" variant="outline" size="sm" disabled={batchDrafting || rowDrafting === r.email} className="ml-auto rounded-none" onClick={() => void draftRow(i)}>
                           {rowDrafting === r.email ? "Drafting…" : r.why_you.trim() ? "Regenerate" : "Draft with AI"}
                         </Button>
@@ -1737,7 +1737,7 @@ export function AdminCenter({ page }: { page: "overview" | "send" }) {
                             </button>
                           </div>
                         </td>
-                        <td>{memberRoleLabel(m.role, m.entity)}{(m as { participates_in_forum?: boolean }).participates_in_forum === false && <span className="ml-2 whitespace-nowrap border border-gold/30 px-1.5 py-0.5 text-[10px] uppercase tracking-[0.12em] text-gold/80">No Forum</span>}</td>
+                        <td>{memberRoleLabel(m.role, m.entity, !!(m as { is_candidate?: boolean }).is_candidate)}{(m as { participates_in_forum?: boolean }).participates_in_forum === false && <span className="ml-2 whitespace-nowrap border border-gold/30 px-1.5 py-0.5 text-[10px] uppercase tracking-[0.12em] text-gold/80">No Forum</span>}</td>
                         <td className="py-4 pr-3">
                           <span className={`inline-block border px-2 py-1 text-xs uppercase tracking-[0.12em] ${st.tone}`}>{st.label}</span>
                           {journey && (
@@ -1871,7 +1871,7 @@ export function AdminCenter({ page }: { page: "overview" | "send" }) {
                             Access: {m.status}
                           </span>
                         </button>
-                        <span className="max-w-[45%] text-right text-xs text-ivory/70">{memberRoleLabel(m.role, m.entity)}</span>
+                        <span className="max-w-[45%] text-right text-xs text-ivory/70">{memberRoleLabel(m.role, m.entity, !!(m as { is_candidate?: boolean }).is_candidate)}</span>
                       </div>
 
                       <div className="mt-3 border-t border-ivory/10 pt-3">
@@ -2052,7 +2052,7 @@ export function AdminCenter({ page }: { page: "overview" | "send" }) {
                   >
                     <option value="">Choose a member…</option>
                     {members.map((m) => (
-                      <option key={m.id} value={m.id}>{m.first_name} {m.last_name} · {memberRoleLabel(m.role, m.entity)}</option>
+                      <option key={m.id} value={m.id}>{m.first_name} {m.last_name} · {memberRoleLabel(m.role, m.entity, !!(m as { is_candidate?: boolean }).is_candidate)}</option>
                     ))}
                   </select>
                 </label>
@@ -2256,7 +2256,7 @@ export function AdminCenter({ page }: { page: "overview" | "send" }) {
               </div>
               <div className="bg-navy px-5 py-3">
                 <p className="text-xs uppercase tracking-[0.14em] text-gold">Company &amp; role</p>
-                <p className="mt-1 text-base text-ivory">{memberRoleLabel(inviteDraft.role, inviteDraft.entity)}</p>
+                <p className="mt-1 text-base text-ivory">{memberRoleLabel(inviteDraft.role, inviteDraft.entity, !!inviteDraft.is_candidate)}</p>
               </div>
               <div className="bg-navy px-5 py-3">
                 <p className="text-xs uppercase tracking-[0.14em] text-gold">Logos shown</p>

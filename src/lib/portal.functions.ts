@@ -134,7 +134,7 @@ export const saveMyProfile = createServerFn({ method: "POST" })
       const apiKey = process.env["LOVABLE_API_KEY"];
       if (apiKey) {
         const fullName = `${member.first_name ?? ""} ${member.last_name ?? ""}`.trim() || member.email;
-        const roleLabel = memberRoleLabel(member.role, member.entity);
+        const roleLabel = memberRoleLabel(member.role, member.entity, !!(member as any).is_candidate);
         const entityLabel = member.entity === "both" ? "PRSC and DIS" : String(member.entity).toUpperCase();
         const subject = `Profile submitted — ${fullName}`;
         const email = {
@@ -312,12 +312,13 @@ async function recordInviteReviews(admin: any, memberId: string, adminId: string
   if (gates.review) rows.push({ member_id: memberId, kind: "role_combination", decision: "approved", reviewer_id: adminId, notes: gates.review.notes, details: { prsc_scope: gates.review.prsc_scope, dis_scope: gates.review.dis_scope, conflict_controls: gates.review.conflict_controls } });
   await admin.from("governance_reviews").insert(rows);
 }
-function portalInviteRedirect(member: { first_name: string; entity: string; role: string; poll_id?: string | null }) {
+function portalInviteRedirect(member: { first_name: string; entity: string; role: string; poll_id?: string | null; is_candidate?: boolean }) {
   const url = new URL("https://access.prscstandards.org/accept-invitation");
   url.searchParams.set("first_name", member.first_name);
   url.searchParams.set("entity", member.entity);
   url.searchParams.set("role", member.role);
   if (member.poll_id) url.searchParams.set("poll", member.poll_id);
+  if (member.is_candidate) url.searchParams.set("candidate", "1");
   return url.toString();
 }
 export const invitePortalMember = createServerFn({ method: "POST" })

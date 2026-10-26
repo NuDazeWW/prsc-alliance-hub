@@ -161,8 +161,8 @@ function PortalHome() {
   // Every member can read about both organizations, regardless of designation.
   const entityWord = m.entity === "both" ? "PRSC and DIS" : m.entity.toUpperCase();
   const designations = memberRoleLabels(m.role, m.entity);
-  const roleChips = memberRoleChips(m.role, m.entity);
-  const roleKinds = memberRoleKinds(m.role, Boolean((m as { is_methodology_committee?: boolean }).is_methodology_committee));
+  const roleChips = memberRoleChips(m.role, m.entity, !!(m as { is_candidate?: boolean }).is_candidate);
+  const roleKinds = memberRoleKinds(m.role, Boolean((m as { is_methodology_committee?: boolean }).is_methodology_committee), !!(m as { is_candidate?: boolean }).is_candidate);
   const profileComplete = data?.hasProfile ?? false;
   const packageReady = m.package_status === "package_ready";
   const myDocs = documents.data?.documents ?? [];
@@ -457,7 +457,7 @@ function PortalHome() {
                   </DialogTitle>
                 </DialogHeader>
                 <p className="mt-5 font-display text-[clamp(1.35rem,1.8vw,2rem)] leading-tight text-gold">
-                  {memberRoleLabel(m.role, m.entity)}
+                  {memberRoleLabel(m.role, m.entity, !!(m as { is_candidate?: boolean }).is_candidate)}
                 </p>
                 {m.organization && (
                   <p className="mt-3 text-[16px] leading-7 text-ivory/70">{m.organization}</p>
@@ -489,7 +489,7 @@ function PortalHome() {
                   <div>
                     <dt className="text-[10px] uppercase tracking-[0.22em] text-ivory/45">Capacity</dt>
                     <dd className="mt-2 font-display text-2xl text-ivory">
-                      {memberRoleLabel(m.role, m.entity)}
+                      {memberRoleLabel(m.role, m.entity, !!(m as { is_candidate?: boolean }).is_candidate)}
                     </dd>
                   </div>
                   {m.organization && (
