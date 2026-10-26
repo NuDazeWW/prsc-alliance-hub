@@ -29,8 +29,8 @@ const PRIORITY_B = "Available once the Strategic Forum workspace is live and tes
 export const FORUM_EMAILS: ForumEmailDef[] = [
   { key: "forum_confirmed", number: 2, label: "Forum confirmed", enabled: true, gate: "invite", fields: [{ token: "forum_date", label: "Forum date" }, { token: "forum_time", label: "Time and time zone" }, { token: "forum_location", label: "Location or virtual meeting" }] },
   { key: "briefing_released", number: 3, label: "Strategic briefing released", enabled: true, gate: "cleared", needsDocument: true, fields: [] },
-  { key: "input_requested", number: 4, label: "Executive input requested", enabled: false, disabledReason: PRIORITY_B, gate: "cleared", fields: [{ token: "deadline", label: "Submission deadline" }] },
-  { key: "input_reminder", number: 5, label: "Input reminder", enabled: false, disabledReason: PRIORITY_B, gate: "cleared", fields: [{ token: "deadline", label: "Deadline" }] },
+  { key: "input_requested", number: 4, label: "Executive questions requested", enabled: true, gate: "cleared", fields: [{ token: "deadline", label: "Submission deadline" }] },
+  { key: "input_reminder", number: 5, label: "Executive questions reminder", enabled: true, gate: "cleared", fields: [{ token: "deadline", label: "Deadline" }] },
   { key: "final_agenda", number: 6, label: "Final Forum agenda", enabled: true, gate: "cleared", fields: [{ token: "forum_when", label: "Forum date and time" }] },
   { key: "coordination_summary", number: 7, label: "Forum coordination summary", enabled: true, gate: "cleared", fields: [] },
   { key: "followup_assigned", number: 8, label: "Follow-up assignment", enabled: false, disabledReason: PRIORITY_B, gate: "cleared", fields: [{ token: "action_title", label: "Action" }, { token: "target_date", label: "Target date" }, { token: "coordinating_entity", label: "Coordinating entity" }] },

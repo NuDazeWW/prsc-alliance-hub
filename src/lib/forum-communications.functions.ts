@@ -1,6 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+import { roundOpen, needsReminder } from "@/lib/executive-questions";
 import { FORUM_EMAILS, forumEmailBlock, forumIdempotencyKey, type ForumEmailKey } from "@/lib/forum-communications";
 
 async function assertAdmin(context: { supabase: any; userId: string }) {
@@ -14,6 +15,7 @@ const input = z.object({
   forum_key: z.string().trim().min(1).max(80).regex(/^[a-z0-9-]+$/i),
   version: z.number().int().min(1).max(99),
   document_id: z.string().uuid().nullable().optional(),
+  round_id: z.string().uuid().nullable().optional(),
   tokens: z.record(z.string().max(60), z.string().trim().max(300)).default({}),
 });
 
@@ -26,11 +28,26 @@ async function evaluate(context: any, data: z.infer<typeof input>) {
     context.supabase.from("forum_communication_sends").select("member_id, created_at").eq("forum_key", data.forum_key).eq("email_key", data.email_key).eq("version", data.version),
   ]);
   const doc = docRes.data;
+  // Question emails are tied to one open round: access, deadline and reminder rules come from it.
+  const isQuestion = data.email_key === "input_requested" || data.email_key === "input_reminder";
+  let round: any = null, responded = new Set<string>();
+  if (isQuestion) {
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    if (data.round_id) round = (await supabaseAdmin.from("question_rounds").select("*").eq("id", data.round_id).maybeSingle()).data;
+    const { data: resp } = round ? await supabaseAdmin.from("question_round_responses").select("member_id").eq("round_id", round.id) : { data: [] };
+    responded = new Set((resp ?? []).map((r: any) => r.member_id));
+  }
   const sentMap = new Map((sent ?? []).map((r: any) => [r.member_id, r.created_at]));
-  return (members ?? []).map((m: any) => {
+  const rows = (members ?? []).map((m: any) => {
     let reason = forumEmailBlock(data.email_key, m, doc, false);
     if (!reason && doc?.member_id && doc.member_id !== m.id) reason = "No access to briefing";
-    return { id: m.id, name: `${m.first_name} ${m.last_name}`.trim(), email: m.email, reason, sent_at: sentMap.get(m.id) ?? null };
+    if (!reason && isQuestion) {
+      if (!round) reason = "Choose the question round";
+      else if (round.forum_key !== data.forum_key) reason = "Round belongs to another Forum";
+      else if (!roundOpen(round)) reason = "Question round is not open";
+      else if (data.email_key === "input_reminder" && !needsReminder(responded.has(m.id) ? "done" : null)) reason = "Already responded";
+    }
+    return { id: m.id, member: m, name: `${m.first_name} ${m.last_name}`.trim(), email: m.email, reason, sent_at: sentMap.get(m.id) ?? null };
   });
 }
 
