@@ -63,7 +63,8 @@ export const getForumRecipients = createServerFn({ method: "POST" })
   .handler(async ({ context, data }) => {
     await assertAdmin(context);
     const { data: docs } = await context.supabase.from("portal_documents").select("id, title, classification").is("superseded_at", null).order("created_at", { ascending: false });
-    return { recipients: await evaluate(context, data), documents: docs ?? [] };
+    const { data: rounds } = await context.supabase.from("question_rounds").select("id, title, forum_key, status, deadline").order("created_at", { ascending: false });
+    return { recipients: await evaluate(context, data), documents: docs ?? [], rounds: rounds ?? [] };
   });
 
 export const sendForumEmail = createServerFn({ method: "POST" })
