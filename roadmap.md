@@ -73,3 +73,7 @@
 - [x] Independent Forum / Stage 2 release, NDA form reset, profile emails on shared sender, entity onboarding email
 - [ ] Founder approval of email previews before any live send (blocked: founder review)
 - [ ] Signed-in walkthrough of the Stage 2 release (blocked: admin sign-in in preview)
+- [x] Existing-member Stage 2 release review + reconciliation (no affected members today)
+- [x] 14-template inventory, meeting reminder template, question emails enabled per round
+- [x] Executive Questions member card + Secretariat register
+- [ ] Signed-in walkthrough with fictional members (blocked: approval to add temporary records to the shared database)

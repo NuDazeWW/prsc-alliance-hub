@@ -171,3 +171,14 @@ export function stage2ReleaseProblems(c: Stage2ReleaseCheck): string[] {
   if (c.stage2DocCount === 0) p.push(`No approved ${c.target.toUpperCase()} Stage 2 documents are assigned to this role yet`);
   return p;
 }
+
+export type LegacyReleaseInput = { hasRelease: boolean; activatedAt: string | null; signedEntityDocs: number; unsignedEntityDocs: number };
+/**
+ * Existing members whose unsigned Stage 2–4 documents are now gated. "authorized" only when the
+ * records themselves show prior entity onboarding (activation or a signed Stage 2–4 document for
+ * that entity); anything else stays restricted until an admin reviews it.
+ */
+export function legacyReleaseCase(c: LegacyReleaseInput): "authorized" | "needs_review" | null {
+  if (c.hasRelease || c.unsignedEntityDocs === 0) return null;
+  return c.activatedAt || c.signedEntityDocs > 0 ? "authorized" : "needs_review";
+}

@@ -13,6 +13,8 @@ export function AdminForumCommunications() {
   const [forumKey, setForumKey] = useState("motorsport-forum-1");
   const [version, setVersion] = useState(1);
   const [docId, setDocId] = useState<string | null>(null);
+  const [roundId, setRoundId] = useState<string | null>(null);
+  const [rounds, setRounds] = useState<{ id: string; title: string; forum_key: string; status: string; deadline: string }[]>([]);
   const [tokens, setTokens] = useState<Record<string, string>>({});
   const [rows, setRows] = useState<Recipient[]>([]);
   const [docs, setDocs] = useState<{ id: string; title: string }[]>([]);
@@ -25,7 +27,8 @@ export function AdminForumCommunications() {
   async function load() {
     setStatus("");
     try {
-      const res = await getForumRecipients({ data: { email_key: key, forum_key: forumKey, version, document_id: docId, tokens } });
+      const res = await getForumRecipients({ data: { email_key: key, forum_key: forumKey, version, document_id: docId, round_id: roundId, tokens } });
+      setRounds((res as any).rounds ?? []);
       setRows(res.recipients as Recipient[]);
       setDocs(res.documents as { id: string; title: string }[]);
       setPicked(new Set((res.recipients as Recipient[]).filter((r) => !r.reason && !r.sent_at).map((r) => r.id)));
@@ -33,7 +36,7 @@ export function AdminForumCommunications() {
       setStatus("Recipients could not be loaded.");
     }
   }
-  useEffect(() => { void load(); }, [key, forumKey, version, docId]);
+  useEffect(() => { void load(); }, [key, forumKey, version, docId, roundId]);
 
   const missing = useMemo(() => def.fields.filter((f) => !tokens[f.token]?.trim()), [def, tokens]);
 
@@ -47,7 +50,7 @@ export function AdminForumCommunications() {
   async function send() {
     setBusy(true);
     try {
-      const res = await sendForumEmail({ data: { email_key: key, forum_key: forumKey, version, document_id: docId, tokens, member_ids: [...picked] } });
+      const res = await sendForumEmail({ data: { email_key: key, forum_key: forumKey, version, document_id: docId, round_id: roundId, tokens, member_ids: [...picked] } });
       setStatus(`${res.sent} sent individually${res.skipped ? `, ${res.skipped} skipped` : ""}.`);
       await load();
     } catch (e) {
@@ -79,6 +82,14 @@ export function AdminForumCommunications() {
             <select value={docId ?? ""} onChange={(e) => setDocId(e.target.value || null)} className="mt-1 h-10 w-full rounded-md border border-input bg-navy px-2 text-sm text-ivory">
               <option value="">Choose a document…</option>
               {docs.map((d) => <option key={d.id} value={d.id}>{d.title}</option>)}
+            </select>
+          </label>
+        )}
+        {(key === "input_requested" || key === "input_reminder") && (
+          <label className="text-xs text-ivory/60 md:col-span-4">Question round (names the Forum and round; reminders skip anyone who already responded)
+            <select value={roundId ?? ""} onChange={(e) => { const r = rounds.find((x) => x.id === e.target.value); setRoundId(e.target.value || null); if (r) { setForumKey(r.forum_key); setTokens({ ...tokens, deadline: new Date(r.deadline).toLocaleString(), round_title: r.title }); } }} className="mt-1 h-10 w-full rounded-md border border-input bg-navy px-2 text-sm text-ivory">
+              <option value="">Choose a round…</option>
+              {rounds.map((r) => <option key={r.id} value={r.id}>{r.title} · {r.forum_key} · {r.status}</option>)}
             </select>
           </label>
         )}

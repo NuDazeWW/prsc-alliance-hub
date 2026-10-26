@@ -32,6 +32,7 @@ import {
 
 import { MemberDocuments } from "@/components/portal/MemberDocuments";
 import { MemberMeetings } from "@/components/portal/MemberMeetings";
+import { MemberExecutiveQuestions } from "@/components/portal/MemberExecutiveQuestions";
 import { LeadershipTeam } from "@/components/portal/LeadershipTeam";
 import { getMyMeetings } from "@/lib/meetings.functions";
 import { getMyDocuments, getMyHeadshotUrl, getPortalSession } from "@/lib/portal.functions";
@@ -427,6 +428,7 @@ function PortalHome() {
             <MemberMeetings asMemberId={asMember} hideIntro />
           </div>
         </section>
+        {!asMember && <MemberExecutiveQuestions />}
         <section id="team" className="min-w-0">
           <LeadershipTeam />
         </section>
