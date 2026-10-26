@@ -68,13 +68,13 @@ describe("profile submission emails", () => {
   });
   it("admin alert carries only name, time and reference", () => {
     const alert = planProfileEmails({ ...base, submit: true, alreadySubmitted: false })[0];
-    strictEqual(Object.keys(alert.tokens).sort().join(), "member_name,submitted_at,submission_id");
+    strictEqual(Object.keys(alert.tokens).sort().join(), "member_name,submission_id,submitted_at");
   });
   it("both go through the shared sender, and a failure does not throw", async () => {
     const sent: string[] = [];
     const r = await deliverProfileEmails(planProfileEmails({ ...base, submit: true, alreadySubmitted: false }), {
-      load: async (k) => (t) => ({ k, t }),
-      send: async (_to, e) => { sent.push(e.k); if (e.k === "profile_received") throw new Error("down"); return true; },
+      load: async (k: string) => (t: Record<string, string>) => ({ k, t }),
+      send: async (_to: string, e: any) => { sent.push(e.k); if (e.k === "profile_received") throw new Error("down"); return true; },
       log: () => {},
     });
     strictEqual(sent.join(), "profile_submitted_admin_alert,profile_received");
