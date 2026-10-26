@@ -72,6 +72,22 @@ export function forumCleared(status: string | null | undefined) {
   return status === "cleared" || status === "cleared_restricted";
 }
 
+export type AppointmentStatus = "candidate" | "pending_appointment" | "appointed";
+
+/** Read-only designation. Activation is the existing administratively verified appointment record. */
+export function entityAppointmentStatus(input: {
+  activatedAt?: string | null;
+  acceptanceComplete: boolean;
+  roleReviewStatus?: string | null;
+  participatesInForum?: boolean | null;
+  forumClearanceStatus?: string | null;
+}): AppointmentStatus {
+  if (input.activatedAt) return "appointed";
+  const reviewsClear = !roleReviewBlocks(input.roleReviewStatus) &&
+    (input.participatesInForum === false || forumCleared(input.forumClearanceStatus));
+  return input.acceptanceComplete && reviewsClear ? "pending_appointment" : "candidate";
+}
+
 export type VisibilityDoc = { classification: string; superseded_at: string | null; is_forum_prep: boolean; journey_stage?: number | null; member_specific?: boolean };
 export type VisibilityMember = { nda_verified_at: string | null; forum_clearance_status: string; is_candidate?: boolean };
 

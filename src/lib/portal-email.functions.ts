@@ -3,6 +3,7 @@ import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { applyTokens, buildMemberTokens, parseSignatures, renderBrandedEmail, renderBrandedEmailText } from "@/lib/branded-email";
 import { SYSTEM_EMAIL_DEFAULTS } from "@/lib/system-email-defaults";
+import { withAppointmentProgress } from "@/lib/portal.functions";
 
 export type EmailTemplate = {
   id: string;
@@ -163,7 +164,7 @@ export const sendMemberEmail = createServerFn({ method: "POST" })
     await assertAdmin(context);
     const { data: members, error } = await context.supabase
       .from("portal_members")
-      .select("id, email, first_name, last_name, organization, title, entity, role")
+      .select("*")
       .in("id", data.member_ids);
     if (error) throw error;
     if (!members?.length) throw new Error("No recipients found");
@@ -178,7 +179,7 @@ export const sendMemberEmail = createServerFn({ method: "POST" })
     const signatures = parseSignatures(data.signatures);
 
     for (const member of members as any[]) {
-      const tokens = buildMemberTokens(member);
+      const tokens = buildMemberTokens(await withAppointmentProgress(context.supabase, member));
       const subject = applyTokens(data.subject, tokens);
       const composed = {
         subject,

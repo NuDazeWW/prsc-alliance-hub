@@ -16,6 +16,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { memberDesignation } from "@/lib/member-role-labels";
+import { getAdminOverview } from "@/lib/portal.functions";
 
 type Draft = { id?: string; name: string; title: string; affiliation: string; bio: string; member_id: string | null; visible: boolean; sort_order: number; photo_path: string | null; photo_url?: string | null };
 
@@ -27,8 +28,8 @@ export function AdminLeadership() {
   const members = useQuery({
     queryKey: ["leadership-member-options"],
     queryFn: async () => {
-      const { data } = await supabase.from("portal_members").select("id, first_name, last_name, entity, role, is_candidate, forum_clearance_status, prsc_activated_at, dis_activated_at").neq("status", "revoked").order("last_name");
-      return data ?? [];
+      const data = await getAdminOverview();
+      return data.members.filter((m) => m.status !== "revoked").sort((a, b) => a.last_name.localeCompare(b.last_name));
     },
   });
   const [settings, setSettings] = useState({ eyebrow: "", heading: "", subtext: "" });

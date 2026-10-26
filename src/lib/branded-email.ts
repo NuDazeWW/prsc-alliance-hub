@@ -67,6 +67,9 @@ export function buildMemberTokens(member: {
   forum_clearance_status?: string | null;
   prsc_activated_at?: string | null;
   dis_activated_at?: string | null;
+  role_review_status?: string | null;
+  participates_in_forum?: boolean | null;
+  acceptance_complete?: { prsc: boolean; dis: boolean };
 }): EmailTokens {
   const entity = String(member.entity ?? "");
   const role = String(member.role ?? "");

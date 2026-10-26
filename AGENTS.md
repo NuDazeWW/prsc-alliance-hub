@@ -10,6 +10,7 @@
 <!-- LOVABLE:END -->
 
 - Use the shared member-role presentation helper for member designations across portal, admin, and emails; stored role values and permissions remain independent of display wording.
+- Derive entity acceptance completion from applicable active Stage 2–3 documents in journey.ts, then apply governance.ts appointment review gates through memberDesignation; hydrate reads with withAppointmentProgress. Why: independent PRSC/DIS designations stay consistent without writes or automatic activation.
 - The Orientation Hub owns a fixed-body scroll lock with cleanup, and resets its dialog scroll before painting each view; keep background position stable during navigation.
 
 - Automatic emails load admin-editable copy by `system_key` via `loadSystemEmail`, with originals in `src/lib/system-email-defaults.ts`; edit wording there, not inline in send code, so admin edits and Reset keep working.
