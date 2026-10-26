@@ -69,7 +69,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { InviteEmail, capitalizeInviteName } from "@/lib/email-templates/invite";
 import { roleCombinationTier } from "@/lib/governance";
 import { INVITE_EMAIL_PREVIEW_URL, INVITE_EMAIL_REPLY_TO, INVITE_EMAIL_SUBJECT } from "@/lib/invite-email-config";
-import { memberRoleLabel, memberDesignation } from "@/lib/member-role-labels";
+import { memberRoleLabel, memberDesignation, memberCandidateLabel } from "@/lib/member-role-labels";
 import { STAGES, type JourneyStatus } from "@/lib/journey";
 import type { InviteEmailReview } from "@/lib/portal-invite-email.functions";
 import { MemberDetailsEditor } from "@/components/portal/MemberDetailsEditor";
@@ -291,7 +291,7 @@ function parseMemberList(text: string): { rows: StagedRow[]; errors: string[] } 
 
     const entityRaw = record["entity"]?.toLowerCase();
     const roleRaw = record["role"]?.toLowerCase().replace(/[\s-]+/g, "_");
-    const isCandidate = roleRaw === "candidate" || roleRaw === "forum_candidate";
+    const isCandidate = ["candidate", "forum_candidate", "forum_invitee", "united_forum_invitee"].includes(roleRaw ?? "");
     const entity = entityRaw === "prsc" || entityRaw === "dis" || entityRaw === "both" ? entityRaw : isCandidate ? "prsc" : null;
     const mixed: Record<string, MemberRow["role"]> = {
       prsc_board_dis_advisor: "prsc_board_dis_advisor", prsc_board_member_dis_advisor: "prsc_board_dis_advisor", "prsc_board_+_dis_advisor": "prsc_board_dis_advisor",
@@ -302,7 +302,7 @@ function parseMemberList(text: string): { rows: StagedRow[]; errors: string[] } 
     if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(record["email"] ?? "")) return errors.push(`${label}: a valid email is required.`);
     if (!record["first_name"] || !record["last_name"]) return errors.push(`${label}: first and last name are required.`);
     if (!entity) return errors.push(`${label}: designation must be PRSC, DIS, or Both.`);
-    if (!role) return errors.push(`${label}: role must be candidate, board_member, advisor, methodology_committee, prsc_board_dis_advisor, or prsc_advisor_dis_board.`);
+    if (!role) return errors.push(`${label}: role must be forum_invitee, board_member, advisor, methodology_committee, prsc_board_dis_advisor, or prsc_advisor_dis_board.`);
     if (role.startsWith("prsc_") && entity !== "both") return errors.push(`${label}: mixed PRSC/DIS roles require designation Both.`);
     const why = (record["why_you"] ?? "").trim();
     const background = (record["background"] ?? "").trim().slice(0, 8000);
@@ -709,7 +709,7 @@ export function AdminCenter({ page }: { page: "overview" | "send" }) {
           firstName={inviteDraft.first_name}
           recipientEmail={inviteDraft.email}
           entity={inviteDraft.entity}
-          roleLabel={memberRoleLabel(inviteDraft.role, inviteDraft.entity, !!inviteDraft.is_candidate)}
+          roleLabel={memberCandidateLabel(inviteDraft.role, inviteDraft.entity, !!inviteDraft.is_candidate)}
           copy={inviteTemplate}
           meetingBlock={invitePollBlock}
           whyYou={inviteDraft.why_you}
@@ -2280,7 +2280,7 @@ export function AdminCenter({ page }: { page: "overview" | "send" }) {
               </div>
               <div className="bg-navy px-5 py-3">
                 <p className="text-xs uppercase tracking-[0.14em] text-gold">Company &amp; role</p>
-                <p className="mt-1 text-base text-ivory">{memberRoleLabel(inviteDraft.role, inviteDraft.entity, !!inviteDraft.is_candidate)}</p>
+                <p className="mt-1 text-base text-ivory">{memberCandidateLabel(inviteDraft.role, inviteDraft.entity, !!inviteDraft.is_candidate)}</p>
               </div>
               <div className="bg-navy px-5 py-3">
                 <p className="text-xs uppercase tracking-[0.14em] text-gold">Logos shown</p>

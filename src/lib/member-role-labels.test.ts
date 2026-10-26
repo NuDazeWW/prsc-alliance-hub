@@ -1,6 +1,6 @@
 import { describe, test } from "node:test";
 import { deepStrictEqual } from "node:assert";
-import { memberRoleLabels, memberRoleLabel } from "./member-role-labels";
+import { memberRoleLabels, memberRoleLabel, memberDesignation } from "./member-role-labels";
 
 describe("entity-specific member capacities", () => {
   test("PRSC advisor", () => deepStrictEqual(memberRoleLabels("advisor", "prsc"), ["PRSC Advisor"]));
@@ -27,7 +27,12 @@ describe("role chips and role details", () => {
 
 describe("forum candidates", () => {
   test("shows the Forum candidate designation instead of any PRSC/DIS seat", () => {
-    deepStrictEqual(memberRoleLabel("advisor", "prsc", true), "Readiness Vanguard Forum Candidate");
+    deepStrictEqual(memberRoleLabel("advisor", "prsc", true), "United Forum Invitee");
+    deepStrictEqual(memberDesignation({ role: "advisor", entity: "prsc", is_candidate: true, forum_clearance_status: "cleared" }), "Forum Participant");
+  });
+  test("shows a PRSC/DIS title only after that entity's activation", () => {
+    deepStrictEqual(memberDesignation({ role: "board_member", entity: "both" }), "PRSC Board Candidate / DIS Board Candidate");
+    deepStrictEqual(memberDesignation({ role: "board_member", entity: "both", prsc_activated_at: "2026-10-01" }), "PRSC Board / DIS Board Candidate");
     deepStrictEqual(memberRoleKinds("board_member", true, true), []);
   });
 });
