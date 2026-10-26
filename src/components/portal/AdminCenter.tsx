@@ -329,6 +329,10 @@ function downloadListTemplate() {
   URL.revokeObjectURL(url);
 }
 
+type InviteGov = { nda_confirmed: boolean; nda_reference: string; nda_entities: "" | "prsc" | "dis" | "both"; nda_scope: string; review_notes: string; prsc_scope: string; dis_scope: string; conflict_controls: string };
+/** Fresh per-recipient governance state; NDA coverage is never preselected. */
+const EMPTY_INVITE_GOV: InviteGov = { nda_confirmed: false, nda_reference: "", nda_entities: "", nda_scope: "", review_notes: "", prsc_scope: "", dis_scope: "", conflict_controls: "" };
+
 export function AdminCenter({ page }: { page: "overview" | "send" }) {
   const [hasSession, setHasSession] = useState(false);
   useEffect(() => {
@@ -356,7 +360,7 @@ export function AdminCenter({ page }: { page: "overview" | "send" }) {
   });
   const openPolls: any[] = (polls.data?.polls ?? []).filter((p: any) => p.status === "open");
   const [invitePollId, setInvitePollId] = useState("");
-  const [inviteGov, setInviteGov] = useState({ nda_confirmed: false, nda_reference: "", nda_entities: "prsc" as "prsc" | "dis" | "both", nda_scope: "", review_notes: "", prsc_scope: "", dis_scope: "", conflict_controls: "" });
+  const [inviteGov, setInviteGov] = useState(EMPTY_INVITE_GOV);
   const [inviteCollapsed, setInviteCollapsed] = useStoredFlag("admin.inviteCollapsed");
   const PLACE: Record<"overview" | "send", Record<number, string>> = {
     overview: {
@@ -685,13 +689,14 @@ export function AdminCenter({ page }: { page: "overview" | "send" }) {
     try {
       const needsReview = !inviteDraft.is_candidate && roleCombinationTier(inviteDraft.entity, inviteDraft.role, inviteDraft.is_methodology_committee ?? false).tier === "review";
       await invitePortalMember({ data: { ...inviteDraft, poll_id: invitePollId || null,
-        nda_confirmed: inviteGov.nda_confirmed, nda_reference: inviteGov.nda_reference, nda_entities: inviteGov.nda_entities, nda_scope: inviteGov.nda_scope,
+        nda_confirmed: inviteGov.nda_confirmed, nda_reference: inviteGov.nda_reference, nda_entities: inviteGov.nda_entities || undefined, nda_scope: inviteGov.nda_scope,
         role_review: needsReview ? { decision: "approved", notes: inviteGov.review_notes, prsc_scope: inviteGov.prsc_scope, dis_scope: inviteGov.dis_scope, conflict_controls: inviteGov.conflict_controls } : undefined } });
       setStatus(invitePollId ? "Invitation sent with the meeting dates attached." : "Invitation sent.");
       setInvitePollId("");
       void polls.refetch();
       form.reset();
       setInviteDraft(emptyInvite);
+      setInviteGov(EMPTY_INVITE_GOV); // never carry one recipient's NDA or review data to the next
       await overview.refetch();
     } catch (error) {
       setStatus(error instanceof Error ? error.message : "Invitation failed.");
@@ -1090,8 +1095,8 @@ export function AdminCenter({ page }: { page: "overview" | "send" }) {
                 <div className="grid gap-3 border border-gold/30 p-4 sm:col-span-2 sm:grid-cols-3">
                   <span className="text-base font-medium text-ivory/90 sm:col-span-3">NDA verification (required before inviting)</span>
                   <Input value={inviteGov.nda_reference} onChange={(e) => setInviteGov({ ...inviteGov, nda_reference: e.target.value })} placeholder="NDA reference or storage location" className="text-base" />
-                  <select value={inviteGov.nda_entities} onChange={(e) => setInviteGov({ ...inviteGov, nda_entities: e.target.value as "prsc" | "dis" | "both" })} aria-label="Entities the NDA covers" className="h-9 w-full rounded-md border border-input bg-navy px-3 text-base">
-                    <option value="prsc">NDA covers PRSC</option><option value="dis">NDA covers DIS</option><option value="both">NDA covers PRSC and DIS</option>
+                  <select value={inviteGov.nda_entities} onChange={(e) => setInviteGov({ ...inviteGov, nda_entities: e.target.value as InviteGov["nda_entities"] })} aria-label="Entities the NDA covers" className="h-9 w-full rounded-md border border-input bg-navy px-3 text-base">
+                    <option value="">Choose NDA coverage…</option><option value="prsc">NDA covers PRSC</option><option value="dis">NDA covers DIS</option><option value="both">NDA covers PRSC and DIS</option>
                   </select>
                   <Input value={inviteGov.nda_scope} onChange={(e) => setInviteGov({ ...inviteGov, nda_scope: e.target.value })} placeholder="Information-sharing scope" className="text-base" />
                   <label className="flex items-center gap-3 sm:col-span-3"><input type="checkbox" checked={inviteGov.nda_confirmed} onChange={(e) => setInviteGov({ ...inviteGov, nda_confirmed: e.target.checked })} className="h-4 w-4" /><span className="text-base text-ivory/85">I verified this executed NDA today</span></label>

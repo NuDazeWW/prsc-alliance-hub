@@ -1,4 +1,6 @@
 import { describe, it } from "node:test";
+const none = { released: { prsc: false, dis: false } };
+const both = { released: { prsc: true, dis: true } };
 import { strictEqual } from "node:assert";
 import { entityAcceptanceComplete, journeyStatus, lockedDocumentIds, type JourneyDoc } from "./journey";
 
@@ -7,16 +9,16 @@ const docs = [d("f1", 1, "shared", 0), d("f2", 1, "shared", 1), d("p2", 2, "prsc
 
 describe("journey sequencing", () => {
   it("unlocks only the first Forum document at start", () => {
-    const locked = lockedDocumentIds(docs, new Set(), "prsc");
+    const locked = lockedDocumentIds(docs, new Set(), "prsc", none);
     strictEqual(locked.has("f1"), false);
     strictEqual(locked.has("f2"), true);
     strictEqual(locked.has("p2"), true);
   });
   it("one-off records are never locked", () => {
-    strictEqual(lockedDocumentIds(docs, new Set(), "prsc").has("x"), false);
+    strictEqual(lockedDocumentIds(docs, new Set(), "prsc", none).has("x"), false);
   });
-  it("entity stages open after the Forum is cleared", () => {
-    const locked = lockedDocumentIds(docs, new Set(["f1", "f2"]), "both");
+  it("entity stages open after explicit release", () => {
+    const locked = lockedDocumentIds(docs, new Set(["f1", "f2"]), "both", both);
     strictEqual(locked.has("p2"), false);
     strictEqual(locked.has("dis2"), false);
     strictEqual(locked.has("p3"), true);
@@ -27,11 +29,12 @@ describe("journey sequencing", () => {
     strictEqual(journeyStatus(prscDocs, done, "prsc", { prsc: null, dis: null }).label, "Pending Activation");
     strictEqual(journeyStatus(prscDocs, done, "prsc", { prsc: "2026-01-02", dis: null }).label, "Fully Activated");
   });
-  it("non-Forum members start in Stage 2 without any Forum documents", () => {
+  it("non-Forum members show Stage 2 as current but documents stay locked until release", () => {
     const entityDocs = docs.filter((x) => x.journey_stage !== 1 && x.id !== "dis2");
     const st = journeyStatus(entityDocs, new Set(), "prsc", { prsc: null, dis: null }, false);
     strictEqual(st.currentStage, 2);
-    strictEqual(lockedDocumentIds(entityDocs, new Set(), "prsc").has("p2"), false);
+    strictEqual(lockedDocumentIds(entityDocs, new Set(), "prsc", none).has("p2"), true);
+    strictEqual(lockedDocumentIds(entityDocs, new Set(), "prsc", both).has("p2"), false);
   });
 });
 
@@ -41,7 +44,7 @@ describe("forum clearance", () => {
     const st = journeyStatus(docs, done, "prsc", { prsc: null, dis: null }, true, false);
     strictEqual(st.forumCleared, false);
     strictEqual(st.label, "Clearance Pending Review");
-    strictEqual(lockedDocumentIds(docs, done, "prsc", false).has("p2"), true);
+    strictEqual(lockedDocumentIds(docs, done, "prsc", none).has("p2"), true);
   });
 });
 
@@ -64,5 +67,42 @@ describe("per-entity Stage 3 acceptance", () => {
     const legacy = [d("accept", 3, null)];
     strictEqual(entityAcceptanceComplete(legacy, new Set(["accept"]), "dis").dis, true);
     strictEqual(entityAcceptanceComplete(legacy, new Set(["accept"]), "both").dis, false);
+  });
+});
+
+describe("independent Forum and entity onboarding", () => {
+  const set = [d("f1", 1, "shared"), d("p2", 2, "prsc"), d("p2b", 2, "prsc", 1), d("p3", 3, "prsc"), d("d2", 2, "dis")];
+  it("1. Forum invitee with no entity release: Stage 1 open, Stage 2 locked", () => {
+    const l = lockedDocumentIds(set, new Set(), "prsc", none);
+    strictEqual(l.has("f1"), false);
+    strictEqual(l.has("p2"), true);
+  });
+  it("2. Forum-cleared member without release keeps Stage 2 locked", () => {
+    strictEqual(lockedDocumentIds(set, new Set(["f1"]), "prsc", none).has("p2"), true);
+  });
+  it("3. Forum opt-out without release keeps Stage 2 locked", () => {
+    const optOut = set.filter((x) => x.journey_stage !== 1);
+    strictEqual(lockedDocumentIds(optOut, new Set(), "prsc", none).has("p2"), true);
+  });
+  it("4. Forum opt-out with explicit release opens only the first Stage 2 document", () => {
+    const optOut = set.filter((x) => x.journey_stage !== 1);
+    const l = lockedDocumentIds(optOut, new Set(), "prsc", { released: { prsc: true, dis: false } });
+    strictEqual(l.has("p2"), false);
+    strictEqual(l.has("p2b"), true);
+    strictEqual(l.has("p3"), true);
+  });
+  it("5. Forum participant with release opens Stage 2 without Forum completion", () => {
+    strictEqual(lockedDocumentIds(set, new Set(), "both", { released: { prsc: true, dis: false } }).has("p2"), false);
+  });
+  it("6. PRSC released, DIS not: only PRSC opens", () => {
+    const l = lockedDocumentIds(set, new Set(), "both", { released: { prsc: true, dis: false } });
+    strictEqual(l.has("p2"), false);
+    strictEqual(l.has("d2"), true);
+  });
+  it("9. release alone does not complete Stage 3 or acceptance", () => {
+    strictEqual(entityAcceptanceComplete(set, new Set(), "prsc").prsc, false);
+  });
+  it("historical completions stay unlocked without a release", () => {
+    strictEqual(lockedDocumentIds(set, new Set(["p2"]), "prsc", none).has("p2"), false);
   });
 });

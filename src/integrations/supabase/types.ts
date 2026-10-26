@@ -101,6 +101,56 @@ export type Database = {
         }
         Relationships: []
       }
+      entity_onboarding_releases: {
+        Row: {
+          documents: Json
+          entity: string
+          id: string
+          member_id: string
+          notified_at: string | null
+          notify_attempts: number
+          notify_error: string | null
+          notify_status: string
+          released_at: string
+          released_by: string
+          role: string
+        }
+        Insert: {
+          documents?: Json
+          entity: string
+          id?: string
+          member_id: string
+          notified_at?: string | null
+          notify_attempts?: number
+          notify_error?: string | null
+          notify_status?: string
+          released_at?: string
+          released_by: string
+          role: string
+        }
+        Update: {
+          documents?: Json
+          entity?: string
+          id?: string
+          member_id?: string
+          notified_at?: string | null
+          notify_attempts?: number
+          notify_error?: string | null
+          notify_status?: string
+          released_at?: string
+          released_by?: string
+          role?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "entity_onboarding_releases_member_id_fkey"
+            columns: ["member_id"]
+            isOneToOne: false
+            referencedRelation: "portal_members"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       forum_communication_sends: {
         Row: {
           created_at: string

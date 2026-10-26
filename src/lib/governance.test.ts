@@ -92,3 +92,14 @@ describe("Pending Appointment review gates", () => {
   it("Forum opt-outs need no Forum clearance", () => strictEqual(entityAppointmentStatus({ ...complete, participatesInForum: false, forumClearanceStatus: "not_reviewed" }), "pending_appointment"));
   it("only existing verified administrative activation produces Appointed", () => strictEqual(entityAppointmentStatus({ ...complete, activatedAt: "2026-10-26" }), "appointed"));
 });
+
+import { stage2ReleaseProblems } from "./governance";
+describe("Stage 2 release gate", () => {
+  const ok = { target: "prsc" as const, memberEntity: "prsc", role: "advisor", isCandidate: false, nda: { verified_at: "2026-01-01", verified_by: "a", reference: "ref", entities: "prsc", scope: "full" }, roleReviewStatus: "not_required", stage2DocCount: 1, alreadyReleased: false };
+  it("allows an eligible release", () => { strictEqual(stage2ReleaseProblems(ok).length, 0); });
+  it("blocks a Forum-only candidate with no intended role", () => { strictEqual(stage2ReleaseProblems({ ...ok, isCandidate: true }).length > 0, true); });
+  it("7. blocks an unresolved cross-entity review", () => { strictEqual(stage2ReleaseProblems({ ...ok, memberEntity: "both", roleReviewStatus: "pending", nda: { ...ok.nda, entities: "both" } }).length > 0, true); });
+  it("blocks mismatched NDA coverage", () => { strictEqual(stage2ReleaseProblems({ ...ok, target: "dis", memberEntity: "both", nda: { ...ok.nda, entities: "prsc" }, roleReviewStatus: "approved" }).some((p) => /NDA/.test(p)), true); });
+  it("8. blocks a second release of the same entity", () => { strictEqual(stage2ReleaseProblems({ ...ok, alreadyReleased: true }).length > 0, true); });
+  it("blocks when no Stage 2 documents exist", () => { strictEqual(stage2ReleaseProblems({ ...ok, stage2DocCount: 0 }).length > 0, true); });
+});

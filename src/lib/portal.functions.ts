@@ -138,66 +138,24 @@ export const saveMyProfile = createServerFn({ method: "POST" })
     }
     if (data.submit && !alreadySubmitted) {
       await context.supabase.from("portal_activity").insert({ member_id: member.id, actor_user_id: context.userId, event_type: "profile_submitted" });
-      const apiKey = process.env["LOVABLE_API_KEY"];
-      if (apiKey) {
-        const fullName = `${member.first_name ?? ""} ${member.last_name ?? ""}`.trim() || member.email;
-        const roleLabel = memberRoleLabel(member.role, member.entity, !!(member as any).is_candidate);
-        const entityLabel = member.entity === "both" ? "PRSC and DIS" : String(member.entity).toUpperCase();
-        const subject = `Profile submitted — ${fullName}`;
-        const email = {
-          subject,
-          eyebrow: "Profile received",
-          heading: `${fullName} has submitted their profile`,
-          body: `${fullName} (${roleLabel}) has completed and submitted their private profile.\n\nThe profile is now marked Profile Received. Review their answers and load the next-step documents in the administrator center.\n\nPreferred email: ${data.preferred_email}\nPreferred phone: ${data.preferred_phone || "Not provided"}\nContact requested: ${data.contact_requested ? "Yes" : "No"}`,
-          ctaLabel: "Review Profile & Prepare Next Step",
-          ctaUrl: "https://access.prscstandards.org/admin",
-          ctaSubtext: "Open the member record, review the submitted profile, then upload or release the appropriate documents.",
-          signatures: [],
-        };
-        try {
-          const { sendLovableEmail } = await import("@lovable.dev/email-js");
-          await sendLovableEmail(
-            {
-              to: "admin@readinessterminal.com",
-              from: "PRSC Board & Advisor Center <no-reply@readinessterminal.com>",
-              sender_domain: "notify.readinessterminal.com",
-              reply_to: "info@readinessterminal.com",
-              subject,
-              html: renderBrandedEmail(email),
-              text: renderBrandedEmailText(email),
-              label: "profile-submitted-admin-alert",
-              purpose: "transactional",
-              idempotency_key: `profile-submitted-admin-${member.id}-${crypto.randomUUID()}`,
-            },
-            { apiKey, sendUrl: process.env["LOVABLE_SEND_URL"] },
-          );
-        } catch (notificationError) {
-          console.error("Profile submission admin notification failed", notificationError);
-        }
-        try {
-          const { sendLovableEmail } = await import("@lovable.dev/email-js");
-          const firstName = member.first_name?.trim() || "there";
-          const { loadSystemEmail } = await import("@/lib/portal-notify.server");
-          void entityLabel;
-          const confirmation = (await loadSystemEmail("profile_received"))({ first_name: firstName, role: roleLabel });
-          await sendLovableEmail(
-            {
-              to: member.email,
-              from: "PRSC Board & Advisor Center <no-reply@readinessterminal.com>",
-              sender_domain: "notify.readinessterminal.com",
-              reply_to: "info@readinessterminal.com",
-              subject: confirmation.subject,
-              html: renderBrandedEmail(confirmation),
-              text: renderBrandedEmailText(confirmation),
-              label: "profile-submitted-member-confirmation",
-              purpose: "transactional",
-              idempotency_key: `profile-submitted-member-${member.id}-${crypto.randomUUID()}`,
-            },
-            { apiKey, sendUrl: process.env["LOVABLE_SEND_URL"] },
-          );
-        } catch (confirmationError) {
-          console.error("Profile submission member confirmation failed", confirmationError);
-        }
+      // Stable per-submission key: a retry of the same submission never sends twice.
+      const submissionId = `${member.id}-${String((payload as any).submitted_at)}`;
+      const fullName = `${member.first_name ?? ""} ${member.last_name ?? ""}`.trim() || member.email;
+      const roleLabel = memberRoleLabel(member.role, member.entity, !!(member as any).is_candidate);
+      const { loadSystemEmail, sendPortalEmail } = await import("@/lib/portal-notify.server");
+      try {
+        const alert = (await loadSystemEmail("profile_submitted_admin_alert"))({
+          member_name: fullName, submitted_at: new Date((payload as any).submitted_at).toUTCString(), submission_id: submissionId,
+        });
+        await sendPortalEmail(ADMIN_EMAIL, alert, "profile-submitted-admin-alert", `profile-submitted-admin-${submissionId}`);
+      } catch (notificationError) {
+        console.error("Profile submission admin notification failed", notificationError);
+      }
+      try {
+        const confirmation = (await loadSystemEmail("profile_received"))({ first_name: member.first_name?.trim() || "there", role: roleLabel });
+        await sendPortalEmail(member.email, confirmation, "profile-submitted-member-confirmation", `profile-submitted-member-${submissionId}`);
+      } catch (confirmationError) {
+        console.error("Profile submission member confirmation failed", confirmationError);
       }
     }
     return { ok: true, submitted: data.submit };
@@ -750,6 +708,13 @@ export async function withAppointmentProgress<T extends DocMember & DesignationM
   return { ...member, acceptance_complete: entityAcceptanceComplete(docs.filter(isActive), done, member.entity ?? "") };
 }
 
+async function entityReleases(client: any, memberId: string) {
+  const { data, error } = await client.from("entity_onboarding_releases").select("*").eq("member_id", memberId);
+  if (error) throw error;
+  const rows = (data ?? []) as any[];
+  return { rows, released: { prsc: rows.some((r) => r.entity === "prsc"), dis: rows.some((r) => r.entity === "dis") } };
+}
+
 async function signDocumentUrls(documents: PortalDocumentRecord[]) {
   const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
   return Promise.all(
@@ -792,6 +757,7 @@ export const getMyDocuments = createServerFn({ method: "GET" })
       forumCleared: forumCleared(member.forum_clearance_status as string),
       ndaVerified: !!member.nda_verified_at,
       activation,
+      entityReleased: (await entityReleases(context.supabase, member.id as string)).released,
       released: true,
       documents: await signDocumentUrls(docs),
       acknowledged: completions.map((a) => a.document_id),
@@ -879,8 +845,8 @@ export const acknowledgeDocument = createServerFn({ method: "POST" })
     if (!doc) throw new Error("Document unavailable");
     const isConflictForm = /conflict|recusal/i.test(doc.title);
     if (isConflictForm && !data.conflict_answer) throw new Error("Choose your conflict answer before signing");
-    const cleared = forumCleared(member.forum_clearance_status as string);
-    if (lockedDocumentIds(docs, priorDone, member.entity, cleared).has(doc.id)) throw new Error("Please complete the earlier documents in your journey first");
+    const { released } = await entityReleases(context.supabase, member.id);
+    if (lockedDocumentIds(docs, priorDone, member.entity, { released }).has(doc.id)) throw new Error("Please complete the earlier documents in your journey first");
     if (data.kind === "signed") {
       if (!data.signed_name || data.signed_name.length < 2) throw new Error("Type your full legal name to sign");
       if (!data.signature_data?.startsWith("data:image/png;base64,")) throw new Error("Add your signature");
@@ -924,9 +890,9 @@ export const acknowledgeDocument = createServerFn({ method: "POST" })
     }
     await maybeCompletePackage(member as any);
     // Sequential journey: tell the member when this completion unlocks the next document.
-    const before = lockedDocumentIds(docs, priorDone, member.entity, cleared);
+    const before = lockedDocumentIds(docs, priorDone, member.entity, { released });
     const afterDone = new Set(priorDone).add(doc.id);
-    const after = lockedDocumentIds(docs, afterDone, member.entity, cleared);
+    const after = lockedDocumentIds(docs, afterDone, member.entity, { released });
     const unlocked = docs.filter((d) => before.has(d.id) && !after.has(d.id) && !afterDone.has(d.id));
     if (unlocked.length) {
       const { sendPortalEmail } = await import("@/lib/portal-notify.server");
@@ -1078,6 +1044,7 @@ export const listDocumentsForAdmin = createServerFn({ method: "GET" })
       entity: member?.entity ?? "prsc",
       forum: (member as any)?.participates_in_forum !== false,
       forumCleared: forumCleared((member as any)?.forum_clearance_status),
+      entityReleases: data.member_id ? (await entityReleases(context.supabase, data.member_id)).rows : [],
       activation: { prsc: (member as any)?.prsc_activated_at ?? null, dis: (member as any)?.dis_activated_at ?? null } as { prsc: string | null; dis: string | null },
     };
   });
@@ -1347,4 +1314,69 @@ export const updateMemberDetails = createServerFn({ method: "POST" })
       metadata: { is_candidate: data.is_candidate, entity, role, is_methodology_committee: committee, promoted: m.is_candidate && !data.is_candidate, previous: { is_candidate: m.is_candidate, entity: m.entity, role: m.role, is_methodology_committee: m.is_methodology_committee } },
     });
     return { ok: true };
+  });
+
+async function sendReleaseNotice(supabaseAdmin: any, release: any) {
+  const { data: m } = await supabaseAdmin.from("portal_members").select("email, first_name").eq("id", release.member_id).single();
+  const { loadSystemEmail, sendPortalEmail } = await import("@/lib/portal-notify.server");
+  const docs = (release.documents ?? []) as { title: string }[];
+  const email = (await loadSystemEmail("entity_documents_ready"))({
+    first_name: m?.first_name?.trim() || "there",
+    entity: release.entity.toUpperCase(),
+    stage_name: "Stage 2 · Entity Orientation",
+    action_summary: docs[0]?.title ?? "Review your onboarding materials",
+    due_date: "",
+  });
+  let ok = false;
+  let err: string | null = null;
+  try { ok = await sendPortalEmail(m.email, email, "entity-documents-ready", `entity-release-${release.id}`); }
+  catch (e) { err = e instanceof Error ? e.message : String(e); }
+  if (!ok && !err) err = "Email delivery did not complete";
+  await supabaseAdmin.from("entity_onboarding_releases").update({
+    notify_status: ok ? "sent" : "failed", notify_error: ok ? null : err,
+    notify_attempts: (release.notify_attempts ?? 0) + 1, notified_at: ok ? new Date().toISOString() : null,
+  }).eq("id", release.id);
+  return { notified: ok, error: ok ? null : err };
+}
+
+/** Explicit admin start of one entity's Stage 2. Never advances Stage 3 or activates a role. */
+export const releaseEntityOnboarding = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input) => z.object({ member_id: z.string().uuid(), entity: z.enum(["prsc", "dis"]) }).parse(input))
+  .handler(async ({ context, data }) => {
+    await assertAdmin(context);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { stage2ReleaseProblems } = await import("@/lib/governance");
+    const { data: m } = await supabaseAdmin.from("portal_members").select("*").eq("id", data.member_id).single();
+    if (!m) throw new Error("Member not found");
+    const first = memberTracksFor(m.entity)[0];
+    const docs = (await applicableDocuments(supabaseAdmin, m as any)).filter(isActive)
+      .filter((d: any) => d.journey_stage === 2 && ((d.journey_track && d.journey_track !== "shared" ? d.journey_track : first) === data.entity));
+    const { released } = await entityReleases(supabaseAdmin, m.id);
+    const problems = stage2ReleaseProblems({
+      target: data.entity, memberEntity: m.entity, role: m.role, isCandidate: !!m.is_candidate, isCommittee: !!m.is_methodology_committee,
+      nda: { verified_at: m.nda_verified_at, verified_by: m.nda_verified_by, reference: m.nda_reference, entities: m.nda_entities, scope: m.nda_scope },
+      roleReviewStatus: m.role_review_status, stage2DocCount: docs.length, alreadyReleased: released[data.entity],
+    });
+    if (problems.length) throw new Error(`Cannot start ${data.entity.toUpperCase()} onboarding: ${problems.join("; ")}`);
+    if (!m.documents_released_at) await supabaseAdmin.from("portal_members").update({ documents_released_at: new Date().toISOString() }).eq("id", m.id);
+    const { data: release, error } = await supabaseAdmin.from("entity_onboarding_releases").insert({
+      member_id: m.id, entity: data.entity, role: m.role, released_by: context.userId,
+      documents: docs.map((d: any) => ({ id: d.id, title: d.title, version: d.version_label ?? null })),
+    }).select("*").single();
+    if (error) throw error;
+    await supabaseAdmin.from("portal_activity").insert({ member_id: m.id, actor_user_id: context.userId, event_type: "entity_onboarding_released", metadata: { entity: data.entity, release_id: release.id, documents: docs.length } });
+    return { ok: true, ...(await sendReleaseNotice(supabaseAdmin, release)) };
+  });
+
+export const retryReleaseNotice = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input) => z.object({ release_id: z.string().uuid() }).parse(input))
+  .handler(async ({ context, data }) => {
+    await assertAdmin(context);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { data: release } = await supabaseAdmin.from("entity_onboarding_releases").select("*").eq("id", data.release_id).single();
+    if (!release) throw new Error("Release not found");
+    if (release.notify_status === "sent") return { notified: true, error: null };
+    return sendReleaseNotice(supabaseAdmin, release);
   });
