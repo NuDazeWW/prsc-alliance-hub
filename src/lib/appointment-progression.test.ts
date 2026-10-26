@@ -35,7 +35,7 @@ describe("complete appointment progression for each entity", () => {
   });
   it("a revised required disclosure prevents pending until the new version is completed", () => {
     const requirements = [
-      ...docs,
+      ...docs.map((doc) => ({ ...doc, superseded_at: null })),
       { ...docs[1], id: "old-disclosure", superseded_at: "2026-10-26" },
       { ...docs[1], id: "new-disclosure", superseded_at: null },
     ].filter(isActive);
