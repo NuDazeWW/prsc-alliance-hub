@@ -69,7 +69,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { InviteEmail, capitalizeInviteName } from "@/lib/email-templates/invite";
 import { roleCombinationTier } from "@/lib/governance";
 import { INVITE_EMAIL_PREVIEW_URL, INVITE_EMAIL_REPLY_TO, INVITE_EMAIL_SUBJECT } from "@/lib/invite-email-config";
-import { memberRoleLabel } from "@/lib/member-role-labels";
+import { memberRoleLabel, memberDesignation, memberCandidateLabel } from "@/lib/member-role-labels";
 import { STAGES, type JourneyStatus } from "@/lib/journey";
 import type { InviteEmailReview } from "@/lib/portal-invite-email.functions";
 import { MemberDetailsEditor } from "@/components/portal/MemberDetailsEditor";
@@ -278,7 +278,7 @@ function parseMemberList(text: string): { rows: StagedRow[]; errors: string[] } 
     committee: "methodology_committee", methodology: "methodology_committee", is_methodology_committee: "methodology_committee",
   };
   const keys = headers.map((h) => alias[h] ?? h);
-  const required = ["first_name", "last_name", "email", "organization", "entity", "role"];
+  const required = ["first_name", "last_name", "email", "role"];
   const missing = required.filter((r) => !keys.includes(r));
   if (missing.length) return { rows: [], errors: [`Missing column${missing.length > 1 ? "s" : ""}: ${missing.join(", ")}`] };
 
@@ -291,7 +291,7 @@ function parseMemberList(text: string): { rows: StagedRow[]; errors: string[] } 
 
     const entityRaw = record["entity"]?.toLowerCase();
     const roleRaw = record["role"]?.toLowerCase().replace(/[\s-]+/g, "_");
-    const isCandidate = roleRaw === "candidate" || roleRaw === "forum_candidate";
+    const isCandidate = ["candidate", "forum_candidate", "forum_invitee", "united_forum_invitee"].includes(roleRaw ?? "");
     const entity = entityRaw === "prsc" || entityRaw === "dis" || entityRaw === "both" ? entityRaw : isCandidate ? "prsc" : null;
     const mixed: Record<string, MemberRow["role"]> = {
       prsc_board_dis_advisor: "prsc_board_dis_advisor", prsc_board_member_dis_advisor: "prsc_board_dis_advisor", "prsc_board_+_dis_advisor": "prsc_board_dis_advisor",
@@ -301,9 +301,8 @@ function parseMemberList(text: string): { rows: StagedRow[]; errors: string[] } 
 
     if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(record["email"] ?? "")) return errors.push(`${label}: a valid email is required.`);
     if (!record["first_name"] || !record["last_name"]) return errors.push(`${label}: first and last name are required.`);
-    if (!record["organization"]) return errors.push(`${label}: organization is required.`);
     if (!entity) return errors.push(`${label}: designation must be PRSC, DIS, or Both.`);
-    if (!role) return errors.push(`${label}: role must be candidate, board_member, advisor, methodology_committee, prsc_board_dis_advisor, or prsc_advisor_dis_board.`);
+    if (!role) return errors.push(`${label}: role must be forum_invitee, board_member, advisor, methodology_committee, prsc_board_dis_advisor, or prsc_advisor_dis_board.`);
     if (role.startsWith("prsc_") && entity !== "both") return errors.push(`${label}: mixed PRSC/DIS roles require designation Both.`);
     const why = (record["why_you"] ?? "").trim();
     const background = (record["background"] ?? "").trim().slice(0, 8000);
@@ -710,7 +709,7 @@ export function AdminCenter({ page }: { page: "overview" | "send" }) {
           firstName={inviteDraft.first_name}
           recipientEmail={inviteDraft.email}
           entity={inviteDraft.entity}
-          roleLabel={memberRoleLabel(inviteDraft.role, inviteDraft.entity, !!inviteDraft.is_candidate)}
+          roleLabel={memberCandidateLabel(inviteDraft.role, inviteDraft.entity, !!inviteDraft.is_candidate)}
           copy={inviteTemplate}
           meetingBlock={invitePollBlock}
           whyYou={inviteDraft.why_you}
@@ -941,7 +940,7 @@ export function AdminCenter({ page }: { page: "overview" | "send" }) {
       const prog = docProgress[m.id];
       const ans = p.experience_answers ?? {};
       const vis = p.visibility_instructions ?? {};
-      return [m.first_name, m.last_name, m.email, m.organization, m.title, String(m.entity).toUpperCase(), memberRoleLabel(m.role, m.entity, !!(m as { is_candidate?: boolean }).is_candidate), m.status, stageOf(m).label,
+      return [m.first_name, m.last_name, m.email, m.organization, m.title, String(m.entity).toUpperCase(), memberDesignation(m as any), m.status, stageOf(m).label,
         date(m.invited_at), date(m.last_access_at), date(p.submitted_at), prog?.done ?? "", prog?.total ?? "", date(m.documents_completed_at),
         p.preferred_name, p.professional_role, p.current_organization, p.preferred_email, p.preferred_phone,
         ...PORTAL_EXPERIENCE_QUESTIONS.map((_, i) => ans[`q${i + 1}`] ?? ""),
@@ -1027,14 +1026,14 @@ export function AdminCenter({ page }: { page: "overview" | "send" }) {
                 <Input name="first_name" value={inviteDraft.first_name} onChange={(e) => setInviteDraft({ ...inviteDraft, first_name: e.target.value })} placeholder="First name" required className="text-base" />
                 <Input name="last_name" value={inviteDraft.last_name} onChange={(e) => setInviteDraft({ ...inviteDraft, last_name: e.target.value })} placeholder="Last name" required className="text-base" />
                 <Input name="email" type="email" value={inviteDraft.email} onChange={(e) => setInviteDraft({ ...inviteDraft, email: e.target.value })} placeholder="Email" required className="text-base" />
-                <p className="text-sm uppercase tracking-[0.16em] text-gold/80 sm:col-span-2">Current position</p>
-                <Input name="organization" value={inviteDraft.organization} onChange={(e) => setInviteDraft({ ...inviteDraft, organization: e.target.value })} placeholder="Current company / organization" aria-label="Current company or organization" required className="text-base" />
-                <Input name="title" value={inviteDraft.title} onChange={(e) => setInviteDraft({ ...inviteDraft, title: e.target.value })} placeholder="Current professional title" aria-label="Current professional title" required className="text-base" />
+                <p className="text-sm uppercase tracking-[0.16em] text-gold/80 sm:col-span-2">Current position <span className="normal-case tracking-normal text-ivory/45">— optional</span></p>
+                <Input name="organization" value={inviteDraft.organization} onChange={(e) => setInviteDraft({ ...inviteDraft, organization: e.target.value })} placeholder="Current company / organization (optional)" aria-label="Current company or organization (optional)" className="text-base" />
+                <Input name="title" value={inviteDraft.title} onChange={(e) => setInviteDraft({ ...inviteDraft, title: e.target.value })} placeholder="Current professional title (optional)" aria-label="Current professional title (optional)" className="text-base" />
                 <fieldset className="grid gap-2 border border-gold/30 p-4 sm:col-span-2 sm:grid-cols-2">
                   <legend className="px-1 text-sm uppercase tracking-[0.16em] text-gold/80">PRSC / DIS status</legend>
                   {([
-                    { value: true, title: "Forum candidate", note: "Invited to the Readiness Vanguard Forum — no PRSC/DIS seat yet" },
-                    { value: false, title: "Selected for a PRSC / DIS role", note: "Choose the entity and role below" },
+                    { value: true, title: "United Forum invitee", note: "Invited to strategic coordination only — no PRSC/DIS role identified" },
+                    { value: false, title: "Identified for a PRSC / DIS role", note: "Intended role — shown as Candidate until appointment is activated" },
                   ] as const).map((opt) => (
                     <label key={String(opt.value)} className={`flex cursor-pointer items-start gap-3 border px-4 py-3 ${!!inviteDraft.is_candidate === opt.value ? "border-gold bg-gold/10" : "border-gold/20"}`}>
                       <input type="radio" name="alliance_status" checked={!!inviteDraft.is_candidate === opt.value}
@@ -1761,7 +1760,7 @@ export function AdminCenter({ page }: { page: "overview" | "send" }) {
                             </button>
                           </div>
                         </td>
-                        <td>{memberRoleLabel(m.role, m.entity, !!(m as { is_candidate?: boolean }).is_candidate)}{(m as { participates_in_forum?: boolean }).participates_in_forum === false && <span className="ml-2 whitespace-nowrap border border-gold/30 px-1.5 py-0.5 text-[10px] uppercase tracking-[0.12em] text-gold/80">No Forum</span>}</td>
+                        <td>{memberDesignation(m as any)}{(m as { participates_in_forum?: boolean }).participates_in_forum === false && <span className="ml-2 whitespace-nowrap border border-gold/30 px-1.5 py-0.5 text-[10px] uppercase tracking-[0.12em] text-gold/80">No Forum</span>}</td>
                         <td className="py-4 pr-3">
                           <span className={`inline-block border px-2 py-1 text-xs uppercase tracking-[0.12em] ${st.tone}`}>{st.label}</span>
                           {journey && (
@@ -1895,7 +1894,7 @@ export function AdminCenter({ page }: { page: "overview" | "send" }) {
                             Access: {m.status}
                           </span>
                         </button>
-                        <span className="max-w-[45%] text-right text-xs text-ivory/70">{memberRoleLabel(m.role, m.entity, !!(m as { is_candidate?: boolean }).is_candidate)}</span>
+                        <span className="max-w-[45%] text-right text-xs text-ivory/70">{memberDesignation(m as any)}</span>
                       </div>
 
                       <div className="mt-3 border-t border-ivory/10 pt-3">
@@ -2076,7 +2075,7 @@ export function AdminCenter({ page }: { page: "overview" | "send" }) {
                   >
                     <option value="">Choose a member…</option>
                     {members.map((m) => (
-                      <option key={m.id} value={m.id}>{m.first_name} {m.last_name} · {memberRoleLabel(m.role, m.entity, !!(m as { is_candidate?: boolean }).is_candidate)}</option>
+                      <option key={m.id} value={m.id}>{m.first_name} {m.last_name} · {memberDesignation(m as any)}</option>
                     ))}
                   </select>
                 </label>
@@ -2281,7 +2280,7 @@ export function AdminCenter({ page }: { page: "overview" | "send" }) {
               </div>
               <div className="bg-navy px-5 py-3">
                 <p className="text-xs uppercase tracking-[0.14em] text-gold">Company &amp; role</p>
-                <p className="mt-1 text-base text-ivory">{memberRoleLabel(inviteDraft.role, inviteDraft.entity, !!inviteDraft.is_candidate)}</p>
+                <p className="mt-1 text-base text-ivory">{memberCandidateLabel(inviteDraft.role, inviteDraft.entity, !!inviteDraft.is_candidate)}</p>
               </div>
               <div className="bg-navy px-5 py-3">
                 <p className="text-xs uppercase tracking-[0.14em] text-gold">Logos shown</p>

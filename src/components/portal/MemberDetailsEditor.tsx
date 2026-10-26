@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Pencil } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { updateMemberDetails } from "@/lib/portal.functions";
-import { memberRoleLabel } from "@/lib/member-role-labels";
+import { memberRoleLabel, memberDesignation } from "@/lib/member-role-labels";
 
 type Entity = "prsc" | "dis" | "both";
 type Role = "board_member" | "advisor" | "prsc_board_dis_advisor" | "prsc_advisor_dis_board" | "methodology_committee";
@@ -45,7 +45,7 @@ export function MemberDetailsEditor({ member, preview, onSaved }: { member: Memb
         <div>
           <p className="text-xs uppercase tracking-[0.18em] text-gold">Member details</p>
           <p className="mt-2 text-base text-ivory">{[member.title, member.organization].filter(Boolean).join(", ")}</p>
-          <p className="mt-1 text-sm text-ivory/60">{memberRoleLabel(member.role, member.entity, !!member.is_candidate)}</p>
+          <p className="mt-1 text-sm text-ivory/60">{memberDesignation(member as any)}</p>
         </div>
         {!open && (
           <button type="button" onClick={() => { setForm(initial()); setOpen(true); setMessage(""); }} className="inline-flex items-center gap-2 rounded-full border border-gold/50 px-4 py-2 text-xs uppercase tracking-[0.16em] text-gold hover:bg-gold hover:text-navy-deep">
@@ -58,11 +58,11 @@ export function MemberDetailsEditor({ member, preview, onSaved }: { member: Memb
           <Input value={form.first_name} onChange={(e) => setForm({ ...form, first_name: e.target.value })} placeholder="First name" aria-label="First name" required className="text-base" />
           <Input value={form.last_name} onChange={(e) => setForm({ ...form, last_name: e.target.value })} placeholder="Last name" aria-label="Last name" required className="text-base" />
           <p className="text-sm uppercase tracking-[0.16em] text-gold/80 sm:col-span-2">Current position</p>
-          <Input value={form.organization} onChange={(e) => setForm({ ...form, organization: e.target.value })} placeholder="Current company / organization" aria-label="Current company or organization" required className="text-base" />
-          <Input value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} placeholder="Current professional title" aria-label="Current professional title" className="text-base" />
+          <Input value={form.organization} onChange={(e) => setForm({ ...form, organization: e.target.value })} placeholder="Current company / organization (optional)" aria-label="Current company or organization (optional)" className="text-base" />
+          <Input value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} placeholder="Current professional title (optional)" aria-label="Current professional title" className="text-base" />
           <fieldset className="grid gap-2 border border-gold/30 p-4 sm:col-span-2 sm:grid-cols-2">
             <legend className="px-1 text-sm uppercase tracking-[0.16em] text-gold/80">PRSC / DIS status</legend>
-            {([{ v: true, t: "Forum candidate" }, { v: false, t: "Selected for a PRSC / DIS role" }] as const).map((o) => (
+            {([{ v: true, t: "United Forum invitee" }, { v: false, t: "Identified for a PRSC / DIS role" }] as const).map((o) => (
               <label key={String(o.v)} className={`flex cursor-pointer items-center gap-3 border px-4 py-3 ${form.is_candidate === o.v ? "border-gold bg-gold/10" : "border-gold/20"}`}>
                 <input type="radio" name={`status-${member.id}`} checked={form.is_candidate === o.v} onChange={() => setForm({ ...form, is_candidate: o.v })} className="h-4 w-4 accent-[#d4af37]" />
                 <span className="text-base text-ivory">{o.t}</span>
@@ -87,7 +87,7 @@ export function MemberDetailsEditor({ member, preview, onSaved }: { member: Memb
                   <span className="text-base text-ivory/85">Also on the Methodology Committee</span>
                 </label>
               )}
-              {member.is_candidate && <p className="text-sm text-ivory/60 sm:col-span-2">Promoting unlocks the matching Stage 2–4 documents. Cross-entity combinations still need a recorded role review before activation.</p>}
+              {member.is_candidate && <p className="text-sm text-ivory/60 sm:col-span-2">Assigning an intended role keeps their Forum records and acknowledgments, and the matching Stage 2–4 documents become available progressively. They show as Candidate until each entity's appointment is verified and activated; cross-entity combinations still need a recorded role review.</p>}
             </>
           )}
           <div className="flex gap-3 sm:col-span-2">

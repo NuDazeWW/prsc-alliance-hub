@@ -262,8 +262,8 @@ export const submitPortalInquiry = createServerFn({ method: "POST" })
 
 const inviteSchema = z.object({
   email: z.string().trim().email().max(200), first_name: z.string().trim().min(1).max(80),
-  last_name: z.string().trim().min(1).max(80), organization: z.string().trim().min(1).max(180),
-  title: z.string().trim().max(160), entity: entitySchema, role: roleSchema,
+  last_name: z.string().trim().min(1).max(80), organization: z.string().trim().max(180).default(""),
+  title: z.string().trim().max(160).default(""), entity: entitySchema, role: roleSchema,
   why_you: z.string().trim().min(20).max(2000),
   is_methodology_committee: z.boolean().optional(),
   participates_in_forum: z.boolean().optional(),
@@ -1289,7 +1289,7 @@ export const getRequestHost = createServerFn({ method: "GET" })
 const memberDetailsSchema = z.object({
   member_id: z.string().uuid(),
   first_name: z.string().trim().min(1).max(80), last_name: z.string().trim().min(1).max(80),
-  organization: z.string().trim().min(1).max(180), title: z.string().trim().max(160),
+  organization: z.string().trim().max(180).default(""), title: z.string().trim().max(160).default(""),
   is_candidate: z.boolean(),
   entity: entitySchema, role: roleSchema,
   is_methodology_committee: z.boolean().optional(),
@@ -1324,7 +1324,7 @@ export const updateMemberDetails = createServerFn({ method: "POST" })
     }
     await context.supabase.from("portal_activity").insert({
       member_id: m.id, actor_user_id: context.userId, event_type: "member_details_updated",
-      metadata: { is_candidate: data.is_candidate, entity, role, promoted: m.is_candidate && !data.is_candidate },
+      metadata: { is_candidate: data.is_candidate, entity, role, is_methodology_committee: committee, promoted: m.is_candidate && !data.is_candidate, previous: { is_candidate: m.is_candidate, entity: m.entity, role: m.role, is_methodology_committee: m.is_methodology_committee } },
     });
     return { ok: true };
   });
