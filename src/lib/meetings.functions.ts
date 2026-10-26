@@ -211,7 +211,16 @@ export const confirmPollSlot = createServerFn({ method: "POST" })
     const { loadSystemEmail } = await import("@/lib/portal-notify.server");
     const build = await loadSystemEmail("meeting_confirmed");
     void founderSignature;
+    // Never duplicate a confirmation: members who already received the manual
+    // Forum confirmation for this event are skipped here.
+    const { data: forumSent } = await supabaseAdmin
+      .from("forum_communication_sends")
+      .select("member_id")
+      .eq("email_key", "forum_confirmed")
+      .neq("status", "failed");
+    const alreadyForumConfirmed = new Set((forumSent ?? []).map((r: any) => r.member_id));
     for (const m of members ?? []) {
+      if (alreadyForumConfirmed.has(m.id)) continue;
       await sendPortalEmail(
         m.email,
         build({

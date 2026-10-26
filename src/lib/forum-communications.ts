@@ -69,3 +69,11 @@ export function forumEmailBlock(key: ForumEmailKey, m: ForumRecipient, doc?: Vis
 export function forumIdempotencyKey(forumKey: string, emailKey: string, version: number, memberId: string) {
   return `forum:${forumKey}:${emailKey}:v${version}:${memberId}`;
 }
+
+/**
+ * A member already received a meeting confirmation through the Meetings poll
+ * flow, so the manual Forum confirmation must not duplicate it.
+ */
+export function confirmedThroughPoll(memberId: string, confirmedPolls: { invited_member_ids: unknown }[]): boolean {
+  return confirmedPolls.some((p) => Array.isArray(p.invited_member_ids) && (p.invited_member_ids as string[]).includes(memberId));
+}
