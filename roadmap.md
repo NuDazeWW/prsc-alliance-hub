@@ -1,5 +1,9 @@
 # Portal build roadmap
 
+## Pending Appointment update (Oct 26)
+- [ ] Derive independent PRSC/DIS Candidate, Pending Appointment and Appointed designations from existing journey records
+- [ ] Test both entity progressions, review gates and mixed statuses without changing records or sending invitations
+
 - [x] Match chapter 04 box typography, fit chapter 06 footer labels, and standardize portal bullet punctuation and PRSC Readiness Score references
 - [x] Apply exclusive hover highlighting to chapter 06 footer buttons
 
