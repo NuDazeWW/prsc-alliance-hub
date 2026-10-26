@@ -9,6 +9,8 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { render } from "@react-email/render";
 import { AdminForumCommunications } from "@/components/portal/AdminForumCommunications";
+import { AdminQuestionRegister } from "@/components/portal/AdminQuestionRegister";
+import { AdminReleaseReview } from "@/components/portal/AdminReleaseReview";
 import {
   Activity,
   AlertTriangle,
@@ -1364,6 +1366,12 @@ export function AdminCenter({ page }: { page: "overview" | "send" }) {
 
           <div className="contents">
             <div className={`${S("overview",5)} [&>section]:h-full`}><AdminLeadership /></div>
+            {page === "overview" && !preview && (
+              <section id="release-review" className="order-last lg:col-span-2 2xl:col-span-3 admin-card p-6 sm:p-8"><AdminReleaseReview /></section>
+            )}
+            {page === "send" && !preview && (
+              <section id="question-register" className="order-last lg:col-span-2 2xl:col-span-3 admin-card p-6 sm:p-8"><AdminQuestionRegister /></section>
+            )}
             <section id="forum-communications" className={`${page === "send" ? "order-last lg:col-span-2 2xl:col-span-3" : "hidden"} admin-card p-6 sm:p-8`}>
               {page === "send" && <AdminForumCommunications />}
             </section>
