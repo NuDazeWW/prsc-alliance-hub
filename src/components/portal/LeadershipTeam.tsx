@@ -10,14 +10,14 @@ import l4 from "@/assets/leaders/leader4.jpg";
 import l5 from "@/assets/leaders/leader5.jpg";
 import l6 from "@/assets/leaders/leader6.jpg";
 
-const DEMO: Pick<LeaderRow, "id" | "name" | "title" | "bio" | "photo_url">[] = [
+const DEMO: Pick<LeaderRow, "id" | "name" | "title" | "bio" | "photo_url" | "affiliation">[] = [
   ["Jonathan Reeves", "Chairman", l1],
   ["Dr. Elena Park", "Board Member", l2],
   ["Marcus Ellison", "Board Member", l3],
   ["Victoria Chen", "Board Member", l4],
   ["Daniel Brooks", "Board Member", l5],
   ["Angela Kim", "Board Member", l6],
-].map(([name, title, photo], i) => ({ id: `demo-${i}`, name, title, bio: null, photo_url: photo }));
+].map(([name, title, photo], i) => ({ id: `demo-${i}`, name, title, bio: null, photo_url: photo, affiliation: null }));
 
 const DEFAULT_SETTINGS = {
   eyebrow: "Our Leadership Team",
@@ -69,7 +69,8 @@ export function LeadershipTeam() {
                 )}
                 <span className="min-w-0 flex-1 py-2">
                   <span className="block truncate font-display text-[17px] text-ivory">{p.name}</span>
-                  <span className="block truncate text-xs text-ivory/55">{p.title}</span>
+                  <span className="block truncate text-xs text-gold/85">{p.title}</span>
+                  {p.affiliation && <span className="block truncate text-xs text-ivory/55">{p.affiliation}</span>}
                 </span>
                 <ChevronDown className={`h-4 w-4 shrink-0 text-gold transition-transform ${isOpen ? "rotate-180" : ""}`} />
               </button>

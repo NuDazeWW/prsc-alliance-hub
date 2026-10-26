@@ -15,10 +15,11 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { memberRoleLabel } from "@/lib/member-role-labels";
 
-type Draft = { id?: string; name: string; title: string; bio: string; member_id: string | null; visible: boolean; sort_order: number; photo_path: string | null; photo_url?: string | null };
+type Draft = { id?: string; name: string; title: string; affiliation: string; bio: string; member_id: string | null; visible: boolean; sort_order: number; photo_path: string | null; photo_url?: string | null };
 
-const blank = (order: number): Draft => ({ name: "", title: "", bio: "", member_id: null, visible: true, sort_order: order, photo_path: null });
+const blank = (order: number): Draft => ({ name: "", title: "", affiliation: "", bio: "", member_id: null, visible: true, sort_order: order, photo_path: null });
 
 export function AdminLeadership() {
   const qc = useQueryClient();
@@ -26,7 +27,7 @@ export function AdminLeadership() {
   const members = useQuery({
     queryKey: ["leadership-member-options"],
     queryFn: async () => {
-      const { data } = await supabase.from("portal_members").select("id, first_name, last_name").neq("status", "revoked").order("last_name");
+      const { data } = await supabase.from("portal_members").select("id, first_name, last_name, organization, title, entity, role, is_candidate").neq("status", "revoked").order("last_name");
       return data ?? [];
     },
   });
@@ -76,7 +77,7 @@ export function AdminLeadership() {
   }
 
   const toDraft = (t: LeaderRow): Draft => ({
-    id: t.id, name: t.name, title: t.title, bio: t.own_bio ?? "", member_id: t.member_id, visible: t.visible,
+    id: t.id, name: t.name, title: t.title, affiliation: t.affiliation ?? "", bio: t.own_bio ?? "", member_id: t.member_id, visible: t.visible,
     sort_order: t.sort_order, photo_path: t.photo_path, photo_url: t.photo_url,
   });
 
@@ -119,7 +120,7 @@ export function AdminLeadership() {
             {t.photo_url ? <img src={t.photo_url} alt="" className="h-12 w-12 object-cover" /> : <span className="h-12 w-12 bg-ivory/5" />}
             <div className="min-w-0 flex-1">
               <p className="truncate text-sm text-ivory">{t.name} {t.is_placeholder && <span className="ml-2 text-[10px] uppercase text-gold/70">sample</span>}</p>
-              <p className="truncate text-xs text-ivory/50">{t.title}{t.member_id ? " · linked to member" : ""}</p>
+              <p className="truncate text-xs text-ivory/50">{t.title}{t.affiliation ? ` · ${t.affiliation}` : ""}{t.member_id ? " · linked to member" : ""}</p>
             </div>
             <div className="flex gap-1">
               <IconBtn label="Move up" onClick={() => move(i, -1)}><ArrowUp className="h-4 w-4" /></IconBtn>
@@ -154,10 +155,19 @@ export function AdminLeadership() {
           </div>
           <div className="mt-4 grid gap-3 sm:grid-cols-2">
             <label className="text-xs uppercase text-ivory/55">Name<Input value={editing.name} onChange={(e) => setEditing({ ...editing, name: e.target.value })} className="mt-2 border-ivory/20 text-ivory" /></label>
-            <label className="text-xs uppercase text-ivory/55">Role / title<Input value={editing.title} onChange={(e) => setEditing({ ...editing, title: e.target.value })} className="mt-2 border-ivory/20 text-ivory" /></label>
+            <label className="text-xs uppercase text-ivory/55">PRSC / DIS position<Input value={editing.title} onChange={(e) => setEditing({ ...editing, title: e.target.value })} placeholder="e.g. Board Member, PRSC" className="mt-2 border-ivory/20 normal-case text-ivory" /></label>
+            <label className="text-xs uppercase text-ivory/55 sm:col-span-2">Current title &amp; company<Input value={editing.affiliation} onChange={(e) => setEditing({ ...editing, affiliation: e.target.value })} placeholder="e.g. Chief Revenue Officer, Acme Corp" className="mt-2 border-ivory/20 normal-case text-ivory" /></label>
             <label className="text-xs uppercase text-ivory/55 sm:col-span-2">
               Linked portal member (optional)
-              <select value={editing.member_id ?? ""} onChange={(e) => setEditing({ ...editing, member_id: e.target.value || null })} className="mt-2 h-10 w-full border border-ivory/20 bg-navy-deep px-3 text-sm normal-case text-ivory">
+              <select value={editing.member_id ?? ""} onChange={(e) => {
+                const m = (members.data ?? []).find((x: any) => x.id === e.target.value) as any;
+                setEditing({
+                  ...editing, member_id: e.target.value || null,
+                  ...(m && !editing.name.trim() ? { name: `${m.first_name} ${m.last_name}` } : {}),
+                  ...(m && !editing.title.trim() && !m.is_candidate ? { title: memberRoleLabel(m.role, m.entity) } : {}),
+                  ...(m && !editing.affiliation.trim() ? { affiliation: [m.title, m.organization].filter(Boolean).join(", ") } : {}),
+                });
+              }} className="mt-2 h-10 w-full border border-ivory/20 bg-navy-deep px-3 text-sm normal-case text-ivory">
                 <option value="">Not linked</option>
                 {(members.data ?? []).map((m: any) => <option key={m.id} value={m.id}>{m.first_name} {m.last_name}</option>)}
               </select>
