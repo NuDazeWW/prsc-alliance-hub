@@ -1,6 +1,6 @@
 import { describe, it } from "node:test";
 import { strictEqual, deepStrictEqual } from "node:assert";
-import { roleCombinationTier, roleReviewBlocks, ndaProblem, documentVisible, appointmentProblems, governanceStatusLabel } from "./governance";
+import { entityAppointmentStatus, roleCombinationTier, roleReviewBlocks, ndaProblem, documentVisible, appointmentProblems, governanceStatusLabel } from "./governance";
 
 const nda = { verified_at: "2026-10-01", verified_by: "admin", reference: "Vault/NDA-001", entities: "prsc", scope: "Forum materials" };
 const pending = { nda_verified_at: "2026-10-01", forum_clearance_status: "not_reviewed" };
@@ -76,4 +76,19 @@ describe("forum candidate document visibility", () => {
     strictEqual(documentVisible(doc(3), m, false), false);
     strictEqual(documentVisible(doc(3), { ...m, is_candidate: false }, false), true);
   });
+});
+
+describe("Pending Appointment review gates", () => {
+  const complete = { acceptanceComplete: true, roleReviewStatus: "approved", forumClearanceStatus: "cleared" };
+  it("Stage 3 incomplete stays Candidate", () => strictEqual(entityAppointmentStatus({ ...complete, acceptanceComplete: false }), "candidate"));
+  it("Stage 3 complete and reviews cleared becomes Pending Appointment without activation", () => strictEqual(entityAppointmentStatus(complete), "pending_appointment"));
+  it("pending, declined, prohibited or missing role reviews prevent Pending Appointment", () => {
+    for (const roleReviewStatus of ["pending", "declined", "prohibited", undefined]) strictEqual(entityAppointmentStatus({ ...complete, roleReviewStatus }), "candidate");
+  });
+  it("uncleared conflict review prevents Pending Appointment", () => {
+    for (const forumClearanceStatus of ["not_reviewed", "escalated", "declined"]) strictEqual(entityAppointmentStatus({ ...complete, forumClearanceStatus }), "candidate");
+  });
+  it("cleared restrictions and non-required role review allow Pending Appointment", () => strictEqual(entityAppointmentStatus({ ...complete, roleReviewStatus: "not_required", forumClearanceStatus: "cleared_restricted" }), "pending_appointment"));
+  it("Forum opt-outs need no Forum clearance", () => strictEqual(entityAppointmentStatus({ ...complete, participatesInForum: false, forumClearanceStatus: "not_reviewed" }), "pending_appointment"));
+  it("only existing verified administrative activation produces Appointed", () => strictEqual(entityAppointmentStatus({ ...complete, activatedAt: "2026-10-26" }), "appointed"));
 });

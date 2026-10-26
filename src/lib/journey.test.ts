@@ -1,6 +1,6 @@
 import { describe, it } from "node:test";
 import { strictEqual } from "node:assert";
-import { journeyStatus, lockedDocumentIds, type JourneyDoc } from "./journey";
+import { entityAcceptanceComplete, journeyStatus, lockedDocumentIds, type JourneyDoc } from "./journey";
 
 const d = (id: string, stage: number | null, track: JourneyDoc["journey_track"], sort = 0): JourneyDoc => ({ id, journey_stage: stage, journey_track: track, sort_order: sort, created_at: "2026-01-01" });
 const docs = [d("f1", 1, "shared", 0), d("f2", 1, "shared", 1), d("p2", 2, "prsc"), d("p3", 3, "prsc"), d("x", 5, "shared"), d("dis2", 2, "dis")];
@@ -42,5 +42,27 @@ describe("forum clearance", () => {
     strictEqual(st.forumCleared, false);
     strictEqual(st.label, "Clearance Pending Review");
     strictEqual(lockedDocumentIds(docs, done, "prsc", false).has("p2"), true);
+  });
+});
+
+describe("per-entity Stage 3 acceptance", () => {
+  const requirements = [d("p2", 2, "prsc"), d("p3", 3, "prsc"), d("d2", 2, "dis"), d("d3", 3, "dis"), d("d3-disclosure", 3, "dis"), d("p4", 4, "prsc"), d("ongoing", 5, "shared")];
+  it("does not complete Stage 3 when no requirements exist", () => {
+    strictEqual(entityAcceptanceComplete([], new Set(), "both").prsc, false);
+    strictEqual(entityAcceptanceComplete([], new Set(), "both").dis, false);
+  });
+  it("keeps DIS incomplete when its disclosure remains unsigned", () => {
+    const result = entityAcceptanceComplete(requirements, new Set(["p2", "p3", "d2", "d3"]), "both");
+    strictEqual(result.prsc, true);
+    strictEqual(result.dis, false);
+  });
+  it("requires the applicable earlier orientation but not Stage 4 or ongoing records", () => {
+    strictEqual(entityAcceptanceComplete(requirements, new Set(["p3"]), "prsc").prsc, false);
+    strictEqual(entityAcceptanceComplete(requirements, new Set(["p2", "p3"]), "prsc").prsc, true);
+  });
+  it("assigns legacy untracked Stage 3 requirements to the existing first entity track", () => {
+    const legacy = [d("accept", 3, null)];
+    strictEqual(entityAcceptanceComplete(legacy, new Set(["accept"]), "dis").dis, true);
+    strictEqual(entityAcceptanceComplete(legacy, new Set(["accept"]), "both").dis, false);
   });
 });
