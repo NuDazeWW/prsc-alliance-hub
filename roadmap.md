@@ -70,3 +70,6 @@
 - [ ] Priority B: Forum question workflow with "No additional questions", follow-up assignments; then enable Emails 4, 5, 8
 - [x] Outlook calendar holds for meeting polls (Busy organizer holds, reconcile on confirm/cancel, re-sync, best-effort executive holds)
 - [ ] Outlook acceptance demonstration (blocked: sign-in returned shirley.johnson@nudaze.com; prscstandards.com mailbox needed)
+- [x] Independent Forum / Stage 2 release, NDA form reset, profile emails on shared sender, entity onboarding email
+- [ ] Founder approval of email previews before any live send (blocked: founder review)
+- [ ] Signed-in walkthrough of the Stage 2 release (blocked: admin sign-in in preview)
