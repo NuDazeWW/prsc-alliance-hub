@@ -81,6 +81,11 @@ export const InviteEmail = ({
     const tokens = { first_name: inviteeName, full_name: inviteeName, entity_full: selectedEntity.full, entity: selectedEntity.short, role: roleLabel, email: recipientEmail, why_you: whyYou?.trim() || 'We have been intentional about who we invite into this next chapter, and your experience and judgment are a meaningful part of why you were selected.' }
     const fill = (v?: string | null, d = '') => fillInviteTokens(v?.trim() || d, tokens)
     const blocks = fill(copy.body).split(/\n\s*\n/).map((b) => b.split('\n').map((l) => l.trim()).filter(Boolean)).filter((b) => b.length)
+    // The activation button must always render: place it before the last
+    // non-list block, or after the body when every block is a list.
+    const ctaBefore = blocks.reduce((acc, lines, i) => (lines.every((l) => /^[•\-*]\s/.test(l)) ? acc : i), -1)
+    const cta = <><Button style={button} href={confirmationUrl}>{fill(copy.cta_label, 'Accept Your Private Invitation')}</Button>
+      {copy.cta_subtext?.trim() && <Text style={instruction}>{fill(copy.cta_subtext)}</Text>}</>
     const [sigName, ...sigTitle] = (copy.signatures?.trim() || 'Shirley Johnson|Founder').split('|')
     return <Html lang="en" dir="ltr">
       <Head />
@@ -100,15 +105,12 @@ export const InviteEmail = ({
             {blocks.map((lines, bi) => {
               const isList = lines.every((l) => /^[•\-*]\s/.test(l))
               if (isList) return <Section key={bi} style={list}>{lines.map((l, li) => <Text key={li} style={listItem}>• {renderInline(l.replace(/^[•\-*]\s+/, ''))}</Text>)}</Section>
-              const isLast = bi === blocks.length - 1
               return <React.Fragment key={bi}>
-                {isLast && blocks.length > 1 && <><Button style={button} href={confirmationUrl}>{fill(copy.cta_label, 'Access Your Private Welcome Center →')}</Button>
-                  {copy.cta_subtext?.trim() && <Text style={instruction}>{fill(copy.cta_subtext)}</Text>}</>}
+                {bi === ctaBefore && blocks.length > 1 && cta}
                 <Text style={bi === 0 ? lead : text}>{lines.map((l, li) => <React.Fragment key={li}>{li > 0 && <br />}{renderInline(l)}</React.Fragment>)}</Text>
               </React.Fragment>
             })}
-            {blocks.length <= 1 && <><Button style={button} href={confirmationUrl}>{fill(copy.cta_label, 'Access Your Private Welcome Center →')}</Button>
-              {copy.cta_subtext?.trim() && <Text style={instruction}>{fill(copy.cta_subtext)}</Text>}</>}
+            {(blocks.length <= 1 || ctaBefore === -1) && cta}
             <MeetingSection block={meetingBlock} />
             <Text style={signoff}>Warmly,</Text>
             <Text style={signature}>{sigName.trim()}</Text>
