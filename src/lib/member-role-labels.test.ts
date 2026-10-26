@@ -1,6 +1,6 @@
 import { describe, test } from "node:test";
 import { deepStrictEqual } from "node:assert";
-import { memberRoleLabels, memberRoleLabel, memberRoleKinds } from "./member-role-labels";
+import { memberRoleLabels, memberRoleLabel } from "./member-role-labels";
 
 describe("entity-specific member capacities", () => {
   test("PRSC advisor", () => deepStrictEqual(memberRoleLabels("advisor", "prsc"), ["PRSC Advisor"]));
