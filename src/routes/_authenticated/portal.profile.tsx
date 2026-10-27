@@ -21,6 +21,7 @@ import {
 import { initialProfileForm, currentProfilePreferences, profileFieldStage, type ProfileForm } from "@/lib/portal-profile-form";
 import { profileSchema, profileValidationMessage } from "@/lib/portal-profile-schema";
 import { userFacingError } from "@/lib/user-facing-error";
+import { supabase } from "@/integrations/supabase/client";
 
 export const Route = createFileRoute("/_authenticated/portal/profile")({
   validateSearch: (q: Record<string, unknown>): { edit?: number } => (q.edit ? { edit: 1 } : {}),
@@ -30,8 +31,14 @@ export const Route = createFileRoute("/_authenticated/portal/profile")({
 
 function ProfilePage() {
   const queryClient = useQueryClient();
-  const session = useQuery({ queryKey: ["portal-session"], queryFn: () => isPreviewHost() ? Promise.resolve(null) : getPortalSession(), retry: false });
-  const profile = useQuery({ queryKey: ["portal-profile"], queryFn: () => isPreviewHost() ? Promise.resolve(null) : getMyProfile(), retry: false });
+  const session = useQuery({ queryKey: ["portal-session"], queryFn: async () => {
+    if (isPreviewHost()) {
+      const { data } = await supabase.auth.getSession();
+      if (!data.session) return null;
+    }
+    return getPortalSession();
+  }, retry: false });
+  const profile = useQuery({ queryKey: ["portal-profile"], queryFn: () => getMyProfile(), enabled: Boolean(session.data?.member), retry: false });
   const { edit } = Route.useSearch();
   const isSubmitted = Boolean(profile.data?.submitted_at);
   const [form, setForm] = useState<ProfileForm>(() => initialProfileForm());
@@ -77,7 +84,7 @@ function ProfilePage() {
     setStatus("Saving…");
     try {
       await saveMyProfile({ data });
-      setStatus(submit ? "Profile received. Your individualized package is now being prepared." : isSubmitted ? "Changes saved." : "Progress saved.");
+      setStatus(submit ? "Profile received. Thank you for sharing your perspective." : isSubmitted ? "Changes saved." : "Progress saved.");
       if (submit) {
         setJustSubmitted(true);
         setForm((current) => ({ ...current, current_stage: 5 }));
@@ -122,7 +129,7 @@ function ProfilePage() {
       <aside>
         <p className="text-xs uppercase text-gold">Private profile</p>
         <h1 className="mt-3 font-display text-4xl">Your perspective, in your words.</h1>
-        <p className="mt-4 text-sm leading-6 text-ivory/55">Save your progress and return at any time. Your responses help us understand fit and prepare private draft materials for your review. They are not permission to publish or a replacement for any formal agreement.</p>
+        <p className="mt-4 text-sm leading-6 text-ivory/55">Your private profile helps us understand your background, expertise and interests. It is not shared with other Forum participants and does not constitute an appointment or commitment to serve. You can postpone it and continue meeting availability and released Forum requirements.</p>
         <ol className="mt-6 grid grid-cols-5 gap-1 sm:mt-8 sm:block sm:space-y-3">{PORTAL_PROFILE_STAGES.map((title, index) => <li key={title} aria-current={stage === index + 1 ? "step" : undefined} className={`border-t-2 pt-2 text-center text-[10px] sm:border-l-2 sm:border-t-0 sm:py-1 sm:pl-3 sm:text-left sm:text-sm ${stage === index + 1 ? "border-gold text-gold" : "border-ivory/15 text-ivory/40"}`}><span className="sm:hidden">{String(index + 1).padStart(2, "0")}</span><span className="hidden sm:inline">{String(index + 1).padStart(2, "0")} · {title}</span></li>)}</ol>
       </aside>
       <section className="min-w-0 min-h-[620px] border border-gold/20 bg-ivory/[.025] p-6 sm:p-10 lg:p-14" aria-busy={saving}>
@@ -143,7 +150,7 @@ function ProfilePage() {
           {stage === 2 && <><StepTitle n="02" title={PORTAL_FIT_TITLE} copy={PORTAL_FIT_DESCRIPTION} /><FitIntake value={readFitAnswers(form.experience_answers)} onChange={(answers) => setForm({ ...form, experience_answers: { ...form.experience_answers, ...answers } })} /></>}
           {stage === 3 && <><StepTitle n="03" title={PORTAL_COMMUNICATION_TITLE} copy={PORTAL_COMMUNICATION_DESCRIPTION} /><CommunicationIntake value={readCommunicationPreferences(form.visibility_instructions)} onChange={(preferences) => setForm({ ...form, visibility_instructions: { ...form.visibility_instructions, ...preferences } })} /></>}
           {stage === 4 && <>
-            <StepTitle n="04" title="Final details" copy="Share anything we should consider while preparing your package." />
+            <StepTitle n="04" title="Final details" copy="Share any additional interests or questions. Sensitive conflict disclosures belong in your separate Conflict / Recusal Confirmation, not in this profile." />
             <label className="mt-10 block text-sm text-ivory/75">Package considerations<Textarea value={form.final_notes} maxLength={3000} onChange={(event) => setForm({ ...form, final_notes: event.target.value })} className="mt-3 min-h-32 border-ivory/20 text-ivory" /></label>
             <label className="mt-7 block text-sm text-ivory/75">Questions for the team<Textarea value={form.questions} maxLength={3000} onChange={(event) => setForm({ ...form, questions: event.target.value })} className="mt-3 min-h-32 border-ivory/20 text-ivory" /></label>
             <label className="mt-7 flex items-start gap-3 text-sm text-ivory/70"><input type="checkbox" checked={form.contact_requested} onChange={(event) => setForm({ ...form, contact_requested: event.target.checked })} className="mt-1 accent-gold" />I would like a member of the team to contact me.</label>
@@ -199,7 +206,7 @@ function BioDraft({ form, onUse }: { form: ProfileForm; onUse: (bio: string) => 
 }
 
 function ReceivedConfirmation() {
-  return <div className="flex min-h-[480px] flex-col items-center justify-center text-center"><div className="flex h-16 w-16 items-center justify-center rounded-full border border-gold text-gold"><Check className="h-7 w-7" /></div><p className="mt-8 text-xs uppercase text-gold">Profile received</p><h2 className="mt-4 max-w-xl font-display text-5xl">Thank you. Your individualized package is being prepared.</h2><p className="mt-6 max-w-lg text-sm leading-7 text-ivory/55">We will follow up privately with next steps. Questions can be sent to info@readinessterminal.com.</p><div className="mt-10 w-full max-w-3xl text-left"><MemberMeetings hideWhenEmpty /></div><Button asChild className="mt-8 rounded-none bg-gold text-navy hover:bg-gold-light hover:text-navy"><Link to="/portal"><ArrowLeft className="mr-2 h-4 w-4" />Return to Welcome Center</Link></Button></div>;
+  return <div className="flex min-h-[480px] flex-col items-center justify-center text-center"><div className="flex h-16 w-16 items-center justify-center rounded-full border border-gold text-gold"><Check className="h-7 w-7" /></div><p className="mt-8 text-xs uppercase text-gold">Received</p><h2 className="mt-4 max-w-xl font-display text-5xl">Thank you for sharing your perspective.</h2><p className="mt-6 max-w-lg text-sm leading-7 text-ivory/55">Your private Executive Profile is on file. This does not constitute an appointment or commitment to serve. Meeting availability and released Forum requirements remain available. Questions can be sent to info@readinessterminal.com.</p><div className="mt-10 w-full max-w-3xl text-left"><MemberMeetings hideWhenEmpty /></div><Button asChild className="mt-8 rounded-none bg-gold text-navy hover:bg-gold-light hover:text-navy"><Link to="/portal"><ArrowLeft className="mr-2 h-4 w-4" />Return to Welcome Center</Link></Button></div>;
 }
 function SubmittedProfileReview({ form, onEdit }: { form: ProfileForm; onEdit: () => void }) {
   return <div><p className="text-xs uppercase text-gold">Submitted profile</p><h2 className="mt-3 font-display text-4xl sm:text-5xl">Your profile, on file.</h2><p className="mt-4 text-sm leading-7 text-ivory/55">Review the information you submitted below, or edit it at any time.</p><Button type="button" onClick={onEdit} className="mt-6 rounded-none bg-gold text-navy hover:bg-gold-light hover:text-navy"><Save className="mr-2 h-4 w-4" />Edit profile</Button>
