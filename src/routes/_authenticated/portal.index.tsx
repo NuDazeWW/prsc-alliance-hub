@@ -380,25 +380,20 @@ function PortalHome() {
           {/* Intro + Why you */}
           <div className="grid gap-5 px-5 pb-5 pt-5 sm:px-7 lg:grid-cols-2 lg:gap-[1.25%] lg:px-[1.5%] lg:pt-[1.25%]">
             <section className="flex flex-col justify-center border border-gold/25 bg-[linear-gradient(135deg,var(--color-midnight),var(--color-navy))] p-6 sm:p-8">
-              <p className="text-[15px] leading-[1.65] text-ivory/72">
-                PRSC and Decision Intelligence Systems have reached an important inflection point. The foundation is built, the
-                platform is advancing, and DIS has officially entered investor prospecting.
+              <p className="text-[11px] uppercase tracking-[0.18em] text-gold">Executive Profile · {profileComplete ? "Received" : "Not Yet Completed"}</p>
+              <h2 className="mt-3 font-display text-3xl leading-tight">Help Us Understand Your Perspective</h2>
+              <p className="mt-4 text-[15px] leading-[1.65] text-ivory/72">
+                Your experience and perspective are important to the future of PRSC and DIS. Please complete your private Executive Profile so we can better understand your background, areas of expertise, and interests as we consider future leadership, advisory, and specialist opportunities.
               </p>
               <p className="mt-4 text-[15px] leading-[1.65] text-ivory/72">
-                You were selected to join us because we believe your experience, perspective, and credibility can contribute
-                meaningfully to what we're building.
+                Your profile is private and will not be shared with other Forum participants. Completing it does not constitute an appointment or commitment to serve.
               </p>
-              <Link
-                to="/portal/profile"
-                className="cta-glow mt-[22px] inline-flex min-h-14 w-full max-w-[300px] items-center justify-between gap-6 rounded-full px-7 py-4 text-[19px] font-semibold transition-all"
-              >
-                <span className="relative z-10 flex w-full items-center justify-between gap-6">
-                  {profileComplete ? "Review Your Profile" : "Complete Your Profile"} <ArrowRight className="h-4 w-4" />
-                </span>
-              </Link>
+              <Button asChild className="cta-glow mt-[22px] h-auto min-h-14 w-full whitespace-normal px-5 py-4 text-left text-base font-semibold">
+                <Link to="/portal/profile"><span className="relative z-10 flex w-full items-center justify-between gap-3">{profileComplete ? "Review Your Executive Profile" : "Complete Your Executive Profile"}<ArrowRight className="h-4 w-4 shrink-0" /></span></Link>
+              </Button>
               <p className="mt-3 text-[15px] text-ivory/52">
                 {profileComplete
-                  ? "Your profile is on file — your package is being prepared."
+                  ? "Thank you. Your private Executive Profile has been received."
                   : (
                     <>
                       Approx. 7–10 minutes  •  Your submission is private.
