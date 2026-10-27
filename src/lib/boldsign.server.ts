@@ -21,7 +21,7 @@ export async function reconcileBoldSign(documentId: string) {
       sb.from("portal_documents").select("*").eq("id", a.document_id).maybeSingle(),
     ]);
     if (!member || member.status === "revoked" || !doc || doc.superseded_at || doc.member_id !== member.id || doc.version_label !== a.version_label || (doc.journey_track ?? member.entity) !== a.entity || member.email.toLowerCase() !== a.signer_email) continue;
-    const { appliesTo, type: _unused } = { ...(await import("./portal.functions")), type: undefined };
+    const { appliesTo } = await import("./portal.functions");
     if (!appliesTo(doc as import("./portal.functions").PortalDocumentRecord, member)) continue;
     const [{ data: allDocs }, { data: acks }, { data: releases }] = await Promise.all([
       sb.from("portal_documents").select("*"),
