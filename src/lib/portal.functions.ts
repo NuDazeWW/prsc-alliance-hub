@@ -1202,6 +1202,9 @@ export const prepareSignedCopy = createServerFn({ method: "POST" })
     return { ok: true, previewUrl: signed?.signedUrl ?? null };
   });
 
+// Initial launch: signed copies are available only through authenticated portal access (founder directive).
+import { SIGNED_COPY_EMAIL_ENABLED, SIGNED_COPY_EMAIL_DISABLED_MESSAGE } from "@/lib/signed-copy-policy";
+
 export const sendSignedCopy = createServerFn({ method: "POST" })
   .middleware([requirePortalAccess])
   .inputValidator((input) => z.object({
@@ -1212,6 +1215,7 @@ export const sendSignedCopy = createServerFn({ method: "POST" })
   }).parse(input))
   .handler(async ({ context, data }) => {
     await assertAdmin(context);
+    if (!SIGNED_COPY_EMAIL_ENABLED) throw new Error(SIGNED_COPY_EMAIL_DISABLED_MESSAGE);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { data: ack } = await supabaseAdmin.from("portal_document_acknowledgements").select("id, member_id, signed_copy_path").eq("id", data.ack_id).single();
     if (!ack?.signed_copy_path) throw new Error("Prepare the signed copy first");
