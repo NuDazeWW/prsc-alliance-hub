@@ -38,6 +38,7 @@ function trackOf(d: JourneyDoc, entity: string): JourneyTrack {
 }
 
 export type LockOptions = {
+  forum?: boolean;
   /** Explicit admin Stage 2 release per entity. Forum status never opens entity tracks. */
   released: { prsc: boolean; dis: boolean };
 };
@@ -49,7 +50,7 @@ export type LockOptions = {
  */
 export function lockedDocumentIds(docs: JourneyDoc[], done: Set<string>, entity: string, opts: LockOptions): Set<string> {
   const locked = new Set<string>();
-  const onboarding = docs.filter(isOnboarding);
+  const onboarding = docs.filter(d => isOnboarding(d) && (opts.forum !== false || d.journey_stage !== 1));
   const shared = onboarding.filter((d) => trackOf(d, entity) === "shared").sort(order);
   let blocked = false;
   for (const d of shared) {

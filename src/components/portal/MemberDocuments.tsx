@@ -20,17 +20,17 @@ type Doc = {
 };
 type Completion = { document_id: string; kind: string; signed_name: string | null; acknowledged_at: string };
 
-type Props = { documents: Doc[]; completions: Completion[]; entity: string; forumCleared?: boolean; entityReleased?: { prsc: boolean; dis: boolean } };
+type Props = { documents: Doc[]; completions: Completion[]; entity: string; forum?: boolean; forumCleared?: boolean; entityReleased?: { prsc: boolean; dis: boolean } };
 
 const TRACK_LABEL = { shared: "Shared Forum", prsc: "PRSC", dis: "DIS" } as const;
 
-export function MemberDocuments({ documents: all, completions, entity, forumCleared = true, entityReleased = { prsc: false, dis: false } }: Props) {
-  const documents = all.filter((d: any) => !d.superseded_at);
+export function MemberDocuments({ documents: all, completions, entity, forum = true, forumCleared = true, entityReleased = { prsc: false, dis: false } }: Props) {
+  const documents = all.filter((d: any) => !d.superseded_at && (forum || d.journey_stage !== 1));
   const history = all.filter((d: any) => d.superseded_at);
   const [openId, setOpenId] = useState<string | null>(null);
   const open = all.find((d) => d.id === openId) ?? null;
   const doneMap = new Map(completions.map((c) => [c.document_id, c]));
-  const locked = lockedDocumentIds(documents, new Set(doneMap.keys()), entity, { released: entityReleased });
+  const locked = lockedDocumentIds(documents, new Set(doneMap.keys()), entity, { released: entityReleased, forum });
   const s1 = documents.filter((d) => d.journey_stage === 1);
   const awaitingClearance = !forumCleared && s1.length > 0 && s1.every((d) => doneMap.has(d.id));
   const onboarding = documents.filter(isOnboarding);
@@ -59,7 +59,7 @@ export function MemberDocuments({ documents: all, completions, entity, forumClea
         if (!docs.length) return null;
         return (
           <div key={stage.n} className="mt-8">
-            <p className="text-[11px] uppercase tracking-[0.24em] text-gold">Stage {stage.n} · {stage.label}</p>
+            <p className="text-[11px] uppercase tracking-[0.24em] text-gold">Stage {forum ? stage.n : stage.n - 1} · {stage.label}</p>
             <div className="mt-4 grid gap-4 lg:grid-cols-2">
               {docs.map((d) => <DocCard key={d.id} d={d} done={doneMap.get(d.id)} locked={locked.has(d.id)} onOpen={setOpenId} />)}
             </div>
