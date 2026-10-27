@@ -1,8 +1,7 @@
 import { userFacingError } from "@/lib/user-facing-error";
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { getClearancePrerequisites, getMemberGovernance, grantRestrictedDocument, listRestrictedGrants, recordConflictReview, recordForumClearance, recordNdaVerification, recordRoleReview, revokeRestrictedDocument } from "@/lib/governance.functions";
-import { getAdminDocuments } from "@/lib/portal.functions";
+import { getClearancePrerequisites, getMemberGovernance, listRestrictedDocuments, grantRestrictedDocument, listRestrictedGrants, recordConflictReview, recordForumClearance, recordNdaVerification, recordRoleReview, revokeRestrictedDocument } from "@/lib/governance.functions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -19,7 +18,7 @@ export function AdminGovernancePanel({ memberId, preview, onChange }: { memberId
   const q = useQuery({ queryKey: ["governance", memberId], enabled: !preview, retry: false, queryFn: () => getMemberGovernance({ data: { member_id: memberId } }) });
   const pre = useQuery({ queryKey: ["clearance-prereq", memberId], enabled: !preview, retry: false, queryFn: () => getClearancePrerequisites({ data: { member_id: memberId } }) });
   const grants = useQuery({ queryKey: ["restricted-grants", memberId], enabled: !preview, retry: false, queryFn: () => listRestrictedGrants({ data: { member_id: memberId } }) });
-  const restricted = useQuery({ queryKey: ["restricted-docs"], enabled: !preview, retry: false, queryFn: async () => ((await getAdminDocuments()) as any).documents?.filter((d: any) => d.classification === "restricted_opportunity" && !d.superseded_at) ?? [] });
+  const restricted = useQuery({ queryKey: ["restricted-docs"], enabled: !preview, retry: false, queryFn: async () => (await listRestrictedDocuments()).documents });
   const [cr, setCr] = useState({ decision: "approved" as "approved" | "declined" | "hold", notes: "" });
   const [grantReason, setGrantReason] = useState("");
   const [msg, setMsg] = useState("");

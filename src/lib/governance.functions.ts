@@ -212,3 +212,11 @@ export const listRestrictedGrants = createServerFn({ method: "GET" })
     const { data: rows } = await context.supabase.from("restricted_document_grants").select("document_id, version_label, granted_at, revoked_at").eq("member_id", data.member_id).is("revoked_at", null);
     return { grants: rows ?? [] };
   });
+
+export const listRestrictedDocuments = createServerFn({ method: "GET" })
+  .middleware([requirePortalAccess])
+  .handler(async ({ context }) => {
+    await assertAdmin(context);
+    const { data } = await context.supabase.from("portal_documents").select("id, title, version_label").eq("classification", "restricted_opportunity").is("superseded_at", null);
+    return { documents: data ?? [] };
+  });
