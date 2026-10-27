@@ -2,11 +2,11 @@
 
 ## Final security acceptance checkpoint (Oct 27)
 - [ ] Receive completed deep rescan and return all 16 finding dispositions (scan running)
-- [ ] Request controlled test-member password recovery and complete inbox-link reset; record provider-verification limits
-- [ ] Report historical signed-link lifetimes and residual expiry exposure
-- [ ] Confirm approved manual launch reminders; insecure public-key dispatch stays disabled
-- [ ] Verify stored invitation wording and first-login order
-- [ ] Return GO/NO-GO with remaining vulnerabilities and published-rehearsal limits; retain all four fictional accounts
+- [ ] Complete controlled inbox-link password reset (request accepted HTTP 200 and sent event verified; awaits inbox owner); provider thresholds remain unreadable
+- [x] Report historical signed-link lifetimes (1 hour / 15 minutes / 7 days) and residual expiry exposure; zero current signed-copy records is not an issuance ledger
+- [x] Confirm approved manual launch reminders via authenticated Admin Center → Nudge now; public-key dispatch stays disabled and scheduler is not a launch prerequisite
+- [x] Correct and read back stored invitation step list; application rule tests preserve first-login order
+- [x] Return checkpoint NO-GO with remaining verification and published-rehearsal limits; retain all four fictional accounts
 
 ## Authorized security remediation (Oct 27)
 - [x] Remove attacker-triggered durable account lockout; direct provider login preserves provider controls
