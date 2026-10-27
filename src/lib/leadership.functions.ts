@@ -51,12 +51,8 @@ export const getLeadershipTeam = createServerFn({ method: "GET" })
         const permitted = linkedProfilePermissions(prof?.visibility_instructions);
         if (!admin && r.member_id && !permitted.name) return null;
         let photo_url: string | null = null;
-        if (r.photo_path && (admin || !r.member_id || permitted.photo)) {
-          const { data } = await supabaseAdmin.storage.from("leadership-photos").createSignedUrl(r.photo_path, 3600);
-          photo_url = data?.signedUrl ?? null;
-        } else if (prof?.headshot_path && (admin || permitted.photo)) {
-          const { data } = await supabaseAdmin.storage.from("member-headshots").createSignedUrl(prof.headshot_path, 3600);
-          photo_url = data?.signedUrl ?? null;
+        if ((r.photo_path || prof?.headshot_path) && (admin || !r.member_id || permitted.photo)) {
+          photo_url = `/api/public/portal-file?kind=leader&id=${r.id}`;
         }
         return {
           id: r.id,

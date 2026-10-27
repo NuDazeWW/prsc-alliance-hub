@@ -2,6 +2,7 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useRef, useState } from "react";
 import { Pencil, LogOut } from "lucide-react";
+import { usePrivateMedia } from "@/hooks/use-private-media";
 import { useHeadshotUpload } from "@/hooks/use-headshot-upload";
 import { OrientationHub } from "@/components/portal/OrientationHub";
 import { acknowledgeOrientation } from "@/lib/forum-communications.functions";
@@ -99,6 +100,7 @@ function PortalHome() {
     retry: false,
     enabled: Boolean(data?.member),
   });
+  const headshotSrc = usePrivateMedia(headshot.data?.url);
   const documents = useQuery({
     queryKey: ["my-documents", asMember ?? null],
     queryFn: () => getMyDocuments({ data: { asMemberId: asMember } }).catch(() => null),
@@ -246,7 +248,7 @@ function PortalHome() {
           <div className="lg:px-[12.5%] lg:pt-[clamp(1.5rem,2vw,2.25rem)]">
             <p className="text-[11px] uppercase tracking-[0.22em] text-gold/80">Your Welcome Center</p>
             <div className="mt-5 flex items-center gap-4">
-              <AvatarCircle url={headshot.data?.url} initials={initials} alt={`${name} ${m.last_name}`} editable={!asMember} />
+              <AvatarCircle url={headshotSrc} initials={initials} alt={`${name} ${m.last_name}`} editable={!asMember} />
               <h2 className="min-w-0 font-display text-[clamp(1.15rem,1.3vw,1.5rem)] leading-tight">
                 {name} {m.last_name}
               </h2>

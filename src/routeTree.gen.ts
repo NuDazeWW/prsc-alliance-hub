@@ -34,6 +34,7 @@ import { Route as AuthenticatedPortalSummaryRouteImport } from './routes/_authen
 import { Route as ApiPublicBoldsignWebhookRouteImport } from './routes/api/public/boldsign-webhook'
 import { Route as ApiPublicInviteRemindersRouteImport } from './routes/api/public/invite-reminders'
 import { Route as ApiPublicMeetingIcsRouteImport } from './routes/api/public/meeting-ics'
+import { Route as ApiPublicPortalFileRouteImport } from './routes/api/public/portal-file'
 import { Route as LovableEmailEventsRouteImport } from './routes/lovable/email/events'
 import { Route as LovableEmailAuthPreviewRouteImport } from './routes/lovable/email/auth/preview'
 import { Route as LovableEmailAuthWebhookRouteImport } from './routes/lovable/email/auth/webhook'
@@ -169,6 +170,11 @@ const ApiPublicMeetingIcsRoute = ApiPublicMeetingIcsRouteImport.update({
   path: '/api/public/meeting-ics',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicPortalFileRoute = ApiPublicPortalFileRouteImport.update({
+  id: '/api/public/portal-file',
+  path: '/api/public/portal-file',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const LovableEmailEventsRoute = LovableEmailEventsRouteImport.update({
   id: '/lovable/email/events',
   path: '/lovable/email/events',
@@ -209,6 +215,7 @@ export interface FileRoutesByFullPath {
   '/api/public/boldsign-webhook': typeof ApiPublicBoldsignWebhookRoute
   '/api/public/invite-reminders': typeof ApiPublicInviteRemindersRoute
   '/api/public/meeting-ics': typeof ApiPublicMeetingIcsRoute
+  '/api/public/portal-file': typeof ApiPublicPortalFileRoute
   '/lovable/email/events': typeof LovableEmailEventsRoute
   '/portal/': typeof AuthenticatedPortalIndexRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
@@ -238,6 +245,7 @@ export interface FileRoutesByTo {
   '/api/public/boldsign-webhook': typeof ApiPublicBoldsignWebhookRoute
   '/api/public/invite-reminders': typeof ApiPublicInviteRemindersRoute
   '/api/public/meeting-ics': typeof ApiPublicMeetingIcsRoute
+  '/api/public/portal-file': typeof ApiPublicPortalFileRoute
   '/lovable/email/events': typeof LovableEmailEventsRoute
   '/portal': typeof AuthenticatedPortalIndexRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
@@ -269,6 +277,7 @@ export interface FileRoutesById {
   '/api/public/boldsign-webhook': typeof ApiPublicBoldsignWebhookRoute
   '/api/public/invite-reminders': typeof ApiPublicInviteRemindersRoute
   '/api/public/meeting-ics': typeof ApiPublicMeetingIcsRoute
+  '/api/public/portal-file': typeof ApiPublicPortalFileRoute
   '/lovable/email/events': typeof LovableEmailEventsRoute
   '/_authenticated/portal/': typeof AuthenticatedPortalIndexRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
@@ -300,6 +309,7 @@ export interface FileRouteTypes {
     | '/api/public/boldsign-webhook'
     | '/api/public/invite-reminders'
     | '/api/public/meeting-ics'
+    | '/api/public/portal-file'
     | '/lovable/email/events'
     | '/portal/'
     | '/lovable/email/auth/preview'
@@ -329,6 +339,7 @@ export interface FileRouteTypes {
     | '/api/public/boldsign-webhook'
     | '/api/public/invite-reminders'
     | '/api/public/meeting-ics'
+    | '/api/public/portal-file'
     | '/lovable/email/events'
     | '/portal'
     | '/lovable/email/auth/preview'
@@ -359,6 +370,7 @@ export interface FileRouteTypes {
     | '/api/public/boldsign-webhook'
     | '/api/public/invite-reminders'
     | '/api/public/meeting-ics'
+    | '/api/public/portal-file'
     | '/lovable/email/events'
     | '/_authenticated/portal/'
     | '/lovable/email/auth/preview'
@@ -385,6 +397,7 @@ export interface RootRouteChildren {
   ApiPublicBoldsignWebhookRoute: typeof ApiPublicBoldsignWebhookRoute
   ApiPublicInviteRemindersRoute: typeof ApiPublicInviteRemindersRoute
   ApiPublicMeetingIcsRoute: typeof ApiPublicMeetingIcsRoute
+  ApiPublicPortalFileRoute: typeof ApiPublicPortalFileRoute
   LovableEmailEventsRoute: typeof LovableEmailEventsRoute
   LovableEmailAuthPreviewRoute: typeof LovableEmailAuthPreviewRoute
   LovableEmailAuthWebhookRoute: typeof LovableEmailAuthWebhookRoute
@@ -567,6 +580,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicMeetingIcsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/portal-file': {
+      id: '/api/public/portal-file'
+      path: '/api/public/portal-file'
+      fullPath: '/api/public/portal-file'
+      preLoaderRoute: typeof ApiPublicPortalFileRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/lovable/email/events': {
       id: '/lovable/email/events'
       path: '/lovable/email/events'
@@ -632,6 +652,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiPublicBoldsignWebhookRoute: ApiPublicBoldsignWebhookRoute,
   ApiPublicInviteRemindersRoute: ApiPublicInviteRemindersRoute,
   ApiPublicMeetingIcsRoute: ApiPublicMeetingIcsRoute,
+  ApiPublicPortalFileRoute: ApiPublicPortalFileRoute,
   LovableEmailEventsRoute: LovableEmailEventsRoute,
   LovableEmailAuthPreviewRoute: LovableEmailAuthPreviewRoute,
   LovableEmailAuthWebhookRoute: LovableEmailAuthWebhookRoute,

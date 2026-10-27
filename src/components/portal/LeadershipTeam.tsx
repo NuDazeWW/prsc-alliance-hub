@@ -1,3 +1,4 @@
+import { usePrivateMedia } from "@/hooks/use-private-media";
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { ChevronDown } from "lucide-react";
@@ -63,7 +64,7 @@ export function LeadershipTeam() {
                 className="flex w-full items-center gap-4 pr-5 text-left transition-colors hover:bg-ivory/[.03]"
               >
                 {p.photo_url ? (
-                  <img src={p.photo_url} alt={p.name} loading="lazy" width={80} height={64} className="h-16 w-20 shrink-0 object-cover" />
+                  <LeaderPhoto url={p.photo_url} name={p.name} />
                 ) : (
                   <span className="grid h-16 w-20 shrink-0 place-items-center bg-ivory/5 font-display text-lg text-gold">{initials}</span>
                 )}
@@ -85,4 +86,9 @@ export function LeadershipTeam() {
       </ul>
     </div>
   );
+}
+
+function LeaderPhoto({ url, name }: { url: string; name: string }) {
+  const src = usePrivateMedia(url);
+  return src ? <img src={src} alt={name} loading="lazy" width={80} height={64} className="h-16 w-20 shrink-0 object-cover" /> : <span className="h-16 w-20 shrink-0 bg-ivory/5" />;
 }
