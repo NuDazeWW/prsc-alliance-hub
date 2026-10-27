@@ -639,10 +639,27 @@ export type PortalCompletion = {
 type DocMember = { id: string; entity: string; role: string; is_candidate?: boolean | null; participates_in_forum?: boolean | null; nda_verified_at?: string | null; forum_clearance_status?: string | null; role_review_status?: string | null };
 const GOV_COLS = "nda_verified_at, forum_clearance_status, role_review_status";
 
+/** Addendum execution, restricted grants and entity releases for one member (server-only, identity already fixed). */
+export async function memberVisibilityFlags(memberId: string) {
+  const { supabaseAdmin: sb } = await import("@/integrations/supabase/client.server");
+  const [{ data: addenda }, { data: assignments }, { data: grants }, { data: releases }] = await Promise.all([
+    sb.from("portal_documents").select("id, forum_role, superseded_at, signing_approved, version_label, countersignature_required, member_id").eq("forum_role", "addendum"),
+    sb.from("boldsign_assignments").select("document_id, status, version_label, countersigned_at").eq("member_id", memberId),
+    sb.from("restricted_document_grants").select("document_id, version_label, revoked_at").eq("member_id", memberId).is("revoked_at", null),
+    sb.from("entity_onboarding_releases").select("entity").eq("member_id", memberId),
+  ]);
+  return {
+    addendum_complete: addendumSatisfied((addenda ?? []) as any, (assignments ?? []) as any, memberId),
+    grants: (grants ?? []) as RestrictedGrant[],
+    has_entity_release: (releases ?? []).length > 0,
+  };
+}
+
 /** What the member may actually open: mirrors the database read policy. */
-function memberVisible(docs: PortalDocumentRecord[], m: DocMember, done: Set<string>) {
-  const vm = { nda_verified_at: m.nda_verified_at ?? null, forum_clearance_status: m.forum_clearance_status ?? "not_reviewed", is_candidate: !!m.is_candidate };
-  return docs.filter((d: any) => documentVisible({ classification: d.classification ?? "entity_confidential", superseded_at: d.superseded_at ?? null, is_forum_prep: !!d.is_forum_prep, journey_stage: d.journey_stage ?? null, member_specific: !!d.member_id }, vm, done.has(d.id)));
+async function memberVisible(docs: PortalDocumentRecord[], m: DocMember, done: Set<string>) {
+  const flags = await memberVisibilityFlags(m.id);
+  const vm = { nda_verified_at: m.nda_verified_at ?? null, forum_clearance_status: m.forum_clearance_status ?? "not_reviewed", is_candidate: !!m.is_candidate, participates_in_forum: m.participates_in_forum ?? true, ...flags };
+  return docs.filter((d: any) => documentVisible({ id: d.id, classification: d.classification ?? "entity_confidential", superseded_at: d.superseded_at ?? null, is_forum_prep: !!d.is_forum_prep, journey_stage: d.journey_stage ?? null, member_specific: !!d.member_id, forum_role: d.forum_role ?? null, version_label: d.version_label ?? null }, vm, done.has(d.id)));
 }
 
 export function appliesTo(doc: PortalDocumentRecord, m: DocMember) {
