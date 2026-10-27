@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { Pencil, LogOut } from "lucide-react";
 import { usePrivateMedia } from "@/hooks/use-private-media";
 import { afterOrientation } from "@/lib/first-login";
+import { shouldLoadMemberDocuments } from "@/lib/member-documents-access";
 import { useHeadshotUpload } from "@/hooks/use-headshot-upload";
 import { OrientationHub } from "@/components/portal/OrientationHub";
 import { acknowledgeOrientation } from "@/lib/forum-communications.functions";
@@ -112,7 +113,7 @@ function PortalHome() {
     queryKey: ["my-documents", asMember ?? null],
     queryFn: () => getMyDocuments({ data: { asMemberId: asMember } }).catch(() => null),
     retry: false,
-    enabled: Boolean(data?.member && data?.hasProfile),
+    enabled: shouldLoadMemberDocuments(data),
   });
   const meetings = useQuery({
     queryKey: ["my-meetings", asMember ?? null],
@@ -201,7 +202,7 @@ function PortalHome() {
 
   const sideNav = [
     { label: "Overview", href: "#overview", icon: Home, active: true, onSelect: undefined as (() => void) | undefined },
-    { label: "Your Personal Documents", href: "#documents", icon: profileComplete ? FileSignature : Lock, active: false, onSelect: () => setPanel("documents") },
+    { label: "Your Personal Documents", href: "#documents", icon: FileSignature, active: false, onSelect: () => setPanel("documents") },
     { label: "Meetings", href: "#meetings", icon: CalendarDays, active: false, onSelect: () => document.getElementById("meetings")?.scrollIntoView({ behavior: "smooth" }) },
     { label: "The Orientation Hub", href: "#hub", icon: ScrollText, active: false, onSelect: () => setPanel("hub") },
   ];
@@ -228,21 +229,19 @@ function PortalHome() {
               <p className="whitespace-nowrap text-[9px] uppercase tracking-[0.18em] text-gold">Your Next Step</p>
               <span className="h-3 w-px bg-gold/25" />
               <p className="truncate text-[11px] text-ivory/55">
-                {profileComplete
-                  ? documentsReleased
-                    ? docSummary
-                    : "Your profile is received. Your document package is being prepared — we will email you when it is ready."
-                  : "Complete your private profile to begin."}
+                {documentsReleased
+                  ? docSummary
+                  : "We will email you when your assigned documents are released. Your executive profile is optional for Forum participation."}
               </p>
             </div>
-            {profileComplete && documentsReleased && (allDone ? (
+            {documentsReleased && (allDone ? (
               <Link to="/portal/summary" className="shrink-0 text-[10px] uppercase tracking-[0.14em] text-gold hover:text-ivory">
                 View your summary
               </Link>
             ) : (
-              <button type="button" onClick={() => setPanel("documents")} className="shrink-0 text-[10px] uppercase tracking-[0.14em] text-gold hover:text-ivory">
+              <Button variant="ghost" onClick={() => setPanel("documents")} className="shrink-0 text-[10px] uppercase tracking-[0.14em] text-gold hover:text-ivory">
                 Review documents
-              </button>
+              </Button>
             ))}
           </div>
           <JourneyTimeline currentStage={journey.currentStage} stageDone={journey.stageDone} forum={m.participates_in_forum !== false} />
@@ -404,7 +403,7 @@ function PortalHome() {
                     <>
                       Approx. 7–10 minutes  •  Your submission is private.
                       <br />
-                      Completing your profile unlocks your individualized package.
+                      Your executive profile is optional for Forum participation. Released requirements are available in Your Personal Documents.
                     </>
                   )}
               </p>
@@ -534,29 +533,14 @@ function PortalHome() {
                 </DialogTitle>
               </DialogHeader>
 
-              {!profileComplete ? (
-                <div className="mt-8 border border-gold/25 bg-ivory/[.03] p-8 text-center">
-                  <Lock className="mx-auto h-7 w-7 text-gold" />
-                  <h3 className="mt-5 font-display text-[24px] leading-snug">Available after your profile is complete.</h3>
-                  <p className="mx-auto mt-4 max-w-[34rem] text-[15px] leading-7 text-ivory/65">
-                    Your documents are prepared individually. Once your profile is completed, the documents will appear here.
-                  </p>
-                  <Link
-                    to="/portal/profile"
-                    onClick={() => setPanel(null)}
-                    className="cta-glow mt-7 inline-flex items-center gap-3 rounded-full px-7 py-3.5 text-[16px] font-semibold transition-all"
-                  >
-                    <span className="relative z-10 flex items-center gap-3">
-                      Complete Your Profile <ArrowRight className="h-4 w-4" />
-                    </span>
-                  </Link>
-                </div>
+              {documents.isPending ? (
+                <p className="mt-8 text-ivory/65">Opening your released documents…</p>
               ) : (
                 <>
                   {documentsReleased ? (
                     <MemberDocuments documents={myDocs as any} completions={documents.data?.completions ?? []} entity={docEntity} forum={(documents.data as any)?.forum !== false} forumCleared={(documents.data as any)?.forumCleared === true} entityReleased={(documents.data as any)?.entityReleased} />
                   ) : (
-                    <div className="mt-8 border border-gold/25 bg-ivory/[.03] p-8 text-center"><FileText className="mx-auto h-7 w-7 text-gold"/><h3 className="mt-5 font-display text-[24px] leading-snug">Your documents are being prepared.</h3><p className="mx-auto mt-4 max-w-[34rem] text-[15px] leading-7 text-ivory/65">Your profile has been received. We will email you as soon as your individualized Board/Advisor documents are ready here.</p></div>
+                    <div className="mt-8 border border-gold/25 bg-ivory/[.03] p-8 text-center"><FileText className="mx-auto h-7 w-7 text-gold"/><h3 className="mt-5 font-display text-[24px] leading-snug">Your documents are being prepared.</h3><p className="mx-auto mt-4 max-w-[34rem] text-[15px] leading-7 text-ivory/65">We will email you when your assigned documents are released. Your executive profile is optional for Forum participation.</p></div>
                   )}
                 </>
               )}
