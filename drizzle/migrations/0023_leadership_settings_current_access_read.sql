@@ -1,0 +1,2 @@
+DROP POLICY IF EXISTS "Signed in read leadership settings" ON public.leadership_settings;
+CREATE POLICY "Current portal access reads leadership settings" ON public.leadership_settings FOR SELECT TO authenticated USING (public.portal_access_current());
