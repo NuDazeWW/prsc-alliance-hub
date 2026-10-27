@@ -2,7 +2,8 @@
 
 ## Executive Profile encouragement and exact Forum map (Oct 27)
 - [ ] Reuse nonblocking profile flow; add founder copy and explicit submission status without new stages or reminder automation
-- [ ] Verify existing fictional profile and document access; reuse BoldSign evidence, no signing or invitations
+- [ ] Verify source/configuration and reuse fictional/BoldSign evidence only; no preview sessions, transactions, uploads, releases or publishing
+- [ ] Check Addendum prerequisite at authenticated file endpoint, individual restricted_opportunity authorization, repeated-confirmation email duplication and exact eight-file manifest
 - [ ] Deliver actual journey and eight-document upload map, identifying configuration gaps and contradictions; Gate B paused
 
 ## Published document-access rehearsal (Oct 27)
