@@ -119,3 +119,6 @@
 - [x] Bounded security verification + Gate A recommendation (GO for fictional-account testing; Gate B awaits founder)
 - [ ] Testone password reset result (waiting on founder)
 - [ ] BoldSign webhook secret (waiting on founder; manual check-off works meanwhile)
+- [x] Leadership heading access limited to current portal access (critical finding fixed)
+- [x] Gate A controlled publication for fictional-account rehearsal
+- [ ] Fictional BoldSign signing test (blocked: founder must confirm the BoldSign account is Sandbox or approve a nonbinding test in Live)
