@@ -1,3 +1,4 @@
+import { userFacingError } from "@/lib/user-facing-error";
 import { fetchPrivateFile } from "@/lib/private-file-client";
 import { DEFAULT_MEETING_TZ, timezoneLabel } from "@/lib/meeting-block";
 import { useEffect, useState } from "react";
@@ -100,7 +101,7 @@ export function MemberMeetings({ hideWhenEmpty = false, hideIntro = false, asMem
       setDrafts(d);
       setNotes(n);
     } catch (e) {
-      toast.error(e instanceof Error ? e.message : "Could not load meetings");
+      toast.error(userFacingError(e, "Could not load meetings"));
     } finally {
       setLoading(false);
     }
@@ -128,7 +129,7 @@ export function MemberMeetings({ hideWhenEmpty = false, hideIntro = false, asMem
       toast.success("Your availability has been sent");
       await refresh();
     } catch (e) {
-      toast.error(e instanceof Error ? e.message : "Could not send");
+      toast.error(userFacingError(e, "Could not send"));
     } finally {
       setSaving(null);
     }

@@ -1,3 +1,4 @@
+import { userFacingError } from "@/lib/user-facing-error";
 import { useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -26,7 +27,7 @@ export function useHeadshotUpload() {
       ]);
       setMsg("Photo saved.");
     } catch (e) {
-      setMsg(e instanceof Error ? e.message : "Upload failed. Please try again.");
+      setMsg(userFacingError(e, "Upload failed. Please try again."));
     } finally { setBusy(false); }
   }
   return { upload, busy, msg };

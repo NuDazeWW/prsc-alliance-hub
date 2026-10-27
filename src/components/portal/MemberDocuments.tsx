@@ -1,3 +1,4 @@
+import { userFacingError } from "@/lib/user-facing-error";
 import { usePrivateMedia } from "@/hooks/use-private-media";
 import { useEffect, useRef, useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
@@ -133,8 +134,8 @@ function BoldSignReader({ documentId, title, completed }: { documentId: string; 
   useEffect(() => () => { if (url.startsWith("blob:")) URL.revokeObjectURL(url); }, [url]);
   return <>
     <Button type="button" variant="outline" disabled={open.isPending || evidence.isPending} onClick={() => completed ? evidence.mutate() : open.mutate()}><BookOpen className="h-4 w-4" /> {open.isPending || evidence.isPending ? "Opening…" : completed ? "View executed document" : "Review and Sign"}</Button>
-    {open.error && <p className="mt-3 text-sm text-gold">{open.error.message}</p>}
-    {evidence.error && <p className="mt-3 text-sm text-gold">{evidence.error.message}</p>}
+    {open.error && <p className="mt-3 text-sm text-gold">{userFacingError(open.error, "The signing document could not be opened. Please try again.")}</p>}
+    {evidence.error && <p className="mt-3 text-sm text-gold">{userFacingError(evidence.error, "The executed document could not be opened. Please try again.")}</p>}
     {url && <div role="dialog" aria-modal="true" aria-label={`Sign ${title}`} className="fixed inset-0 z-50 flex flex-col bg-navy-deep p-4">
       <div className="mb-4 flex flex-wrap items-center justify-between gap-3"><h3 className="font-display text-xl">{title}</h3><a href={url} target="_blank" rel="noreferrer" className="text-gold underline">Open signing in a new tab</a><Button variant="outline" onClick={() => { setUrl(""); void client.invalidateQueries({ queryKey: ["my-documents"] }); }}>Return to Welcome Center</Button></div>
       <iframe src={url} title={`BoldSign: ${title}`} className="min-h-0 flex-1 border border-border bg-background" />
@@ -258,7 +259,7 @@ function DocumentReader({ doc, completion, onBack }: { doc: Doc; completion: Com
           <button type="button" disabled={!canSubmit || complete.isPending} onClick={() => complete.mutate()} className="cta-glow inline-flex items-center gap-3 rounded-full px-7 py-3 text-[15px] font-semibold transition-all disabled:opacity-40">
             <span className="relative z-10">{complete.isPending ? "Saving…" : isSign ? "Sign document" : "Confirm I have read this"}</span>
           </button>
-          {complete.error && <p className="text-[14px] text-gold">{complete.error instanceof Error ? complete.error.message : "Something went wrong."}</p>}
+          {complete.error && <p className="text-[14px] text-gold">{userFacingError(complete.error, "Something went wrong.")}</p>}
         </div>
       )}
     </div>

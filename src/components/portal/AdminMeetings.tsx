@@ -1,3 +1,4 @@
+import { userFacingError } from "@/lib/user-facing-error";
 import { useEffect, useState } from "react";
 import { CalendarDays, Check, Clock, MapPin, Plus, RefreshCw, Video, X } from "lucide-react";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -44,7 +45,7 @@ export function AdminMeetings() {
     try {
       const r = await resyncPollCalendar({ data: { poll_id: pollId } });
       if (r.ok) toast.success("Outlook calendar is in sync");
-      else toast.error(`Calendar not synced: ${r.error}`);
+      else toast.error(`Calendar not synced: ${userFacingError(r.error, "Please try again.")}`);
       await refresh();
     } finally {
       setSyncing(null);
@@ -57,7 +58,7 @@ export function AdminMeetings() {
       setMembers(m.members);
       setPolls(p.polls);
     } catch (e) {
-      toast.error(e instanceof Error ? e.message : "Could not load meetings");
+      toast.error(userFacingError(e, "Could not load meetings"));
     } finally {
       setLoading(false);
     }
@@ -74,7 +75,7 @@ export function AdminMeetings() {
       toast.success("Meeting confirmed — calendar invitations sent");
       await refresh();
     } catch (e) {
-      toast.error(e instanceof Error ? e.message : "Could not confirm");
+      toast.error(userFacingError(e, "Could not confirm"));
     }
   }
 
@@ -84,7 +85,7 @@ export function AdminMeetings() {
       toast.success("Meeting cancelled");
       await refresh();
     } catch (e) {
-      toast.error(e instanceof Error ? e.message : "Could not cancel");
+      toast.error(userFacingError(e, "Could not cancel"));
     }
   }
 
@@ -104,7 +105,7 @@ export function AdminMeetings() {
         {!cal ? "Checking Outlook calendar…" : cal.connected && !cal.error ? (
           <>Holds go to: <span className="text-ivory">{cal.name} · {cal.email}</span> ({cal.calendar}). Confirm this is your working calendar.</>
         ) : (
-          <span className="text-amber-300">Outlook calendar not connected{cal.error ? ` — ${cal.error}` : ""}. Polls still work; proposed times are not held on your calendar.</span>
+          <span className="text-amber-300">Outlook calendar not connected{cal.error ? ` — ${userFacingError(cal.error, "Could not check Outlook")}` : ""}. Polls still work; proposed times are not held on your calendar.</span>
         )}
       </div>
       <Dialog open={proposeOpen} onOpenChange={setProposeOpen}>

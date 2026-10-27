@@ -1,3 +1,4 @@
+import { userFacingError } from "@/lib/user-facing-error";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { Eye, EyeOff, KeyRound, Mail, ShieldCheck } from "lucide-react";
@@ -66,7 +67,7 @@ function AuthPage() {
       } catch {
         await navigate({ to: search.redirect, replace: true });
       }
-    } catch (error) { setMessage(error instanceof Error ? error.message : "Please try again."); }
+    } catch (error) { setMessage(userFacingError(error, "Please try again.")); }
     finally { setBusy(false); }
   }
   return <main className="relative flex min-h-screen items-center overflow-hidden bg-navy px-5 py-10 text-ivory">

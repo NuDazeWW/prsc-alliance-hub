@@ -1,6 +1,8 @@
 import { createServerFn } from "@tanstack/react-start";
 import { assertNdaRecipient, assertInviteIdentity } from "@/lib/invitation-evidence";
 import { z } from "zod";
+import { parseProfileSaveInput, assertCommunicationPreferencesNotDowngraded } from "@/lib/portal-profile-schema";
+import type { PortalProfileRecord } from "@/lib/portal-profile-fields";
 import { getRequest } from "@tanstack/react-start/server";
 import { requirePortalAccess } from "@/lib/portal-access";
 import { renderBrandedEmail, renderBrandedEmailText } from "@/lib/branded-email";
@@ -23,16 +25,15 @@ type PortalMember = {
 type PortalProfile = {
   id: string; member_id: string; current_stage: number; preferred_name: string | null;
   professional_role: string | null; current_organization: string | null;
-  preferred_email: string | null; preferred_phone: string | null; headshot_path: string | null;
-  experience_answers: Record<string, string>; visibility_instructions: Record<string, string>;
-  restriction_status: string | null; restriction_details: string | null;
+  preferred_email: string | null; preferred_phone: string | null; headshot_path: string | null; bio: string | null;
+  experience_answers: PortalProfileRecord; visibility_instructions: PortalProfileRecord;
+  restriction_status: "no" | "yes" | "unsure" | null; restriction_details: string | null;
   final_notes: string | null; questions: string | null; contact_requested: boolean;
   submitted_at: string | null; updated_at: string;
 };
 
 const roleSchema = z.enum(["board_member", "advisor", "prsc_board_dis_advisor", "prsc_advisor_dis_board", "methodology_committee"]);
 const entitySchema = z.enum(["prsc", "dis", "both"]);
-const permissionSchema = z.enum(["yes", "discuss", "no"]);
 
 async function assertAdmin(context: { supabase: any; userId: string }) {
   const { data } = await context.supabase.from("user_roles").select("role").eq("user_id", context.userId).eq("role", "admin").maybeSingle();
@@ -85,27 +86,9 @@ export const getMyProfile = createServerFn({ method: "GET" })
     return data as PortalProfile | null;
   });
 
-const profileSchema = z.object({
-  current_stage: z.number().int().min(1).max(5),
-  preferred_name: z.string().trim().max(120),
-  professional_role: z.string().trim().max(160),
-  current_organization: z.string().trim().max(180),
-  preferred_email: z.string().trim().email().max(200),
-  preferred_phone: z.string().trim().max(40),
-  bio: z.string().trim().max(3000).optional(),
-  experience_answers: z.record(z.string(), z.string().trim().max(3000)),
-  visibility_instructions: z.record(z.string(), permissionSchema),
-  restriction_status: z.enum(["no", "yes", "unsure"]).nullable(),
-  restriction_details: z.string().trim().max(3000),
-  final_notes: z.string().trim().max(3000),
-  questions: z.string().trim().max(3000),
-  contact_requested: z.boolean(),
-  submit: z.boolean(),
-});
-
 export const saveMyProfile = createServerFn({ method: "POST" })
   .middleware([requirePortalAccess])
-  .inputValidator((input) => profileSchema.parse(input))
+  .inputValidator((input) => parseProfileSaveInput(input))
   .handler(async ({ context, data }) => {
     const { data: member, error: memberError } = await context.supabase
       .from("portal_members")
@@ -113,7 +96,9 @@ export const saveMyProfile = createServerFn({ method: "POST" })
       .eq("user_id", context.userId)
       .single();
     if (memberError || !member) throw new Error("Member profile unavailable");
-    const { data: existing } = await context.supabase.from("portal_profiles").select("submitted_at").eq("member_id", member.id).maybeSingle();
+    const { data: existing, error: existingError } = await context.supabase.from("portal_profiles").select("submitted_at, visibility_instructions").eq("member_id", member.id).maybeSingle();
+    if (existingError) throw new Error("We could not confirm your saved profile preferences. Please try again.");
+    assertCommunicationPreferencesNotDowngraded(existing?.visibility_instructions as Record<string, unknown> | null, data.visibility_instructions);
     const alreadySubmitted = Boolean(existing?.submitted_at);
     const payload = {
       member_id: member.id,

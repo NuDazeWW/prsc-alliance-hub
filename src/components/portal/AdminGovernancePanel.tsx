@@ -1,3 +1,4 @@
+import { userFacingError } from "@/lib/user-facing-error";
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { getMemberGovernance, recordForumClearance, recordNdaVerification, recordRoleReview } from "@/lib/governance.functions";
@@ -23,7 +24,7 @@ export function AdminGovernancePanel({ memberId, preview, onChange }: { memberId
   async function run(fn: () => Promise<unknown>, ok: string) {
     if (preview) return setMsg("Preview mode: governance records are saved on the live admin page.");
     setMsg("");
-    try { await fn(); setMsg(ok); await q.refetch(); onChange?.(); } catch (e) { setMsg(e instanceof Error ? e.message : "Could not save"); }
+    try { await fn(); setMsg(ok); await q.refetch(); onChange?.(); } catch (e) { setMsg(userFacingError(e, "Could not save")); }
   }
   if (preview) return <p className="mt-5 text-base text-ivory/55">Governance controls (NDA, role review, Forum clearance) appear here on the live admin page.</p>;
   if (!q.data) return <p className="mt-5 text-base text-gold">Loading governance record…</p>;

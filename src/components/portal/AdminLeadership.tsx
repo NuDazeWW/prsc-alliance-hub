@@ -1,3 +1,4 @@
+import { userFacingError } from "@/lib/user-facing-error";
 import { usePrivateMedia } from "@/hooks/use-private-media";
 import { useEffect, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
@@ -53,7 +54,7 @@ export function AdminLeadership() {
       toast.success(ok);
       await refresh();
     } catch (e) {
-      toast.error(e instanceof Error ? e.message : "Something went wrong");
+      toast.error(userFacingError(e, "Something went wrong"));
     } finally {
       setBusy(false);
     }
@@ -66,7 +67,7 @@ export function AdminLeadership() {
     const ext = (file.name.split(".").pop() || "jpg").toLowerCase().replace(/[^a-z0-9]/g, "") || "jpg";
     const path = `team/${crypto.randomUUID()}.${ext}`;
     const { error } = await supabase.storage.from("leadership-photos").upload(path, file, { upsert: false });
-    if (error) return toast.error(error.message);
+    if (error) return toast.error(userFacingError(error, "The photo could not be uploaded. Please try again."));
     setEditing({ ...editing, photo_path: path, photo_url: URL.createObjectURL(file) });
   }
 

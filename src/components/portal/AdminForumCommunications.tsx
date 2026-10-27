@@ -1,3 +1,4 @@
+import { userFacingError } from "@/lib/user-facing-error";
 import { useEffect, useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { FORUM_EMAILS, type ForumEmailKey } from "@/lib/forum-communications";
@@ -54,7 +55,7 @@ export function AdminForumCommunications() {
       setStatus(`${res.sent} sent individually${res.skipped ? `, ${res.skipped} skipped` : ""}.`);
       await load();
     } catch (e) {
-      setStatus(e instanceof Error ? e.message : "Send failed.");
+      setStatus(userFacingError(e, "Send failed."));
     } finally {
       setBusy(false);
     }

@@ -1,3 +1,4 @@
+import { userFacingError } from "@/lib/user-facing-error";
 import { useState, type FormEvent } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { submitBriefing, submitBoardInterest, submitVanguardInterest, submitCertificationInterest } from "@/lib/forms.functions";
@@ -24,7 +25,7 @@ export function BriefingForm() {
         e.preventDefault();
         s.setError(null); s.setPending(true);
         try { await call({ data: getData(e) as never }); s.setDone(true); }
-        catch (err) { s.setError((err as Error).message || "Something went wrong."); }
+        catch (err) { s.setError(userFacingError(err, "Something went wrong.")); }
         finally { s.setPending(false); }
       }}
       className="grid gap-5 md:grid-cols-2"
@@ -66,7 +67,7 @@ export function BoardInterestForm() {
         e.preventDefault();
         s.setError(null); s.setPending(true);
         try { await call({ data: getData(e) as never }); s.setDone(true); }
-        catch (err) { s.setError((err as Error).message || "Something went wrong."); }
+        catch (err) { s.setError(userFacingError(err, "Something went wrong.")); }
         finally { s.setPending(false); }
       }}
       className="grid gap-5 md:grid-cols-2"
@@ -101,7 +102,7 @@ export function VanguardInterestForm() {
         e.preventDefault();
         s.setError(null); s.setPending(true);
         try { await call({ data: getData(e) as never }); s.setDone(true); }
-        catch (err) { s.setError((err as Error).message || "Something went wrong."); }
+        catch (err) { s.setError(userFacingError(err, "Something went wrong.")); }
         finally { s.setPending(false); }
       }}
       className="grid gap-5 md:grid-cols-2"
@@ -141,7 +142,7 @@ export function CertificationNotifyForm() {
           await call({ data: getData(e) as never });
           s.setDone(true);
         } catch (err) {
-          s.setError((err as Error).message || "Something went wrong.");
+          s.setError(userFacingError(err, "Something went wrong."));
         } finally {
           s.setPending(false);
         }

@@ -1,3 +1,4 @@
+import { userFacingError } from "@/lib/user-facing-error";
 import { useEffect, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
@@ -38,7 +39,7 @@ function RoundForm({ round, readOnly }: { round: any; readOnly: boolean }) {
       await saveMyQuestions({ data: { round_id: round.id, no_questions: noQuestions, questions: noQuestions ? [] : qs } });
       setStatus(noQuestions ? "Recorded: no additional questions." : "Your questions are saved. You can edit them until the deadline.");
       await qc.invalidateQueries({ queryKey: ["my-question-rounds"] });
-    } catch (e) { setStatus(e instanceof Error ? e.message : "Could not save"); }
+    } catch (e) { setStatus(userFacingError(e, "Could not save")); }
   }
   const resp = round.response?.status;
   return (

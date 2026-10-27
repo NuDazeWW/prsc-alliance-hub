@@ -1,3 +1,4 @@
+import { userFacingError } from "@/lib/user-facing-error";
 import { useState } from "react";
 import { Pencil } from "lucide-react";
 import { Input } from "@/components/ui/input";
@@ -33,7 +34,7 @@ export function MemberDetailsEditor({ member, preview, onSaved }: { member: Memb
       setOpen(false);
       onSaved();
     } catch (error) {
-      setMessage(error instanceof Error ? error.message : "Could not save member details.");
+      setMessage(userFacingError(error, "Could not save member details."));
     } finally {
       setBusy(false);
     }

@@ -1,3 +1,4 @@
+import { userFacingError } from "@/lib/user-facing-error";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { Eye, EyeOff, KeyRound, ShieldCheck } from "lucide-react";
@@ -92,7 +93,7 @@ function AcceptInvitationPage() {
         replace: true,
       });
     } catch (error) {
-      setMessage(error instanceof Error ? error.message : "We could not save your password. Please request a new invitation.");
+      setMessage(userFacingError(error, "We could not save your password. Please request a new invitation."));
     } finally {
       setBusy(false);
     }

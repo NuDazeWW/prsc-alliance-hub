@@ -1,3 +1,4 @@
+import { userFacingError } from "@/lib/user-facing-error";
 import { useEffect, useState } from "react";
 import { Link, useNavigate } from "@tanstack/react-router";
 import { Activity, CalendarDays, ChevronDown, Eye, EyeOff, FileText, HelpCircle, KeyRound, LayoutDashboard, LogOut, MailPlus, MessageSquare, ShieldPlus, Trash2, Users } from "lucide-react";
@@ -136,7 +137,7 @@ function ChangePasswordDialog({ open, onClose }: { open: boolean; onClose: () =>
     setBusy(true);
     const { error } = await supabase.auth.updateUser({ password: next, current_password: current } as any);
     setBusy(false);
-    if (error) return toast.error(error.message);
+    if (error) return toast.error(userFacingError(error, "Could not update your password. Please try again."));
     toast.success("Password updated");
     reset();
     onClose();
@@ -168,7 +169,7 @@ function ManageAdminsDialog({ open, onClose }: { open: boolean; onClose: () => v
 
   async function load() {
     setLoading(true);
-    try { setAdmins((await listAdmins()).admins); } catch (e) { toast.error(e instanceof Error ? e.message : "Could not load administrators"); }
+    try { setAdmins((await listAdmins()).admins); } catch (e) { toast.error(userFacingError(e, "Could not load administrators")); }
     finally { setLoading(false); }
   }
   useEffect(() => { if (open) void load(); }, [open]);
@@ -181,14 +182,14 @@ function ManageAdminsDialog({ open, onClose }: { open: boolean; onClose: () => v
       toast.success(r.invited ? `Invitation sent to ${form.email}` : `${form.email} is now an administrator`);
       setForm({ first_name: "", last_name: "", email: "" });
       await load();
-    } catch (err) { toast.error(err instanceof Error ? err.message : "Could not add administrator"); }
+    } catch (err) { toast.error(userFacingError(err, "Could not add administrator")); }
     finally { setBusy(false); }
   }
 
   async function remove(a: AdminAccount) {
     if (!confirm(`Remove administrator access for ${a.email}?`)) return;
     try { await removeAdmin({ data: { user_id: a.user_id } }); toast.success("Administrator removed"); await load(); }
-    catch (err) { toast.error(err instanceof Error ? err.message : "Could not remove administrator"); }
+    catch (err) { toast.error(userFacingError(err, "Could not remove administrator")); }
   }
 
   return (

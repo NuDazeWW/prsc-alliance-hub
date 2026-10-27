@@ -1,4 +1,5 @@
 import { csvCell } from "@/lib/csv";
+import { userFacingError } from "@/lib/user-facing-error";
 import { freshInviteGovernance, normalizedRecipient } from "@/lib/invitation-evidence";
 import { useStoredFlag } from "@/hooks/use-stored-flag";
 import { ChevronDown, ChevronUp } from "lucide-react";
@@ -77,9 +78,21 @@ import { memberRoleLabel, memberDesignation, memberCandidateLabel } from "@/lib/
 import { STAGES, type JourneyStatus } from "@/lib/journey";
 import type { InviteEmailReview } from "@/lib/portal-invite-email.functions";
 import { MemberDetailsEditor } from "@/components/portal/MemberDetailsEditor";
-import { PORTAL_EXPERIENCE_QUESTIONS, PORTAL_PERMISSION_LABELS, PORTAL_PROFILE_STAGES, PORTAL_VISIBILITY_PERMISSIONS } from "@/lib/portal-profile-fields";
+import {
+  communicationReadoutRows,
+  fitReadoutRows,
+  hasCommunicationPreferences,
+  hasFitAnswers,
+  LEGACY_PORTAL_EXPERIENCE_QUESTIONS,
+  LEGACY_PORTAL_VISIBILITY_PERMISSIONS,
+  PORTAL_COMMUNICATION_VERSION,
+  PORTAL_FIT_VERSION,
+  PORTAL_PERMISSION_LABELS,
+  PORTAL_PROFILE_STAGES,
+} from "@/lib/portal-profile-fields";
 
-
+const FIT_EXPORT_LABELS = fitReadoutRows({ version: PORTAL_FIT_VERSION }).map((row) => row.label);
+const COMMUNICATION_EXPORT_LABELS = communicationReadoutRows({ version: PORTAL_COMMUNICATION_VERSION }).map((row) => row.label);
 
 const demoOverview: any = {
   members: [
@@ -123,6 +136,7 @@ const demoMemberDetail: any = {
     current_organization: "Northline Partners",
     preferred_email: "alex.morgan@example.com",
     preferred_phone: "+1 212 555 0140",
+    bio: "Strategic advisor with experience in partnership strategy and operating models.",
     experience_answers: { q1: "Partnership strategy, operating models, and investor readiness." },
     visibility_instructions: { p1: "yes", p2: "discuss", p3: "no" },
     restriction_status: "no",
@@ -428,7 +442,7 @@ export function AdminCenter({ page }: { page: "overview" | "send" }) {
       setInviteDraft((d) => ({ ...d, why_you: text }));
       setAiStatus("Draft added below. Review and edit before sending.");
     } catch (err) {
-      setAiStatus((err as Error).message || "The draft could not be created.");
+      setAiStatus(userFacingError(err, "The draft could not be created."));
     } finally { setAiDrafting(false); }
   };
   const [invitePreviewOpen, setInvitePreviewOpen] = useState(false);
@@ -500,7 +514,7 @@ export function AdminCenter({ page }: { page: "overview" | "send" }) {
     const r = importRows[i];
     setRowDrafting(r.email);
     try { updateImportRow(i, { why_you: await draftNote(r) }); }
-    catch (err) { setBatchProgress(`${r.first_name}: ${(err as Error).message}`); }
+    catch (err) { setBatchProgress(`${r.first_name}: ${userFacingError(err, "The draft could not be created.")}`); }
     finally { setRowDrafting(""); }
   }
 
@@ -513,7 +527,7 @@ export function AdminCenter({ page }: { page: "overview" | "send" }) {
       try { const text = await draftNote(r); updateImportRow(i, { why_you: text }); done += 1; }
       catch (err) {
         failed += 1;
-        if (/credits|Too many/.test((err as Error).message)) { setBatchProgress((err as Error).message); break; }
+        if (/credits|Too many/.test((err as Error)?.message ?? "")) { setBatchProgress(userFacingError(err, "Drafting is temporarily unavailable. Please try again later.")); break; }
       }
     }
     setBatchDrafting(false);
@@ -536,7 +550,7 @@ export function AdminCenter({ page }: { page: "overview" | "send" }) {
       if (listRef.current) listRef.current.value = "";
       await overview.refetch();
     } catch (error) {
-      setImportStatus(error instanceof Error ? error.message : "The list could not be uploaded.");
+      setImportStatus(userFacingError(error, "The list could not be uploaded."));
     } finally {
       setImporting(false);
     }
@@ -567,7 +581,7 @@ export function AdminCenter({ page }: { page: "overview" | "send" }) {
       setMemberBusy(status === "revoked" ? "Access revoked." : "Access restored.");
       await overview.refetch();
     } catch (error) {
-      setMemberBusy(error instanceof Error ? error.message : "Could not update access.");
+      setMemberBusy(userFacingError(error, "Could not update access."));
     }
   }
 
@@ -578,7 +592,7 @@ export function AdminCenter({ page }: { page: "overview" | "send" }) {
       setMemberBusy("Package status updated.");
       await overview.refetch();
     } catch (error) {
-      setMemberBusy(error instanceof Error ? error.message : "Could not update the package status.");
+      setMemberBusy(userFacingError(error, "Could not update the package status."));
     }
   }
 
@@ -597,7 +611,7 @@ export function AdminCenter({ page }: { page: "overview" | "send" }) {
       setMemberBusy(`${selectedMemberIds.length} selected member${selectedMemberIds.length === 1 ? " was" : "s were"} revoked; records retained.`);
       await Promise.all([overview.refetch(), email.refetch()]);
     } catch (error) {
-      setMemberBusy(error instanceof Error ? error.message : "Could not delete the selected members.");
+      setMemberBusy(userFacingError(error, "Could not delete the selected members."));
     }
   }
 
@@ -612,7 +626,7 @@ export function AdminCenter({ page }: { page: "overview" | "send" }) {
       setMemberBusy(`${count} selected email record${count === 1 ? " was" : "s were"} deleted.`);
       await email.refetch();
     } catch (error) {
-      setMemberBusy(error instanceof Error ? error.message : "Could not delete the selected email records.");
+      setMemberBusy(userFacingError(error, "Could not delete the selected email records."));
     }
   }
 
@@ -623,7 +637,7 @@ export function AdminCenter({ page }: { page: "overview" | "send" }) {
       setMemberBusy(status === "resolved" ? "Inquiry marked resolved." : "Inquiry reopened.");
       await overview.refetch();
     } catch (error) {
-      setMemberBusy(error instanceof Error ? error.message : "Could not update the inquiry.");
+      setMemberBusy(userFacingError(error, "Could not update the inquiry."));
     }
   }
 
@@ -706,7 +720,7 @@ export function AdminCenter({ page }: { page: "overview" | "send" }) {
       resetInvitation();
       await overview.refetch();
     } catch (error) {
-      setStatus(error instanceof Error ? error.message : "Invitation failed.");
+      setStatus(userFacingError(error, "Invitation failed."));
     }
   }
 
@@ -777,7 +791,7 @@ export function AdminCenter({ page }: { page: "overview" | "send" }) {
       setPreviewOpen(false);
       await email.refetch();
     } catch (error) {
-      const message = error instanceof Error ? error.message : "Could not save the template.";
+      const message = userFacingError(error, "Could not save the template.");
       setEmailStatus(message);
 
     }
@@ -793,7 +807,7 @@ export function AdminCenter({ page }: { page: "overview" | "send" }) {
       setEmailStatus("Original wording restored.");
       await email.refetch();
     } catch (error) {
-      setEmailStatus(error instanceof Error ? error.message : "Could not reset the template.");
+      setEmailStatus(userFacingError(error, "Could not reset the template."));
     }
   }
 
@@ -804,7 +818,7 @@ export function AdminCenter({ page }: { page: "overview" | "send" }) {
       if (draft.id === id) setDraft(emptyDraft);
       await email.refetch();
     } catch (error) {
-      setEmailStatus(error instanceof Error ? error.message : "Could not remove the template.");
+      setEmailStatus(userFacingError(error, "Could not remove the template."));
     }
   }
 
@@ -848,7 +862,7 @@ export function AdminCenter({ page }: { page: "overview" | "send" }) {
       setComposeFromId("");
       await email.refetch();
     } catch (error) {
-      setEmailStatus(error instanceof Error ? error.message : "Sending failed.");
+      setEmailStatus(userFacingError(error, "Sending failed."));
     } finally {
       setSending(false);
     }
@@ -940,26 +954,34 @@ export function AdminCenter({ page }: { page: "overview" | "send" }) {
       setMemberBusy(`Reminder sent to ${m.first_name} (${r.kind}).`);
       await overview.refetch();
     } catch (err) {
-      setMemberBusy((err as Error).message || "The reminder could not be sent.");
+      setMemberBusy(userFacingError(err, "The reminder could not be sent."));
     } finally { setNudging(""); }
   };
   const exportCsv = () => {
     const esc = csvCell;
     const date = (v: string | null | undefined) => (v ? new Date(v).toISOString().slice(0, 10) : "");
     const header = ["First name", "Last name", "Email", "Organization", "Title", "Company", "Role", "Access", "Stage", "Invited", "Last sign-in", "Profile submitted", "Documents done", "Documents total", "Documents completed",
-      "Preferred name", "Professional role", "Current organization", "Preferred email", "Preferred phone",
-      ...PORTAL_EXPERIENCE_QUESTIONS, ...PORTAL_VISIBILITY_PERMISSIONS, "Restrictions", "Restriction details", "Final notes", "Questions"];
+      "Preferred name", "Professional role", "Current organization", "Preferred email", "Preferred phone", "Short bio",
+      ...FIT_EXPORT_LABELS.map((label) => `Where You Fit — ${label}`),
+      ...COMMUNICATION_EXPORT_LABELS.map((label) => `Profile & communication preferences — ${label}`),
+      ...LEGACY_PORTAL_EXPERIENCE_QUESTIONS.map((label) => `Previous experience response — ${label}`),
+      ...LEGACY_PORTAL_VISIBILITY_PERMISSIONS.map((label) => `Previous visibility permission — ${label}`),
+      "Previous restrictions", "Previous restriction details", "Final notes", "Questions", "Contact requested"];
     const rows = filteredMembers.map((m: any) => {
       const p = profilesById.get(m.id) ?? {};
       const prog = docProgress[m.id];
       const ans = p.experience_answers ?? {};
       const vis = p.visibility_instructions ?? {};
+      const fitValues = new Map(hasFitAnswers(ans) ? fitReadoutRows(ans).map(({ label, value }) => [label, value]) : []);
+      const communicationValues = new Map(hasCommunicationPreferences(vis) ? communicationReadoutRows(vis).map(({ label, value }) => [label, value]) : []);
       return [m.first_name, m.last_name, m.email, m.organization, m.title, String(m.entity).toUpperCase(), memberDesignation(m as any), m.status, stageOf(m).label,
         date(m.invited_at), date(m.last_access_at), date(p.submitted_at), prog?.done ?? "", prog?.total ?? "", date(m.documents_completed_at),
-        p.preferred_name, p.professional_role, p.current_organization, p.preferred_email, p.preferred_phone,
-        ...PORTAL_EXPERIENCE_QUESTIONS.map((_, i) => ans[`q${i + 1}`] ?? ""),
-        ...PORTAL_VISIBILITY_PERMISSIONS.map((_, i) => PORTAL_PERMISSION_LABELS[vis[`p${i + 1}`]] ?? ""),
-        p.restriction_status, p.restriction_details, p.final_notes, p.questions].map(esc).join(",");
+        p.preferred_name, p.professional_role, p.current_organization, p.preferred_email, p.preferred_phone, p.bio,
+        ...FIT_EXPORT_LABELS.map((label) => fitValues.get(label) ?? ""),
+        ...COMMUNICATION_EXPORT_LABELS.map((label) => communicationValues.get(label) ?? ""),
+        ...LEGACY_PORTAL_EXPERIENCE_QUESTIONS.map((_, i) => ans[`q${i + 1}`] ?? ""),
+        ...LEGACY_PORTAL_VISIBILITY_PERMISSIONS.map((_, i) => PORTAL_PERMISSION_LABELS[vis[`p${i + 1}`]] ?? ""),
+        p.restriction_status, p.restriction_details, p.final_notes, p.questions, p.contact_requested ? "Yes" : "No"].map(esc).join(",");
     });
     const blob = new Blob(["\ufeff" + [header.map(esc).join(","), ...rows].join("\r\n")], { type: "text/csv;charset=utf-8" });
     const url = URL.createObjectURL(blob);
@@ -1286,7 +1308,7 @@ export function AdminCenter({ page }: { page: "overview" | "send" }) {
                 <ul className="mt-4 space-y-1.5 text-base">
                   {importResults.map((r) => (
                     <li key={r.email} className={r.ok ? "text-ivory/60" : "text-amber-300/80"}>
-                      {r.email} — {r.message}
+                      {r.email} — {r.ok ? r.message : userFacingError(r.message, "This member could not be added.")}
                     </li>
                   ))}
                 </ul>
@@ -2245,19 +2267,19 @@ export function AdminCenter({ page }: { page: "overview" | "send" }) {
                       value={detail.data.profile.submitted_at ? new Date(detail.data.profile.submitted_at).toLocaleString() : "Not submitted yet"}
                     />
                   </dl>
-                  <Block label="Experience">
-                    {PORTAL_EXPERIENCE_QUESTIONS.map((question, index) => <Field key={question} label={question} value={detail.data.profile?.experience_answers?.[`q${index + 1}`]} />)}
+                  <Block label="Short bio">
+                    <div className="sm:col-span-2"><Field label="Short bio" value={detail.data.profile.bio} /></div>
                   </Block>
-                  <Block label="Visibility instructions">
-                    {PORTAL_VISIBILITY_PERMISSIONS.map((permission, index) => {
-                      const answer = detail.data.profile?.visibility_instructions?.[`p${index + 1}`];
-                      return <Field key={permission} label={permission} value={answer ? PORTAL_PERMISSION_LABELS[answer] ?? answer : undefined} />;
-                    })}
+                  <Block label={hasFitAnswers(detail.data.profile.experience_answers) ? "Where You Fit" : "Previous experience responses"}>
+                    {fitReadoutRows(detail.data.profile.experience_answers).map(({ label, value }) => <Field key={label} label={label} value={value} />)}
                   </Block>
-                  <Block label="Restrictions">
+                  <Block label={hasCommunicationPreferences(detail.data.profile.visibility_instructions) ? "Profile & communication preferences" : "Previous visibility permissions"}>
+                    {communicationReadoutRows(detail.data.profile.visibility_instructions).map(({ label, value }) => <Field key={label} label={label} value={value} />)}
+                  </Block>
+                  {(detail.data.profile.restriction_status || detail.data.profile.restriction_details) && <Block label="Previous restrictions">
                     <Field label="Status" value={detail.data.profile.restriction_status} />
                     <Field label="Details" value={detail.data.profile.restriction_details} />
-                  </Block>
+                  </Block>}
                   <Block label="Notes and questions">
                     <Field label="Final notes" value={detail.data.profile.final_notes} />
                     <Field label="Questions" value={detail.data.profile.questions} />

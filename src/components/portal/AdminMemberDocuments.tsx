@@ -1,3 +1,4 @@
+import { userFacingError } from "@/lib/user-facing-error";
 import { useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Trash2, Upload } from "lucide-react";
@@ -114,7 +115,7 @@ export function AdminMemberDocuments({ memberId, memberName, preview }: Props) {
       setStatus("Document added.");
       await docs.refetch();
     } catch (error) {
-      setStatus(error instanceof Error ? error.message : "The document could not be added.");
+      setStatus(userFacingError(error, "The document could not be added."));
     } finally {
       setBusy(false);
     }
@@ -129,7 +130,7 @@ export function AdminMemberDocuments({ memberId, memberName, preview }: Props) {
       setStatus("Released. The member has been emailed.");
       await docs.refetch();
     } catch (error) {
-      setStatus(error instanceof Error ? error.message : "The documents could not be released.");
+      setStatus(userFacingError(error, "The documents could not be released."));
     } finally {
       setReleasing(false);
     }
@@ -141,7 +142,7 @@ export function AdminMemberDocuments({ memberId, memberName, preview }: Props) {
       await deleteMemberDocument({ data: { id } });
       await docs.refetch();
     } catch (error) {
-      setStatus(error instanceof Error ? error.message : "The document could not be removed.");
+      setStatus(userFacingError(error, "The document could not be removed."));
     }
   }
 
@@ -153,7 +154,7 @@ export function AdminMemberDocuments({ memberId, memberName, preview }: Props) {
     if (preview) return setStatus("Preview mode: check-offs save on the live admin page.");
     setWorking(documentId);
     try { await confirmExternalSignature({ data: { member_id: memberId, document_id: documentId, confirmed } }); await docs.refetch(); }
-    catch (e) { setStatus(e instanceof Error ? e.message : "Could not update"); }
+    catch (e) { setStatus(userFacingError(e, "Could not update")); }
     finally { setWorking(""); }
   }
   async function openComposer(ackId: string, docTitle: string) {
@@ -167,7 +168,7 @@ export function AdminMemberDocuments({ memberId, memberName, preview }: Props) {
         subject: `Your signed copy: ${docTitle}`,
         body: `Hi ${first},\n\nAs requested, here is your signed copy of ${docTitle}. It includes a signature certificate showing your name, initials, and the date and time you completed it in the portal.\n\nPlease keep it for your records. If you have any questions, just reply to info@readinessterminal.com.`,
       });
-    } catch (e) { setStatus(e instanceof Error ? e.message : "Could not prepare the signed copy"); }
+    } catch (e) { setStatus(userFacingError(e, "Could not prepare the signed copy")); }
     finally { setWorking(""); }
   }
   async function sendComposer() {
@@ -176,7 +177,7 @@ export function AdminMemberDocuments({ memberId, memberName, preview }: Props) {
     try {
       await sendSignedCopy({ data: { ack_id: composer.ackId, to: composer.to, subject: composer.subject, body: composer.body } });
       setComposer(null); setStatus("Signed copy emailed."); await docs.refetch();
-    } catch (e) { setComposer({ ...composer, sending: false, msg: e instanceof Error ? e.message : "Could not send" }); }
+    } catch (e) { setComposer({ ...composer, sending: false, msg: userFacingError(e, "Could not send") }); }
   }
   const list = docs.data?.documents ?? [];
   const acks = docs.data?.acknowledgements ?? [];
@@ -197,26 +198,26 @@ export function AdminMemberDocuments({ memberId, memberName, preview }: Props) {
     }
     if (patch.superseded && !confirm("Mark as superseded? It leaves active queues; signed copies and history are kept.")) return;
     try { await updateDocumentGovernance({ data: { document_id: id, ...patch, third_party_permission } }); await docs.refetch(); }
-    catch (e) { setStatus(e instanceof Error ? e.message : "Could not update"); }
+    catch (e) { setStatus(userFacingError(e, "Could not update")); }
   }
   async function toggleForum(on: boolean) {
     if (preview) return setStatus("Preview mode: Forum participation is changed on the live admin page.");
     try { await setForumParticipation({ data: { member_id: memberId, participates: on } }); await docs.refetch(); }
-    catch (e) { setStatus(e instanceof Error ? e.message : "Could not update Forum participation"); }
+    catch (e) { setStatus(userFacingError(e, "Could not update Forum participation")); }
   }
   async function startOnboarding(t: "prsc" | "dis") {
     if (preview) return setStatus("Preview mode: Stage 2 is released on the live admin page.");
     if (!confirm(`Start ${t.toUpperCase()} onboarding for ${memberName}? Their first approved Stage 2 document opens and one notification email is sent. This does not advance Stage 3 or appoint anyone.`)) return;
     try {
       const r = await releaseEntityOnboarding({ data: { member_id: memberId, entity: t } });
-      setStatus(r.notified ? `${t.toUpperCase()} Stage 2 released and the member was notified.` : `${t.toUpperCase()} Stage 2 released, but the email failed: ${r.error}. Use Retry notice.`);
+      setStatus(r.notified ? `${t.toUpperCase()} Stage 2 released and the member was notified.` : `${t.toUpperCase()} Stage 2 released, but the email failed: ${userFacingError(r.error, "Please try again.")}. Use Retry notice.`);
       await docs.refetch();
-    } catch (e) { setStatus(e instanceof Error ? e.message : "Could not start onboarding"); }
+    } catch (e) { setStatus(userFacingError(e, "Could not start onboarding")); }
   }
   async function retryNotice(id: string) {
     if (preview) return;
-    try { const r = await retryReleaseNotice({ data: { release_id: id } }); setStatus(r.notified ? "Notice sent." : `Notice failed again: ${r.error}`); await docs.refetch(); }
-    catch (e) { setStatus(e instanceof Error ? e.message : "Could not retry"); }
+    try { const r = await retryReleaseNotice({ data: { release_id: id } }); setStatus(r.notified ? "Notice sent." : `Notice failed again: ${userFacingError(r.error, "Please try again.")}`); await docs.refetch(); }
+    catch (e) { setStatus(userFacingError(e, "Could not retry")); }
   }
   const lockedIds = lockedDocumentIds(active as any, doneIds, entity, { forum, released: { prsc: releases.some((r: any) => r.entity === "prsc"), dis: releases.some((r: any) => r.entity === "dis") } });
   async function toggleActivation(t: "prsc" | "dis", on: boolean) {
@@ -228,7 +229,7 @@ export function AdminMemberDocuments({ memberId, memberName, preview }: Props) {
       if (!appointment_ref.trim()) return setStatus("Appointment needs a recorded appointment action reference.");
     }
     try { await setEntityActivation({ data: { member_id: memberId, entity: t, activated: on, countersigned: on, appointment_ref } }); await docs.refetch(); }
-    catch (e) { setStatus(e instanceof Error ? e.message : "Could not update activation"); }
+    catch (e) { setStatus(userFacingError(e, "Could not update activation")); }
   }
   function applyPreset(i: string) {
     const p = JOURNEY_PRESETS[Number(i)];

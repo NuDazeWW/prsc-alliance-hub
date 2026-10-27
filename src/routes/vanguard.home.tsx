@@ -1,3 +1,4 @@
+import { userFacingError } from "@/lib/user-facing-error";
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useRef, useState, type FormEvent } from "react";
 import { motion, useMotionValue, useTransform, animate, useReducedMotion, useInView } from "motion/react";
@@ -210,7 +211,7 @@ function ReserveForm() {
           await call({ data: data as never });
           setDone(true);
         } catch (err) {
-          setError((err as Error).message || "Something went wrong.");
+          setError(userFacingError(err, "Something went wrong."));
         } finally {
           setPending(false);
         }

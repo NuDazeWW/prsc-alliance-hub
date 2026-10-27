@@ -1,6 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requirePortalAccess } from "@/lib/portal-access";
+import { buildProfileBioPrompt, isAiDraftPreviewHost, profileBioDraftSchema, type ProfileBioInvitation } from "@/lib/profile-bio-draft";
 
 const schema = z.object({
   first_name: z.string().trim().max(80),
@@ -35,15 +36,30 @@ export const draftWhyYouPreview = createServerFn({ method: "POST" })
   .handler(async ({ data }) => {
     const { getRequest } = await import("@tanstack/react-start/server");
     const host = new URL(getRequest().url).hostname;
-    const ok = host === "localhost" || host === "127.0.0.1" || /(^|\.)id-preview--[^.]+\.lovable\.app$/.test(host) || host.endsWith(".lovableproject.com");
-    if (!ok) throw new Error("Unauthorized");
+    if (!isAiDraftPreviewHost(host)) throw new Error("Unauthorized");
     return generateDraft(data);
   });
 
-async function generateDraft(data: z.infer<typeof schema>) {
-    const key = process.env.LOVABLE_API_KEY;
-    if (!key) throw new Error("AI drafting is not configured.");
+/** A member may draft only their own biography; generating never writes profile or invitation data. */
+export const draftMyProfileBio = createServerFn({ method: "POST" })
+  .middleware([requirePortalAccess])
+  .inputValidator((input) => profileBioDraftSchema.parse(input))
+  .handler(async ({ context, data }) => {
+    const { data: member, error } = await context.supabase.from("portal_members").select("*").eq("user_id", context.userId).single();
+    if (error || !member || member.status === "revoked") throw new Error("Member profile unavailable");
+    return generateAiDraft(buildProfileBioPrompt(member as ProfileBioInvitation, data));
+  });
 
+/** Builder-preview QA has no member session and may use only the supplied profile facts. */
+export const draftMyProfileBioPreview = createServerFn({ method: "POST" })
+  .inputValidator((input) => profileBioDraftSchema.parse(input))
+  .handler(async ({ data }) => {
+    const { getRequest } = await import("@tanstack/react-start/server");
+    if (!isAiDraftPreviewHost(new URL(getRequest().url).hostname)) throw new Error("Unauthorized");
+    return generateAiDraft(buildProfileBioPrompt({ first_name: "", last_name: "" }, data));
+  });
+
+async function generateDraft(data: z.infer<typeof schema>) {
     const { INVITE_ROLE_LABELS } = await import("@/lib/invite-email-config");
     const role = data.is_candidate ? "United Forum invitee (invited to strategic coordination in the United Strategic Coordination Forum; not appointed to any PRSC or DIS board, advisory, or committee seat and not a participant in the Readiness Vanguard benchmarking program; never imply a seat)" : INVITE_ROLE_LABELS[data.role];
     const instructions = `Write a private, personal note from Shirley Johnson, Founder, on behalf of ${ENTITY[data.entity]}, explaining directly to an invited ${role} why we chose them.
@@ -63,6 +79,13 @@ Content rules:
 - Do not call the candidate's position "our role." "Role" refers only to their invited ${role} position.
 - Return only the finished note.`;
     const input = `Candidate: ${data.first_name} ${data.last_name}\nTitle: ${data.title || "n/a"}\nOrganization: ${data.organization || "n/a"}\nLinkedIn: ${data.linkedin_url || "n/a"}\n\nBackground (from their LinkedIn About/Experience):\n${data.background || "Not provided."}`;
+
+    return generateAiDraft({ instructions, input });
+  }
+
+async function generateAiDraft({ instructions, input }: { instructions: string; input: string }) {
+    const key = process.env.LOVABLE_API_KEY;
+    if (!key) throw new Error("AI drafting is not configured.");
 
     const res = await fetch("https://ai.gateway.lovable.dev/v1/responses", {
       method: "POST",

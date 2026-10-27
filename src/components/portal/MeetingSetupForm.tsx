@@ -1,3 +1,4 @@
+import { userFacingError } from "@/lib/user-facing-error";
 import { useEffect, useMemo, useState } from "react";
 import { CalendarDays, Plus, X } from "lucide-react";
 import { toast } from "sonner";
@@ -155,7 +156,7 @@ export function MeetingSetupForm({
       setRespondBy("");
       onCreated?.(res.id);
     } catch (e) {
-      toast.error(e instanceof Error ? e.message : "Could not create the meeting");
+      toast.error(userFacingError(e, "Could not create the meeting"));
     } finally {
       setSaving(false);
     }

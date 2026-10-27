@@ -1,3 +1,4 @@
+import { userFacingError } from "@/lib/user-facing-error";
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
@@ -30,7 +31,7 @@ export function AdminReleaseReview() {
                   {r.kind === "authorized" ? (
                     <div className="mt-2 flex flex-wrap gap-2">
                       <input value={reason[k] ?? ""} onChange={(e) => setReason({ ...reason, [k]: e.target.value })} placeholder="Reason, for the audit record" aria-label="Reconciliation reason" className="h-9 min-w-[260px] flex-1 rounded-md border border-input bg-navy px-2 text-ivory" />
-                      <Button type="button" size="sm" onClick={async () => { setStatus(""); try { await reconcileEntityRelease({ data: { member_id: r.member_id, entity: t, reason: reason[k] ?? "" } }); setStatus("Release reconciled; no email sent."); await q.refetch(); } catch (e) { setStatus(e instanceof Error ? e.message : "Failed"); } }}>Reconcile release</Button>
+                      <Button type="button" size="sm" onClick={async () => { setStatus(""); try { await reconcileEntityRelease({ data: { member_id: r.member_id, entity: t, reason: reason[k] ?? "" } }); setStatus("Release reconciled; no email sent."); await q.refetch(); } catch (e) { setStatus(userFacingError(e, "Failed")); } }}>Reconcile release</Button>
                     </div>
                   ) : <p className="mt-1 text-ivory/55">Review the member, then use Start Entity Onboarding in their documents panel if appropriate</p>}
                 </div>

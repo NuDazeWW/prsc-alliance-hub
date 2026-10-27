@@ -1,3 +1,4 @@
+import { userFacingError } from "@/lib/user-facing-error";
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
@@ -18,7 +19,7 @@ export function AdminQuestionRegister() {
   const [group, setGroup] = useState({ consolidated_text: "", category: "other", source: "internal", route: "", priority: "", review_status: "new", list_target: "none" });
   const [recipient, setRecipient] = useState("Jared Odrick");
   const [status, setStatus] = useState("");
-  const run = async (fn: () => Promise<unknown>, ok: string) => { setStatus(""); try { await fn(); setStatus(ok); await reg.refetch(); } catch (e) { setStatus(e instanceof Error ? e.message : "Failed"); } };
+  const run = async (fn: () => Promise<unknown>, ok: string) => { setStatus(""); try { await fn(); setStatus(ok); await reg.refetch(); } catch (e) { setStatus(userFacingError(e, "Failed")); } };
   const editRound = (r?: any) => setForm(r ? { ...r, opens_at: toLocal(r.opens_at), deadline: toLocal(r.deadline) } : { forum_key: "motorsport-forum-1", title: "", opens_at: "", deadline: "", status: "draft", briefing_document_id: "" });
 
   return (
