@@ -1,5 +1,12 @@
 # Portal build roadmap
 
+## Published document-access rehearsal (Oct 27)
+- [x] Publish accepted correction; live access.prscstandards.org HTTP 200 and Test 2 normal Documents walkthrough verified
+- [x] Complete live six-chapter orientation and visible TEST Forum acknowledgment with no profile record; completed acknowledgment reads back
+- [ ] Exercise meeting availability and Review and Sign entry (blocked: no active test poll or eligible unsigned TEST document exists; completed transaction must not be reset or repeated)
+- [x] Unreleased sentinel hidden and direct file HTTP 403; signed-out executed file HTTP 401; existing executed/audit PDFs HTTP 200, no entity releases or appointments, 53 focused checks pass
+- [x] Return partial acceptance with missing rehearsal fixtures; Gate B remains unauthorized
+
 ## Final member documents access correction (Oct 27)
 - [x] Remove profile prerequisite from member document loading, navigation, and document dialog; preserve server authorization
 - [x] Verify released fictional Stage 1 reader and enabled acknowledgment through an incomplete-profile member session; unreleased direct acknowledgment/signing calls denied
