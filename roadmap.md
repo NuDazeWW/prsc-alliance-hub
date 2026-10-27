@@ -1,5 +1,11 @@
 # Portal build roadmap
 
+## Published document-access rehearsal (Oct 27)
+- [ ] Publish the accepted profile-independent document-access correction (Gate A only)
+- [ ] Walk through live orientation, optional-profile document review/acknowledgment, available test meeting and eligible signing entry using existing fictional accounts
+- [ ] Verify unreleased document denial and unchanged entity releases; reuse completed TEST BoldSign evidence, no new signing transaction
+- [ ] Return concise live PASS/FAIL and genuine blockers; Gate B remains unauthorized
+
 ## Final member documents access correction (Oct 27)
 - [x] Remove profile prerequisite from member document loading, navigation, and document dialog; preserve server authorization
 - [x] Verify released fictional Stage 1 reader and enabled acknowledgment through an incomplete-profile member session; unreleased direct acknowledgment/signing calls denied
