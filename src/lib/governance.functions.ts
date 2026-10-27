@@ -90,6 +90,10 @@ export const recordForumClearance = createServerFn({ method: "POST" })
     await assertAdmin(context);
     const { data: m } = await context.supabase.from("portal_members").select("nda_verified_at").eq("id", data.member_id).single();
     if ((data.decision === "cleared" || data.decision === "cleared_restricted") && !m?.nda_verified_at) throw new Error("Verify the NDA before clearing for the Forum");
+    if (data.decision === "cleared" || data.decision === "cleared_restricted") {
+      const problems = await clearanceProblemsFor(data.member_id);
+      if (problems.length) throw new Error(`Clearance prerequisites incomplete: ${problems.join("; ")}`);
+    }
     if (data.decision === "cleared_restricted" && data.restrictions.length < 3) throw new Error("List the restrictions that apply");
     const cleared = data.decision === "cleared" || data.decision === "cleared_restricted";
     const { error } = await context.supabase.from("portal_members").update({
