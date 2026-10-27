@@ -12,3 +12,11 @@ export function recipientsToConfirm(memberIds: string[], existing: ConfirmationR
   const sent = new Set(existing.filter((r) => r.status === "sent").map((r) => r.member_id));
   return memberIds.filter((id) => !sent.has(id));
 }
+
+const CONFIDENTIAL_TERMS = /\b(confidential|restricted|nascar|jared|nda|addendum|strategy brief|recusal|conflict)\b/i;
+/** Polls reach members before the Addendum: their wording must stay neutral. */
+export function pollWordingWarning(...texts: string[]) {
+  return texts.some((t) => CONFIDENTIAL_TERMS.test(t))
+    ? "This wording may reveal confidential details. Poll titles and descriptions are seen before the Confidentiality Addendum, so keep them neutral."
+    : null;
+}
