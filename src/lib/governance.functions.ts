@@ -1,7 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requirePortalAccess } from "@/lib/portal-access";
-import { roleCombinationTier } from "@/lib/governance";
+import { roleCombinationTier, stage1ClearanceProblems } from "@/lib/governance";
 
 async function assertAdmin(context: { supabase: any; userId: string }) {
   const { data } = await context.supabase.from("user_roles").select("role").eq("user_id", context.userId).eq("role", "admin").maybeSingle();
@@ -127,4 +127,84 @@ export const updateDocumentGovernance = createServerFn({ method: "POST" })
       if (data.third_party_permission) await context.supabase.from("governance_reviews").insert({ member_id: doc.member_id, kind: "third_party_permission", decision: "confirmed", reviewer_id: context.userId, notes: data.third_party_permission, details: { document_id: data.document_id, title: doc.title } });
     }
     return { ok: true };
+  });
+
+/** Prerequisites for ordinary Forum clearance, computed from records only. */
+export async function clearanceProblemsFor(memberId: string) {
+  const { supabaseAdmin: sb } = await import("@/integrations/supabase/client.server");
+  const { memberVisibilityFlags, appliesTo } = await import("@/lib/portal.functions");
+  const [{ data: m }, { data: docs }, { data: acks }, { data: assignments }, { data: reviews }] = await Promise.all([
+    sb.from("portal_members").select("*").eq("id", memberId).single(),
+    sb.from("portal_documents").select("*").eq("journey_stage", 1).is("superseded_at", null),
+    sb.from("portal_document_acknowledgements").select("document_id").eq("member_id", memberId),
+    sb.from("boldsign_assignments").select("document_id, status").eq("member_id", memberId),
+    sb.from("governance_reviews").select("decision, created_at").eq("member_id", memberId).eq("kind", "conflict_review").order("created_at", { ascending: false }).limit(1),
+  ]);
+  if (!m) throw new Error("Member not found");
+  const flags = await memberVisibilityFlags(memberId);
+  const done = new Set((acks ?? []).map((a) => a.document_id));
+  const applicable = (docs ?? []).filter((d: any) => appliesTo(d, m as any) && !["agenda", "restricted_brief", "secretariat_controls", "facilitator_run_of_show"].includes(d.forum_role ?? ""));
+  const conflictDocs = applicable.filter((d: any) => d.forum_role === "conflict");
+  return stage1ClearanceProblems({
+    ndaVerified: !!m.nda_verified_at,
+    addendumComplete: flags.addendum_complete,
+    incompleteStage1: applicable.filter((d) => !done.has(d.id)).map((d) => d.title),
+    conflictSigned: conflictDocs.length > 0 && conflictDocs.every((d) => (assignments ?? []).some((a) => a.document_id === d.id && a.status === "completed")),
+    conflictReviewDecision: reviews?.[0]?.decision ?? null,
+  });
+}
+
+export const getClearancePrerequisites = createServerFn({ method: "GET" })
+  .middleware([requirePortalAccess])
+  .inputValidator((i) => memberId.parse(i))
+  .handler(async ({ context, data }) => {
+    await assertAdmin(context);
+    return { problems: await clearanceProblemsFor(data.member_id) };
+  });
+
+/** Independent administrative conflict-review decision. It never grants clearance by itself. */
+export const recordConflictReview = createServerFn({ method: "POST" })
+  .middleware([requirePortalAccess])
+  .inputValidator((i) => memberId.extend({ decision: z.enum(["approved", "declined", "hold"]), notes: z.string().trim().min(5).max(2000) }).parse(i))
+  .handler(async ({ context, data }) => {
+    await assertAdmin(context);
+    await log(context, data.member_id, "conflict_review", data.decision, data.notes, {});
+    return { ok: true };
+  });
+
+export const grantRestrictedDocument = createServerFn({ method: "POST" })
+  .middleware([requirePortalAccess])
+  .inputValidator((i) => memberId.extend({ document_id: z.string().uuid(), reason: z.string().trim().min(5).max(1000) }).parse(i))
+  .handler(async ({ context, data }) => {
+    await assertAdmin(context);
+    const { supabaseAdmin: sb } = await import("@/integrations/supabase/client.server");
+    const { data: doc } = await sb.from("portal_documents").select("id, classification, superseded_at, version_label, title").eq("id", data.document_id).single();
+    if (!doc || doc.classification !== "restricted_opportunity") throw new Error("Only Restricted Opportunity documents use individual grants");
+    if (doc.superseded_at) throw new Error("This version has been superseded");
+    const { error } = await sb.from("restricted_document_grants").insert({ document_id: doc.id, member_id: data.member_id, version_label: doc.version_label, granted_by: context.userId, reason: data.reason });
+    if (error?.code === "23505") throw new Error("This member already has an active grant for this document");
+    if (error) throw error;
+    await log(context, data.member_id, "restricted_grant", "granted", data.reason, { document_id: doc.id, title: doc.title, version: doc.version_label });
+    return { ok: true };
+  });
+
+export const revokeRestrictedDocument = createServerFn({ method: "POST" })
+  .middleware([requirePortalAccess])
+  .inputValidator((i) => memberId.extend({ document_id: z.string().uuid(), reason: z.string().trim().min(5).max(1000) }).parse(i))
+  .handler(async ({ context, data }) => {
+    await assertAdmin(context);
+    const { supabaseAdmin: sb } = await import("@/integrations/supabase/client.server");
+    const { error } = await sb.from("restricted_document_grants").update({ revoked_at: new Date().toISOString(), revoked_by: context.userId }).eq("document_id", data.document_id).eq("member_id", data.member_id).is("revoked_at", null);
+    if (error) throw error;
+    await log(context, data.member_id, "restricted_grant", "revoked", data.reason, { document_id: data.document_id });
+    return { ok: true };
+  });
+
+export const listRestrictedGrants = createServerFn({ method: "GET" })
+  .middleware([requirePortalAccess])
+  .inputValidator((i) => memberId.parse(i))
+  .handler(async ({ context, data }) => {
+    await assertAdmin(context);
+    const { data: rows } = await context.supabase.from("restricted_document_grants").select("document_id, version_label, granted_at, revoked_at").eq("member_id", data.member_id).is("revoked_at", null);
+    return { grants: rows ?? [] };
   });
