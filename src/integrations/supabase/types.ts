@@ -49,10 +49,14 @@ export type Database = {
       }
       boldsign_assignments: {
         Row: {
+          admin_notified_at: string | null
           audit_path: string | null
           boldsign_document_id: string
           completed_at: string | null
+          countersigned_at: string | null
           created_at: string
+          disclosure_hash: string | null
+          disclosure_snapshot: Json | null
           document_id: string
           entity: string
           executed_path: string | null
@@ -64,10 +68,14 @@ export type Database = {
           version_label: string
         }
         Insert: {
+          admin_notified_at?: string | null
           audit_path?: string | null
           boldsign_document_id: string
           completed_at?: string | null
+          countersigned_at?: string | null
           created_at?: string
+          disclosure_hash?: string | null
+          disclosure_snapshot?: Json | null
           document_id: string
           entity: string
           executed_path?: string | null
@@ -79,10 +87,14 @@ export type Database = {
           version_label: string
         }
         Update: {
+          admin_notified_at?: string | null
           audit_path?: string | null
           boldsign_document_id?: string
           completed_at?: string | null
+          countersigned_at?: string | null
           created_at?: string
+          disclosure_hash?: string | null
+          disclosure_snapshot?: Json | null
           document_id?: string
           entity?: string
           executed_path?: string | null
@@ -516,6 +528,61 @@ export type Database = {
         }
         Relationships: []
       }
+      meeting_confirmation_sends: {
+        Row: {
+          attempts: number
+          created_at: string
+          last_error: string | null
+          member_id: string
+          poll_id: string
+          slot_id: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          attempts?: number
+          created_at?: string
+          last_error?: string | null
+          member_id: string
+          poll_id: string
+          slot_id: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          attempts?: number
+          created_at?: string
+          last_error?: string | null
+          member_id?: string
+          poll_id?: string
+          slot_id?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "meeting_confirmation_sends_member_id_fkey"
+            columns: ["member_id"]
+            isOneToOne: false
+            referencedRelation: "portal_members"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "meeting_confirmation_sends_poll_id_fkey"
+            columns: ["poll_id"]
+            isOneToOne: false
+            referencedRelation: "meeting_polls"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "meeting_confirmation_sends_slot_id_fkey"
+            columns: ["slot_id"]
+            isOneToOne: false
+            referencedRelation: "meeting_poll_slots"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       meeting_poll_notes: {
         Row: {
           member_id: string
@@ -808,19 +875,23 @@ export type Database = {
           action: string
           audience_entity: string | null
           audience_role: string | null
+          boldsign_template_id: string | null
           category: string
           classification: string
           classification_reviewed_at: string | null
+          countersignature_required: boolean
           created_at: string
           created_by: string | null
           description: string
           external_url: string | null
           file_path: string | null
+          forum_role: string | null
           id: string
           is_forum_prep: boolean
           journey_stage: number | null
           journey_track: string | null
           member_id: string | null
+          signing_approved: boolean
           sort_order: number
           superseded_at: string | null
           supersedes_id: string | null
@@ -832,19 +903,23 @@ export type Database = {
           action: string
           audience_entity?: string | null
           audience_role?: string | null
+          boldsign_template_id?: string | null
           category: string
           classification?: string
           classification_reviewed_at?: string | null
+          countersignature_required?: boolean
           created_at?: string
           created_by?: string | null
           description?: string
           external_url?: string | null
           file_path?: string | null
+          forum_role?: string | null
           id?: string
           is_forum_prep?: boolean
           journey_stage?: number | null
           journey_track?: string | null
           member_id?: string | null
+          signing_approved?: boolean
           sort_order?: number
           superseded_at?: string | null
           supersedes_id?: string | null
@@ -856,19 +931,23 @@ export type Database = {
           action?: string
           audience_entity?: string | null
           audience_role?: string | null
+          boldsign_template_id?: string | null
           category?: string
           classification?: string
           classification_reviewed_at?: string | null
+          countersignature_required?: boolean
           created_at?: string
           created_by?: string | null
           description?: string
           external_url?: string | null
           file_path?: string | null
+          forum_role?: string | null
           id?: string
           is_forum_prep?: boolean
           journey_stage?: number | null
           journey_track?: string | null
           member_id?: string | null
+          signing_approved?: boolean
           sort_order?: number
           superseded_at?: string | null
           supersedes_id?: string | null
@@ -1503,6 +1582,57 @@ export type Database = {
           },
         ]
       }
+      restricted_document_grants: {
+        Row: {
+          document_id: string
+          granted_at: string
+          granted_by: string
+          id: string
+          member_id: string
+          reason: string
+          revoked_at: string | null
+          revoked_by: string | null
+          version_label: string | null
+        }
+        Insert: {
+          document_id: string
+          granted_at?: string
+          granted_by: string
+          id?: string
+          member_id: string
+          reason: string
+          revoked_at?: string | null
+          revoked_by?: string | null
+          version_label?: string | null
+        }
+        Update: {
+          document_id?: string
+          granted_at?: string
+          granted_by?: string
+          id?: string
+          member_id?: string
+          reason?: string
+          revoked_at?: string | null
+          revoked_by?: string | null
+          version_label?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "restricted_document_grants_document_id_fkey"
+            columns: ["document_id"]
+            isOneToOne: false
+            referencedRelation: "portal_documents"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "restricted_document_grants_member_id_fkey"
+            columns: ["member_id"]
+            isOneToOne: false
+            referencedRelation: "portal_members"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_roles: {
         Row: {
           created_at: string
@@ -1598,6 +1728,11 @@ export type Database = {
           filled: number
           total: number
         }[]
+      }
+      member_addendum_complete: { Args: never; Returns: boolean }
+      member_restricted_grant: {
+        Args: { p_document: string; p_version: string }
+        Returns: boolean
       }
       portal_access_current: { Args: never; Returns: boolean }
     }
