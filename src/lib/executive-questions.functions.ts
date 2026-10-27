@@ -15,8 +15,12 @@ const MEMBER_COLS = "id, status, participates_in_forum, nda_verified_at, forum_c
 export async function memberRoundAccess(admin: any, member: any, round: any) {
   let hasBriefing = false;
   if (round.briefing_document_id) {
-    const { data: doc } = await admin.from("portal_documents").select("id, classification, superseded_at, is_forum_prep, member_id, journey_stage").eq("id", round.briefing_document_id).maybeSingle();
-    hasBriefing = Boolean(doc) && (!doc.member_id || doc.member_id === member.id) && documentVisible({ ...doc, member_specific: Boolean(doc.member_id) }, member, false);
+    const { data: doc } = await admin.from("portal_documents").select("id, classification, superseded_at, is_forum_prep, member_id, journey_stage, forum_role, version_label").eq("id", round.briefing_document_id).maybeSingle();
+    const { memberVisibilityFlags } = await import("@/lib/portal.functions");
+    const flags = await memberVisibilityFlags(member.id);
+    // Executive Questions require the same exact-version individual grant as the restricted brief.
+    hasBriefing = Boolean(doc) && (!doc.member_id || doc.member_id === member.id) && grantCovers(flags.grants, doc) &&
+      documentVisible({ ...doc, member_specific: Boolean(doc.member_id) }, { ...member, ...flags }, false);
   }
   return questionAccessBlock(member, hasBriefing);
 }
