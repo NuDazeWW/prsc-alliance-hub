@@ -1,5 +1,6 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
+import { leadershipPublicationAllowed, linkedProfilePermissions } from "./leadership-publication";
 import { requirePortalAccess } from "@/lib/portal-access";
 
 export type LeaderRow = {
@@ -15,6 +16,7 @@ export type LeaderRow = {
   is_placeholder: boolean;
   photo_path: string | null;
   own_bio: string | null;
+  publication_scope?: string;
 };
 export type LeadershipSettings = { eyebrow: string; heading: string; subtext: string };
 
@@ -28,26 +30,31 @@ export const getLeadershipTeam = createServerFn({ method: "GET" })
   .middleware([requirePortalAccess])
   .handler(async ({ context }) => {
     const admin = await isAdmin(context);
-    const [{ data: rows, error }, { data: settings }] = await Promise.all([
-      context.supabase.from("leadership_team").select("*").order("sort_order").order("created_at"),
+    let teamQuery = context.supabase.from("leadership_team").select("*").order("sort_order").order("created_at");
+    if (!admin) teamQuery = teamQuery.eq("visible", true);
+    const [{ data: allRows, error }, { data: settings }] = await Promise.all([
+      teamQuery,
       context.supabase.from("leadership_settings").select("eyebrow, heading, subtext").maybeSingle(),
     ]);
     if (error) throw error;
+    const rows = (allRows ?? []).filter((r: any) => admin || leadershipPublicationAllowed(r));
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const memberIds = (rows ?? []).map((r: any) => r.member_id).filter(Boolean);
-    const profiles = new Map<string, { bio: string | null; headshot_path: string | null }>();
+    const profiles = new Map<string, { bio: string | null; headshot_path: string | null; visibility_instructions: Record<string, unknown> | null }>();
     if (memberIds.length) {
-      const { data } = await supabaseAdmin.from("portal_profiles").select("member_id, bio, headshot_path").in("member_id", memberIds);
-      for (const p of data ?? []) profiles.set(p.member_id, { bio: p.bio, headshot_path: p.headshot_path });
+      const { data } = await supabaseAdmin.from("portal_profiles").select("member_id, bio, headshot_path, visibility_instructions").in("member_id", memberIds);
+      for (const p of data ?? []) profiles.set(p.member_id, { bio: p.bio, headshot_path: p.headshot_path, visibility_instructions: p.visibility_instructions as Record<string, unknown> });
     }
-    const team: LeaderRow[] = await Promise.all(
+    const assembled = await Promise.all(
       (rows ?? []).map(async (r: any) => {
         const prof = r.member_id ? profiles.get(r.member_id) : undefined;
+        const permitted = linkedProfilePermissions(prof?.visibility_instructions);
+        if (!admin && r.member_id && !permitted.name) return null;
         let photo_url: string | null = null;
-        if (r.photo_path) {
+        if (r.photo_path && (admin || !r.member_id || permitted.photo)) {
           const { data } = await supabaseAdmin.storage.from("leadership-photos").createSignedUrl(r.photo_path, 3600);
           photo_url = data?.signedUrl ?? null;
-        } else if (prof?.headshot_path) {
+        } else if (prof?.headshot_path && (admin || permitted.photo)) {
           const { data } = await supabaseAdmin.storage.from("member-headshots").createSignedUrl(prof.headshot_path, 3600);
           photo_url = data?.signedUrl ?? null;
         }
@@ -55,12 +62,13 @@ export const getLeadershipTeam = createServerFn({ method: "GET" })
           id: r.id,
           name: r.name,
           title: r.title,
-          affiliation: r.affiliation ?? null,
-          bio: r.bio?.trim() ? r.bio : prof?.bio ?? null,
-          own_bio: r.bio,
+          affiliation: admin || !r.member_id || permitted.affiliation ? r.affiliation ?? null : null,
+          bio: admin || !r.member_id || permitted.bio ? (r.bio?.trim() ? r.bio : prof?.bio ?? null) : null,
+          own_bio: admin ? r.bio : null,
+          publication_scope: admin ? r.publication_scope : undefined,
           photo_url,
-          photo_path: r.photo_path,
-          member_id: r.member_id,
+          photo_path: admin ? r.photo_path : null,
+          member_id: admin ? r.member_id : null,
           sort_order: r.sort_order,
           visible: r.visible,
           is_placeholder: r.is_placeholder,
@@ -69,7 +77,7 @@ export const getLeadershipTeam = createServerFn({ method: "GET" })
     );
     return {
       admin,
-      team,
+      team: assembled.filter((r): r is NonNullable<typeof r> => r !== null),
       settings: (settings as LeadershipSettings | null) ?? {
         eyebrow: "Our Leadership Team",
         heading: "Our Leadership Team",
@@ -80,6 +88,7 @@ export const getLeadershipTeam = createServerFn({ method: "GET" })
 
 const leaderSchema = z.object({
   id: z.string().uuid().optional(),
+  publication_scope: z.enum(["none", "portal_members"]).default("none"),
   name: z.string().trim().min(1).max(160),
   title: z.string().trim().max(160),
   affiliation: z.string().trim().max(200).nullable().optional(),
@@ -96,7 +105,8 @@ export const saveLeader = createServerFn({ method: "POST" })
   .handler(async ({ context, data }) => {
     if (!(await isAdmin(context))) throw new Error("Unauthorized");
     const { id, ...rest } = data;
-    const row = { ...rest, bio: rest.bio || null, affiliation: rest.affiliation || null, is_placeholder: false };
+    const approved = rest.publication_scope === "portal_members";
+    const row = { ...rest, publication_approved_at: approved ? new Date().toISOString() : null, publication_approved_by: approved ? context.userId : null, bio: rest.bio || null, affiliation: rest.affiliation || null, is_placeholder: false };
     const q = id
       ? context.supabase.from("leadership_team").update(row).eq("id", id)
       : context.supabase.from("leadership_team").insert(row);

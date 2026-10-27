@@ -6,6 +6,7 @@ import { useHeadshotUpload } from "@/hooks/use-headshot-upload";
 import { OrientationHub } from "@/components/portal/OrientationHub";
 import { acknowledgeOrientation } from "@/lib/forum-communications.functions";
 import { toast } from "sonner";
+import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import {
   ArrowRight,
@@ -132,8 +133,15 @@ function PortalHome() {
       await queryClient.invalidateQueries({ queryKey: ["portal-session"] });
     }
     setPanel(null);
-    toast.success("Thank you. Next: complete your executive profile.");
-    navigate({ to: "/portal/profile" });
+    const currentMeetings = isDemo ? meetings.data : await getMyMeetings();
+    const hasActivePoll = (currentMeetings?.polls ?? []).some((p: any) => p.status === "open");
+    if (hasActivePoll) {
+      toast.success("Thank you. Next: mark your meeting availability.");
+      setPanel("meetings");
+    } else {
+      toast.success("Thank you. Next: complete your executive profile.");
+      navigate({ to: "/portal/profile" });
+    }
   }
 
   if (isLoading)
@@ -446,6 +454,7 @@ function PortalHome() {
               </DialogHeader>
               <div className="mt-8">
                 <MemberMeetings />
+                <Button onClick={() => navigate({ to: "/portal/profile" })} className="mt-6">Continue to Executive Profile <ArrowRight className="h-4 w-4" /></Button>
               </div>
             </div>
           )}
