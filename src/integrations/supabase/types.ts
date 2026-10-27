@@ -332,6 +332,9 @@ export type Database = {
           member_id: string | null
           name: string
           photo_path: string | null
+          publication_approved_at: string | null
+          publication_approved_by: string | null
+          publication_scope: string
           sort_order: number
           title: string
           updated_at: string
@@ -346,6 +349,9 @@ export type Database = {
           member_id?: string | null
           name: string
           photo_path?: string | null
+          publication_approved_at?: string | null
+          publication_approved_by?: string | null
+          publication_scope?: string
           sort_order?: number
           title?: string
           updated_at?: string
@@ -360,6 +366,9 @@ export type Database = {
           member_id?: string | null
           name?: string
           photo_path?: string | null
+          publication_approved_at?: string | null
+          publication_approved_by?: string | null
+          publication_scope?: string
           sort_order?: number
           title?: string
           updated_at?: string
@@ -1482,6 +1491,7 @@ export type Database = {
           total: number
         }[]
       }
+      portal_access_current: { Args: never; Returns: boolean }
     }
     Enums: {
       app_role:
