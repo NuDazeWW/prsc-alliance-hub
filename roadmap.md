@@ -1,15 +1,17 @@
 # Portal build roadmap
 
 ## Authorized security remediation (Oct 27)
-- [ ] Remove attacker-triggered account lockout while preserving identity-provider protections and recovery
-- [ ] Enforce administrator authorization on all invitation dispatch paths
-- [ ] Deny revoked sessions across server functions, database policies and private files; retain history
-- [ ] Remove recipient addresses from diagnostic logs and restrict delivery metadata
-- [ ] Neutralize spreadsheet formula injection in every export
-- [ ] Record generic leadership-heading exception and enforce linked-profile publication approval
-- [ ] Preserve orientation → active meeting availability → profile → Forum sequence
-- [ ] Verify audience matrix and existing regression tests; rerun quick and deep scans after saved changes
-- [ ] Return complete dispositions for founder review; publishing and real invitations remain paused
+- [x] Remove attacker-triggered durable account lockout; direct provider login preserves provider controls
+- [x] Enforce administrator authorization on all invitation dispatch paths; candidate and anonymous denial verified
+- [x] Deny existing revoked sessions through server/RLS checks; retain history; private member downloads require authentication
+- [x] Remove recipient addresses from diagnostic logs and restrict delivery metadata
+- [x] Neutralize spreadsheet formula injection in every export; hostile values tested
+- [x] Document heading exception and enforce linked-profile publication approval; raw roster is admin-only
+- [x] Preserve orientation → active meeting availability → profile → Forum sequence in code and rule tests
+- [ ] Complete deep rescan and founder disposition (after saved fixes); quick scan retains only intentional heading exception
+- [ ] Verify hosted password throttling and legitimate password recovery (provider settings/inbox walkthrough unavailable)
+- [ ] Finish populated appointed-member/materials audience checks and published first-login rehearsal (no appointment activation or confidential releases authorized)
+- [x] Return interim itemized disposition; publishing and real invitations remain paused
 
 ## Founder security review and published rehearsal (Oct 27)
 - [x] Inspect leadership_settings, candidate direct reads and leadership server authorization; generic heading only in flagged table, no other member rows exposed in controlled test

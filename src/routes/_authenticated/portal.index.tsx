@@ -3,6 +3,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useRef, useState } from "react";
 import { Pencil, LogOut } from "lucide-react";
 import { usePrivateMedia } from "@/hooks/use-private-media";
+import { afterOrientation } from "@/lib/first-login";
 import { useHeadshotUpload } from "@/hooks/use-headshot-upload";
 import { OrientationHub } from "@/components/portal/OrientationHub";
 import { acknowledgeOrientation } from "@/lib/forum-communications.functions";
@@ -142,7 +143,7 @@ function PortalHome() {
     }
     setPanel(null);
     const currentMeetings = isDemo ? meetings.data : await getMyMeetings();
-    const hasActivePoll = (currentMeetings?.polls ?? []).some((p: any) => p.status === "open");
+    const hasActivePoll = afterOrientation(currentMeetings?.polls ?? []) === "meetings";
     if (hasActivePoll) {
       toast.success("Thank you. Next: mark your meeting availability.");
       setPanel("meetings");
