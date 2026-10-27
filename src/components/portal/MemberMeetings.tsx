@@ -1,3 +1,4 @@
+import { fetchPrivateFile } from "@/lib/private-file-client";
 import { DEFAULT_MEETING_TZ, timezoneLabel } from "@/lib/meeting-block";
 import { useEffect, useState } from "react";
 import { CalendarDays, Check, Clock, Download, MapPin, Video } from "lucide-react";
@@ -278,12 +279,15 @@ export function MemberMeetings({ hideWhenEmpty = false, hideIntro = false, asMem
                     )}
                   </div>
                   {p.ics_token && (
-                    <a
-                      href={`/api/public/meeting-ics?poll=${p.id}&token=${p.ics_token}`}
-                      className="inline-flex shrink-0 items-center gap-2 rounded-full border border-gold/40 px-4 py-2 text-sm text-gold transition-colors hover:bg-gold/10"
-                    >
+                    <Button variant="outline" onClick={async () => {
+                      try {
+                        const blob = await fetchPrivateFile(`/api/public/meeting-ics?poll=${p.id}`);
+                        const url = URL.createObjectURL(blob);
+                        const link = document.createElement("a"); link.href = url; link.download = "meeting.ics"; link.click(); URL.revokeObjectURL(url);
+                      } catch { toast.error("Calendar access unavailable. Please sign in again."); }
+                    }}>
                       <Download className="h-4 w-4" /> Add to calendar
-                    </a>
+                    </Button>
                   )}
                 </div>
               );

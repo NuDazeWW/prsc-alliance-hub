@@ -1,7 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requirePortalAccess } from "@/lib/portal-access";
-import { meetingIcsToken } from "@/lib/ics";
+
 import { formatSlot, zonedToUtc } from "@/lib/meeting-block";
 
 const PORTAL_URL = "https://access.prscstandards.org/portal";
@@ -195,8 +195,7 @@ export const confirmPollSlot = createServerFn({ method: "POST" })
     const { safeReconcile } = await import("@/lib/outlook-calendar.server");
     await safeReconcile(data.poll_id);
 
-    const token = await meetingIcsToken(data.poll_id);
-    const icsUrl = `https://access.prscstandards.org/api/public/meeting-ics?poll=${data.poll_id}&token=${token}`;
+    const icsUrl = "https://access.prscstandards.org/portal#meetings";
     const typeLabel = MEETING_TYPE_LABEL[poll.meeting_type] ?? "Meeting";
     const where =
       poll.format === "virtual"
@@ -206,7 +205,7 @@ export const confirmPollSlot = createServerFn({ method: "POST" })
     const { data: members } = await supabaseAdmin
       .from("portal_members")
       .select("id, email, first_name")
-      .in("id", poll.invited_member_ids as string[]);
+      .in("id", poll.invited_member_ids as string[]).neq("status", "revoked");
 
     const { loadSystemEmail } = await import("@/lib/portal-notify.server");
     const build = await loadSystemEmail("meeting_confirmed");
@@ -313,7 +312,8 @@ export const getMyMeetings = createServerFn({ method: "GET" })
     const withTokens = await Promise.all(
       polls.map(async (p: any) => ({
         ...p,
-        ics_token: p.status === "confirmed" ? await meetingIcsToken(p.id) : null,
+        ics_token: p.status === "confirmed" ? "authenticated" : null,
+        invited_member_ids: undefined,
         slots: (slots ?? []).filter((s: any) => s.poll_id === p.id),
         my_responses: (responses ?? []).filter((r: any) => r.poll_id === p.id),
         my_note: (notes ?? []).find((n: any) => n.poll_id === p.id)?.note ?? "",
