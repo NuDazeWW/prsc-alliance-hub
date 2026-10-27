@@ -105,7 +105,8 @@ Limit for fix 8: the automatic BoldSign trigger is built and tested with mocked 
   - direct file access before and after the Addendum
   - Jared brief with no grant, then a TEST-only grant on a TEST document
 - No real sends and no publishing.
-- One short PASS/FAIL report.
+- No broad scan.
+- One short PASS/FAIL report. For each fix it says resolved, or still needs an approved source document (for example, the final Addendum, the Conflict template, or the Jared brief).
 
 ## Technical notes
 - Three migrations: the Addendum and restricted-grant helpers with the read-policy update, the `restricted_document_grants` table, and the `meeting_confirmation_sends` table plus the assignment snapshot columns. Each includes grants and RLS.
