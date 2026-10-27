@@ -1,3 +1,4 @@
+import { usePrivateMedia } from "@/hooks/use-private-media";
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { ChevronDown } from "lucide-react";
@@ -53,7 +54,7 @@ export function LeadershipTeam() {
       <ul className="mt-6 space-y-3">
         {team.map((p) => {
           const isOpen = open === p.id;
-          const initials = p.name.split(/\s+/).filter((w) => !w.endsWith(".")).map((w) => w[0]).slice(0, 2).join("");
+          const initials = p.name.split(/\s+/).filter((w: string) => !w.endsWith(".")).map((w: string) => w[0]).slice(0, 2).join("");
           return (
             <li key={p.id} className="border border-ivory/15 bg-navy-deep/40">
               <button
@@ -63,7 +64,7 @@ export function LeadershipTeam() {
                 className="flex w-full items-center gap-4 pr-5 text-left transition-colors hover:bg-ivory/[.03]"
               >
                 {p.photo_url ? (
-                  <img src={p.photo_url} alt={p.name} loading="lazy" width={80} height={64} className="h-16 w-20 shrink-0 object-cover" />
+                  <LeaderPhoto url={p.photo_url} name={p.name} />
                 ) : (
                   <span className="grid h-16 w-20 shrink-0 place-items-center bg-ivory/5 font-display text-lg text-gold">{initials}</span>
                 )}
@@ -85,4 +86,9 @@ export function LeadershipTeam() {
       </ul>
     </div>
   );
+}
+
+function LeaderPhoto({ url, name }: { url: string; name: string }) {
+  const src = usePrivateMedia(url);
+  return src ? <img src={src} alt={name} loading="lazy" width={80} height={64} className="h-16 w-20 shrink-0 object-cover" /> : <span className="h-16 w-20 shrink-0 bg-ivory/5" />;
 }

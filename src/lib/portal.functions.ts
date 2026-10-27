@@ -179,9 +179,7 @@ export const getMyHeadshotUrl = createServerFn({ method: "GET" })
     if (!member) return { url: null };
     const { data: profile } = await context.supabase.from("portal_profiles").select("headshot_path").eq("member_id", member.id).maybeSingle();
     if (!profile?.headshot_path) return { url: null };
-    const { data, error } = await context.supabase.storage.from(HEADSHOT_BUCKET).createSignedUrl(profile.headshot_path, 3600);
-    if (error) return { url: null };
-    return { url: data.signedUrl };
+    return { url: `/api/public/portal-file?kind=headshot&id=${member.id}` };
   });
 
 const inquirySchema = z.object({ subject: z.string().trim().min(1).max(160), message: z.string().trim().min(10).max(4000) });
@@ -688,14 +686,8 @@ async function entityReleases(client: any, memberId: string) {
 }
 
 async function signDocumentUrls(documents: PortalDocumentRecord[]) {
-  const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-  return Promise.all(
-    documents.map(async (doc) => {
-      if (!doc.file_path) return { ...doc, url: doc.external_url };
-      const { data } = await supabaseAdmin.storage.from(DOCUMENT_BUCKET).createSignedUrl(doc.file_path, 900);
-      return { ...doc, url: data?.signedUrl ?? null };
-    }),
-  );
+  return documents.map(doc => ({ ...doc, member_id: null, file_path: null,
+    url: doc.file_path ? `/api/public/portal-file?kind=document&id=${doc.id}` : doc.external_url }));
 }
 
 export const getMyDocuments = createServerFn({ method: "GET" })

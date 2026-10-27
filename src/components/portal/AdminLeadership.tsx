@@ -1,3 +1,4 @@
+import { usePrivateMedia } from "@/hooks/use-private-media";
 import { useEffect, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Users, ChevronRight, ArrowDown, ArrowUp, ChevronDown, ChevronUp, Eye, EyeOff, Plus, Save, Trash2, Upload } from "lucide-react";
@@ -118,7 +119,7 @@ export function AdminLeadership() {
       <ul className="mt-4 space-y-2">
         {(showAll ? team : team.slice(0, 3)).map((t, i) => (
           <li key={t.id} className={`flex flex-wrap items-center gap-3 border border-ivory/15 p-2 ${t.visible ? "" : "opacity-50"}`}>
-            {t.photo_url ? <img src={t.photo_url} alt="" className="h-12 w-12 object-cover" /> : <span className="h-12 w-12 bg-ivory/5" />}
+            {t.photo_url ? <AdminPhoto url={t.photo_url} /> : <span className="h-12 w-12 bg-ivory/5" />}
             <div className="min-w-0 flex-1">
               <p className="truncate text-sm text-ivory">{t.name} {t.is_placeholder && <span className="ml-2 text-[10px] uppercase text-gold/70">sample</span>}</p>
               <p className="truncate text-xs text-ivory/50">{t.title}{t.affiliation ? ` · ${t.affiliation}` : ""}{t.member_id ? " · linked to member" : ""}</p>
@@ -147,7 +148,7 @@ export function AdminLeadership() {
         <div className="mt-6 border border-gold/30 bg-navy-deep/50 p-5">
           <h4 className="font-display text-lg">{editing.id ? "Edit person" : "Add person"}</h4>
           <div className="mt-4 flex items-center gap-4">
-            {editing.photo_url ? <img src={editing.photo_url} alt="" className="h-16 w-16 object-cover" /> : <span className="grid h-16 w-16 place-items-center bg-ivory/5 text-gold"><Upload className="h-5 w-5" /></span>}
+            {editing.photo_url ? <AdminPhoto url={editing.photo_url} /> : <span className="grid h-16 w-16 place-items-center bg-ivory/5 text-gold"><Upload className="h-5 w-5" /></span>}
             <label className="cursor-pointer text-sm text-gold underline">
               Upload photo
               <input type="file" accept="image/*" className="hidden" onChange={(e) => { const f = e.target.files?.[0]; if (f) void uploadPhoto(f); e.target.value = ""; }} />
@@ -202,3 +203,5 @@ function IconBtn({ label, onClick, children }: { label: string; onClick: () => v
     </button>
   );
 }
+
+function AdminPhoto({ url }: { url: string }) { const src = usePrivateMedia(url); return src ? <img src={src} alt="" className="h-12 w-12 object-cover" /> : <span className="h-12 w-12 bg-ivory/5" />; }

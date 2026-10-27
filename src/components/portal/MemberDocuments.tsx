@@ -1,3 +1,4 @@
+import { usePrivateMedia } from "@/hooks/use-private-media";
 import { useEffect, useRef, useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { ArrowLeft, ArrowRight, BookOpen, Check, Lock, Mail } from "lucide-react";
@@ -124,6 +125,7 @@ function DocCard({ d, done, locked, onOpen }: { d: Doc; done?: Completion; locke
 
 function DocumentReader({ doc, completion, onBack }: { doc: Doc; completion: Completion | null; onBack: () => void }) {
   const queryClient = useQueryClient();
+  const documentUrl = usePrivateMedia(doc.url);
   const [readConfirmed, setReadConfirmed] = useState(false);
   const [initials, setInitials] = useState("");
   const [name, setName] = useState("");
@@ -172,8 +174,8 @@ function DocumentReader({ doc, completion, onBack }: { doc: Doc; completion: Com
       {doc.description && <p className="mt-2 text-[14px] leading-6 text-ivory/60">{doc.description}</p>}
 
       <div className="mt-5 h-[60vh] border border-gold/25 bg-ivory" onContextMenu={(e) => e.preventDefault()}>
-        {doc.url ? (
-          <iframe title={doc.title} src={`${doc.url}#toolbar=0&navpanes=0`} className="h-full w-full" />
+        {documentUrl ? (
+          <iframe title={doc.title} src={`${documentUrl}#toolbar=0&navpanes=0`} className="h-full w-full" />
         ) : (
           <p className="p-6 text-navy-deep">This document is not available right now.</p>
         )}

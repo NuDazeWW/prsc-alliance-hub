@@ -1,3 +1,4 @@
+import { usePrivateMedia } from "@/hooks/use-private-media";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { MemberMeetings } from "@/components/portal/MemberMeetings";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
@@ -55,7 +56,7 @@ function StepTitle({n,title,copy}:{n:string;title:string;copy:string}){return <d
 function HeadshotField(){
  const fileRef=useRef<HTMLInputElement>(null); const{upload,busy,msg}=useHeadshotUpload();
  const url=useQuery({queryKey:["my-headshot"],queryFn:()=>isPreviewHost()?Promise.resolve(null):getMyHeadshotUrl(),retry:false});
- const src=url.data?.url;
+ const src=usePrivateMedia(url.data?.url);
  return <div className="mt-10 flex items-center gap-6 border border-gold/15 bg-navy/40 p-5">
   <div className="flex h-20 w-20 shrink-0 items-center justify-center overflow-hidden rounded-full border border-gold/30 bg-ivory/5 text-gold">{src?<img src={src} alt="Your headshot" className="h-full w-full object-cover"/>:<Upload className="h-6 w-6"/>}</div>
   <div><p className="text-xs uppercase text-ivory/55">Headshot</p><p className="mt-1 text-sm text-ivory/50">Used only for your individualized materials. JPG or PNG, up to 5 MB.</p>

@@ -29,3 +29,10 @@
 - PRSC/DIS Stage 2 opens only through an `entity_onboarding_releases` row created by `releaseEntityOnboarding` (gated by `stage2ReleaseProblems`); `lockedDocumentIds` and the `portal_documents` read policy key entity tracks off that release, never Forum status. Why: Forum and entity onboarding are independent journeys.
 - Executive Questions access/limits/reminder/share rules live only in `src/lib/executive-questions.ts`; member writes go through `executive-questions.functions.ts` (server-checked, own-row reads only) and outbound sharing requires a recorded approval (DB check). Why: confidential submissions never leave the Secretariat without founder approval.
 - Profile submission emails are planned by `planProfileEmails` and sent by `deliverProfileEmails` in `src/lib/profile-emails.ts`. Why: one testable rule for at-most-once, minimal-disclosure notices.
+- Portal RPCs use requirePortalAccess and portal_access_current with restrictive RLS; invited onboarding remains permitted. Why: revoked bearer sessions must fail immediately.
+- Member removal revokes and audits without deleting records/files. Why: retain signed evidence and history.
+- Invitation reminder HTTP dispatch verifies a bearer and admin role, never a public key. Why: hiding controls is not authorization.
+- Leadership publishing requires explicit portal-member approval and profile field permissions; omit private IDs/paths from member DTOs. Why: linking is not consent.
+- Private member files use authenticated portal-file fetches, and calendar downloads require current access. Why: new member links cannot bypass revocation; old storage links expire on their original schedule.
+- Password login calls the identity provider directly; anonymous email-keyed locks never govern access. Why: retain provider IP protections without attacker-triggered account denial.
+- Export text uses csvCell. Why: CSV quoting does not prevent spreadsheet formulas.

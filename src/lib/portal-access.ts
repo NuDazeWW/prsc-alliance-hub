@@ -9,11 +9,10 @@ export function portalAccessAllowed(member: { status: string } | null, admin: bo
 export const requirePortalAccess = createMiddleware({ type: "function" })
   .middleware([requireSupabaseAuth])
   .server(async ({ context, next }) => {
-    const [{ data: member, error }, { data: role, error: roleError }] = await Promise.all([
-      context.supabase.from("portal_members").select("status").eq("user_id", context.userId).maybeSingle(),
-      context.supabase.from("user_roles").select("role").eq("user_id", context.userId).eq("role", "admin").maybeSingle(),
-    ]);
-    if (error || roleError || !portalAccessAllowed(member, Boolean(role))) throw new Error("Portal access unavailable");
+    // Definer predicate sees revoked rows hidden by their own SELECT policy;
+    // even a retained role cannot accidentally authorize a revoked member.
+    const { data: allowed, error } = await context.supabase.rpc("portal_access_current");
+    if (error || allowed !== true) throw new Error("Portal access unavailable");
     return next();
   });
 
