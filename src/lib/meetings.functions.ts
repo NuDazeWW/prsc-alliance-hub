@@ -212,7 +212,7 @@ export const confirmPollSlot = createServerFn({ method: "POST" })
     void founderSignature;
     // One confirmation per poll, confirmed slot and recipient; retries reuse the same delivery key.
     const { confirmationKey, recipientsToConfirm } = await import("@/lib/meeting-confirmations");
-    const { data: existing } = await supabaseAdmin.from("meeting_confirmation_sends").select("member_id, status").eq("poll_id", poll.id).eq("slot_id", data.slot_id);
+    const { data: existing } = await supabaseAdmin.from("meeting_confirmation_sends").select("member_id, status, attempts").eq("poll_id", poll.id).eq("slot_id", data.slot_id);
     const owed = new Set(recipientsToConfirm((members ?? []).map((m) => m.id), (existing ?? []) as any));
     for (const m of members ?? []) {
       if (!owed.has(m.id)) continue;
