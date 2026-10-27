@@ -735,7 +735,7 @@ export const getMyDocuments = createServerFn({ method: "GET" })
       .select("document_id, kind, initials, signed_name, acknowledged_at")
       .eq("member_id", member.id);
     const completions = (acks ?? []) as PortalCompletion[];
-    const docs = memberVisible(all, member as DocMember, new Set(completions.map((c) => c.document_id)));
+    const docs = await memberVisible(all, member as DocMember, new Set(completions.map((c) => c.document_id)));
     return {
       memberId: member.id as string,
       entity: member.entity as string,
@@ -826,7 +826,7 @@ export const acknowledgeDocument = createServerFn({ method: "POST" })
     const { lockedDocumentIds } = await import("@/lib/journey");
     const { data: priorAcks } = await context.supabase.from("portal_document_acknowledgements").select("document_id").eq("member_id", member.id);
     const priorDone = new Set<string>((priorAcks ?? []).map((a: { document_id: string }) => a.document_id));
-    const docs = memberVisible(await applicableDocuments(context.supabase, member as DocMember), member as DocMember, priorDone).filter(isActive);
+    const docs = (await memberVisible(await applicableDocuments(context.supabase, member as DocMember), member as DocMember, priorDone)).filter(isActive);
     const doc = docs.find((d) => d.id === data.document_id);
     if (!doc) throw new Error("Document unavailable");
     if (doc.action === "boldsign" || doc.action === "docusign") throw new Error("Complete this document through verified electronic signing");

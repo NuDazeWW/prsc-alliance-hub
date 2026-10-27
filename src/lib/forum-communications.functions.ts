@@ -48,7 +48,7 @@ async function evaluate(context: any, data: z.infer<typeof input>) {
   const { memberVisibilityFlags } = await import("@/lib/portal.functions");
   const flagsById = new Map(await Promise.all((members ?? []).map(async (m: any) => [m.id, await memberVisibilityFlags(m.id)] as const)));
   const rows = (members ?? []).map((m: any) => {
-    let reason = forumEmailBlock(data.email_key, { ...m, ...flagsById.get(m.id) }, doc, false);
+    let reason = forumEmailBlock(data.email_key, { ...m, ...(flagsById.get(m.id) ?? {}) }, doc, false);
     if (!reason && data.email_key === "forum_confirmed" && confirmedThroughPoll(m.id, confirmedPolls)) reason = "Meeting confirmation already sent from Meetings";
     if (!reason && doc?.member_id && doc.member_id !== m.id) reason = "No access to briefing";
     if (!reason && isQuestion) {

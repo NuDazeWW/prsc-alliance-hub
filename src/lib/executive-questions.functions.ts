@@ -1,7 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requirePortalAccess } from "@/lib/portal-access";
-import { documentVisible } from "@/lib/governance";
+import { documentVisible, grantCovers } from "@/lib/governance";
 import { questionAccessBlock, roundOpen, validateQuestions, shareBlock, QUESTION_CATEGORIES, ROUTES } from "@/lib/executive-questions";
 
 async function assertAdmin(context: { supabase: any; userId: string }) {
