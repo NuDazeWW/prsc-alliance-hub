@@ -8,6 +8,36 @@ export async function boldSignGet(path: string): Promise<Response> {
   return response;
 }
 
+export async function boldSignPost(path: string, body: unknown): Promise<Response> {
+  const key = process.env["BOLDSIGN_API_KEY"];
+  if (!key) throw new Error("BoldSign is not configured");
+  const response = await fetch(`https://api.boldsign.com/v1/${path}`, { method: "POST", headers: { "X-API-KEY": key, "Content-Type": "application/json" }, body: JSON.stringify(body), signal: AbortSignal.timeout(10000) });
+  if (!response.ok) throw new Error(`BoldSign request failed (${response.status})`);
+  return response;
+}
+
+/** One sign-in-required notice per completed assignment to the designated administrator. No attachments. */
+export async function notifyAdminOfCompletion(assignmentId: string) {
+  const { supabaseAdmin: sb } = await import("@/integrations/supabase/client.server");
+  const { data: a } = await sb.from("boldsign_assignments").select("id, member_id, document_id, version_label, status, admin_notified_at").eq("id", assignmentId).maybeSingle();
+  if (!a || a.status !== "completed" || a.admin_notified_at) return false;
+  const [{ data: m }, { data: d }] = await Promise.all([
+    sb.from("portal_members").select("first_name, last_name").eq("id", a.member_id).maybeSingle(),
+    sb.from("portal_documents").select("title").eq("id", a.document_id).maybeSingle(),
+  ]);
+  const { sendPortalEmail } = await import("./portal-notify.server");
+  const { SIGNING_NOTICE_ADMIN, signingNoticeKey } = await import("./signed-copy-policy");
+  const ok = await sendPortalEmail(SIGNING_NOTICE_ADMIN, {
+    subject: `Signed: ${d?.title ?? "Document"} · ${[m?.first_name, m?.last_name].filter(Boolean).join(" ")}`.trim(),
+    eyebrow: "Signing complete",
+    heading: "A BoldSign document was executed.",
+    body: `Document: ${d?.title ?? ""} (${a.version_label})\nMember: ${[m?.first_name, m?.last_name].filter(Boolean).join(" ")}\n\nThe executed PDF and audit trail are retained privately. Sign in as the administrator to review them in the member's documents.`,
+    ctaLabel: "Open Administrator Center", ctaUrl: "https://access.prscstandards.org/admin",
+  }, "boldsign-completed-admin", signingNoticeKey(a.id));
+  if (ok) await sb.from("boldsign_assignments").update({ admin_notified_at: new Date().toISOString() }).eq("id", a.id).is("admin_notified_at", null);
+  return ok;
+}
+
 export async function reconcileBoldSign(documentId: string) {
   const { supabaseAdmin: sb } = await import("@/integrations/supabase/client.server");
   const { data: assignments, error } = await sb.from("boldsign_assignments").select("*").eq("boldsign_document_id", documentId);
@@ -15,7 +45,8 @@ export async function reconcileBoldSign(documentId: string) {
   if (!assignments?.length) return;
   const properties: BoldSignProperties = await (await boldSignGet(`properties?documentId=${encodeURIComponent(documentId)}`)).json();
   for (const a of assignments) {
-    if (a.status === "completed") continue;
+    if (a.status === "completed") { await notifyAdminOfCompletion(a.id).catch(() => false); continue; }
+    if (a.status === "preparing") continue;
     const [{ data: member }, { data: doc }] = await Promise.all([
       sb.from("portal_members").select("*").eq("id", a.member_id).maybeSingle(),
       sb.from("portal_documents").select("*").eq("id", a.document_id).maybeSingle(),
@@ -48,6 +79,7 @@ export async function reconcileBoldSign(documentId: string) {
     }
     const { error: completeError } = await sb.rpc("complete_boldsign_assignment", { p_id: a.id, p_executed_path: `${base}/executed.pdf`, p_audit_path: `${base}/audit.pdf` });
     if (completeError) throw completeError;
+    await notifyAdminOfCompletion(a.id).catch(() => false);
     // Completion is document-specific; appointment activation remains manual.
   }
 }
