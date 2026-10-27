@@ -7,8 +7,6 @@ export const openBoldSign = createServerFn({ method: "POST" }).middleware([requi
   .handler(async ({ context, data }) => {
     const { data: member } = await context.supabase.from("portal_members").select("*").eq("user_id", context.userId).single();
     if (!member || member.status === "revoked") throw new Error("Portal access unavailable");
-    const { getMyDocuments } = await import("./portal.functions");
-    // getMyDocuments is a separate RPC; use the same authorized document context locally.
     const { data: doc } = await context.supabase.from("portal_documents").select("*").eq("id", data.document_id).maybeSingle();
     if (!doc || doc.member_id !== member.id || doc.action !== "boldsign" || doc.superseded_at || !doc.version_label) throw new Error("This signing assignment requires a current member-specific document and approved version");
     const { data: all } = await context.supabase.from("portal_documents").select("*");

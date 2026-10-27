@@ -649,7 +649,7 @@ function memberVisible(docs: PortalDocumentRecord[], m: DocMember, done: Set<str
   return docs.filter((d: any) => documentVisible({ classification: d.classification ?? "entity_confidential", superseded_at: d.superseded_at ?? null, is_forum_prep: !!d.is_forum_prep, journey_stage: d.journey_stage ?? null, member_specific: !!d.member_id }, vm, done.has(d.id)));
 }
 
-function appliesTo(doc: PortalDocumentRecord, m: DocMember) {
+export function appliesTo(doc: PortalDocumentRecord, m: DocMember) {
   // Members opted out of the Forum never receive Stage 1 documents.
   if (m.participates_in_forum === false && (doc as any).journey_stage === 1) return false;
   if (doc.member_id) return doc.member_id === m.id;

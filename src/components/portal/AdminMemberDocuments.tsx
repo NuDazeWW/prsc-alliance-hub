@@ -218,7 +218,7 @@ export function AdminMemberDocuments({ memberId, memberName, preview }: Props) {
     try { const r = await retryReleaseNotice({ data: { release_id: id } }); setStatus(r.notified ? "Notice sent." : `Notice failed again: ${r.error}`); await docs.refetch(); }
     catch (e) { setStatus(e instanceof Error ? e.message : "Could not retry"); }
   }
-  const lockedIds = lockedDocumentIds(active as any, doneIds, entity, { released: { prsc: releases.some((r: any) => r.entity === "prsc"), dis: releases.some((r: any) => r.entity === "dis") } });
+  const lockedIds = lockedDocumentIds(active as any, doneIds, entity, { forum, released: { prsc: releases.some((r: any) => r.entity === "prsc"), dis: releases.some((r: any) => r.entity === "dis") } });
   async function toggleActivation(t: "prsc" | "dis", on: boolean) {
     if (preview) return setStatus("Preview mode: activation is recorded on the live admin page.");
     let appointment_ref: string | undefined;
