@@ -1,10 +1,11 @@
-import { expect, it } from "vitest";
+import { it } from "node:test";
+import assert from "node:assert/strict";
 import { leadershipPublicationAllowed, linkedProfilePermissions } from "./leadership-publication";
 it("linking a person does not approve publication", () => {
-  expect(leadershipPublicationAllowed({ publication_scope: "none" })).toBe(false);
-  expect(leadershipPublicationAllowed({ publication_scope: "portal_members", publication_approved_at: "2026-10-27", publication_approved_by: "admin" })).toBe(true);
+  assert.equal(leadershipPublicationAllowed({ publication_scope: "none" }), false);
+  assert.equal(leadershipPublicationAllowed({ publication_scope: "portal_members", publication_approved_at: "2026-10-27", publication_approved_by: "admin" }), true);
 });
 it("no, discuss and missing profile permissions fail closed", () => {
-  expect(linkedProfilePermissions({ p1: "yes", p2: "no", p3: "discuss" })).toEqual({ name: true, affiliation: false, bio: false, photo: false });
-  expect(linkedProfilePermissions({ p3: "yes", p4: "yes" }).photo).toBe(true);
+  assert.deepEqual(linkedProfilePermissions({ p1: "yes", p2: "no", p3: "discuss" }), { name: true, affiliation: false, bio: false, photo: false });
+  assert.equal(linkedProfilePermissions({ p3: "yes", p4: "yes" }).photo, true);
 });

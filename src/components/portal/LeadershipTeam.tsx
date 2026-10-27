@@ -54,7 +54,7 @@ export function LeadershipTeam() {
       <ul className="mt-6 space-y-3">
         {team.map((p) => {
           const isOpen = open === p.id;
-          const initials = p.name.split(/\s+/).filter((w) => !w.endsWith(".")).map((w) => w[0]).slice(0, 2).join("");
+          const initials = p.name.split(/\s+/).filter((w: string) => !w.endsWith(".")).map((w: string) => w[0]).slice(0, 2).join("");
           return (
             <li key={p.id} className="border border-ivory/15 bg-navy-deep/40">
               <button
