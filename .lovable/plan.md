@@ -3,7 +3,7 @@
 Scope: only the six findings below. No redesign, real invitations, live signing, appointments, uploads, restricted-brief releases or publishing. Gate B stays paused. Historical records stay as they are.
 
 ## 1. Critical: addendum required before protected document reads
-- One shared rule, `addendumSatisfied(member)`, in `governance.ts`. It is true only when the member has a current-version Confidentiality Addendum signature or acknowledgment that has not been superseded.
+- One shared rule, `addendumSatisfied(member)`, in `governance.ts`. It is true only when BoldSign confirms execution of the approved Addendum version assigned to that member, including any required countersignatures. A portal acknowledgment never counts.
 - A protected document is any Forum document marked confidential or restricted, plus any Stage 1 item listed after the Addendum.
 - The rule applies in three places:
   - the member document list
@@ -116,6 +116,21 @@ Limit for fix 8: the automatic BoldSign trigger is built and tested with mocked 
 7. Every signed Conflict form gets a frozen, hash-linked snapshot of the answers stored with it. Matching BoldSign fields are pre-filled when the template has them.
 8. Poll wording stays neutral: title, date options, length and format. Admins see a warning before publishing if the poll text looks confidential.
 9. The report lists which fictional accounts and steps you can test by hand, and which only through automated checks.
+
+## Final approval clarifications (Oct 27, 21:40)
+1. Addendum: only a verified BoldSign execution of the member's assigned, approved version counts, including countersignatures when that document is marked as needing them. The Addendum itself stays readable for signing.
+2. Jared grants: each grant is bound to one exact document version and one member. A grant ends when that version is superseded or withdrawn, when the member is revoked or removed, or when clearance is lost. It never carries over to a new version.
+3. Activation: before any password change, the server checks that the invitation is still valid, not expired, unused, for the intended recipient and bound to the right account. Email matching alone is not enough. A conflicting session is signed out, and no password changes.
+4. Conflict evidence: the member's frozen answers are merged into the signed PDF before sending, so the executed document shows exactly what they signed. Earlier signed versions are never altered.
+5. Meeting confirmations: retries reuse the same per-meeting, per-member delivery key. Before any retry, the email delivery record is checked so a confirmation is neither sent twice nor wrongly skipped.
+
+## Flags on the revisions
+- A. Countersignature: there is no countersignature step today. Each signature-required document will get a "countersignature required" setting and a countersigner. Please confirm who countersigns the Addendum (for example, the Secretariat or admin@readinessterminal.com).
+- B. Manual testing: an acknowledgment no longer satisfies the Addendum, and no live signing is allowed this cycle. So no fictional account can reach the protected materials through the normal screens. Protected-document access will be proven with automated checks that mock a BoldSign execution. A manual walkthrough needs one authorized TEST signing later.
+- C. Answers in the signed PDF: this means the Conflict form is generated per member (answers merged into the document) rather than sent as a fixed BoldSign template. If counsel's approved form must stay a fixed template, the fallback is a securely bound attachment.
+- D. Journey impact: a member who was already signed in on another account is signed out when opening their invitation. That is one extra step, but it prevents the wrong account's password from changing.
+- E. Clearance loss: if clearance is withdrawn, the Jared brief and Executive Questions close immediately, including mid-session. This is intended.
+- No other conflicts found with the ten-step journey or the profile encouragement.
 
 ## Technical notes
 - Three migrations: the Addendum and restricted-grant helpers with the read-policy update, the `restricted_document_grants` table, and the `meeting_confirmation_sends` table plus the assignment snapshot columns. Each includes grants and RLS.
