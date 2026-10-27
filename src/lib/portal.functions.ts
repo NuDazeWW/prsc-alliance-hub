@@ -9,7 +9,7 @@ import { renderBrandedEmail, renderBrandedEmailText } from "@/lib/branded-email"
 import { memberRoleLabel } from "@/lib/member-role-labels";
 import { entityAcceptanceComplete, journeyStatus, type JourneyStatus } from "@/lib/journey";
 import type { DesignationMember } from "@/lib/member-role-labels";
-import { documentVisible, forumCleared, isActive, ndaProblem, roleCombinationTier, initialRoleReviewStatus, roleReviewBlocks, appointmentProblems, memberTracksFor } from "@/lib/governance";
+import { addendumSatisfied, type RestrictedGrant, documentVisible, forumCleared, isActive, ndaProblem, roleCombinationTier, initialRoleReviewStatus, roleReviewBlocks, appointmentProblems, memberTracksFor } from "@/lib/governance";
 
 type PortalMember = {
   id: string; user_id: string; email: string; first_name: string; last_name: string;
