@@ -21,6 +21,7 @@ type Doc = {
   journey_track: "shared" | "prsc" | "dis" | null;
   sort_order: number;
   created_at: string;
+  forum_role?: string | null;
 };
 type Completion = { document_id: string; kind: string; signed_name: string | null; acknowledged_at: string };
 
@@ -110,7 +111,7 @@ function DocCard({ d, done, locked, onOpen }: { d: Doc; done?: Completion; locke
         {locked ? (
           <p className="inline-flex items-center gap-2 text-[13px] text-ivory/60"><Lock className="h-4 w-4" /> Opens after the previous document</p>
         ) : d.action === "boldsign" || d.action === "docusign" ? (
-          <BoldSignReader documentId={d.id} title={d.title} completed={!!done} />
+          <BoldSignReader documentId={d.id} title={d.title} completed={!!done} isConflict={d.forum_role === "conflict"} />
         ) : (
           <button type="button" onClick={() => onOpen(d.id)} className="cta-glow-outline inline-flex items-center gap-3 rounded-full px-5 py-2.5 text-[13px] transition-all">
             <span className="relative z-10 flex items-center gap-3">
@@ -123,17 +124,27 @@ function DocCard({ d, done, locked, onOpen }: { d: Doc; done?: Completion; locke
   );
 }
 
-function BoldSignReader({ documentId, title, completed }: { documentId: string; title: string; completed: boolean }) {
+function BoldSignReader({ documentId, title, completed, isConflict = false }: { documentId: string; title: string; completed: boolean; isConflict?: boolean }) {
   const [url, setUrl] = useState("");
+  const [answer, setAnswer] = useState<"" | "none" | "changed" | "unsure">("");
+  const [details, setDetails] = useState("");
   const client = useQueryClient();
-  const open = useMutation({ mutationFn: () => openBoldSign({ data: { document_id: documentId } }), onSuccess: result => setUrl(result.url) });
+  const open = useMutation({ mutationFn: () => openBoldSign({ data: { document_id: documentId, ...(isConflict && answer ? { disclosures: { conflict_answer: answer, conflict_details: details.trim() } } : {}) } }), onSuccess: result => setUrl(result.url) });
+  const answersReady = !isConflict || completed || (answer !== "" && (answer === "none" || details.trim().length > 2));
   const evidence = useMutation({ mutationFn: async () => {
     const file = await fetchPrivateFile(`/api/public/portal-file?kind=executed&id=${documentId}`);
     const objectUrl = URL.createObjectURL(file); setUrl(objectUrl);
   } });
   useEffect(() => () => { if (url.startsWith("blob:")) URL.revokeObjectURL(url); }, [url]);
   return <>
-    <Button type="button" variant="outline" disabled={open.isPending || evidence.isPending} onClick={() => completed ? evidence.mutate() : open.mutate()}><BookOpen className="h-4 w-4" /> {open.isPending || evidence.isPending ? "Opening…" : completed ? "View executed document" : "Review and Sign"}</Button>
+    {isConflict && !completed && <div className="mb-4 space-y-2">
+      <p className="text-sm text-ivory/70">Your answers are placed into the document you sign and kept with the signed record.</p>
+      {([["none", "No conflict"], ["changed", "New or changed conflict"], ["unsure", "Unsure, please review"]] as const).map(([v, l]) => (
+        <label key={v} className="flex items-center gap-2 text-base text-ivory/85"><input type="radio" name={`bs-conflict-${documentId}`} checked={answer === v} onChange={() => setAnswer(v)} className="h-4 w-4" /> {l}</label>
+      ))}
+      {answer && answer !== "none" && <textarea value={details} onChange={(e) => setDetails(e.target.value)} rows={3} placeholder="Please describe the conflict or question" className="w-full border border-gold/30 bg-transparent p-3 text-[16px] text-ivory outline-none focus:border-gold" />}
+    </div>}
+    <Button type="button" variant="outline" disabled={open.isPending || evidence.isPending || !answersReady} onClick={() => completed ? evidence.mutate() : open.mutate()}><BookOpen className="h-4 w-4" /> {open.isPending || evidence.isPending ? "Opening…" : completed ? "View executed document" : "Review and Sign"}</Button>
     {open.error && <p className="mt-3 text-sm text-gold">{userFacingError(open.error, "The signing document could not be opened. Please try again.")}</p>}
     {evidence.error && <p className="mt-3 text-sm text-gold">{userFacingError(evidence.error, "The executed document could not be opened. Please try again.")}</p>}
     {url && <div role="dialog" aria-modal="true" aria-label={`Sign ${title}`} className="fixed inset-0 z-50 flex flex-col bg-navy-deep p-4">
