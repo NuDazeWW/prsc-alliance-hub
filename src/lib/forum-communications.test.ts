@@ -23,7 +23,7 @@ describe("Forum email recipients", () => {
   it("requires both clearance and document permission for the briefing", () => {
     strictEqual(forumEmailBlock("briefing_released", invitable, briefing), "Not Forum-cleared");
     strictEqual(forumEmailBlock("briefing_released", cleared, { ...briefing, classification: "restricted_opportunity" }), "No access to briefing");
-    strictEqual(forumEmailBlock("briefing_released", cleared, briefing), null);
+    strictEqual(forumEmailBlock("briefing_released", { ...cleared, addendum_complete: true }, briefing), null);
   });
   it("keeps Email 8 switched off until follow-up assignments exist", () => {
     notStrictEqual(forumEmailBlock("followup_assigned", cleared), null);

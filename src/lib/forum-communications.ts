@@ -41,6 +41,9 @@ export type ForumRecipient = {
   participates_in_forum: boolean | null;
   nda_verified_at: string | null;
   forum_clearance_status: string;
+  addendum_complete?: boolean;
+  grants?: import("@/lib/governance").RestrictedGrant[];
+  has_entity_release?: boolean;
 };
 
 /** May be invited to the Forum: participating, NDA verified, not declined. Not the same as cleared. */

@@ -25,7 +25,7 @@ export function questionAccessBlock(m: QuestionMember, hasBriefing: boolean): st
   if (m.participates_in_forum === false) return "Not participating in the Forum";
   if (!m.nda_verified_at) return "NDA not verified";
   if (!forumCleared(m.forum_clearance_status)) return "Forum clearance is not complete";
-  if (!hasBriefing) return "The strategic briefing has not been released to you yet";
+  if (!hasBriefing) return "The strategic briefing has not been individually authorized for you yet";
   return null;
 }
 

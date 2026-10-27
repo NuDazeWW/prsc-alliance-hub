@@ -88,20 +88,76 @@ export function entityAppointmentStatus(input: {
   return input.acceptanceComplete && reviewsClear ? "pending_appointment" : "candidate";
 }
 
-export type VisibilityDoc = { classification: string; superseded_at: string | null; is_forum_prep: boolean; journey_stage?: number | null; member_specific?: boolean };
-export type VisibilityMember = { nda_verified_at: string | null; forum_clearance_status: string; is_candidate?: boolean };
+export type VisibilityDoc = { id?: string; classification: string; superseded_at: string | null; is_forum_prep: boolean; journey_stage?: number | null; member_specific?: boolean; forum_role?: string | null; version_label?: string | null };
+export type VisibilityMember = {
+  nda_verified_at: string | null; forum_clearance_status: string; is_candidate?: boolean;
+  participates_in_forum?: boolean | null;
+  /** Verified BoldSign execution of the assigned, approved Addendum version. */
+  addendum_complete?: boolean;
+  /** Active, version-bound restricted grants for this member. */
+  grants?: RestrictedGrant[];
+  has_entity_release?: boolean;
+};
+
+export const ADMIN_ONLY_FORUM_ROLES = ["secretariat_controls", "facilitator_run_of_show"];
+export const PROTECTED_CLASSIFICATIONS = ["confidential_forum", "restricted_opportunity"];
+
+export type RestrictedGrant = { document_id: string; version_label: string | null; revoked_at: string | null };
+
+/** A grant covers exactly one document version and ends on revocation or supersession. */
+export function grantCovers(grants: RestrictedGrant[] | undefined, doc: { id?: string; version_label?: string | null; superseded_at: string | null }) {
+  if (!doc.id || doc.superseded_at) return false;
+  return (grants ?? []).some((g) => !g.revoked_at && g.document_id === doc.id && (g.version_label ?? null) === (doc.version_label ?? null));
+}
+
+export type AddendumDoc = { id: string; forum_role?: string | null; superseded_at: string | null; signing_approved?: boolean; version_label?: string | null; countersignature_required?: boolean; member_id?: string | null };
+export type SigningRecord = { document_id: string; status: string; version_label: string; countersigned_at?: string | null };
+
+/** Only a verified BoldSign execution counts; portal acknowledgments never satisfy the Addendum. */
+export function addendumSatisfied(docs: AddendumDoc[], assignments: SigningRecord[], memberId?: string) {
+  return docs.some((d) => d.forum_role === "addendum" && !d.superseded_at && d.signing_approved && (!d.member_id || !memberId || d.member_id === memberId) &&
+    assignments.some((a) => a.document_id === d.id && a.status === "completed" && a.version_label === d.version_label && (!d.countersignature_required || !!a.countersigned_at)));
+}
 
 /** Mirrors the database read policy. hasCompletion keeps a member's own signed historical copies visible. */
 export function documentVisible(doc: VisibilityDoc, m: VisibilityMember, hasCompletion: boolean) {
-  if (doc.classification === "secretariat_only" || doc.classification === "restricted_opportunity") return false;
+  if (doc.classification === "secretariat_only" || ADMIN_ONLY_FORUM_ROLES.includes(doc.forum_role ?? "")) return false;
   if (doc.superseded_at && !hasCompletion) return false;
   if (doc.classification === "confidential_forum") {
     if (!m.nda_verified_at || m.forum_clearance_status === "declined") return false;
     if (!doc.is_forum_prep && !forumCleared(m.forum_clearance_status)) return false;
   }
+  if (doc.classification === "restricted_opportunity") {
+    if (m.participates_in_forum === false || !m.nda_verified_at || !forumCleared(m.forum_clearance_status) || !grantCovers(m.grants, doc)) return false;
+  }
+  if (PROTECTED_CLASSIFICATIONS.includes(doc.classification) && doc.forum_role !== "addendum" && !m.addendum_complete) return false;
+  // Forum opt-outs receive nothing further until an explicit PRSC/DIS release.
+  if (m.participates_in_forum === false && !hasCompletion) {
+    if (doc.journey_stage === 1 || PROTECTED_CLASSIFICATIONS.includes(doc.classification) || !m.has_entity_release) return false;
+  }
   // Forum candidates hold no PRSC/DIS seat: appointment-track stages (2–4) stay hidden.
   if (m.is_candidate && !doc.member_specific && doc.journey_stage != null && doc.journey_stage >= 2 && doc.journey_stage <= 4) return false;
   return true;
+}
+
+export type ClearanceCheck = {
+  ndaVerified: boolean;
+  addendumComplete: boolean;
+  /** Applicable active Stage 1 action items not yet completed (titles). */
+  incompleteStage1: string[];
+  conflictSigned: boolean;
+  conflictReviewDecision: string | null;
+};
+
+/** Ordinary Forum clearance requires completed prerequisites and a separate conflict-review decision. */
+export function stage1ClearanceProblems(c: ClearanceCheck): string[] {
+  const p: string[] = [];
+  if (!c.ndaVerified) p.push("NDA verification incomplete");
+  if (!c.addendumComplete) p.push("Confidentiality Addendum not executed through BoldSign");
+  if (c.incompleteStage1.length) p.push(`Stage 1 items incomplete: ${c.incompleteStage1.join(", ")}`);
+  if (!c.conflictSigned) p.push("Conflict / Recusal Confirmation not signed");
+  if (c.conflictReviewDecision !== "approved") p.push("Administrative conflict review not approved");
+  return p;
 }
 
 /** Superseded documents never sit in active onboarding or acknowledgement queues. */
