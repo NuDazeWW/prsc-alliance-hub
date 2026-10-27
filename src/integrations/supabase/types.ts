@@ -361,6 +361,36 @@ export type Database = {
           },
         ]
       }
+      invitation_nda_evidence: {
+        Row: {
+          entities: string
+          recipient_email: string
+          recipient_name: string
+          reference: string
+          reviewer_id: string
+          scope: string
+          verified_at: string
+        }
+        Insert: {
+          entities: string
+          recipient_email: string
+          recipient_name: string
+          reference: string
+          reviewer_id: string
+          scope: string
+          verified_at?: string
+        }
+        Update: {
+          entities?: string
+          recipient_email?: string
+          recipient_name?: string
+          reference?: string
+          reviewer_id?: string
+          scope?: string
+          verified_at?: string
+        }
+        Relationships: []
+      }
       leadership_settings: {
         Row: {
           eyebrow: string
@@ -1547,6 +1577,17 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      bind_invitation_nda: {
+        Args: {
+          p_email: string
+          p_entities: string
+          p_name: string
+          p_reference: string
+          p_reviewer: string
+          p_scope: string
+        }
+        Returns: undefined
+      }
       complete_boldsign_assignment: {
         Args: { p_audit_path: string; p_executed_path: string; p_id: string }
         Returns: boolean
