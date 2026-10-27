@@ -1,5 +1,17 @@
 # Portal build roadmap
 
+## Six-finding correction plan (Oct 27)
+- [x] Fix 1 Addendum gate on reads, list and file endpoint
+- [x] Fix 2 Exact-version restricted grants (and Executive Questions)
+- [x] Fix 3 Invitation activation bound to recipient
+- [x] Fix 4 Clearance prerequisites plus separate conflict review
+- [x] Fix 5 Frozen, merged conflict disclosures
+- [x] Fix 6 Per-meeting, per-recipient confirmations
+- [x] Forum inventory correction (eight supplied documents)
+- [x] Automatic BoldSign prepare/resume and admin completion notice (mock-tested only)
+- [ ] Load approved Addendum, Conflict template, Agenda and Jared brief (blocked: approved source documents)
+- [ ] Manual walkthrough of protected access (blocked: one authorized TEST signing)
+
 ## Executive Profile encouragement and exact Forum map (Oct 27)
 - [x] Reuse nonblocking profile flow; add founder copy and explicit submission status without new stages or reminder automation
 - [x] Verify source/configuration and reuse fictional/BoldSign evidence only; no preview sessions, transactions, uploads, releases or publishing; 104 focused rules pass, build OK
