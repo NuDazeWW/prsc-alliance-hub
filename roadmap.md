@@ -1,7 +1,8 @@
 # Portal build roadmap
 
 ## Founder security review and published rehearsal (Oct 27)
-- [ ] Review the leadership_settings finding, candidate direct reads and server authorization; return disposition for founder approval before publishing
+- [x] Inspect leadership_settings, candidate direct reads and leadership server authorization; generic heading only in flagged table, no other member rows exposed in controlled test
+- [ ] Complete deep security scan and founder disposition of heading warning / future linked-profile publication boundary (scan running; founder review)
 - [ ] Publish latest tested code only after the security review is resolved (founder gate)
 - [ ] Run controlled published-site member and meeting rehearsal (retain fictional accounts; requires controlled inbox activation)
 - [ ] Load approved v1.4 Stage 1 documents (waiting on founder operational approval and files)
