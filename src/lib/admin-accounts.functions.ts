@@ -1,7 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { getRequest } from "@tanstack/react-start/server";
 import { z } from "zod";
-import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+import { requirePortalAccess } from "@/lib/portal-access";
 
 async function assertAdmin(context: { supabase: any; userId: string }) {
   const { data } = await context.supabase.from("user_roles").select("role").eq("user_id", context.userId).eq("role", "admin").maybeSingle();
@@ -11,7 +11,7 @@ async function assertAdmin(context: { supabase: any; userId: string }) {
 export type AdminAccount = { user_id: string; email: string; name: string | null; is_you: boolean };
 
 export const listAdmins = createServerFn({ method: "GET" })
-  .middleware([requireSupabaseAuth])
+  .middleware([requirePortalAccess])
   .handler(async ({ context }) => {
     await assertAdmin(context);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
@@ -28,7 +28,7 @@ export const listAdmins = createServerFn({ method: "GET" })
   });
 
 export const addAdmin = createServerFn({ method: "POST" })
-  .middleware([requireSupabaseAuth])
+  .middleware([requirePortalAccess])
   .inputValidator((input) =>
     z.object({ email: z.string().trim().email().max(200), first_name: z.string().trim().max(80).optional(), last_name: z.string().trim().max(80).optional() }).parse(input),
   )
@@ -55,7 +55,7 @@ export const addAdmin = createServerFn({ method: "POST" })
   });
 
 export const removeAdmin = createServerFn({ method: "POST" })
-  .middleware([requireSupabaseAuth])
+  .middleware([requirePortalAccess])
   .inputValidator((input) => z.object({ user_id: z.string().uuid() }).parse(input))
   .handler(async ({ context, data }) => {
     await assertAdmin(context);

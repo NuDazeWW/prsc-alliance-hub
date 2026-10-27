@@ -18,9 +18,9 @@ import { Textarea } from "@/components/ui/textarea";
 import { memberDesignation } from "@/lib/member-role-labels";
 import { getAdminOverview } from "@/lib/portal.functions";
 
-type Draft = { id?: string; name: string; title: string; affiliation: string; bio: string; member_id: string | null; visible: boolean; sort_order: number; photo_path: string | null; photo_url?: string | null };
+type Draft = { publication_scope: "none" | "portal_members"; id?: string; name: string; title: string; affiliation: string; bio: string; member_id: string | null; visible: boolean; sort_order: number; photo_path: string | null; photo_url?: string | null };
 
-const blank = (order: number): Draft => ({ name: "", title: "", affiliation: "", bio: "", member_id: null, visible: true, sort_order: order, photo_path: null });
+const blank = (order: number): Draft => ({ publication_scope: "none", name: "", title: "", affiliation: "", bio: "", member_id: null, visible: true, sort_order: order, photo_path: null });
 
 export function AdminLeadership() {
   const qc = useQueryClient();
@@ -78,7 +78,7 @@ export function AdminLeadership() {
   }
 
   const toDraft = (t: LeaderRow): Draft => ({
-    id: t.id, name: t.name, title: t.title, affiliation: t.affiliation ?? "", bio: t.own_bio ?? "", member_id: t.member_id, visible: t.visible,
+    publication_scope: t.publication_scope === "portal_members" ? "portal_members" : "none", id: t.id, name: t.name, title: t.title, affiliation: t.affiliation ?? "", bio: t.own_bio ?? "", member_id: t.member_id, visible: t.visible,
     sort_order: t.sort_order, photo_path: t.photo_path, photo_url: t.photo_url,
   });
 
@@ -94,7 +94,7 @@ export function AdminLeadership() {
       </button>
       <p className="mt-2 text-sm text-ivory/60">
         Edit the "Our Leadership Team" panel members see. Link a person to a portal member and their profile photo and bio fill in
-        automatically; anything you type here takes priority.
+        only when their permissions allow it and you approve display to portal members.
       </p>
 
       {showAll && (<>
@@ -173,6 +173,7 @@ export function AdminLeadership() {
               </select>
             </label>
             <label className="text-xs uppercase text-ivory/55 sm:col-span-2">Bio (leave blank to use the member's own profile bio)<Textarea value={editing.bio} onChange={(e) => setEditing({ ...editing, bio: e.target.value })} className="mt-2 min-h-28 border-ivory/20 normal-case text-ivory" /></label>
+            <label className="flex items-center gap-2 text-sm text-ivory/70 sm:col-span-2"><input type="checkbox" checked={editing.publication_scope === "portal_members"} onChange={(e) => setEditing({ ...editing, publication_scope: e.target.checked ? "portal_members" : "none" })} className="accent-gold" /> Approve publication to portal members only, within the person’s permitted scope</label>
             <label className="flex items-center gap-2 text-sm text-ivory/70"><input type="checkbox" checked={editing.visible} onChange={(e) => setEditing({ ...editing, visible: e.target.checked })} className="accent-gold" /> Visible to members</label>
           </div>
           <div className="mt-4 flex gap-3">

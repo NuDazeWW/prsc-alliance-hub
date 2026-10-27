@@ -1,6 +1,6 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
-import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+import { requirePortalAccess } from "@/lib/portal-access";
 import { roundOpen, needsReminder } from "@/lib/executive-questions";
 import { FORUM_EMAILS, confirmedThroughPoll, forumEmailBlock, forumIdempotencyKey, type ForumEmailKey } from "@/lib/forum-communications";
 
@@ -66,7 +66,7 @@ async function evaluate(context: any, data: z.infer<typeof input>) {
 }
 
 export const getForumRecipients = createServerFn({ method: "POST" })
-  .middleware([requireSupabaseAuth])
+  .middleware([requirePortalAccess])
   .inputValidator((i) => input.parse(i))
   .handler(async ({ context, data }) => {
     await assertAdmin(context);
@@ -76,11 +76,12 @@ export const getForumRecipients = createServerFn({ method: "POST" })
   });
 
 export const sendForumEmail = createServerFn({ method: "POST" })
-  .middleware([requireSupabaseAuth])
+  .middleware([requirePortalAccess])
   .inputValidator((i) => input.extend({ member_ids: z.array(z.string().uuid()).min(1).max(200) }).parse(i))
   .handler(async ({ context, data }) => {
     await assertAdmin(context);
-    const def = FORUM_EMAILS.find((d) => d.key === data.email_key)!;
+    const def = FORUM_EMAILS.find((d) => d.key === data.email_key);
+    if (!def) throw new Error("Email unavailable");
     if (!def.enabled) throw new Error(def.disabledReason ?? "This email is not yet available");
     const rows = await evaluate(context, data);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
@@ -109,7 +110,7 @@ export const sendForumEmail = createServerFn({ method: "POST" })
 
 /** Member records their own non-legal orientation review. The time is set by the server. */
 export const acknowledgeOrientation = createServerFn({ method: "POST" })
-  .middleware([requireSupabaseAuth])
+  .middleware([requirePortalAccess])
   .handler(async ({ context }) => {
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { data: m } = await supabaseAdmin.from("portal_members").select("id, orientation_acknowledged_at").eq("user_id", context.userId).maybeSingle();

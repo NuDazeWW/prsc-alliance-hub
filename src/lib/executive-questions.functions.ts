@@ -1,6 +1,6 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
-import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+import { requirePortalAccess } from "@/lib/portal-access";
 import { documentVisible } from "@/lib/governance";
 import { questionAccessBlock, roundOpen, validateQuestions, shareBlock, QUESTION_CATEGORIES, ROUTES } from "@/lib/executive-questions";
 
@@ -24,7 +24,7 @@ export async function memberRoundAccess(admin: any, member: any, round: any) {
 // ---------------- Member ----------------
 
 export const getMyQuestionRounds = createServerFn({ method: "GET" })
-  .middleware([requireSupabaseAuth])
+  .middleware([requirePortalAccess])
   .handler(async ({ context }) => {
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { data: member } = await supabaseAdmin.from("portal_members").select(MEMBER_COLS).eq("user_id", context.userId).maybeSingle();
@@ -51,7 +51,7 @@ const qSchema = z.object({
 });
 
 export const saveMyQuestions = createServerFn({ method: "POST" })
-  .middleware([requireSupabaseAuth])
+  .middleware([requirePortalAccess])
   .inputValidator((i) => z.object({ round_id: z.string().uuid(), no_questions: z.boolean().default(false), questions: z.array(qSchema).max(3).default([]) }).parse(i))
   .handler(async ({ context, data }) => {
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
@@ -83,7 +83,7 @@ export const saveMyQuestions = createServerFn({ method: "POST" })
 // ---------------- Admin register ----------------
 
 export const getQuestionRegister = createServerFn({ method: "GET" })
-  .middleware([requireSupabaseAuth])
+  .middleware([requirePortalAccess])
   .inputValidator((i) => z.object({ round_id: z.string().uuid().nullable().optional() }).parse(i ?? {}))
   .handler(async ({ context, data }) => {
     await assertAdmin(context);
@@ -104,7 +104,7 @@ export const getQuestionRegister = createServerFn({ method: "GET" })
   });
 
 export const saveQuestionRound = createServerFn({ method: "POST" })
-  .middleware([requireSupabaseAuth])
+  .middleware([requirePortalAccess])
   .inputValidator((i) => z.object({
     id: z.string().uuid().nullable().optional(),
     forum_key: z.string().trim().min(1).max(80).regex(/^[a-z0-9-]+$/i),
@@ -128,7 +128,7 @@ export const saveQuestionRound = createServerFn({ method: "POST" })
   });
 
 export const saveQuestionGroup = createServerFn({ method: "POST" })
-  .middleware([requireSupabaseAuth])
+  .middleware([requirePortalAccess])
   .inputValidator((i) => z.object({
     id: z.string().uuid().nullable().optional(),
     round_id: z.string().uuid(),
@@ -155,7 +155,7 @@ export const saveQuestionGroup = createServerFn({ method: "POST" })
   });
 
 export const prepareOutbound = createServerFn({ method: "POST" })
-  .middleware([requireSupabaseAuth])
+  .middleware([requirePortalAccess])
   .inputValidator((i) => z.object({ round_id: z.string().uuid(), recipient: z.string().trim().min(1).max(200) }).parse(i))
   .handler(async ({ context, data }) => {
     await assertAdmin(context);
@@ -168,7 +168,7 @@ export const prepareOutbound = createServerFn({ method: "POST" })
   });
 
 export const updateOutbound = createServerFn({ method: "POST" })
-  .middleware([requireSupabaseAuth])
+  .middleware([requirePortalAccess])
   .inputValidator((i) => z.object({ id: z.string().uuid(), action: z.enum(["approve", "mark_shared", "record"]), responses: z.string().max(10000).optional(), unresolved: z.string().max(5000).optional() }).parse(i))
   .handler(async ({ context, data }) => {
     await assertAdmin(context);

@@ -1,4 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { authorizeInvitationRequest } from "@/lib/portal-access";
 
 const REMINDER_AFTER_DAYS = 3;
 
@@ -6,8 +7,7 @@ export const Route = createFileRoute("/api/public/invite-reminders")({
   server: {
     handlers: {
       POST: async ({ request }) => {
-        const expected = process.env["SUPABASE_PUBLISHABLE_KEY"] ?? process.env["VITE_SUPABASE_PUBLISHABLE_KEY"];
-        if (!expected || request.headers.get("apikey") !== expected) {
+        if (!(await authorizeInvitationRequest(request))) {
           return new Response("Unauthorized", { status: 401 });
         }
         const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
@@ -21,7 +21,7 @@ export const Route = createFileRoute("/api/public/invite-reminders")({
           .is("reminder_sent_at", null)
           .lt("invited_at", cutoff)
           .limit(50);
-        if (error) return new Response(error.message, { status: 500 });
+        if (error) return new Response("Reminder lookup failed", { status: 500 });
         let sent = 0;
         for (const m of pending ?? []) {
           const redirectTo = new URL("https://access.prscstandards.org/accept-invitation");
@@ -34,7 +34,7 @@ export const Route = createFileRoute("/api/public/invite-reminders")({
             options: { redirectTo: redirectTo.toString() },
           });
           if (linkError || !link?.properties?.action_link) {
-            console.error("Reminder link failed", m.email, linkError);
+            console.error("Reminder link generation failed");
             continue;
           }
           const firstName = m.first_name?.trim() || "there";
@@ -59,6 +59,7 @@ export const Route = createFileRoute("/api/public/invite-reminders")({
         const { data: docPending } = await supabaseAdmin
           .from("portal_members")
           .select("id, email, first_name")
+          .neq("status", "revoked")
           .not("documents_released_at", "is", null)
           .is("documents_completed_at", null)
           .is("documents_reminder_sent_at", null)
@@ -103,6 +104,7 @@ export const Route = createFileRoute("/api/public/invite-reminders")({
           const { data: pendingMembers } = await supabaseAdmin
             .from("portal_members")
             .select("id, email, first_name")
+            .neq("status", "revoked")
             .in("id", pendingIds);
           for (const m of pendingMembers ?? []) {
             const build = await loadSystemEmail("meeting_poll_reminder");

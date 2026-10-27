@@ -134,6 +134,13 @@
       "when": 1793054241721,
       "tag": "0018_question_round_briefing",
       "breakpoints": true
+    },
+    {
+      "idx": 19,
+      "version": "7",
+      "when": 1793070554669,
+      "tag": "0019_portal_revocation_and_leadership_publication_controls",
+      "breakpoints": true
     }
   ]
 }

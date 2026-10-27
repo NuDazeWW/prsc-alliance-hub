@@ -1,6 +1,6 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
-import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+import { requirePortalAccess } from "@/lib/portal-access";
 import { applyTokens, buildMemberTokens, parseSignatures, renderBrandedEmail, renderBrandedEmailText } from "@/lib/branded-email";
 import { SYSTEM_EMAIL_DEFAULTS } from "@/lib/system-email-defaults";
 import { withAppointmentProgress } from "@/lib/portal.functions";
@@ -44,7 +44,7 @@ async function assertAdmin(context: { supabase: any; userId: string }) {
 }
 
 export const getEmailCenter = createServerFn({ method: "GET" })
-  .middleware([requireSupabaseAuth])
+  .middleware([requirePortalAccess])
   .handler(async ({ context }) => {
     await assertAdmin(context);
     // Make sure every automatic email is listed so admins can edit it.
@@ -82,7 +82,7 @@ const templateSchema = z.object({
 });
 
 export const saveEmailTemplate = createServerFn({ method: "POST" })
-  .middleware([requireSupabaseAuth])
+  .middleware([requirePortalAccess])
   .inputValidator((input) => templateSchema.parse(input))
   .handler(async ({ context, data }) => {
     await assertAdmin(context);
@@ -110,7 +110,7 @@ export const saveEmailTemplate = createServerFn({ method: "POST" })
   });
 
 export const resetEmailTemplate = createServerFn({ method: "POST" })
-  .middleware([requireSupabaseAuth])
+  .middleware([requirePortalAccess])
   .inputValidator((input) => z.object({ id: z.string().uuid() }).parse(input))
   .handler(async ({ context, data }) => {
     await assertAdmin(context);
@@ -123,7 +123,7 @@ export const resetEmailTemplate = createServerFn({ method: "POST" })
   });
 
 export const deleteEmailTemplate = createServerFn({ method: "POST" })
-  .middleware([requireSupabaseAuth])
+  .middleware([requirePortalAccess])
   .inputValidator((input) => z.object({ id: z.string().uuid() }).parse(input))
   .handler(async ({ context, data }) => {
     await assertAdmin(context);
@@ -133,7 +133,7 @@ export const deleteEmailTemplate = createServerFn({ method: "POST" })
   });
 
 export const deleteEmailHistory = createServerFn({ method: "POST" })
-  .middleware([requireSupabaseAuth])
+  .middleware([requirePortalAccess])
   .inputValidator((input) => z.object({ send_ids: z.array(z.string().uuid()).min(1).max(500) }).parse(input))
   .handler(async ({ context, data }) => {
     await assertAdmin(context);
@@ -158,14 +158,14 @@ const sendSchema = z.object({
 });
 
 export const sendMemberEmail = createServerFn({ method: "POST" })
-  .middleware([requireSupabaseAuth])
+  .middleware([requirePortalAccess])
   .inputValidator((input) => sendSchema.parse(input))
   .handler(async ({ context, data }) => {
     await assertAdmin(context);
     const { data: members, error } = await context.supabase
       .from("portal_members")
       .select("*")
-      .in("id", data.member_ids);
+      .in("id", data.member_ids).neq("status", "revoked");
     if (error) throw error;
     if (!members?.length) throw new Error("No recipients found");
     if (data.poll_id) {

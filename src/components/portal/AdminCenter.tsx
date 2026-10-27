@@ -1,3 +1,4 @@
+import { csvCell } from "@/lib/csv";
 import { useStoredFlag } from "@/hooks/use-stored-flag";
 import { ChevronDown, ChevronUp } from "lucide-react";
 import { AdminLeadership } from "@/components/portal/AdminLeadership";
@@ -577,7 +578,7 @@ export function AdminCenter({ page }: { page: "overview" | "send" }) {
 
   async function removeSelectedMembers() {
     if (selectedMemberIds.length === 0) return;
-    if (!window.confirm(`Permanently delete ${selectedMemberIds.length} selected member record${selectedMemberIds.length === 1 ? "" : "s"} and all associated test data? This cannot be undone.`)) return;
+    if (!window.confirm(`Revoke access for ${selectedMemberIds.length} selected member${selectedMemberIds.length === 1 ? "" : "s"}? Documents, signatures and history will be retained.`)) return;
     if (preview) return setMemberBusy("Preview mode: member deletion is available once you are signed in.");
     try {
       for (const memberId of selectedMemberIds) {
@@ -587,7 +588,7 @@ export function AdminCenter({ page }: { page: "overview" | "send" }) {
       if (detailId && selectedMemberIds.includes(detailId)) setDetailId(null);
       setSelectedMemberIds([]);
       setSelectedEmailIds([]);
-      setMemberBusy(`${selectedMemberIds.length} selected member record${selectedMemberIds.length === 1 ? " was" : "s were"} deleted.`);
+      setMemberBusy(`${selectedMemberIds.length} selected member${selectedMemberIds.length === 1 ? " was" : "s were"} revoked; records retained.`);
       await Promise.all([overview.refetch(), email.refetch()]);
     } catch (error) {
       setMemberBusy(error instanceof Error ? error.message : "Could not delete the selected members.");
@@ -939,7 +940,7 @@ export function AdminCenter({ page }: { page: "overview" | "send" }) {
     } finally { setNudging(""); }
   };
   const exportCsv = () => {
-    const esc = (v: unknown) => `"${String(v ?? "").replaceAll('"', '""')}"`;
+    const esc = csvCell;
     const date = (v: string | null | undefined) => (v ? new Date(v).toISOString().slice(0, 10) : "");
     const header = ["First name", "Last name", "Email", "Organization", "Title", "Company", "Role", "Access", "Stage", "Invited", "Last sign-in", "Profile submitted", "Documents done", "Documents total", "Documents completed",
       "Preferred name", "Professional role", "Current organization", "Preferred email", "Preferred phone",

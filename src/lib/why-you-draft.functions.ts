@@ -1,6 +1,6 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
-import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+import { requirePortalAccess } from "@/lib/portal-access";
 
 const schema = z.object({
   first_name: z.string().trim().max(80),
@@ -21,7 +21,7 @@ const ENTITY: Record<string, string> = {
 };
 
 export const draftWhyYou = createServerFn({ method: "POST" })
-  .middleware([requireSupabaseAuth])
+  .middleware([requirePortalAccess])
   .inputValidator((input) => schema.parse(input))
   .handler(async ({ context, data }) => {
     const { data: admin } = await context.supabase.from("user_roles").select("role").eq("user_id", context.userId).eq("role", "admin").maybeSingle();
