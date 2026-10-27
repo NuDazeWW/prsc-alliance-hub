@@ -6,7 +6,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { PrscMark } from "@/components/site/PrscMark";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { clearPortalLoginFailures } from "@/lib/portal-auth.functions";
+import { activateInvitation, verifyInvitationSession } from "@/lib/invitation-activation.functions";
 
 export const Route = createFileRoute("/accept-invitation")({
   head: () => ({
@@ -36,25 +36,41 @@ function AcceptInvitationPage() {
   useEffect(() => {
     let active = true;
     let timeout: number | undefined;
-    const confirmInvitation = (email?: string) => {
-      if (!active) return;
-      setInvitationEmail((current) => email ?? current);
-      setReady(true);
-      setMessage("");
+    let checking = false;
+    const confirmInvitation = async () => {
+      if (!active || checking) return;
+      checking = true;
       if (timeout !== undefined) window.clearTimeout(timeout);
+      try {
+        // The server confirms this session came from this recipient's own invitation link.
+        const result = await verifyInvitationSession();
+        if (!active) return;
+        if (result.ok) {
+          setInvitationEmail(result.email ?? "");
+          setReady(true);
+          setMessage("");
+          return;
+        }
+        await supabase.auth.signOut();
+        setMessage("You were signed in as another account, so we signed that account out and made no changes. Please open your invitation link again. If it has expired, contact info@readinessterminal.com for a new invitation.");
+      } catch {
+        if (active) setMessage("We could not verify this invitation. Please open your invitation link again or contact info@readinessterminal.com.");
+      } finally {
+        checking = false;
+      }
     };
     const checkSession = async () => {
       const { data } = await supabase.auth.getSession();
       if (!active) return;
       if (data.session) {
-        confirmInvitation(data.session.user.email);
+        void confirmInvitation();
       }
     };
     void checkSession();
     const { data: listener } = supabase.auth.onAuthStateChange((event, session) => {
       if (!active || !session) return;
       if (event === "SIGNED_IN" || event === "PASSWORD_RECOVERY" || event === "INITIAL_SESSION") {
-        confirmInvitation(session.user.email);
+        void confirmInvitation();
       }
     });
     timeout = window.setTimeout(() => {
@@ -81,9 +97,7 @@ function AcceptInvitationPage() {
     }
     setBusy(true);
     try {
-      const { error } = await supabase.auth.updateUser({ password });
-      if (error) throw error;
-      await clearPortalLoginFailures();
+      await activateInvitation({ data: { password } });
       const email = invitationEmail;
       const { error: signOutError } = await supabase.auth.signOut();
       if (signOutError) throw signOutError;
