@@ -10,7 +10,7 @@ Scope: only the items below. No broad scan, redesign, real invitations, appointm
 - Run the quick security scan once and confirm finding `lov_db_rls_tautology_permissive_v1_32ceccda9c2ba06e` is resolved; mark it fixed.
 
 ## 2. BoldSign credentials
-- The previously disclosed webhook secret is never used. Wait for the newly rotated secret to be entered securely as BOLDSIGN_WEBHOOK_SECRET.
+- The previously disclosed webhook secret is never used. The founder reports the rotated secret is now saved as BOLDSIGN_WEBHOOK_SECRET; confirm it is present (without revealing it) before testing.
 - Keep the existing API key and webhook address unchanged; no integration redesign.
 - Confirm whether the saved API key belongs to BoldSign Live or Sandbox with a read-only request, before any signing test.
 
