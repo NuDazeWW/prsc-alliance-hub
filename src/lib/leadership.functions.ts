@@ -30,7 +30,10 @@ export const getLeadershipTeam = createServerFn({ method: "GET" })
   .middleware([requirePortalAccess])
   .handler(async ({ context }) => {
     const admin = await isAdmin(context);
-    let teamQuery = context.supabase.from("leadership_team").select("*").order("sort_order").order("created_at");
+    // Raw roster is admin-only in RLS. Current portal membership was checked
+    // above; this privileged projection returns only approved display fields.
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    let teamQuery = supabaseAdmin.from("leadership_team").select("*").order("sort_order").order("created_at");
     if (!admin) teamQuery = teamQuery.eq("visible", true);
     const [{ data: allRows, error }, { data: settings }] = await Promise.all([
       teamQuery,
@@ -38,7 +41,6 @@ export const getLeadershipTeam = createServerFn({ method: "GET" })
     ]);
     if (error) throw error;
     const rows = (allRows ?? []).filter((r: any) => admin || leadershipPublicationAllowed(r));
-    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const memberIds = (rows ?? []).map((r: any) => r.member_id).filter(Boolean);
     const profiles = new Map<string, { bio: string | null; headshot_path: string | null; visibility_instructions: Record<string, unknown> | null }>();
     if (memberIds.length) {
@@ -57,7 +59,7 @@ export const getLeadershipTeam = createServerFn({ method: "GET" })
         return {
           id: r.id,
           name: r.name,
-          title: r.title,
+          title: admin || !r.member_id || permitted.affiliation ? r.title : "",
           affiliation: admin || !r.member_id || permitted.affiliation ? r.affiliation ?? null : null,
           bio: admin || !r.member_id || permitted.bio ? (r.bio?.trim() ? r.bio : prof?.bio ?? null) : null,
           own_bio: admin ? r.bio : null,
