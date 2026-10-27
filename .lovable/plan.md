@@ -83,13 +83,30 @@ Scope: only the six findings below. No redesign, real invitations, live signing,
   - Earlier security work disabled emailing signed copies. This change re-enables it only as an admin link notice.
   - admin@prscstandards.com is not a portal admin login. The current admin login is admin@readinessterminal.com, so the link will require signing in as that admin.
 
+## Member journey these fixes must preserve
+1. Personalized invitation, then the member securely activates their own account (fix 3)
+2. Five-minute Orientation Hub
+3. Meeting availability, if a poll is active
+4. Prominent but non-blocking Executive Profile invitation
+5. Sign the approved confidentiality addendum (fixes 1 and 8)
+6. Acknowledge the Forum Protocol and Executive Pre-Read
+7. Complete and sign the Conflict / Recusal Confirmation, with disclosures captured (fix 5)
+8. Separate administrative Forum clearance, given only after steps 5–7 (fix 4)
+9. Approved agenda. The restricted Jared briefing and Executive Questions only with specific authorization (fix 2)
+10. Confirmed meeting details sent once per member (fix 6), then attend the Forum
+
+Members can stop and return to the Welcome Center at any point. The profile is encouraged, while the confidentiality and conflict steps are enforced.
+
+Limit for fix 8: the automatic BoldSign trigger is built and tested with mocked BoldSign calls only. No real signing transaction is created this cycle.
+
 ## Verification
 - Focused tests for each rule, plus the existing suite.
 - Read-only access checks using the existing fictional accounts:
   - direct file access before and after the Addendum
   - Jared brief with no grant, then a TEST-only grant on a TEST document
 - No real sends and no publishing.
-- One short PASS/FAIL report.
+- No broad scan.
+- One short PASS/FAIL report. For each fix it says resolved, or still needs an approved source document (for example, the final Addendum, the Conflict template, or the Jared brief).
 
 ## Technical notes
 - Three migrations: the Addendum and restricted-grant helpers with the read-policy update, the `restricted_document_grants` table, and the `meeting_confirmation_sends` table plus the assignment snapshot columns. Each includes grants and RLS.
