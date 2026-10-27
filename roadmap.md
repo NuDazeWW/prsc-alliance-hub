@@ -1,5 +1,13 @@
 # Portal build roadmap
 
+## Final security acceptance checkpoint (Oct 27)
+- [ ] Receive completed deep rescan and return all 16 finding dispositions (scan running)
+- [ ] Request controlled test-member password recovery and complete inbox-link reset; record provider-verification limits
+- [ ] Report historical signed-link lifetimes and residual expiry exposure
+- [ ] Confirm approved manual launch reminders; insecure public-key dispatch stays disabled
+- [ ] Verify stored invitation wording and first-login order
+- [ ] Return GO/NO-GO with remaining vulnerabilities and published-rehearsal limits; retain all four fictional accounts
+
 ## Authorized security remediation (Oct 27)
 - [x] Remove attacker-triggered durable account lockout; direct provider login preserves provider controls
 - [x] Enforce administrator authorization on all invitation dispatch paths; candidate and anonymous denial verified
