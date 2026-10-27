@@ -1,7 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { getRequest } from "@tanstack/react-start/server";
-import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+import { requirePortalAccess } from "@/lib/portal-access";
 import { renderBrandedEmail, renderBrandedEmailText } from "@/lib/branded-email";
 import { memberRoleLabel } from "@/lib/member-role-labels";
 import { entityAcceptanceComplete, journeyStatus, type JourneyStatus } from "@/lib/journey";
@@ -39,7 +39,7 @@ async function assertAdmin(context: { supabase: any; userId: string }) {
 }
 
 export const getPortalSession = createServerFn({ method: "GET" })
-  .middleware([requireSupabaseAuth])
+  .middleware([requirePortalAccess])
   .inputValidator((input?: { asMemberId?: string }) => z.object({ asMemberId: z.string().uuid().optional() }).parse(input ?? {}))
   .handler(async ({ context, data: input }) => {
     if (input.asMemberId) {
@@ -75,7 +75,7 @@ export const getPortalSession = createServerFn({ method: "GET" })
   });
 
 export const getMyProfile = createServerFn({ method: "GET" })
-  .middleware([requireSupabaseAuth])
+  .middleware([requirePortalAccess])
   .handler(async ({ context }) => {
     const { data: member, error: memberError } = await context.supabase.from("portal_members").select("id").eq("user_id", context.userId).single();
     if (memberError || !member) throw new Error("Member profile unavailable");
@@ -103,7 +103,7 @@ const profileSchema = z.object({
 });
 
 export const saveMyProfile = createServerFn({ method: "POST" })
-  .middleware([requireSupabaseAuth])
+  .middleware([requirePortalAccess])
   .inputValidator((input) => profileSchema.parse(input))
   .handler(async ({ context, data }) => {
     const { data: member, error: memberError } = await context.supabase
@@ -152,7 +152,7 @@ export const saveMyProfile = createServerFn({ method: "POST" })
 const HEADSHOT_BUCKET = "member-headshots";
 
 export const setMyHeadshot = createServerFn({ method: "POST" })
-  .middleware([requireSupabaseAuth])
+  .middleware([requirePortalAccess])
   .inputValidator((input) => z.object({ path: z.string().trim().min(1).max(300) }).parse(input))
   .handler(async ({ context, data }) => {
     if (!data.path.startsWith(`${context.userId}/`)) throw new Error("Invalid headshot path");
@@ -164,7 +164,7 @@ export const setMyHeadshot = createServerFn({ method: "POST" })
   });
 
 export const getMyHeadshotUrl = createServerFn({ method: "GET" })
-  .middleware([requireSupabaseAuth])
+  .middleware([requirePortalAccess])
   .inputValidator((input?: { asMemberId?: string }) => z.object({ asMemberId: z.string().uuid().optional() }).parse(input ?? {}))
   .handler(async ({ context: ctx, data: input }) => {
     let context: any = ctx;
@@ -186,7 +186,7 @@ export const getMyHeadshotUrl = createServerFn({ method: "GET" })
 
 const inquirySchema = z.object({ subject: z.string().trim().min(1).max(160), message: z.string().trim().min(10).max(4000) });
 export const submitPortalInquiry = createServerFn({ method: "POST" })
-  .middleware([requireSupabaseAuth])
+  .middleware([requirePortalAccess])
   .inputValidator((input) => inquirySchema.parse(input))
   .handler(async ({ context, data }) => {
     const { data: member, error: memberError } = await context.supabase.from("portal_members").select("id, email, first_name").eq("user_id", context.userId).single();
@@ -275,7 +275,7 @@ function portalInviteRedirect(member: { first_name: string; entity: string; role
   return url.toString();
 }
 export const invitePortalMember = createServerFn({ method: "POST" })
-  .middleware([requireSupabaseAuth])
+  .middleware([requirePortalAccess])
   .inputValidator((input) => inviteSchema.parse(input))
   .handler(async ({ context, data: rawData }) => {
     await assertAdmin(context);
@@ -317,7 +317,7 @@ const importSchema = z.object({
   rows: z.array(inviteSchema).min(1).max(200),
 });
 export const importPortalMembers = createServerFn({ method: "POST" })
-  .middleware([requireSupabaseAuth])
+  .middleware([requirePortalAccess])
   .inputValidator((input) => importSchema.parse(input))
   .handler(async ({ context, data }) => {
     await assertAdmin(context);
@@ -386,7 +386,7 @@ export const importPortalMembers = createServerFn({ method: "POST" })
   });
 
 export const getAdminOverview = createServerFn({ method: "GET" })
-  .middleware([requireSupabaseAuth])
+  .middleware([requirePortalAccess])
   .handler(async ({ context }) => {
     await assertAdmin(context);
     const [{ data: members }, { data: inquiries }, { data: activity }, { data: profiles }, { data: acks }] = await Promise.all([
@@ -411,7 +411,7 @@ export const getAdminOverview = createServerFn({ method: "GET" })
   });
 
 export const nudgeMember = createServerFn({ method: "POST" })
-  .middleware([requireSupabaseAuth])
+  .middleware([requirePortalAccess])
   .inputValidator((input) => z.object({ member_id: z.string().uuid() }).parse(input))
   .handler(async ({ context, data }) => {
     await assertAdmin(context);
@@ -466,7 +466,7 @@ export const nudgeMember = createServerFn({ method: "POST" })
   });
 
 export const getMemberDetail = createServerFn({ method: "GET" })
-  .middleware([requireSupabaseAuth])
+  .middleware([requirePortalAccess])
   .inputValidator((input) => z.object({ member_id: z.string().uuid() }).parse(input))
   .handler(async ({ context, data }) => {
     await assertAdmin(context);
@@ -504,7 +504,7 @@ export const getMemberDetail = createServerFn({ method: "GET" })
   });
 
 export const setMemberAccess = createServerFn({ method: "POST" })
-  .middleware([requireSupabaseAuth])
+  .middleware([requirePortalAccess])
   .inputValidator((input) =>
     z.object({ member_id: z.string().uuid(), status: z.enum(["invited", "active", "revoked"]) }).parse(input),
   )
@@ -526,7 +526,7 @@ export const setMemberAccess = createServerFn({ method: "POST" })
   });
 
 export const deletePortalMember = createServerFn({ method: "POST" })
-  .middleware([requireSupabaseAuth])
+  .middleware([requirePortalAccess])
   .inputValidator((input) => z.object({ member_id: z.string().uuid() }).parse(input))
   .handler(async ({ context, data }) => {
     await assertAdmin(context);
@@ -539,31 +539,15 @@ export const deletePortalMember = createServerFn({ method: "POST" })
     if (memberError || !member) throw memberError ?? new Error("Member not found");
     if (member.user_id === context.userId) throw new Error("The signed-in administrator cannot be deleted.");
 
-    const [{ data: profile }, { data: documents }] = await Promise.all([
-      supabaseAdmin.from("portal_profiles").select("headshot_path").eq("member_id", data.member_id).maybeSingle(),
-      supabaseAdmin.from("portal_documents").select("file_path").eq("member_id", data.member_id),
-    ]);
-    if (profile?.headshot_path) {
-      await supabaseAdmin.storage.from(HEADSHOT_BUCKET).remove([profile.headshot_path]);
-    }
-    const documentPaths = (documents ?? [])
-      .map((document: { file_path: string | null }) => document.file_path)
-      .filter((path: string | null): path is string => Boolean(path));
-    if (documentPaths.length) {
-      await supabaseAdmin.storage.from("member-documents").remove(documentPaths);
-    }
-
-    await supabaseAdmin.from("portal_activity").delete().eq("member_id", data.member_id);
-    const { error: deleteError } = await supabaseAdmin.from("portal_members").delete().eq("id", data.member_id);
-    if (deleteError) throw deleteError;
-    await supabaseAdmin.from("user_roles").delete().eq("user_id", member.user_id);
-    const { error: authError } = await supabaseAdmin.auth.admin.deleteUser(member.user_id);
-    if (authError) throw authError;
+    const { error } = await supabaseAdmin.from("portal_members").update({ status: "revoked" }).eq("id", data.member_id);
+    if (error) throw error;
+    await supabaseAdmin.from("portal_activity").insert({ member_id: data.member_id, actor_user_id: context.userId,
+      event_type: "access_revoked", metadata: { source: "member_removal", records_retained: true } });
     return { ok: true };
   });
 
 export const setMemberPackageStatus = createServerFn({ method: "POST" })
-  .middleware([requireSupabaseAuth])
+  .middleware([requirePortalAccess])
   .inputValidator((input) =>
     z
       .object({
@@ -590,7 +574,7 @@ export const setMemberPackageStatus = createServerFn({ method: "POST" })
   });
 
 export const updateInquiry = createServerFn({ method: "POST" })
-  .middleware([requireSupabaseAuth])
+  .middleware([requirePortalAccess])
   .inputValidator((input) =>
     z
       .object({
@@ -715,7 +699,7 @@ async function signDocumentUrls(documents: PortalDocumentRecord[]) {
 }
 
 export const getMyDocuments = createServerFn({ method: "GET" })
-  .middleware([requireSupabaseAuth])
+  .middleware([requirePortalAccess])
   .inputValidator((input?: { asMemberId?: string }) => z.object({ asMemberId: z.string().uuid().optional() }).parse(input ?? {}))
   .handler(async ({ context: ctx, data: input }) => {
     let context: any = ctx;
@@ -802,7 +786,7 @@ export async function maybeCompletePackage(member: { id: string; email: string; 
 }
 
 export const acknowledgeDocument = createServerFn({ method: "POST" })
-  .middleware([requireSupabaseAuth])
+  .middleware([requirePortalAccess])
   .inputValidator((input) =>
     z
       .object({
@@ -901,7 +885,7 @@ export const acknowledgeDocument = createServerFn({ method: "POST" })
   });
 
 export const setEntityActivation = createServerFn({ method: "POST" })
-  .middleware([requireSupabaseAuth])
+  .middleware([requirePortalAccess])
   .inputValidator((input) => z.object({
     member_id: z.string().uuid(), entity: z.enum(["prsc", "dis"]), activated: z.boolean(),
     countersigned: z.boolean().optional(), appointment_ref: z.string().trim().max(400).optional(),
@@ -942,7 +926,7 @@ export const setEntityActivation = createServerFn({ method: "POST" })
   });
 
 export const setForumParticipation = createServerFn({ method: "POST" })
-  .middleware([requireSupabaseAuth])
+  .middleware([requirePortalAccess])
   .inputValidator((input) => z.object({ member_id: z.string().uuid(), participates: z.boolean() }).parse(input))
   .handler(async ({ context, data }) => {
     await assertAdmin(context);
@@ -957,7 +941,7 @@ export const setForumParticipation = createServerFn({ method: "POST" })
   });
 
 export const requestHardCopy = createServerFn({ method: "POST" })
-  .middleware([requireSupabaseAuth])
+  .middleware([requirePortalAccess])
   .inputValidator((input) => z.object({ document_id: z.string().uuid(), note: z.string().trim().max(600).default("") }).parse(input))
   .handler(async ({ context, data }) => {
     const { data: member } = await context.supabase
@@ -989,7 +973,7 @@ export const requestHardCopy = createServerFn({ method: "POST" })
   });
 
 export const listDocumentsForAdmin = createServerFn({ method: "GET" })
-  .middleware([requireSupabaseAuth])
+  .middleware([requirePortalAccess])
   .inputValidator((input) => z.object({ member_id: z.string().uuid().nullable().optional() }).parse(input ?? {}))
   .handler(async ({ context, data }) => {
     await assertAdmin(context);
@@ -1038,7 +1022,7 @@ export const listDocumentsForAdmin = createServerFn({ method: "GET" })
   });
 
 export const createMemberDocument = createServerFn({ method: "POST" })
-  .middleware([requireSupabaseAuth])
+  .middleware([requirePortalAccess])
   .inputValidator((input) =>
     z
       .object({
@@ -1100,7 +1084,7 @@ export const createMemberDocument = createServerFn({ method: "POST" })
   });
 
 export const releaseMemberDocuments = createServerFn({ method: "POST" })
-  .middleware([requireSupabaseAuth])
+  .middleware([requirePortalAccess])
   .inputValidator((input) => z.object({ member_id: z.string().uuid() }).parse(input))
   .handler(async ({ context, data }) => {
     await assertAdmin(context);
@@ -1139,7 +1123,7 @@ export const releaseMemberDocuments = createServerFn({ method: "POST" })
   });
 
 export const deleteMemberDocument = createServerFn({ method: "POST" })
-  .middleware([requireSupabaseAuth])
+  .middleware([requirePortalAccess])
   .inputValidator((input) => z.object({ id: z.string().uuid() }).parse(input))
   .handler(async ({ context, data }) => {
     await assertAdmin(context);
@@ -1149,7 +1133,7 @@ export const deleteMemberDocument = createServerFn({ method: "POST" })
   });
 
 export const confirmExternalSignature = createServerFn({ method: "POST" })
-  .middleware([requireSupabaseAuth])
+  .middleware([requirePortalAccess])
   .inputValidator((input) => z.object({ member_id: z.string().uuid(), document_id: z.string().uuid(), confirmed: z.boolean() }).parse(input))
   .handler(async ({ context, data }) => {
     await assertAdmin(context);
@@ -1177,7 +1161,7 @@ export const confirmExternalSignature = createServerFn({ method: "POST" })
   });
 
 export const prepareSignedCopy = createServerFn({ method: "POST" })
-  .middleware([requireSupabaseAuth])
+  .middleware([requirePortalAccess])
   .inputValidator((input) => z.object({ ack_id: z.string().uuid() }).parse(input))
   .handler(async ({ context, data }) => {
     await assertAdmin(context);
@@ -1227,7 +1211,7 @@ export const prepareSignedCopy = createServerFn({ method: "POST" })
   });
 
 export const sendSignedCopy = createServerFn({ method: "POST" })
-  .middleware([requireSupabaseAuth])
+  .middleware([requirePortalAccess])
   .inputValidator((input) => z.object({
     ack_id: z.string().uuid(),
     to: z.string().trim().email(),
@@ -1272,7 +1256,7 @@ const memberDetailsSchema = z.object({
 
 /** Admin edit of a member's employment and alliance designation (including candidate → appointed promotion). */
 export const updateMemberDetails = createServerFn({ method: "POST" })
-  .middleware([requireSupabaseAuth])
+  .middleware([requirePortalAccess])
   .inputValidator((input) => memberDetailsSchema.parse(input))
   .handler(async ({ context, data }) => {
     await assertAdmin(context);
@@ -1305,8 +1289,9 @@ export const updateMemberDetails = createServerFn({ method: "POST" })
   });
 
 async function sendReleaseNotice(supabaseAdmin: any, release: any) {
-  const { data: m } = await supabaseAdmin.from("portal_members").select("email, first_name").eq("id", release.member_id).single();
+  const { data: m } = await supabaseAdmin.from("portal_members").select("email, first_name, status").eq("id", release.member_id).single();
   const { loadSystemEmail, sendPortalEmail } = await import("@/lib/portal-notify.server");
+  if (!m || m.status === "revoked") throw new Error("Recipient access unavailable");
   const docs = (release.documents ?? []) as { title: string }[];
   const email = (await loadSystemEmail("entity_documents_ready"))({
     first_name: m?.first_name?.trim() || "there",
@@ -1329,7 +1314,7 @@ async function sendReleaseNotice(supabaseAdmin: any, release: any) {
 
 /** Explicit admin start of one entity's Stage 2. Never advances Stage 3 or activates a role. */
 export const releaseEntityOnboarding = createServerFn({ method: "POST" })
-  .middleware([requireSupabaseAuth])
+  .middleware([requirePortalAccess])
   .inputValidator((input) => z.object({ member_id: z.string().uuid(), entity: z.enum(["prsc", "dis"]) }).parse(input))
   .handler(async ({ context, data }) => {
     await assertAdmin(context);
@@ -1358,7 +1343,7 @@ export const releaseEntityOnboarding = createServerFn({ method: "POST" })
   });
 
 export const retryReleaseNotice = createServerFn({ method: "POST" })
-  .middleware([requireSupabaseAuth])
+  .middleware([requirePortalAccess])
   .inputValidator((input) => z.object({ release_id: z.string().uuid() }).parse(input))
   .handler(async ({ context, data }) => {
     await assertAdmin(context);
@@ -1402,7 +1387,7 @@ async function legacyReleaseRows(supabaseAdmin: any) {
 
 /** Admin report of existing members affected by the per-entity Stage 2 gate. Read-only. */
 export const getLegacyReleaseReport = createServerFn({ method: "GET" })
-  .middleware([requireSupabaseAuth])
+  .middleware([requirePortalAccess])
   .handler(async ({ context }) => {
     await assertAdmin(context);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
@@ -1411,7 +1396,7 @@ export const getLegacyReleaseReport = createServerFn({ method: "GET" })
 
 /** Records a release for a member whose prior entity onboarding is on record. Sends no email. */
 export const reconcileEntityRelease = createServerFn({ method: "POST" })
-  .middleware([requireSupabaseAuth])
+  .middleware([requirePortalAccess])
   .inputValidator((input) => z.object({ member_id: z.string().uuid(), entity: z.enum(["prsc", "dis"]), reason: z.string().trim().min(5).max(1000) }).parse(input))
   .handler(async ({ context, data }) => {
     await assertAdmin(context);

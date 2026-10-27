@@ -1,6 +1,6 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
-import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+import { requirePortalAccess } from "@/lib/portal-access";
 import { meetingIcsToken } from "@/lib/ics";
 import { formatSlot, zonedToUtc } from "@/lib/meeting-block";
 
@@ -51,7 +51,7 @@ const createPollSchema = z.object({
 });
 
 export const createMeetingPoll = createServerFn({ method: "POST" })
-  .middleware([requireSupabaseAuth])
+  .middleware([requirePortalAccess])
   .inputValidator((input) => createPollSchema.parse(input))
   .handler(async ({ context, data }) => {
     await assertAdmin(context);
@@ -120,7 +120,7 @@ export const createMeetingPoll = createServerFn({ method: "POST" })
   });
 
 export const listAdminPolls = createServerFn({ method: "GET" })
-  .middleware([requireSupabaseAuth])
+  .middleware([requirePortalAccess])
   .handler(async ({ context }) => {
     await assertAdmin(context);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
@@ -153,7 +153,7 @@ export const listAdminPolls = createServerFn({ method: "GET" })
   });
 
 export const listInvitableMembers = createServerFn({ method: "GET" })
-  .middleware([requireSupabaseAuth])
+  .middleware([requirePortalAccess])
   .handler(async ({ context }) => {
     await assertAdmin(context);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
@@ -167,7 +167,7 @@ export const listInvitableMembers = createServerFn({ method: "GET" })
   });
 
 export const confirmPollSlot = createServerFn({ method: "POST" })
-  .middleware([requireSupabaseAuth])
+  .middleware([requirePortalAccess])
   .inputValidator((input) => z.object({ poll_id: z.string().uuid(), slot_id: z.string().uuid() }).parse(input))
   .handler(async ({ context, data }) => {
     await assertAdmin(context);
@@ -246,7 +246,7 @@ export const confirmPollSlot = createServerFn({ method: "POST" })
   });
 
 export const cancelPoll = createServerFn({ method: "POST" })
-  .middleware([requireSupabaseAuth])
+  .middleware([requirePortalAccess])
   .inputValidator((input) => z.object({ poll_id: z.string().uuid() }).parse(input))
   .handler(async ({ context, data }) => {
     await assertAdmin(context);
@@ -262,7 +262,7 @@ export const cancelPoll = createServerFn({ method: "POST" })
   });
 
 export const resyncPollCalendar = createServerFn({ method: "POST" })
-  .middleware([requireSupabaseAuth])
+  .middleware([requirePortalAccess])
   .inputValidator((input) => z.object({ poll_id: z.string().uuid() }).parse(input))
   .handler(async ({ context, data }) => {
     await assertAdmin(context);
@@ -271,7 +271,7 @@ export const resyncPollCalendar = createServerFn({ method: "POST" })
   });
 
 export const getCalendarConnection = createServerFn({ method: "GET" })
-  .middleware([requireSupabaseAuth])
+  .middleware([requirePortalAccess])
   .handler(async ({ context }) => {
     await assertAdmin(context);
     const { getConnectedCalendar } = await import("@/lib/outlook-calendar.server");
@@ -279,7 +279,7 @@ export const getCalendarConnection = createServerFn({ method: "GET" })
   });
 
 export const getMyMeetings = createServerFn({ method: "GET" })
-  .middleware([requireSupabaseAuth])
+  .middleware([requirePortalAccess])
   .inputValidator((input?: { asMemberId?: string }) => z.object({ asMemberId: z.string().uuid().optional() }).parse(input ?? {}))
   .handler(async ({ context: ctx, data: input }) => {
     let context: any = ctx;
@@ -335,7 +335,7 @@ const availabilitySchema = z.object({
 });
 
 export const submitMyAvailability = createServerFn({ method: "POST" })
-  .middleware([requireSupabaseAuth])
+  .middleware([requirePortalAccess])
   .inputValidator((input) => availabilitySchema.parse(input))
   .handler(async ({ context, data }) => {
     const member = await getMyMember(context);

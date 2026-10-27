@@ -1,6 +1,6 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
-import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+import { requirePortalAccess } from "@/lib/portal-access";
 import { roleCombinationTier } from "@/lib/governance";
 
 async function assertAdmin(context: { supabase: any; userId: string }) {
@@ -11,7 +11,7 @@ async function assertAdmin(context: { supabase: any; userId: string }) {
 const memberId = z.object({ member_id: z.string().uuid() });
 
 export const getMemberGovernance = createServerFn({ method: "GET" })
-  .middleware([requireSupabaseAuth])
+  .middleware([requirePortalAccess])
   .inputValidator((i) => memberId.parse(i))
   .handler(async ({ context, data }) => {
     await assertAdmin(context);
@@ -35,7 +35,7 @@ async function log(context: any, member_id: string, kind: string, decision: stri
 }
 
 export const recordNdaVerification = createServerFn({ method: "POST" })
-  .middleware([requireSupabaseAuth])
+  .middleware([requirePortalAccess])
   .inputValidator((i) => memberId.extend({
     reference: z.string().trim().min(3).max(400),
     entities: z.enum(["prsc", "dis", "both"]),
@@ -53,7 +53,7 @@ export const recordNdaVerification = createServerFn({ method: "POST" })
   });
 
 export const recordRoleReview = createServerFn({ method: "POST" })
-  .middleware([requireSupabaseAuth])
+  .middleware([requirePortalAccess])
   .inputValidator((i) => memberId.extend({
     decision: z.enum(["approved", "declined"]),
     notes: z.string().trim().min(5).max(2000),
@@ -77,7 +77,7 @@ export const recordRoleReview = createServerFn({ method: "POST" })
   });
 
 export const recordForumClearance = createServerFn({ method: "POST" })
-  .middleware([requireSupabaseAuth])
+  .middleware([requirePortalAccess])
   .inputValidator((i) => memberId.extend({
     decision: z.enum(["cleared", "cleared_restricted", "escalated", "declined"]),
     disclosures_reviewed: z.literal(true),
@@ -104,7 +104,7 @@ export const recordForumClearance = createServerFn({ method: "POST" })
   });
 
 export const updateDocumentGovernance = createServerFn({ method: "POST" })
-  .middleware([requireSupabaseAuth])
+  .middleware([requirePortalAccess])
   .inputValidator((i) => z.object({
     document_id: z.string().uuid(),
     classification: z.enum(["general_orientation", "confidential_forum", "restricted_opportunity", "entity_confidential", "secretariat_only"]).optional(),

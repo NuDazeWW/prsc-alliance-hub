@@ -1,6 +1,6 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
-import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+import { requirePortalAccess } from "@/lib/portal-access";
 
 export type LeaderRow = {
   id: string;
@@ -25,7 +25,7 @@ async function isAdmin(context: { supabase: any; userId: string }) {
 
 /** Team list for the Welcome Center (and admin editor). Admin-entered values win; linked member profile fills blanks. */
 export const getLeadershipTeam = createServerFn({ method: "GET" })
-  .middleware([requireSupabaseAuth])
+  .middleware([requirePortalAccess])
   .handler(async ({ context }) => {
     const admin = await isAdmin(context);
     const [{ data: rows, error }, { data: settings }] = await Promise.all([
@@ -91,7 +91,7 @@ const leaderSchema = z.object({
 });
 
 export const saveLeader = createServerFn({ method: "POST" })
-  .middleware([requireSupabaseAuth])
+  .middleware([requirePortalAccess])
   .inputValidator((i) => leaderSchema.parse(i))
   .handler(async ({ context, data }) => {
     if (!(await isAdmin(context))) throw new Error("Unauthorized");
@@ -106,7 +106,7 @@ export const saveLeader = createServerFn({ method: "POST" })
   });
 
 export const deleteLeader = createServerFn({ method: "POST" })
-  .middleware([requireSupabaseAuth])
+  .middleware([requirePortalAccess])
   .inputValidator((i) => z.object({ id: z.string().uuid() }).parse(i))
   .handler(async ({ context, data }) => {
     if (!(await isAdmin(context))) throw new Error("Unauthorized");
@@ -116,7 +116,7 @@ export const deleteLeader = createServerFn({ method: "POST" })
   });
 
 export const reorderLeaders = createServerFn({ method: "POST" })
-  .middleware([requireSupabaseAuth])
+  .middleware([requirePortalAccess])
   .inputValidator((i) => z.object({ ids: z.array(z.string().uuid()).max(200) }).parse(i))
   .handler(async ({ context, data }) => {
     if (!(await isAdmin(context))) throw new Error("Unauthorized");
@@ -125,7 +125,7 @@ export const reorderLeaders = createServerFn({ method: "POST" })
   });
 
 export const saveLeadershipSettings = createServerFn({ method: "POST" })
-  .middleware([requireSupabaseAuth])
+  .middleware([requirePortalAccess])
   .inputValidator((i) =>
     z.object({ eyebrow: z.string().trim().max(80), heading: z.string().trim().min(1).max(160), subtext: z.string().trim().max(600) }).parse(i),
   )
