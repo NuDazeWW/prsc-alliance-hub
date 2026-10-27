@@ -90,6 +90,11 @@ describe("versioned profile intake validation", () => {
       return true;
     });
   });
+  it("accepts final submission without employer or professional title", () => {
+    const parsed = parseProfileSaveInput({ ...profile(), professional_role: "", current_organization: "", submit: true });
+    assert.equal(parsed.professional_role, "");
+    assert.equal(parsed.current_organization, "");
+  });
   it("requires explicit current version markers and rejects unknown fields", () => {
     const input = profile();
     assert.equal(valid({ ...input, experience_answers: { ...input.experience_answers, version: "fit_v2" } }), false);
