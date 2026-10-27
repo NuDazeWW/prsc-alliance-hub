@@ -816,10 +816,11 @@ export const acknowledgeDocument = createServerFn({ method: "POST" })
     const docs = memberVisible(await applicableDocuments(context.supabase, member as DocMember), member as DocMember, priorDone).filter(isActive);
     const doc = docs.find((d) => d.id === data.document_id);
     if (!doc) throw new Error("Document unavailable");
+    if (doc.action === "boldsign" || doc.action === "docusign") throw new Error("Complete this document through verified electronic signing");
     const isConflictForm = /conflict|recusal/i.test(doc.title);
     if (isConflictForm && !data.conflict_answer) throw new Error("Choose your conflict answer before signing");
     const { released } = await entityReleases(context.supabase, member.id);
-    if (lockedDocumentIds(docs, priorDone, member.entity, { released }).has(doc.id)) throw new Error("Please complete the earlier documents in your journey first");
+    if (lockedDocumentIds(docs, priorDone, member.entity, { released, forum: member.participates_in_forum !== false }).has(doc.id)) throw new Error("Please complete the earlier documents in your journey first");
     if (data.kind === "signed") {
       if (!data.signed_name || data.signed_name.length < 2) throw new Error("Type your full legal name to sign");
       if (!data.signature_data?.startsWith("data:image/png;base64,")) throw new Error("Add your signature");
@@ -863,9 +864,9 @@ export const acknowledgeDocument = createServerFn({ method: "POST" })
     }
     await maybeCompletePackage(member as any);
     // Sequential journey: tell the member when this completion unlocks the next document.
-    const before = lockedDocumentIds(docs, priorDone, member.entity, { released });
+    const before = lockedDocumentIds(docs, priorDone, member.entity, { released, forum: member.participates_in_forum !== false });
     const afterDone = new Set(priorDone).add(doc.id);
-    const after = lockedDocumentIds(docs, afterDone, member.entity, { released });
+    const after = lockedDocumentIds(docs, afterDone, member.entity, { released, forum: member.participates_in_forum !== false });
     const unlocked = docs.filter((d) => before.has(d.id) && !after.has(d.id) && !afterDone.has(d.id));
     if (unlocked.length) {
       const { sendPortalEmail } = await import("@/lib/portal-notify.server");

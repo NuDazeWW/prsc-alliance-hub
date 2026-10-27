@@ -554,7 +554,7 @@ function PortalHome() {
               ) : (
                 <>
                   {documentsReleased ? (
-                    <MemberDocuments documents={myDocs as any} completions={documents.data?.completions ?? []} entity={docEntity} forumCleared={(documents.data as any)?.forumCleared === true} entityReleased={(documents.data as any)?.entityReleased} />
+                    <MemberDocuments documents={myDocs as any} completions={documents.data?.completions ?? []} entity={docEntity} forum={(documents.data as any)?.forum !== false} forumCleared={(documents.data as any)?.forumCleared === true} entityReleased={(documents.data as any)?.entityReleased} />
                   ) : (
                     <div className="mt-8 border border-gold/25 bg-ivory/[.03] p-8 text-center"><FileText className="mx-auto h-7 w-7 text-gold"/><h3 className="mt-5 font-display text-[24px] leading-snug">Your documents are being prepared.</h3><p className="mx-auto mt-4 max-w-[34rem] text-[15px] leading-7 text-ivory/65">Your profile has been received. We will email you as soon as your individualized Board/Advisor documents are ready here.</p></div>
                   )}
