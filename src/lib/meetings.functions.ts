@@ -210,17 +210,15 @@ export const confirmPollSlot = createServerFn({ method: "POST" })
     const { loadSystemEmail } = await import("@/lib/portal-notify.server");
     const build = await loadSystemEmail("meeting_confirmed");
     void founderSignature;
-    // Never duplicate a confirmation: members who already received the manual
-    // Forum confirmation for this event are skipped here.
-    const { data: forumSent } = await supabaseAdmin
-      .from("forum_communication_sends")
-      .select("member_id")
-      .eq("email_key", "forum_confirmed")
-      .neq("status", "failed");
-    const alreadyForumConfirmed = new Set((forumSent ?? []).map((r: any) => r.member_id));
+    // One confirmation per poll, confirmed slot and recipient; retries reuse the same delivery key.
+    const { confirmationKey, recipientsToConfirm } = await import("@/lib/meeting-confirmations");
+    const { data: existing } = await supabaseAdmin.from("meeting_confirmation_sends").select("member_id, status").eq("poll_id", poll.id).eq("slot_id", data.slot_id);
+    const owed = new Set(recipientsToConfirm((members ?? []).map((m) => m.id), (existing ?? []) as any));
     for (const m of members ?? []) {
-      if (alreadyForumConfirmed.has(m.id)) continue;
-      await sendPortalEmail(
+      if (!owed.has(m.id)) continue;
+      const prior = (existing ?? []).find((r: any) => r.member_id === m.id) as any;
+      await supabaseAdmin.from("meeting_confirmation_sends").upsert({ poll_id: poll.id, slot_id: data.slot_id, member_id: m.id, status: "sending", attempts: (prior?.attempts ?? 0) + 1, updated_at: new Date().toISOString() }, { onConflict: "poll_id,slot_id,member_id" });
+      const ok = await sendPortalEmail(
         m.email,
         build({
           first_name: m.first_name?.trim() || "Hello",
@@ -232,7 +230,9 @@ export const confirmPollSlot = createServerFn({ method: "POST" })
           calendar_url: icsUrl,
         }),
         "meeting-confirmed",
+        confirmationKey(poll.id, data.slot_id, m.id),
       );
+      await supabaseAdmin.from("meeting_confirmation_sends").update({ status: ok ? "sent" : "failed", last_error: ok ? null : "Delivery not accepted; retry reuses the same key", updated_at: new Date().toISOString() }).eq("poll_id", poll.id).eq("slot_id", data.slot_id).eq("member_id", m.id);
     }
 
     await supabaseAdmin.from("portal_activity").insert({
