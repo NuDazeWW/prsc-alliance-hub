@@ -90,7 +90,13 @@ function PortalHome() {
   const { asMember } = Route.useSearch();
   const { data, isLoading, error } = useQuery({
     queryKey: ["portal-session", asMember ?? null],
-    queryFn: () => isPreviewHost() && !asMember ? Promise.resolve(null) : getPortalSession({ data: { asMemberId: asMember } }),
+    queryFn: async () => {
+      if (isPreviewHost() && !asMember) {
+        const { data: auth } = await supabase.auth.getSession();
+        if (!auth.session) return null;
+      }
+      return getPortalSession({ data: { asMemberId: asMember } });
+    },
     retry: false,
   });
 

@@ -58,11 +58,3 @@ export function buildSlotHoldIcs(input: { slotId: string; title: string; startsA
   ].join("\r\n");
 }
 
-export async function meetingIcsToken(pollId: string) {
-  const secret = process.env["SETUP_SECRET"] ?? "prsc-meetings";
-  const digest = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(`${pollId}:${secret}`));
-  return Array.from(new Uint8Array(digest))
-    .map((b) => b.toString(16).padStart(2, "0"))
-    .join("")
-    .slice(0, 32);
-}
