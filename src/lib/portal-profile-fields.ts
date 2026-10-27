@@ -99,8 +99,8 @@ export const PORTAL_RELATIONSHIP_CHOICES = options([
   ["related_organization", "I have a current or potential relationship with PRSC, DIS, NuDaze Worldwide, or NicoleIsNine Holdings LLC"],
   ["unsure", "I am unsure and would like to discuss it before any role is considered"],
 ]);
-export const PORTAL_RELATIONSHIP_DETAILS_LABEL = "If helpful, briefly identify the organization or relationship.";
-export const PORTAL_RELATIONSHIP_NOTE = "This is an initial fit screen only. It does not replace a formal conflict-of-interest disclosure or role-specific agreement.";
+export const PORTAL_RELATIONSHIP_DETAILS_LABEL = "Optional general context — do not include sensitive conflict details.";
+export const PORTAL_RELATIONSHIP_NOTE = "This is an initial fit screen only. Sensitive disclosures belong in your separate Conflict / Recusal Confirmation; this profile does not replace it or any role-specific agreement.";
 
 export const PORTAL_COMMUNICATION_TITLE = "Profile & communication preferences";
 export const PORTAL_COMMUNICATION_DESCRIPTION = "If there is a mutual fit, tell us how you would prefer to be contacted and how we should handle any potential profile materials. Nothing will be shared publicly without your approval.";

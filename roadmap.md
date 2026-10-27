@@ -1,9 +1,10 @@
 # Portal build roadmap
 
 ## Executive Profile encouragement and exact Forum map (Oct 27)
-- [ ] Reuse nonblocking profile flow; add founder copy and explicit submission status without new stages or reminder automation
-- [ ] Verify existing fictional profile and document access; reuse BoldSign evidence, no signing or invitations
-- [ ] Deliver actual journey and eight-document upload map, identifying configuration gaps and contradictions; Gate B paused
+- [x] Reuse nonblocking profile flow; add founder copy and explicit submission status without new stages or reminder automation
+- [x] Verify source/configuration and reuse fictional/BoldSign evidence only; no preview sessions, transactions, uploads, releases or publishing; 104 focused rules pass, build OK
+- [x] Check Addendum/file endpoint (no prerequisite), restricted_opportunity (no individual grant; fail-closed), repeated confirmation (can duplicate); six intended titles found, exact eight-file manifest unavailable
+- [x] Deliver focused journey/upload report with real gaps; profile correction local only, Gate B paused
 
 ## Published document-access rehearsal (Oct 27)
 - [x] Publish accepted correction; live access.prscstandards.org HTTP 200 and Test 2 normal Documents walkthrough verified

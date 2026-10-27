@@ -21,7 +21,6 @@ import {
 import { initialProfileForm, currentProfilePreferences, profileFieldStage, type ProfileForm } from "@/lib/portal-profile-form";
 import { profileSchema, profileValidationMessage } from "@/lib/portal-profile-schema";
 import { userFacingError } from "@/lib/user-facing-error";
-import { supabase } from "@/integrations/supabase/client";
 
 export const Route = createFileRoute("/_authenticated/portal/profile")({
   validateSearch: (q: Record<string, unknown>): { edit?: number } => (q.edit ? { edit: 1 } : {}),
@@ -31,14 +30,8 @@ export const Route = createFileRoute("/_authenticated/portal/profile")({
 
 function ProfilePage() {
   const queryClient = useQueryClient();
-  const session = useQuery({ queryKey: ["portal-session"], queryFn: async () => {
-    if (isPreviewHost()) {
-      const { data } = await supabase.auth.getSession();
-      if (!data.session) return null;
-    }
-    return getPortalSession();
-  }, retry: false });
-  const profile = useQuery({ queryKey: ["portal-profile"], queryFn: () => getMyProfile(), enabled: Boolean(session.data?.member), retry: false });
+  const session = useQuery({ queryKey: ["portal-session"], queryFn: () => isPreviewHost() ? Promise.resolve(null) : getPortalSession(), retry: false });
+  const profile = useQuery({ queryKey: ["portal-profile"], queryFn: () => isPreviewHost() ? Promise.resolve(null) : getMyProfile(), retry: false });
   const { edit } = Route.useSearch();
   const isSubmitted = Boolean(profile.data?.submitted_at);
   const [form, setForm] = useState<ProfileForm>(() => initialProfileForm());
