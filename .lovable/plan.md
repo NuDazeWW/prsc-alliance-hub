@@ -65,6 +65,24 @@ Scope: only the six findings below. No redesign, real invitations, live signing,
 - Items 7 and 8 must never be visible to members. They are stored with an admin-only audience, and the read policy and file endpoint already deny them to members. A test confirms this.
 - Add "Forum inventory correction" to roadmap.md. No files are uploaded or released.
 
+## 8. Automatic BoldSign send and collection, with an admin copy
+- When a signature-required document becomes actionable for a member, the portal does the following automatically. Actionable means released, eligible and unlocked in sequence (the Addendum only after legal approval).
+  - Creates the member's BoldSign request from that document's approved template.
+  - Records the exact member, document and version assignment.
+  - Opens embedded signing behind the existing "Review and Sign" button.
+- The existing authenticated callback then collects the executed PDF and audit trail. It stores both privately, marks the item complete only once, and advances the journey.
+- Admin copy: after completion, one notice per signed document goes to admin@prscstandards.com.
+  - The notice carries a short-lived, sign-in-required link to the executed PDF and audit trail, not a file attachment. App emails cannot carry attachments, and this keeps signed evidence behind access checks.
+  - Delivery is tracked per document, so replays send nothing new.
+- Safeguards:
+  - Nothing goes out for unreleased, restricted or unapproved templates.
+  - Nothing goes out for real executives until Gate B.
+  - Before release, the trigger runs only for fictional TEST accounts.
+  - The 24 pre-existing BoldSign documents are never touched.
+- Decision needed:
+  - Earlier security work disabled emailing signed copies. This change re-enables it only as an admin link notice.
+  - admin@prscstandards.com is not a portal admin login. The current admin login is admin@readinessterminal.com, so the link will require signing in as that admin.
+
 ## Verification
 - Focused tests for each rule, plus the existing suite.
 - Read-only access checks using the existing fictional accounts:
