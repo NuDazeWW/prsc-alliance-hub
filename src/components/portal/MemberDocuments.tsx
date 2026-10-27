@@ -7,6 +7,7 @@ import { STAGES, isOnboarding, lockedDocumentIds } from "@/lib/journey";
 import { acknowledgeDocument, requestHardCopy } from "@/lib/portal.functions";
 import { openBoldSign } from "@/lib/boldsign.functions";
 import { Button } from "@/components/ui/button";
+import { fetchPrivateFile } from "@/lib/private-file-client";
 
 type Doc = {
   id: string;
@@ -125,10 +126,15 @@ function BoldSignReader({ documentId, title, completed }: { documentId: string; 
   const [url, setUrl] = useState("");
   const client = useQueryClient();
   const open = useMutation({ mutationFn: () => openBoldSign({ data: { document_id: documentId } }), onSuccess: result => setUrl(result.url) });
-  if (completed) return <a className="text-gold underline" href={`/api/public/portal-file?kind=executed&id=${documentId}`} onClick={e => e.preventDefault()}>Verified signed document</a>;
+  const evidence = useMutation({ mutationFn: async () => {
+    const file = await fetchPrivateFile(`/api/public/portal-file?kind=executed&id=${documentId}`);
+    const objectUrl = URL.createObjectURL(file); setUrl(objectUrl);
+  } });
+  useEffect(() => () => { if (url.startsWith("blob:")) URL.revokeObjectURL(url); }, [url]);
   return <>
-    <Button type="button" variant="outline" disabled={open.isPending} onClick={() => open.mutate()}><BookOpen className="h-4 w-4" /> {open.isPending ? "Opening…" : "Review and Sign"}</Button>
+    <Button type="button" variant="outline" disabled={open.isPending || evidence.isPending} onClick={() => completed ? evidence.mutate() : open.mutate()}><BookOpen className="h-4 w-4" /> {open.isPending || evidence.isPending ? "Opening…" : completed ? "View executed document" : "Review and Sign"}</Button>
     {open.error && <p className="mt-3 text-sm text-gold">{open.error.message}</p>}
+    {evidence.error && <p className="mt-3 text-sm text-gold">{evidence.error.message}</p>}
     {url && <div role="dialog" aria-modal="true" aria-label={`Sign ${title}`} className="fixed inset-0 z-50 flex flex-col bg-navy-deep p-4">
       <div className="mb-4 flex flex-wrap items-center justify-between gap-3"><h3 className="font-display text-xl">{title}</h3><a href={url} target="_blank" rel="noreferrer" className="text-gold underline">Open signing in a new tab</a><Button variant="outline" onClick={() => { setUrl(""); void client.invalidateQueries({ queryKey: ["my-documents"] }); }}>Return to Welcome Center</Button></div>
       <iframe src={url} title={`BoldSign: ${title}`} className="min-h-0 flex-1 border border-border bg-background" />
