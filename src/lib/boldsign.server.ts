@@ -21,6 +21,16 @@ export async function reconcileBoldSign(documentId: string) {
       sb.from("portal_documents").select("*").eq("id", a.document_id).maybeSingle(),
     ]);
     if (!member || member.status === "revoked" || !doc || doc.superseded_at || doc.member_id !== member.id || doc.version_label !== a.version_label || (doc.journey_track ?? member.entity) !== a.entity || member.email.toLowerCase() !== a.signer_email) continue;
+    const { appliesTo } = await import("./portal.functions");
+    if (!appliesTo(doc as import("./portal.functions").PortalDocumentRecord, member)) continue;
+    const [{ data: allDocs }, { data: acks }, { data: releases }] = await Promise.all([
+      sb.from("portal_documents").select("*"),
+      sb.from("portal_document_acknowledgements").select("document_id").eq("member_id", member.id),
+      sb.from("entity_onboarding_releases").select("entity").eq("member_id", member.id),
+    ]);
+    const { lockedDocumentIds } = await import("./journey");
+    const applicable = ((allDocs ?? []) as import("./portal.functions").PortalDocumentRecord[]).filter(d => !d.superseded_at && appliesTo(d, member));
+    if (lockedDocumentIds(applicable, new Set((acks ?? []).map(r => r.document_id)), member.entity, { forum: member.participates_in_forum !== false, released: { prsc: !!releases?.some(r => r.entity === "prsc"), dis: !!releases?.some(r => r.entity === "dis") } }).has(doc.id)) continue;
     const state = verifiedSigningState(properties, a.signer_email);
     if (state === "pending") continue;
     if (state === "signed") {
