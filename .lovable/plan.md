@@ -52,6 +52,19 @@ Scope: only the six findings below. No redesign, real invitations, live signing,
 - The broad suppression for these notices is removed.
 - Tests: a repeat confirmation sends nothing new, a changed slot sends once, and a failure is retried.
 
+## 7. Correct the Forum document inventory (eight supplied documents)
+- Replace the report's "six identified, two missing" statement with the founder's eight-item list:
+  1. Confidentiality & Restricted Information Addendum: BoldSign signature after legal approval
+  2. Participation Protocol: Acknowledge
+  3. Executive Pre-Read: Acknowledge
+  4. Conflict / Recusal Confirmation: Complete and sign (with the snapshot from item 5)
+  5. Inaugural Strategic Agenda: Read after clearance
+  6. Restricted Jared/NASCAR Strategy Brief: Read after a specific grant (item 2)
+  7. Secretariat Controls: Admin only
+  8. Facilitator Run of Show: Admin/facilitator only
+- Items 7 and 8 must never be visible to members. They are stored with an admin-only audience, and the read policy and file endpoint already deny them to members. A test confirms this.
+- Add "Forum inventory correction" to roadmap.md. No files are uploaded or released.
+
 ## Verification
 - Focused tests for each rule, plus the existing suite.
 - Read-only access checks using the existing fictional accounts:
