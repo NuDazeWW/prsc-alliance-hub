@@ -1,5 +1,16 @@
 # Portal build roadmap
 
+## Authorized security remediation (Oct 27)
+- [ ] Remove attacker-triggered account lockout while preserving identity-provider protections and recovery
+- [ ] Enforce administrator authorization on all invitation dispatch paths
+- [ ] Deny revoked sessions across server functions, database policies and private files; retain history
+- [ ] Remove recipient addresses from diagnostic logs and restrict delivery metadata
+- [ ] Neutralize spreadsheet formula injection in every export
+- [ ] Record generic leadership-heading exception and enforce linked-profile publication approval
+- [ ] Preserve orientation → active meeting availability → profile → Forum sequence
+- [ ] Verify audience matrix and existing regression tests; rerun quick and deep scans after saved changes
+- [ ] Return complete dispositions for founder review; publishing and real invitations remain paused
+
 ## Founder security review and published rehearsal (Oct 27)
 - [x] Inspect leadership_settings, candidate direct reads and leadership server authorization; generic heading only in flagged table, no other member rows exposed in controlled test
 - [ ] Complete deep security scan and founder disposition of heading warning / future linked-profile publication boundary (scan running; founder review)
