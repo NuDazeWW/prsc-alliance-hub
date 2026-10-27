@@ -1,0 +1,2 @@
+DROP POLICY "Members read visible leadership" ON public.leadership_team;
+COMMENT ON TABLE public.leadership_team IS 'Administrator-only raw roster. Members receive approved, permission-filtered fields through getLeadershipTeam after current portal authorization; raw member links, private paths and unapproved fields are never member-readable.';
