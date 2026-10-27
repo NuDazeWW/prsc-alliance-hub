@@ -266,6 +266,15 @@ async function recordInviteReviews(admin: any, memberId: string, adminId: string
   if (gates.review) rows.push({ member_id: memberId, kind: "role_combination", decision: "approved", reviewer_id: adminId, notes: gates.review.notes, details: { prsc_scope: gates.review.prsc_scope, dis_scope: gates.review.dis_scope, conflict_controls: gates.review.conflict_controls } });
   await admin.from("governance_reviews").insert(rows);
 }
+async function bindInvitationNda(admin: any, row: InviteInput, adminId: string, gates: ReturnType<typeof invitationGates>) {
+  const { data: oldMember, error: oldError } = await admin.from("portal_members").select("id").eq("email", row.email.toLowerCase()).maybeSingle();
+  if (oldError) throw oldError;
+  const { data: oldReviews, error: reviewError } = await admin.from("governance_reviews").select("member_id").eq("kind", "nda").eq("notes", gates.nda.reference);
+  if (reviewError) throw reviewError;
+  if ((oldReviews ?? []).some((r: { member_id: string }) => r.member_id !== oldMember?.id)) throw new Error("This NDA reference belongs to another recipient");
+  const { error } = await admin.rpc("bind_invitation_nda", { p_reference: gates.nda.reference, p_email: row.email, p_name: `${row.first_name} ${row.last_name}`, p_entities: gates.nda.entities, p_scope: gates.nda.scope, p_reviewer: adminId });
+  if (error) throw new Error("NDA evidence is already bound to a different recipient or scope. Verify this recipient's own NDA");
+}
 function portalInviteRedirect(member: { first_name: string; entity: string; role: string; poll_id?: string | null; is_candidate?: boolean }) {
   const url = new URL("https://access.prscstandards.org/accept-invitation");
   url.searchParams.set("first_name", member.first_name);
@@ -289,6 +298,7 @@ export const invitePortalMember = createServerFn({ method: "POST" })
     const { data: reused, error: evidenceError } = await supabaseAdmin.from("governance_reviews").select("member_id").eq("kind", "nda").eq("notes", gates.nda.reference ?? "");
     if (evidenceError) throw evidenceError;
     if ((reused ?? []).some(r => r.member_id !== existing?.id)) throw new Error("This NDA reference is already recorded for another recipient. Verify this recipient's own executed NDA");
+    await bindInvitationNda(supabaseAdmin, data, context.userId, gates);
     if (pollId) {
       const { loadOpenPoll } = await import("@/lib/meeting-poll.server");
       if (!(await loadOpenPoll(pollId))) throw new Error("That meeting is no longer open for availability. Pick another or remove it.");
@@ -338,6 +348,7 @@ export const importPortalMembers = createServerFn({ method: "POST" })
         let userId: string | null = null;
         // Staged rows may wait for NDA/review; invitations may not.
         const gates = data.send_invitations ? invitationGates(row, context.userId) : null;
+        if (gates) await bindInvitationNda(supabaseAdmin, row, context.userId, gates);
 
         const { data: existingMember } = await supabaseAdmin
           .from("portal_members").select("user_id").eq("email", email).maybeSingle();

@@ -5,6 +5,8 @@ import { ArrowLeft, ArrowRight, BookOpen, Check, Lock, Mail } from "lucide-react
 import { STAGES, isOnboarding, lockedDocumentIds } from "@/lib/journey";
 
 import { acknowledgeDocument, requestHardCopy } from "@/lib/portal.functions";
+import { openBoldSign } from "@/lib/boldsign.functions";
+import { Button } from "@/components/ui/button";
 
 type Doc = {
   id: string;
@@ -106,11 +108,7 @@ function DocCard({ d, done, locked, onOpen }: { d: Doc; done?: Completion; locke
         {locked ? (
           <p className="inline-flex items-center gap-2 text-[13px] text-ivory/60"><Lock className="h-4 w-4" /> Opens after the previous document</p>
         ) : d.action === "boldsign" || d.action === "docusign" ? (
-          d.url && (
-            <a href={d.url} target="_blank" rel="noreferrer" className="cta-glow-outline inline-flex items-center gap-3 rounded-full px-5 py-2.5 text-[13px] transition-all">
-              <span className="relative z-10 flex items-center gap-3">Sign in BoldSign <ArrowRight className="h-4 w-4" /></span>
-            </a>
-          )
+          <BoldSignReader documentId={d.id} title={d.title} completed={!!done} />
         ) : (
           <button type="button" onClick={() => onOpen(d.id)} className="cta-glow-outline inline-flex items-center gap-3 rounded-full px-5 py-2.5 text-[13px] transition-all">
             <span className="relative z-10 flex items-center gap-3">
@@ -121,6 +119,21 @@ function DocCard({ d, done, locked, onOpen }: { d: Doc; done?: Completion; locke
       </div>
     </div>
   );
+}
+
+function BoldSignReader({ documentId, title, completed }: { documentId: string; title: string; completed: boolean }) {
+  const [url, setUrl] = useState("");
+  const client = useQueryClient();
+  const open = useMutation({ mutationFn: () => openBoldSign({ data: { document_id: documentId } }), onSuccess: result => setUrl(result.url) });
+  if (completed) return <a className="text-gold underline" href={`/api/public/portal-file?kind=executed&id=${documentId}`} onClick={e => e.preventDefault()}>Verified signed document</a>;
+  return <>
+    <Button type="button" variant="outline" disabled={open.isPending} onClick={() => open.mutate()}><BookOpen className="h-4 w-4" /> {open.isPending ? "Opening…" : "Review and Sign"}</Button>
+    {open.error && <p className="mt-3 text-sm text-gold">{open.error.message}</p>}
+    {url && <div role="dialog" aria-modal="true" aria-label={`Sign ${title}`} className="fixed inset-0 z-50 flex flex-col bg-navy-deep p-4">
+      <div className="mb-4 flex flex-wrap items-center justify-between gap-3"><h3 className="font-display text-xl">{title}</h3><a href={url} target="_blank" rel="noreferrer" className="text-gold underline">Open signing in a new tab</a><Button variant="outline" onClick={() => { setUrl(""); void client.invalidateQueries({ queryKey: ["my-documents"] }); }}>Return to Welcome Center</Button></div>
+      <iframe src={url} title={`BoldSign: ${title}`} className="min-h-0 flex-1 border border-border bg-background" />
+    </div>}
+  </>;
 }
 
 function DocumentReader({ doc, completion, onBack }: { doc: Doc; completion: Completion | null; onBack: () => void }) {

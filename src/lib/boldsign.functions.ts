@@ -1,6 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requirePortalAccess } from "./portal-access";
+import type { PortalDocumentRecord } from "./portal.functions";
 
 export const openBoldSign = createServerFn({ method: "POST" }).middleware([requirePortalAccess])
   .inputValidator(input => z.object({ document_id: z.string().uuid() }).parse(input))
@@ -14,7 +15,7 @@ export const openBoldSign = createServerFn({ method: "POST" }).middleware([requi
     const { data: releases } = await context.supabase.from("entity_onboarding_releases").select("entity").eq("member_id", member.id);
     const { lockedDocumentIds } = await import("./journey");
     const { appliesTo } = await import("./portal.functions");
-    const applicable = (all ?? []).filter(d => !d.superseded_at && appliesTo(d, member));
+    const applicable = ((all ?? []) as PortalDocumentRecord[]).filter(d => !d.superseded_at && appliesTo(d, member));
     if (lockedDocumentIds(applicable, new Set((acks ?? []).map(a => a.document_id)), member.entity, { forum: member.participates_in_forum !== false, released: { prsc: !!releases?.some(r => r.entity === "prsc"), dis: !!releases?.some(r => r.entity === "dis") } }).has(doc.id)) throw new Error("Complete the applicable earlier documents and await entity release");
     const { boldSignDocumentId } = await import("./boldsign-records");
     const id = boldSignDocumentId(doc.external_url);
