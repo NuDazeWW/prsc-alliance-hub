@@ -6,7 +6,7 @@ import { PrscMark } from "@/components/site/PrscMark";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { getPortalSession } from "@/lib/portal.functions";
-import { clearPortalLoginFailures, signInToPortal } from "@/lib/portal-auth.functions";
+import { clearPortalLoginFailures } from "@/lib/portal-auth.functions";
 
 export const Route = createFileRoute("/auth")({
   validateSearch: (search: Record<string, unknown>) => ({
@@ -54,18 +54,11 @@ function AuthPage() {
         const { error } = await supabase.auth.updateUser({ password }); if (error) throw error;
         await clearPortalLoginFailures();
       } else {
-        const result = await signInToPortal({ data: { email, password } });
-        if (!result.ok) {
-          if (result.resetRequired) {
-            setMode("reset");
-            setPassword("");
-            setMessage("Three unsuccessful sign-in attempts require a password reset. Send instructions below to continue.");
-            return;
-          }
-          throw new Error("The email or password was not recognized.");
-        }
-        const { error } = await supabase.auth.setSession({ access_token: result.accessToken, refresh_token: result.refreshToken });
-        if (error) throw new Error("We could not complete sign-in. Please try again.");
+        // Send credentials directly to the identity provider so its IP-based
+        // protections see the caller, not a shared server proxy. Never write a
+        // durable account lock keyed by an unauthenticated caller's email.
+        const { error } = await supabase.auth.signInWithPassword({ email: email.trim().toLowerCase(), password });
+        if (error) throw new Error(error.status === 429 ? "Too many attempts. Please wait before trying again." : "The email or password was not recognized.");
       }
       try {
         const s = await getPortalSession();
