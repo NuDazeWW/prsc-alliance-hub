@@ -3,7 +3,7 @@ import { strictEqual, deepStrictEqual } from "node:assert";
 import { entityAppointmentStatus, roleCombinationTier, roleReviewBlocks, ndaProblem, documentVisible, appointmentProblems, governanceStatusLabel } from "./governance";
 
 const nda = { verified_at: "2026-10-01", verified_by: "admin", reference: "Vault/NDA-001", entities: "prsc", scope: "Forum materials" };
-const pending = { nda_verified_at: "2026-10-01", forum_clearance_status: "not_reviewed" };
+const pending = { nda_verified_at: "2026-10-01", forum_clearance_status: "not_reviewed", addendum_complete: true };
 
 describe("NDA gate", () => {
   it("blocks invitation with no NDA verification", () => {
