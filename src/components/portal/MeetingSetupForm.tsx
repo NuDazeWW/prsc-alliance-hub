@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { createMeetingPoll, listInvitableMembers } from "@/lib/meetings.functions";
+import { pollWordingWarning } from "@/lib/meeting-confirmations";
 import { DEFAULT_MEETING_TZ, formatSlot, MEETING_TIMEZONES, timezoneLabel, zonedToUtc } from "@/lib/meeting-block";
 
 type MeetingType = "board" | "advisory" | "methodology";
@@ -180,6 +181,7 @@ export function MeetingSetupForm({
         <label className="block sm:col-span-2">
           <span className={labelCls}>Description / context (optional)</span>
           <textarea value={description} onChange={(e) => setDescription(e.target.value)} rows={2} className={inputCls} />
+          {pollWordingWarning(title, description) && <span role="alert" className="mt-1 block text-sm text-gold">{pollWordingWarning(title, description)}</span>}
         </label>
         <label className="block">
           <span className={labelCls}>Format</span>
