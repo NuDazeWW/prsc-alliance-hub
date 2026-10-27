@@ -1,5 +1,11 @@
 # Portal build roadmap
 
+## Final member documents access correction (Oct 27)
+- [x] Remove profile prerequisite from member document loading, navigation, and document dialog; preserve server authorization
+- [ ] Verify released fictional Stage 1 action through an incomplete-profile member session and deny unreleased direct calls
+- [ ] Confirm Test 2 setup created no entity onboarding release; reuse existing BoldSign evidence without another signing transaction
+- [ ] Return focused PASS/FAIL; Gate B remains paused
+
 ## Final integrated portal corrections (Oct 27)
 - [x] Correct stateless BoldSign Verification callback, focused tests, limited authorized publication and live verification (live HTTP 200; ordinary unsigned events HTTP 503)
 - [ ] Complete exact-assignment electronic signing, verified completion/evidence and duplicate protection (fictional nonbinding test; requires founder webhook configuration)
