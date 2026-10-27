@@ -1,5 +1,12 @@
 # Portal build roadmap
 
+## Founder security review and published rehearsal (Oct 27)
+- [ ] Review the leadership_settings finding, candidate direct reads and server authorization; return disposition for founder approval before publishing
+- [ ] Publish latest tested code only after the security review is resolved (founder gate)
+- [ ] Run controlled published-site member and meeting rehearsal (retain fictional accounts; requires controlled inbox activation)
+- [ ] Load approved v1.4 Stage 1 documents (waiting on founder operational approval and files)
+- [ ] Return release report and roster eligibility; remove/archive fictional accounts only after founder hands-on completion approval
+
 ## Pending Appointment update (Oct 26)
 - [x] Derive independent PRSC/DIS Candidate, Pending Appointment and Appointed designations from existing journey records
 - [x] Test both entity progressions, review gates and mixed statuses without changing records or sending invitations
