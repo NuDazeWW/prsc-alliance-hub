@@ -1,4 +1,5 @@
 import { createServerFn } from "@tanstack/react-start";
+import { assertNdaRecipient, assertInviteIdentity } from "@/lib/invitation-evidence";
 import { z } from "zod";
 import { getRequest } from "@tanstack/react-start/server";
 import { requirePortalAccess } from "@/lib/portal-access";
@@ -221,6 +222,7 @@ const inviteSchema = z.object({
   is_candidate: z.boolean().optional(),
   poll_id: z.string().uuid().nullable().optional(),
   nda_confirmed: z.boolean().optional(),
+  nda_recipient_email: z.string().trim().email().max(200).optional(),
   nda_reference: z.string().trim().max(400).optional(),
   nda_entities: entitySchema.optional(),
   nda_scope: z.string().trim().max(600).optional(),
@@ -242,6 +244,7 @@ function normalizeCandidate<T extends InviteInput>(m: T): T {
 
 /** NDA and role-combination gates every invitation must pass, before any account is created. */
 function invitationGates(m: InviteInput, adminId: string) {
+  assertNdaRecipient(m.email, m.nda_recipient_email);
   const nda = { verified_at: m.nda_confirmed ? new Date().toISOString() : null, verified_by: m.nda_confirmed ? adminId : null, reference: m.nda_reference ?? null, entities: m.nda_entities ?? null, scope: m.nda_scope ?? null };
   const ndaErr = ndaProblem(nda, m.entity);
   if (ndaErr) throw new Error(`${m.email}: ${ndaErr}`);
@@ -254,14 +257,23 @@ function invitationGates(m: InviteInput, adminId: string) {
       nda_verified_at: nda.verified_at, nda_verified_by: nda.verified_by, nda_reference: nda.reference, nda_entities: nda.entities, nda_scope: nda.scope,
       role_review_status: combo.tier === "review" ? "approved" : initialRoleReviewStatus(m.entity, m.role, m.is_methodology_committee ?? false),
     },
-    review: combo.tier === "review" ? m.role_review! : null,
+    review: combo.tier === "review" ? m.role_review ?? null : null,
   };
 }
 
 async function recordInviteReviews(admin: any, memberId: string, adminId: string, gates: ReturnType<typeof invitationGates>) {
-  const rows: any[] = [{ member_id: memberId, kind: "nda", decision: "verified", reviewer_id: adminId, notes: gates.nda.reference, details: { entities: gates.nda.entities, scope: gates.nda.scope } }];
+  const rows: any[] = [{ member_id: memberId, kind: "nda", decision: "verified", reviewer_id: adminId, notes: gates.nda.reference, details: { entities: gates.nda.entities, scope: gates.nda.scope, verified_at: gates.nda.verified_at } }];
   if (gates.review) rows.push({ member_id: memberId, kind: "role_combination", decision: "approved", reviewer_id: adminId, notes: gates.review.notes, details: { prsc_scope: gates.review.prsc_scope, dis_scope: gates.review.dis_scope, conflict_controls: gates.review.conflict_controls } });
   await admin.from("governance_reviews").insert(rows);
+}
+async function bindInvitationNda(admin: any, row: InviteInput, adminId: string, gates: ReturnType<typeof invitationGates>) {
+  const { data: oldMember, error: oldError } = await admin.from("portal_members").select("id").eq("email", row.email.toLowerCase()).maybeSingle();
+  if (oldError) throw oldError;
+  const { data: oldReviews, error: reviewError } = await admin.from("governance_reviews").select("member_id").eq("kind", "nda").eq("notes", gates.nda.reference);
+  if (reviewError) throw reviewError;
+  if ((oldReviews ?? []).some((r: { member_id: string }) => r.member_id !== oldMember?.id)) throw new Error("This NDA reference belongs to another recipient");
+  const { error } = await admin.rpc("bind_invitation_nda", { p_reference: gates.nda.reference, p_email: row.email, p_name: `${row.first_name} ${row.last_name}`, p_entities: gates.nda.entities, p_scope: gates.nda.scope, p_reviewer: adminId });
+  if (error) throw new Error("NDA evidence is already bound to a different recipient or scope. Verify this recipient's own NDA");
 }
 function portalInviteRedirect(member: { first_name: string; entity: string; role: string; poll_id?: string | null; is_candidate?: boolean }) {
   const url = new URL("https://access.prscstandards.org/accept-invitation");
@@ -280,7 +292,13 @@ export const invitePortalMember = createServerFn({ method: "POST" })
     const data = normalizeCandidate(rawData);
     const gates = invitationGates(data, context.userId);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const { poll_id: pollId, nda_confirmed: _n, nda_reference: _r, nda_entities: _e, nda_scope: _s, role_review: _rv, ...member } = data;
+    const { poll_id: pollId, nda_confirmed: _n, nda_recipient_email: _ne, nda_reference: _r, nda_entities: _e, nda_scope: _s, role_review: _rv, ...member } = data;
+    const { data: existing, error: existingError } = await supabaseAdmin.from("portal_members").select("id,user_id").eq("email", data.email.toLowerCase()).maybeSingle();
+    if (existingError) throw existingError;
+    const { data: reused, error: evidenceError } = await supabaseAdmin.from("governance_reviews").select("member_id").eq("kind", "nda").eq("notes", gates.nda.reference ?? "");
+    if (evidenceError) throw evidenceError;
+    if ((reused ?? []).some(r => r.member_id !== existing?.id)) throw new Error("This NDA reference is already recorded for another recipient. Verify this recipient's own executed NDA");
+    await bindInvitationNda(supabaseAdmin, data, context.userId, gates);
     if (pollId) {
       const { loadOpenPoll } = await import("@/lib/meeting-poll.server");
       if (!(await loadOpenPoll(pollId))) throw new Error("That meeting is no longer open for availability. Pick another or remove it.");
@@ -290,6 +308,7 @@ export const invitePortalMember = createServerFn({ method: "POST" })
       data: { first_name: member.first_name, last_name: member.last_name, entity: member.entity, role: member.role },
     });
     if (inviteError || !invitation.user) throw inviteError ?? new Error("Invitation could not be created");
+    assertInviteIdentity(data.email, invitation.user.email, existing?.user_id ?? null, invitation.user.id);
     const { data: saved, error: memberError } = await supabaseAdmin.from("portal_members").upsert({
       user_id: invitation.user.id, email: member.email.toLowerCase(), first_name: member.first_name,
       last_name: member.last_name, organization: member.organization, title: member.title || null,
@@ -329,6 +348,7 @@ export const importPortalMembers = createServerFn({ method: "POST" })
         let userId: string | null = null;
         // Staged rows may wait for NDA/review; invitations may not.
         const gates = data.send_invitations ? invitationGates(row, context.userId) : null;
+        if (gates) await bindInvitationNda(supabaseAdmin, row, context.userId, gates);
 
         const { data: existingMember } = await supabaseAdmin
           .from("portal_members").select("user_id").eq("email", email).maybeSingle();
@@ -640,7 +660,7 @@ function memberVisible(docs: PortalDocumentRecord[], m: DocMember, done: Set<str
   return docs.filter((d: any) => documentVisible({ classification: d.classification ?? "entity_confidential", superseded_at: d.superseded_at ?? null, is_forum_prep: !!d.is_forum_prep, journey_stage: d.journey_stage ?? null, member_specific: !!d.member_id }, vm, done.has(d.id)));
 }
 
-function appliesTo(doc: PortalDocumentRecord, m: DocMember) {
+export function appliesTo(doc: PortalDocumentRecord, m: DocMember) {
   // Members opted out of the Forum never receive Stage 1 documents.
   if (m.participates_in_forum === false && (doc as any).journey_stage === 1) return false;
   if (doc.member_id) return doc.member_id === m.id;
@@ -807,10 +827,11 @@ export const acknowledgeDocument = createServerFn({ method: "POST" })
     const docs = memberVisible(await applicableDocuments(context.supabase, member as DocMember), member as DocMember, priorDone).filter(isActive);
     const doc = docs.find((d) => d.id === data.document_id);
     if (!doc) throw new Error("Document unavailable");
+    if (doc.action === "boldsign" || doc.action === "docusign") throw new Error("Complete this document through verified electronic signing");
     const isConflictForm = /conflict|recusal/i.test(doc.title);
     if (isConflictForm && !data.conflict_answer) throw new Error("Choose your conflict answer before signing");
     const { released } = await entityReleases(context.supabase, member.id);
-    if (lockedDocumentIds(docs, priorDone, member.entity, { released }).has(doc.id)) throw new Error("Please complete the earlier documents in your journey first");
+    if (lockedDocumentIds(docs, priorDone, member.entity, { released, forum: member.participates_in_forum !== false }).has(doc.id)) throw new Error("Please complete the earlier documents in your journey first");
     if (data.kind === "signed") {
       if (!data.signed_name || data.signed_name.length < 2) throw new Error("Type your full legal name to sign");
       if (!data.signature_data?.startsWith("data:image/png;base64,")) throw new Error("Add your signature");
@@ -854,9 +875,9 @@ export const acknowledgeDocument = createServerFn({ method: "POST" })
     }
     await maybeCompletePackage(member as any);
     // Sequential journey: tell the member when this completion unlocks the next document.
-    const before = lockedDocumentIds(docs, priorDone, member.entity, { released });
+    const before = lockedDocumentIds(docs, priorDone, member.entity, { released, forum: member.participates_in_forum !== false });
     const afterDone = new Set(priorDone).add(doc.id);
-    const after = lockedDocumentIds(docs, afterDone, member.entity, { released });
+    const after = lockedDocumentIds(docs, afterDone, member.entity, { released, forum: member.participates_in_forum !== false });
     const unlocked = docs.filter((d) => before.has(d.id) && !after.has(d.id) && !afterDone.has(d.id));
     if (unlocked.length) {
       const { sendPortalEmail } = await import("@/lib/portal-notify.server");

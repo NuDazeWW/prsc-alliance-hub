@@ -148,6 +148,20 @@
       "when": 1793071104234,
       "tag": "0020_leadership_private_projection_boundary",
       "breakpoints": true
+    },
+    {
+      "idx": 21,
+      "version": "7",
+      "when": 1793075358737,
+      "tag": "0021_boldsign_verified_assignments",
+      "breakpoints": true
+    },
+    {
+      "idx": 22,
+      "version": "7",
+      "when": 1793075521940,
+      "tag": "0022_recipient_bound_invitation_nda",
+      "breakpoints": true
     }
   ]
 }

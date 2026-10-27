@@ -1,4 +1,5 @@
 import { csvCell } from "@/lib/csv";
+import { freshInviteGovernance, normalizedRecipient } from "@/lib/invitation-evidence";
 import { useStoredFlag } from "@/hooks/use-stored-flag";
 import { ChevronDown, ChevronUp } from "lucide-react";
 import { AdminLeadership } from "@/components/portal/AdminLeadership";
@@ -332,9 +333,9 @@ function downloadListTemplate() {
   URL.revokeObjectURL(url);
 }
 
-type InviteGov = { nda_confirmed: boolean; nda_reference: string; nda_entities: "" | "prsc" | "dis" | "both"; nda_scope: string; review_notes: string; prsc_scope: string; dis_scope: string; conflict_controls: string };
+type InviteGov = ReturnType<typeof freshInviteGovernance>;
 /** Fresh per-recipient governance state; NDA coverage is never preselected. */
-const EMPTY_INVITE_GOV: InviteGov = { nda_confirmed: false, nda_reference: "", nda_entities: "", nda_scope: "", review_notes: "", prsc_scope: "", dis_scope: "", conflict_controls: "" };
+const EMPTY_INVITE_GOV: InviteGov = freshInviteGovernance();
 
 export function AdminCenter({ page }: { page: "overview" | "send" }) {
   const [hasSession, setHasSession] = useState(false);
@@ -433,6 +434,11 @@ export function AdminCenter({ page }: { page: "overview" | "send" }) {
   const [invitePreviewOpen, setInvitePreviewOpen] = useState(false);
   const [invitePreviewHtml, setInvitePreviewHtml] = useState("");
   const inviteFormRef = useRef<HTMLFormElement>(null);
+  function resetInvitation() {
+    setInviteDraft({ ...emptyInvite }); setInviteGov(freshInviteGovernance()); setInvitePollId("");
+    setInvitePreviewOpen(false); setInvitePreviewHtml(""); setAiLinkedin(""); setAiBackground(""); setAiStatus("");
+    inviteFormRef.current?.reset();
+  }
   const [draft, setDraft] = useState<Draft>(emptyDraft);
   const [emailMode, setEmailMode] = useState<"compose" | "template">("compose");
   const isTemplateMode = emailMode === "template";
@@ -692,14 +698,12 @@ export function AdminCenter({ page }: { page: "overview" | "send" }) {
     try {
       const needsReview = !inviteDraft.is_candidate && roleCombinationTier(inviteDraft.entity, inviteDraft.role, inviteDraft.is_methodology_committee ?? false).tier === "review";
       await invitePortalMember({ data: { ...inviteDraft, poll_id: invitePollId || null,
-        nda_confirmed: inviteGov.nda_confirmed, nda_reference: inviteGov.nda_reference, nda_entities: inviteGov.nda_entities || undefined, nda_scope: inviteGov.nda_scope,
+        nda_confirmed: inviteGov.nda_confirmed, nda_recipient_email: inviteGov.nda_recipient_email, nda_reference: inviteGov.nda_reference, nda_entities: inviteGov.nda_entities || undefined, nda_scope: inviteGov.nda_scope,
         role_review: needsReview ? { decision: "approved", notes: inviteGov.review_notes, prsc_scope: inviteGov.prsc_scope, dis_scope: inviteGov.dis_scope, conflict_controls: inviteGov.conflict_controls } : undefined } });
       setStatus(invitePollId ? "Invitation sent with the meeting dates attached." : "Invitation sent.");
       setInvitePollId("");
       void polls.refetch();
-      form.reset();
-      setInviteDraft(emptyInvite);
-      setInviteGov(EMPTY_INVITE_GOV); // never carry one recipient's NDA or review data to the next
+      resetInvitation();
       await overview.refetch();
     } catch (error) {
       setStatus(error instanceof Error ? error.message : "Invitation failed.");
@@ -1021,7 +1025,7 @@ export function AdminCenter({ page }: { page: "overview" | "send" }) {
           <div className="contents">
             <section className={`${S("send",1)} admin-card p-6 sm:p-8 ${inviteCollapsed ? "[&>*:not(:first-child)]:hidden" : ""}`}>
               <div className="flex items-start justify-between gap-3">
-                <button type="button" onClick={() => setInviteCollapsed(!inviteCollapsed)} aria-expanded={!inviteCollapsed} className="flex items-center gap-3 text-left">
+                <button type="button" onClick={() => { resetInvitation(); setInviteCollapsed(!inviteCollapsed); }} aria-expanded={!inviteCollapsed} className="flex items-center gap-3 text-left">
                   <MailPlus className="h-7 w-7 text-gold" />
                   <h2 id="invite" className="scroll-mt-20 font-display text-3xl">Invite a member</h2>
                   {inviteCollapsed && <span className="text-sm text-ivory/50">Click to expand</span>}
@@ -1035,7 +1039,7 @@ export function AdminCenter({ page }: { page: "overview" | "send" }) {
               <form ref={inviteFormRef} onSubmit={invite} className="mt-7 grid gap-4 sm:grid-cols-2">
                 <Input name="first_name" value={inviteDraft.first_name} onChange={(e) => setInviteDraft({ ...inviteDraft, first_name: e.target.value })} placeholder="First name" required className="text-base" />
                 <Input name="last_name" value={inviteDraft.last_name} onChange={(e) => setInviteDraft({ ...inviteDraft, last_name: e.target.value })} placeholder="Last name" required className="text-base" />
-                <Input name="email" type="email" value={inviteDraft.email} onChange={(e) => setInviteDraft({ ...inviteDraft, email: e.target.value })} placeholder="Email" required className="text-base" />
+                <Input name="email" type="email" value={inviteDraft.email} onChange={(e) => { if (normalizedRecipient(e.target.value) !== normalizedRecipient(inviteDraft.email)) { setInviteGov(freshInviteGovernance()); setInvitePreviewHtml(""); setInvitePreviewOpen(false); } setInviteDraft({ ...inviteDraft, email: e.target.value }); }} placeholder="Email" required className="text-base" />
                 <p className="text-sm uppercase tracking-[0.16em] text-gold/80 sm:col-span-2">Current position <span className="normal-case tracking-normal text-ivory/45">— optional</span></p>
                 <Input name="organization" value={inviteDraft.organization} onChange={(e) => setInviteDraft({ ...inviteDraft, organization: e.target.value })} placeholder="Current company / organization (optional)" aria-label="Current company or organization (optional)" className="text-base" />
                 <Input name="title" value={inviteDraft.title} onChange={(e) => setInviteDraft({ ...inviteDraft, title: e.target.value })} placeholder="Current professional title (optional)" aria-label="Current professional title (optional)" className="text-base" />
@@ -1104,7 +1108,7 @@ export function AdminCenter({ page }: { page: "overview" | "send" }) {
                     <option value="">Choose NDA coverage…</option><option value="prsc">NDA covers PRSC</option><option value="dis">NDA covers DIS</option><option value="both">NDA covers PRSC and DIS</option>
                   </select>
                   <Input value={inviteGov.nda_scope} onChange={(e) => setInviteGov({ ...inviteGov, nda_scope: e.target.value })} placeholder="Information-sharing scope" className="text-base" />
-                  <label className="flex items-center gap-3 sm:col-span-3"><input type="checkbox" checked={inviteGov.nda_confirmed} onChange={(e) => setInviteGov({ ...inviteGov, nda_confirmed: e.target.checked })} className="h-4 w-4" /><span className="text-base text-ivory/85">I verified this executed NDA today</span></label>
+                  <label className="flex items-center gap-3 sm:col-span-3"><input type="checkbox" checked={inviteGov.nda_confirmed} disabled={!inviteDraft.email.trim()} onChange={(e) => setInviteGov({ ...inviteGov, nda_confirmed: e.target.checked, nda_recipient_email: e.target.checked ? normalizedRecipient(inviteDraft.email) : "" })} className="h-4 w-4" /><span className="text-base text-ivory/85">I verified this executed NDA today for {inviteDraft.email || "this recipient"}</span></label>
                 </div>
                 {!inviteDraft.is_candidate && roleCombinationTier(inviteDraft.entity, inviteDraft.role, inviteDraft.is_methodology_committee ?? false).tier === "review" && (
                   <div className="grid gap-3 border border-amber-400/40 p-4 sm:col-span-2 sm:grid-cols-2">

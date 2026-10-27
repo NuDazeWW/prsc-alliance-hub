@@ -105,4 +105,15 @@ describe("independent Forum and entity onboarding", () => {
   it("historical completions stay unlocked without a release", () => {
     strictEqual(lockedDocumentIds(set, new Set(["p2"]), "prsc", none).has("p2"), false);
   });
+  for (const entity of ["prsc", "dis"] as const) {
+    it(`opt-out ${entity} skips Forum with full inputs but preserves release and genuine sequencing`, () => {
+      const fixture = [d("forum", 1, "shared"), d("first", 2, entity), d("second", 2, entity, 1), d("accept", 3, entity)];
+      strictEqual(lockedDocumentIds(fixture, new Set(), entity, { ...none, forum: false }).has("first"), true);
+      const opts = { released: { prsc: entity === "prsc", dis: entity === "dis" }, forum: false };
+      const before = lockedDocumentIds(fixture, new Set(), entity, opts);
+      strictEqual(before.has("first"), false); strictEqual(before.has("second"), true);
+      strictEqual(lockedDocumentIds(fixture, new Set(["first"]), entity, opts).has("second"), false);
+      strictEqual(entityAcceptanceComplete(fixture, new Set(["first"]), entity)[entity], false);
+    });
+  }
 });

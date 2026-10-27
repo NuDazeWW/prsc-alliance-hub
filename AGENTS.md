@@ -11,7 +11,7 @@
 
 - Use the shared member-role presentation helper for member designations across portal, admin, and emails; stored role values and permissions remain independent of display wording.
 - Derive entity acceptance completion from applicable active Stage 2–3 documents in journey.ts, then apply governance.ts appointment review gates through memberDesignation; hydrate reads with withAppointmentProgress. Why: independent PRSC/DIS designations stay consistent without writes or automatic activation.
-- The Orientation Hub owns a fixed-body scroll lock with cleanup, and resets its dialog scroll before painting each view; keep background position stable during navigation.
+- Orientation Hub locks body scrolling with cleanup and resets dialog scroll before painting. Why: background stays stable.
 
 - Automatic emails load admin-editable copy by `system_key` via `loadSystemEmail`, with originals in `src/lib/system-email-defaults.ts`; edit wording there, not inline in send code, so admin edits and Reset keep working.
 - Meeting details in emails come from the shared `meetingBlockText` helper, and attaching a meeting always enrolls the recipients in that poll, so the email and the Welcome Center card match.
@@ -36,3 +36,6 @@
 - Private member files use authenticated portal-file fetches, and calendar downloads require current access. Why: new member links cannot bypass revocation; old storage links expire on their original schedule.
 - Password login calls the identity provider directly; anonymous email-keyed locks never govern access. Why: retain provider IP protections without attacker-triggered account denial.
 - Export text uses csvCell. Why: CSV quoting does not prevent spreadsheet formulas.
+
+- BoldSign Verification requires matching header/payload and has no side effects; operational callbacks require HMAC. Signing uses exact member/document/version assignments with atomic completion. Why: spoofing and retries cannot misattribute or duplicate evidence.
+- NDA invitations reset per recipient and verify recipient-bound evidence on the server. Why: one executive’s NDA cannot authorize another.

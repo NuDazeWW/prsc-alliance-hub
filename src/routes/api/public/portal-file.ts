@@ -8,7 +8,7 @@ export const Route = createFileRoute("/api/public/portal-file")({
     const token = request.headers.get("authorization")?.match(/^Bearer (.+)$/)?.[1];
     if (!token) return new Response("Unauthorized", { status: 401 });
     const params = Object.fromEntries(new URL(request.url).searchParams);
-    const input = z.object({ kind: z.enum(["document", "headshot", "leader"]), id: z.string().uuid() }).safeParse(params);
+    const input = z.object({ kind: z.enum(["document", "executed", "audit", "headshot", "leader"]), id: z.string().uuid() }).safeParse(params);
     if (!input.success) return new Response("Not found", { status: 404 });
     const { supabaseAdmin: sb } = await import("@/integrations/supabase/client.server");
     const { data: auth, error } = await sb.auth.getUser(token);
@@ -21,7 +21,11 @@ export const Route = createFileRoute("/api/public/portal-file")({
     if (!portalAccessAllowed(member, admin)) return new Response("Forbidden", { status: 403 });
     let bucket = "member-documents";
     let path: string | null = null;
-    if (input.data.kind === "document") {
+    if (input.data.kind === "executed" || input.data.kind === "audit") {
+      const { data: assignment } = await sb.from("boldsign_assignments").select("member_id,status,executed_path,audit_path").eq("document_id", input.data.id).eq("member_id", admin ? (params["member"] ?? member?.id ?? "") : (member?.id ?? "")).maybeSingle();
+      if (!assignment || assignment.status !== "completed" || (!admin && assignment.member_id !== member?.id)) return new Response("Forbidden", { status: 403 });
+      path = input.data.kind === "audit" ? assignment.audit_path : assignment.executed_path;
+    } else if (input.data.kind === "document") {
       const { data: doc } = await sb.from("portal_documents").select("*").eq("id", input.data.id).maybeSingle();
       if (!doc) return new Response("Not found", { status: 404 });
       if (!admin) {
