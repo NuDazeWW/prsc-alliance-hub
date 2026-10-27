@@ -132,6 +132,14 @@ Limit for fix 8: the automatic BoldSign trigger is built and tested with mocked 
 - E. Clearance loss: if clearance is withdrawn, the Jared brief and Executive Questions close immediately, including mid-session. This is intended.
 - No other conflicts found with the ten-step journey or the profile encouragement.
 
+## Final founder approval (Oct 27, 21:55): these points override anything above
+- Countersignature is a per-document setting, off by default. Nothing requires an entity countersignature automatically, and no mailbox becomes a signatory. Parties are set later from the approved Addendum and counsel's determination. This resolves Flag A.
+- BoldSign: the portal prepares the approved assignment automatically, but "Review and Sign" starts or resumes the member's single existing embedded session. Requests are never duplicated, and BoldSign sends no emails of its own (embedded only).
+- Entity onboarding: the admin's entity-specific Stage 2 release is the access event. The email only notifies. The existing separate PRSC/DIS pages and approvals stay as they are.
+- Conflict and clearance: finalized answers are merged into the document before signing. The executed PDF, the unchangeable answers and the audit trail are all kept. Clearance requires completed prerequisites plus a separate admin conflict-review decision.
+- Admin notices go only to admin@readinessterminal.com, as sign-in-required portal links with no attachments. A check confirms that admin can open the retained evidence.
+- No new pages, redesign, live signing, unapproved uploads, publishing or real invitations. Gate B stays paused. The result is one PASS/FAIL report.
+
 ## Technical notes
 - Three migrations: the Addendum and restricted-grant helpers with the read-policy update, the `restricted_document_grants` table, and the `meeting_confirmation_sends` table plus the assignment snapshot columns. Each includes grants and RLS.
 - Rules stay in `governance.ts`, `journey.ts` and `meetings.functions.ts`, following AGENTS.md.
