@@ -1,4 +1,5 @@
 import { createServerFn } from "@tanstack/react-start";
+import { assertNdaRecipient, assertInviteIdentity } from "@/lib/invitation-evidence";
 import { z } from "zod";
 import { getRequest } from "@tanstack/react-start/server";
 import { requirePortalAccess } from "@/lib/portal-access";
@@ -221,6 +222,7 @@ const inviteSchema = z.object({
   is_candidate: z.boolean().optional(),
   poll_id: z.string().uuid().nullable().optional(),
   nda_confirmed: z.boolean().optional(),
+  nda_recipient_email: z.string().trim().email().max(200).optional(),
   nda_reference: z.string().trim().max(400).optional(),
   nda_entities: entitySchema.optional(),
   nda_scope: z.string().trim().max(600).optional(),
@@ -242,6 +244,7 @@ function normalizeCandidate<T extends InviteInput>(m: T): T {
 
 /** NDA and role-combination gates every invitation must pass, before any account is created. */
 function invitationGates(m: InviteInput, adminId: string) {
+  assertNdaRecipient(m.email, m.nda_recipient_email);
   const nda = { verified_at: m.nda_confirmed ? new Date().toISOString() : null, verified_by: m.nda_confirmed ? adminId : null, reference: m.nda_reference ?? null, entities: m.nda_entities ?? null, scope: m.nda_scope ?? null };
   const ndaErr = ndaProblem(nda, m.entity);
   if (ndaErr) throw new Error(`${m.email}: ${ndaErr}`);
@@ -254,12 +257,12 @@ function invitationGates(m: InviteInput, adminId: string) {
       nda_verified_at: nda.verified_at, nda_verified_by: nda.verified_by, nda_reference: nda.reference, nda_entities: nda.entities, nda_scope: nda.scope,
       role_review_status: combo.tier === "review" ? "approved" : initialRoleReviewStatus(m.entity, m.role, m.is_methodology_committee ?? false),
     },
-    review: combo.tier === "review" ? m.role_review! : null,
+    review: combo.tier === "review" ? m.role_review ?? null : null,
   };
 }
 
 async function recordInviteReviews(admin: any, memberId: string, adminId: string, gates: ReturnType<typeof invitationGates>) {
-  const rows: any[] = [{ member_id: memberId, kind: "nda", decision: "verified", reviewer_id: adminId, notes: gates.nda.reference, details: { entities: gates.nda.entities, scope: gates.nda.scope } }];
+  const rows: any[] = [{ member_id: memberId, kind: "nda", decision: "verified", reviewer_id: adminId, notes: gates.nda.reference, details: { entities: gates.nda.entities, scope: gates.nda.scope, verified_at: gates.nda.verified_at } }];
   if (gates.review) rows.push({ member_id: memberId, kind: "role_combination", decision: "approved", reviewer_id: adminId, notes: gates.review.notes, details: { prsc_scope: gates.review.prsc_scope, dis_scope: gates.review.dis_scope, conflict_controls: gates.review.conflict_controls } });
   await admin.from("governance_reviews").insert(rows);
 }
@@ -280,7 +283,12 @@ export const invitePortalMember = createServerFn({ method: "POST" })
     const data = normalizeCandidate(rawData);
     const gates = invitationGates(data, context.userId);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const { poll_id: pollId, nda_confirmed: _n, nda_reference: _r, nda_entities: _e, nda_scope: _s, role_review: _rv, ...member } = data;
+    const { poll_id: pollId, nda_confirmed: _n, nda_recipient_email: _ne, nda_reference: _r, nda_entities: _e, nda_scope: _s, role_review: _rv, ...member } = data;
+    const { data: existing, error: existingError } = await supabaseAdmin.from("portal_members").select("id,user_id").eq("email", data.email.toLowerCase()).maybeSingle();
+    if (existingError) throw existingError;
+    const { data: reused, error: evidenceError } = await supabaseAdmin.from("governance_reviews").select("member_id").eq("kind", "nda").eq("notes", gates.nda.reference ?? "");
+    if (evidenceError) throw evidenceError;
+    if ((reused ?? []).some(r => r.member_id !== existing?.id)) throw new Error("This NDA reference is already recorded for another recipient. Verify this recipient's own executed NDA");
     if (pollId) {
       const { loadOpenPoll } = await import("@/lib/meeting-poll.server");
       if (!(await loadOpenPoll(pollId))) throw new Error("That meeting is no longer open for availability. Pick another or remove it.");
@@ -290,6 +298,7 @@ export const invitePortalMember = createServerFn({ method: "POST" })
       data: { first_name: member.first_name, last_name: member.last_name, entity: member.entity, role: member.role },
     });
     if (inviteError || !invitation.user) throw inviteError ?? new Error("Invitation could not be created");
+    assertInviteIdentity(data.email, invitation.user.email, existing?.user_id ?? null, invitation.user.id);
     const { data: saved, error: memberError } = await supabaseAdmin.from("portal_members").upsert({
       user_id: invitation.user.id, email: member.email.toLowerCase(), first_name: member.first_name,
       last_name: member.last_name, organization: member.organization, title: member.title || null,
