@@ -44,3 +44,12 @@ One concise report in Files containing: the version tested, the label for each f
 - Files likely touched: `src/lib/portal.functions.ts` (turn off `sendSignedCopy`, audit the signing-record lookup), `src/components/portal/AdminCenter.tsx` or the admin documents panel (disable the control), possibly one small migration if a meeting or question table lacks the restrictive `portal_access_current()` policy, and a new `node:test` case file in `src/lib`.
 - Signed-copy link inventory comes from the email send log, filtered to template `signed-copy-member`.
 - Mark findings Fixed in the security panel only after the current code and tests confirm it. Record the heading exception as ignored, with the founder's approval as the reason.
+
+## Founder clarifications (approved)
+- Signing records: verify a signed-in member can read their own signing records and executed documents (including completed Forum documents). Reject signed-out requests, revoked members, and requests for another member's records.
+- Historical signed links: work out expiry from the link's own details where they're available, not by assuming send date + 7 days. Find out whether any unexpired link contains real member information; if none does, record that and close the item. Turn off every outside email route for signed copies on the server, not just the visible button. Members keep secure portal access.
+- Testing: current-code inspection, targeted automated tests, and signed-in backend checks with the existing fictional accounts. A full first-login walkthrough on the published site is not required before Gate A; it happens right after publishing for test accounts.
+- Findings: match all 16 to their original scanner IDs and record each one's current status. The heading exception covers only the generic text in `leadership_settings`. Accepted findings are not reopened without evidence of a different vulnerability.
+- Recommendation: GO/NO-GO for Gate A (security-approved publishing for fictional-account testing). Gate B (real executive invitations) remains founder-approved only, after a successful published-site rehearsal and the document, NDA and scheduling checks. If no verified launch-critical vulnerability remains, recommend Gate A without another broad review. Noncritical limits are documented and assigned for later work.
+- Keep unchanged: portal architecture, first-login sequence, appointment controls, existing records. Not authorized: real invitations, confidential briefing releases, appointment activations.
+- On approval, add this task to roadmap.md.
