@@ -47,6 +47,69 @@ export type Database = {
         }
         Relationships: []
       }
+      boldsign_assignments: {
+        Row: {
+          audit_path: string | null
+          boldsign_document_id: string
+          completed_at: string | null
+          created_at: string
+          document_id: string
+          entity: string
+          executed_path: string | null
+          id: string
+          member_id: string
+          signer_completed_at: string | null
+          signer_email: string
+          status: string
+          version_label: string
+        }
+        Insert: {
+          audit_path?: string | null
+          boldsign_document_id: string
+          completed_at?: string | null
+          created_at?: string
+          document_id: string
+          entity: string
+          executed_path?: string | null
+          id?: string
+          member_id: string
+          signer_completed_at?: string | null
+          signer_email: string
+          status?: string
+          version_label: string
+        }
+        Update: {
+          audit_path?: string | null
+          boldsign_document_id?: string
+          completed_at?: string | null
+          created_at?: string
+          document_id?: string
+          entity?: string
+          executed_path?: string | null
+          id?: string
+          member_id?: string
+          signer_completed_at?: string | null
+          signer_email?: string
+          status?: string
+          version_label?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "boldsign_assignments_document_id_fkey"
+            columns: ["document_id"]
+            isOneToOne: false
+            referencedRelation: "portal_documents"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "boldsign_assignments_member_id_fkey"
+            columns: ["member_id"]
+            isOneToOne: false
+            referencedRelation: "portal_members"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       briefing_requests: {
         Row: {
           created_at: string
@@ -1484,6 +1547,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      complete_boldsign_assignment: {
+        Args: { p_audit_path: string; p_executed_path: string; p_id: string }
+        Returns: boolean
+      }
       get_vanguard_seats: {
         Args: never
         Returns: {
