@@ -106,3 +106,7 @@
 - [x] 14-template inventory, meeting reminder template, question emails enabled per round
 - [x] Executive Questions member card + Secretariat register
 - [ ] Signed-in walkthrough with fictional members (blocked: approval to add temporary records to the shared database)
+
+- [x] Bounded security verification + Gate A recommendation (GO for fictional-account testing; Gate B awaits founder)
+- [ ] Testone password reset result (waiting on founder)
+- [ ] BoldSign webhook secret (waiting on founder; manual check-off works meanwhile)

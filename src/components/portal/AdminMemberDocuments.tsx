@@ -528,7 +528,7 @@ export function AdminMemberDocuments({ memberId, memberName, preview }: Props) {
           <p className="mt-2 text-base text-ivory/55">The signed PDF is included as a secure download button (valid 7 days).</p>
           {composer.msg && <p className="mt-2 text-base text-destructive">{composer.msg}</p>}
           <div className="mt-4 flex gap-3">
-            <Button type="button" disabled={composer.sending || !composer.to} onClick={sendComposer}>{composer.sending ? "Sending…" : "Send to member"}</Button>
+            <p className="text-base text-ivory/70">Emailing signed copies is turned off for launch. The member can download it securely from their portal.</p>
             <Button type="button" variant="outline" onClick={() => setComposer(null)}>Cancel</Button>
           </div>
         </div>
