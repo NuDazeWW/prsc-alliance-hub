@@ -1,5 +1,12 @@
 # Portal build roadmap
 
+## Final integrated portal corrections (Oct 27)
+- [ ] Correct stateless BoldSign Verification callback, focused tests, limited authorized publication and live verification
+- [ ] Complete exact-assignment electronic signing, verified completion/evidence and duplicate protection (fictional nonbinding test; requires founder webhook configuration)
+- [ ] Verify and correct Forum opt-out entity progression across UI/server with explicit independent releases
+- [ ] Isolate NDA invitation state and enforce recipient-bound evidence on the server
+- [ ] Run bounded acceptance and deliver integrated Gate A / Gate B report
+
 ## Final security acceptance checkpoint (Oct 27)
 - [ ] Receive completed deep rescan and return all 16 finding dispositions (scan running)
 - [ ] Complete controlled inbox-link password reset (request accepted HTTP 200 and sent event verified; awaits inbox owner); provider thresholds remain unreadable
