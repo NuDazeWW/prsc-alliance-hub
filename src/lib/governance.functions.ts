@@ -115,12 +115,21 @@ export const updateDocumentGovernance = createServerFn({ method: "POST" })
     is_forum_prep: z.boolean().optional(),
     superseded: z.boolean().optional(),
     third_party_permission: z.string().trim().max(1000).optional(),
+    forum_role: z.enum(["addendum", "protocol", "pre_read", "conflict", "agenda", "restricted_brief", "secretariat_controls", "facilitator_run_of_show"]).nullable().optional(),
+    signing_approved: z.boolean().optional(),
+    boldsign_template_id: z.string().trim().max(200).nullable().optional(),
+    countersignature_required: z.boolean().optional(),
   }).parse(i))
   .handler(async ({ context, data }) => {
     await assertAdmin(context);
     if (data.classification === "restricted_opportunity" && !data.third_party_permission)
       throw new Error("Record the source's permission before classifying material as Restricted Opportunity");
-    const patch: { classification?: string; classification_reviewed_at?: string; is_forum_prep?: boolean; superseded_at?: string | null } = {};
+    const patch: { classification?: string; classification_reviewed_at?: string; is_forum_prep?: boolean; superseded_at?: string | null; forum_role?: string | null; signing_approved?: boolean; boldsign_template_id?: string | null; countersignature_required?: boolean } = {};
+    if (data.forum_role !== undefined) patch.forum_role = data.forum_role;
+    if (data.forum_role === "secretariat_controls" || data.forum_role === "facilitator_run_of_show") { patch.classification = "secretariat_only"; patch.classification_reviewed_at = new Date().toISOString(); }
+    if (data.signing_approved != null) patch.signing_approved = data.signing_approved;
+    if (data.boldsign_template_id !== undefined) patch.boldsign_template_id = data.boldsign_template_id;
+    if (data.countersignature_required != null) patch.countersignature_required = data.countersignature_required;
     if (data.classification) { patch.classification = data.classification; patch.classification_reviewed_at = new Date().toISOString(); }
     if (data.is_forum_prep != null) patch.is_forum_prep = data.is_forum_prep;
     if (data.superseded != null) patch.superseded_at = data.superseded ? new Date().toISOString() : null;

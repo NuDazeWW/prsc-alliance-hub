@@ -30,6 +30,12 @@ const DOCUMENT_BUCKET = "member-documents";
 
 type Props = { memberId: string; memberName: string; preview: boolean };
 
+const FORUM_ROLE_OPTIONS: [string, string][] = [
+  ["", "Not a Forum item"], ["addendum", "Confidentiality Addendum"], ["protocol", "Participation Protocol"], ["pre_read", "Executive Pre-Read"],
+  ["conflict", "Conflict / Recusal Confirmation"], ["agenda", "Inaugural Strategic Agenda"], ["restricted_brief", "Restricted Strategy Brief"],
+  ["secretariat_controls", "Secretariat Controls (admin only)"], ["facilitator_run_of_show", "Facilitator Run of Show (admin only)"],
+];
+
 export function AdminMemberDocuments({ memberId, memberName, preview }: Props) {
   const queryClient = useQueryClient();
   const docs = useQuery({
@@ -189,7 +195,7 @@ export function AdminMemberDocuments({ memberId, memberName, preview }: Props) {
   const releases: any[] = (docs.data as any)?.entityReleases ?? [];
   const active = list.filter((d: any) => !d.superseded_at);
   const journey = journeyStatus(active as any, doneIds, entity, activation, forum, cleared);
-  async function setDocGov(id: string, patch: { classification?: Classification; superseded?: boolean }) {
+  async function setDocGov(id: string, patch: { classification?: Classification; superseded?: boolean; forum_role?: string | null; signing_approved?: boolean; boldsign_template_id?: string | null; countersignature_required?: boolean }) {
     if (preview) return setStatus("Preview mode: classification is saved on the live admin page.");
     let third_party_permission: string | undefined;
     if (patch.classification === "restricted_opportunity") {
@@ -474,6 +480,14 @@ export function AdminMemberDocuments({ memberId, memberName, preview }: Props) {
                   <select aria-label={`Classification for ${d.title}`} value={(d as any).classification ?? "entity_confidential"} onChange={(e) => setDocGov(d.id, { classification: e.target.value as Classification })} className="h-9 border border-gold/25 bg-navy-deep px-2 text-sm text-ivory">
                     {CLASSIFICATIONS.map((c) => <option key={c.value} value={c.value}>{c.label}</option>)}
                   </select>
+                  <select aria-label={`Forum item for ${d.title}`} value={(d as any).forum_role ?? ""} onChange={(e) => setDocGov(d.id, { forum_role: e.target.value || null })} className="h-9 border border-gold/25 bg-navy-deep px-2 text-sm text-ivory">
+                    {FORUM_ROLE_OPTIONS.map(([v, l]) => <option key={v} value={v}>{l}</option>)}
+                  </select>
+                  {d.action === "boldsign" && <>
+                    <Button type="button" variant="outline" size="sm" onClick={() => { const t = prompt("Approved BoldSign template ID (leave blank to clear):", (d as any).boldsign_template_id ?? ""); if (t !== null) void setDocGov(d.id, { boldsign_template_id: t.trim() || null }); }}>{(d as any).boldsign_template_id ? "Template set" : "Set template"}</Button>
+                    <label className="flex items-center gap-1 text-sm text-ivory/75"><input type="checkbox" checked={!!(d as any).signing_approved} onChange={(e) => setDocGov(d.id, { signing_approved: e.target.checked })} /> Approved for signing</label>
+                    <label className="flex items-center gap-1 text-sm text-ivory/75"><input type="checkbox" checked={!!(d as any).countersignature_required} onChange={(e) => setDocGov(d.id, { countersignature_required: e.target.checked })} /> Countersignature required</label>
+                  </>}
                   {!(d as any).superseded_at && <Button type="button" variant="outline" size="sm" onClick={() => setDocGov(d.id, { superseded: true })}>Mark superseded</Button>}
                 </div>
                 <p className="mt-1 text-base text-ivory/55">
