@@ -12,13 +12,13 @@ function getHandler() {
     apiKey,
     on: {
       "email.bounced": async (event) => {
-        console.error("[email] bounced", event.data.recipient, event.data.message_id);
+        console.error("[email] bounced", event.data.message_id);
       },
       "email.complaint": async (event) => {
-        console.error("[email] complaint", event.data.recipient, event.data.message_id);
+        console.error("[email] complaint", event.data.message_id);
       },
       "email.unsubscribed": async (event) => {
-        console.log("[email] unsubscribed", event.data.recipient, event.data.message_id);
+        console.log("[email] unsubscribed", event.data.message_id);
       },
     },
   });
