@@ -108,6 +108,17 @@ Limit for fix 8: the automatic BoldSign trigger is built and tested with mocked 
 - No broad scan.
 - One short PASS/FAIL report. For each fix it says resolved, or still needs an approved source document (for example, the final Addendum, the Conflict template, or the Jared brief).
 
+## Conflicts and recommendations
+1. Automatic signing and the no-signing rule. Automatic BoldSign creation would create legal transactions. Recommendation: the trigger fires only from templates an admin marks "approved for signing". This cycle it is tested with mocked BoldSign calls only.
+2. Signed-copy email. Emailing signed copies was disabled during the security review. Recommendation: send admin@prscstandards.com a sign-in-required link, not a file. App emails cannot carry attachments anyway.
+3. Admin address. admin@prscstandards.com is not a portal admin login, so the link opens only for admin@readinessterminal.com. Confirm the address, or make it an admin login.
+4. Clearance is blocked until documents arrive. With fix 4, nobody can be cleared until the approved Addendum and Conflict templates are loaded. This is intended, but it is a launch dependency.
+5. Executive Questions access. Step 9 implies Executive Questions need specific authorization. Today they need clearance and the briefing. Recommendation: tie them to the same per-member grant as the Jared brief only if you confirm that.
+6. Forum opt-outs. The Addendum gate applies only to Forum confidential materials. It never blocks PRSC/DIS entity documents for opt-out members.
+7. Conflict questionnaire pre-fill. Pre-filling answers into the signed form needs matching fields in the BoldSign template. Without them, a frozen, hash-linked snapshot is stored alongside the signed form.
+8. Meeting poll content. Availability (step 3) comes before the Addendum, so poll titles and descriptions must contain no confidential details.
+9. Existing TEST evidence. Fictional Test 2 may lose access to its acknowledged TEST item until a TEST Addendum exists. That is expected and is noted in the report.
+
 ## Technical notes
 - Three migrations: the Addendum and restricted-grant helpers with the read-policy update, the `restricted_document_grants` table, and the `meeting_confirmation_sends` table plus the assignment snapshot columns. Each includes grants and RLS.
 - Rules stay in `governance.ts`, `journey.ts` and `meetings.functions.ts`, following AGENTS.md.
