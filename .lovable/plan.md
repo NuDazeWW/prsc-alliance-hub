@@ -71,7 +71,7 @@ Scope: only the six findings below. No redesign, real invitations, live signing,
   - Records the exact member, document and version assignment.
   - Opens embedded signing behind the existing "Review and Sign" button.
 - The existing authenticated callback then collects the executed PDF and audit trail. It stores both privately, marks the item complete only once, and advances the journey.
-- Admin copy: after completion, one notice per signed document goes to admin@prscstandards.com.
+- Admin copy: after completion, one notice per signed document goes to admin@readinessterminal.com.
   - The notice carries a short-lived, sign-in-required link to the executed PDF and audit trail, not a file attachment. App emails cannot carry attachments, and this keeps signed evidence behind access checks.
   - Delivery is tracked per document, so replays send nothing new.
 - Safeguards:
@@ -79,9 +79,7 @@ Scope: only the six findings below. No redesign, real invitations, live signing,
   - Nothing goes out for real executives until Gate B.
   - Before release, the trigger runs only for fictional TEST accounts.
   - The 24 pre-existing BoldSign documents are never touched.
-- Decision needed:
-  - Earlier security work disabled emailing signed copies. This change re-enables it only as an admin link notice.
-  - admin@prscstandards.com is not a portal admin login. The current admin login is admin@readinessterminal.com, so the link will require signing in as that admin.
+- Signed-copy emailing stays disabled, except for this sign-in-required admin link notice (founder decisions 2 and 3).
 
 ## Member journey these fixes must preserve
 1. Personalized invitation, then the member securely activates their own account (fix 3)
@@ -108,16 +106,16 @@ Limit for fix 8: the automatic BoldSign trigger is built and tested with mocked 
 - No broad scan.
 - One short PASS/FAIL report. For each fix it says resolved, or still needs an approved source document (for example, the final Addendum, the Conflict template, or the Jared brief).
 
-## Conflicts and recommendations
-1. Automatic signing and the no-signing rule. Automatic BoldSign creation would create legal transactions. Recommendation: the trigger fires only from templates an admin marks "approved for signing". This cycle it is tested with mocked BoldSign calls only.
-2. Signed-copy email. Emailing signed copies was disabled during the security review. Recommendation: send admin@prscstandards.com a sign-in-required link, not a file. App emails cannot carry attachments anyway.
-3. Admin address. admin@prscstandards.com is not a portal admin login, so the link opens only for admin@readinessterminal.com. Confirm the address, or make it an admin login.
-4. Clearance is blocked until documents arrive. With fix 4, nobody can be cleared until the approved Addendum and Conflict templates are loaded. This is intended, but it is a launch dependency.
-5. Executive Questions access. Step 9 implies Executive Questions need specific authorization. Today they need clearance and the briefing. Recommendation: tie them to the same per-member grant as the Jared brief only if you confirm that.
-6. Forum opt-outs. The Addendum gate applies only to Forum confidential materials. It never blocks PRSC/DIS entity documents for opt-out members.
-7. Conflict questionnaire pre-fill. Pre-filling answers into the signed form needs matching fields in the BoldSign template. Without them, a frozen, hash-linked snapshot is stored alongside the signed form.
-8. Meeting poll content. Availability (step 3) comes before the Addendum, so poll titles and descriptions must contain no confidential details.
-9. Existing TEST evidence. Fictional Test 2 may lose access to its acknowledged TEST item until a TEST Addendum exists. That is expected and is noted in the report.
+## Founder decisions (Oct 27)
+1. Accepted. Automatic signing fires only from documents an admin marks "approved for signing". This cycle uses mocked BoldSign calls only.
+2. Accepted. The admin copy is a sign-in-required link, not a file.
+3. The signed-copy notice goes to admin@readinessterminal.com.
+4. Clearance depends on the approved documents arriving and being completed, not on templates. Until they arrive, clearance stays blocked.
+5. Accepted. Executive Questions require the same per-member grant as the Jared brief, plus clearance.
+6. Forum opt-out members get no Forum or additional materials at all. They see entity documents only after their PRSC/DIS journey is started by an entity-journey invitation email, which is the existing explicit release. Tested.
+7. Every signed Conflict form gets a frozen, hash-linked snapshot of the answers stored with it. Matching BoldSign fields are pre-filled when the template has them.
+8. Poll wording stays neutral: title, date options, length and format. Admins see a warning before publishing if the poll text looks confidential.
+9. The report lists which fictional accounts and steps you can test by hand, and which only through automated checks.
 
 ## Technical notes
 - Three migrations: the Addendum and restricted-grant helpers with the read-policy update, the `restricted_document_grants` table, and the `meeting_confirmation_sends` table plus the assignment snapshot columns. Each includes grants and RLS.
