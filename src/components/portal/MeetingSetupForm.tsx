@@ -120,7 +120,7 @@ export function MeetingSetupForm({
   const [invited, setInvited] = useState<string[]>([]);
 
   useEffect(() => {
-    listInvitableMembers().then((m) => setMembers(m.members)).catch(() => setMembers([]));
+    listInvitableMembers().then((m) => setMembers(m.members)).catch((e) => { console.error("listInvitableMembers failed", e); toast.error(userFacingError(e, "Could not load members to invite")); setMembers([]); });
   }, []);
   useEffect(() => {
     setInvited(autoAudience(members, meetingType));
