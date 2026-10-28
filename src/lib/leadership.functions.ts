@@ -54,7 +54,7 @@ export const getLeadershipTeam = createServerFn({ method: "GET" })
         if (!admin && r.member_id && !permitted.name) return null;
         let photo_url: string | null = null;
         if ((r.photo_path || prof?.headshot_path) && (admin || !r.member_id || permitted.photo)) {
-          photo_url = `/api/public/portal-file?kind=leader&id=${r.id}`;
+          photo_url = `/api/public/portal-file?kind=leader&id=${r.id}&v=${mediaVersion(String(r.photo_path ?? prof?.headshot_path))}`;
         }
         return {
           id: r.id,
@@ -143,3 +143,10 @@ export const saveLeadershipSettings = createServerFn({ method: "POST" })
     if (error) throw error;
     return { ok: true };
   });
+
+
+function mediaVersion(path: string): string {
+  let h = 5381;
+  for (let i = 0; i < path.length; i++) h = ((h << 5) + h + path.charCodeAt(i)) >>> 0;
+  return h.toString(36);
+}
