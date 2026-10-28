@@ -9,7 +9,7 @@ import { createMeetingPoll, listInvitableMembers } from "@/lib/meetings.function
 import { pollWordingWarning } from "@/lib/meeting-confirmations";
 import { DEFAULT_MEETING_TZ, formatSlot, MEETING_TIMEZONES, timezoneLabel, zonedToUtc } from "@/lib/meeting-block";
 
-type MeetingType = "board" | "advisory" | "methodology";
+type MeetingType = "board" | "advisory" | "methodology" | "forum" | "custom";
 
 function memberName(m: any) {
   return `${m.first_name ?? ""} ${m.last_name ?? ""}`.trim() || m.email;
@@ -20,7 +20,8 @@ function autoAudience(members: any[], type: string) {
     .filter((m) => {
       if (type === "methodology") return m.is_methodology_committee || m.role === "methodology_committee";
       if (type === "board") return m.role === "board_member" || m.role === "prsc_board_dis_advisor" || m.role === "prsc_advisor_dis_board";
-      return m.role === "advisor" || m.role === "prsc_board_dis_advisor" || m.role === "prsc_advisor_dis_board";
+      if (type === "advisory") return m.role === "advisor" || m.role === "prsc_board_dis_advisor" || m.role === "prsc_advisor_dis_board";
+      return false; // The Forum / custom: admin picks invitees
     })
     .map((m) => m.id);
 }
@@ -106,6 +107,7 @@ export function MeetingSetupForm({
   const [members, setMembers] = useState<any[]>([]);
   const [saving, setSaving] = useState(false);
   const [meetingType, setMeetingType] = useState<MeetingType>(defaultType);
+  const [customType, setCustomType] = useState("");
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [format, setFormat] = useState<"virtual" | "in_person">("virtual");
@@ -127,6 +129,7 @@ export function MeetingSetupForm({
   const sortedSlots = useMemo(() => [...slots].sort(), [slots]);
 
   async function submit() {
+    if (meetingType === "custom" && customType.trim().length < 2) return toast.error("Enter a meeting type name");
     if (!title.trim()) return toast.error("Add a meeting title");
     if (!slots.length) return toast.error("Add at least one proposed date and time");
     if (!invited.length && !allowNoInvitees) return toast.error("Select at least one member");
@@ -135,7 +138,7 @@ export function MeetingSetupForm({
     try {
       const res = await createMeetingPoll({
         data: {
-          meeting_type: meetingType,
+          meeting_type: meetingType === "custom" ? customType.trim() : meetingType,
           title: title.trim(),
           description: description.trim() || undefined,
           format,
@@ -172,7 +175,13 @@ export function MeetingSetupForm({
             <option value="board">Official Board Meeting</option>
             <option value="advisory">Advisory Meeting</option>
             <option value="methodology">Methodology Committee Meeting</option>
+            <option value="forum">The Forum</option>
+            <option value="custom">Other (enter a name)…</option>
           </select>
+          {meetingType === "custom" && (
+            <input value={customType} onChange={(e) => setCustomType(e.target.value)} maxLength={100} placeholder="e.g. Executive Working Session" aria-label="Meeting type name" className={`${inputCls} mt-2`} />
+          )}
+          {(meetingType === "forum" || meetingType === "custom") && <span className="mt-1 block text-xs text-ivory/45">Choose who to invite below — nobody is preselected.</span>}
         </label>
         <label className="block">
           <span className={labelCls}>Meeting title</span>

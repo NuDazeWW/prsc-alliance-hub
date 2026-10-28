@@ -4,7 +4,14 @@ export const MEETING_TYPE_LABEL: Record<string, string> = {
   board: "Official Board Meeting",
   advisory: "Advisory Meeting",
   methodology: "Methodology Committee Meeting",
+  forum: "The Forum",
 };
+
+/** Display name for a meeting type; custom admin-entered types are stored as their own name. */
+export function meetingTypeLabel(type: string | null | undefined) {
+  if (!type) return "Meeting";
+  return MEETING_TYPE_LABEL[type] ?? type;
+}
 
 export type MeetingBlockPoll = {
   title: string;
@@ -84,7 +91,7 @@ export function zonedToUtc(local: string, tz?: string | null) {
 
 /** Plain-text meeting section used by invitations, Compose, and poll emails. */
 export function meetingBlockText(poll: MeetingBlockPoll, slots: { starts_at: string }[]) {
-  const type = MEETING_TYPE_LABEL[poll.meeting_type] ?? "Meeting";
+  const type = meetingTypeLabel(poll.meeting_type);
   const where = poll.format === "in_person" ? `Format: In person${poll.location ? ` — ${poll.location}` : ""}` : "Format: Virtual — the joining link is shared once the time is confirmed";
   const header = [`Upcoming meeting: ${poll.title} (${type})`, where, `Duration: ${poll.duration_minutes} minutes`].join("\n");
   const times = [...slots]
@@ -107,5 +114,6 @@ export function pollFitsMember(meetingType: string, role: string, isCommittee = 
   if (meetingType === "methodology") return isCommittee || role === "methodology_committee";
   if (meetingType === "board") return role === "board_member" || MIXED.includes(role);
   if (meetingType === "advisory") return role === "advisor" || MIXED.includes(role);
-  return false;
+  // The Forum and admin-named custom meetings are open to any member; the admin picks invitees.
+  return true;
 }

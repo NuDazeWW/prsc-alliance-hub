@@ -2,15 +2,10 @@ import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requirePortalAccess } from "@/lib/portal-access";
 
-import { formatSlot, zonedToUtc } from "@/lib/meeting-block";
+import { formatSlot, meetingTypeLabel, zonedToUtc } from "@/lib/meeting-block";
 
 const PORTAL_URL = "https://access.prscstandards.org/portal";
 
-const MEETING_TYPE_LABEL: Record<string, string> = {
-  board: "Official Board Meeting",
-  advisory: "Advisory Meeting",
-  methodology: "Methodology Committee Meeting",
-};
 
 async function assertAdmin(context: { supabase: any; userId: string }) {
   const { data } = await context.supabase
@@ -37,7 +32,7 @@ const slotSchema = z.object({
 });
 
 const createPollSchema = z.object({
-  meeting_type: z.enum(["board", "advisory", "methodology"]),
+  meeting_type: z.string().trim().min(2, "Add a meeting type").max(100),
   title: z.string().trim().min(3).max(200),
   description: z.string().trim().max(2000).optional(),
   format: z.enum(["virtual", "in_person"]),
@@ -92,7 +87,7 @@ export const createMeetingPoll = createServerFn({ method: "POST" })
       ? await supabaseAdmin.from("portal_members").select("id, email, first_name").in("id", data.invited_member_ids)
       : { data: [] as { id: string; email: string; first_name: string | null }[] };
 
-    const typeLabel = MEETING_TYPE_LABEL[data.meeting_type];
+    const typeLabel = meetingTypeLabel(data.meeting_type);
     const { loadSystemEmail } = await import("@/lib/portal-notify.server");
     const { meetingBlockText } = await import("@/lib/meeting-block");
     const block = meetingBlockText(
@@ -196,7 +191,7 @@ export const confirmPollSlot = createServerFn({ method: "POST" })
     await safeReconcile(data.poll_id);
 
     const icsUrl = "https://access.prscstandards.org/portal#meetings";
-    const typeLabel = MEETING_TYPE_LABEL[poll.meeting_type] ?? "Meeting";
+    const typeLabel = meetingTypeLabel(poll.meeting_type);
     const where =
       poll.format === "virtual"
         ? `Format: Virtual${poll.virtual_link ? `\nJoining link: ${poll.virtual_link}` : "\nThe joining link will follow."}`

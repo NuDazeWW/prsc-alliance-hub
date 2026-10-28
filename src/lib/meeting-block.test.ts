@@ -46,3 +46,10 @@ describe("meeting audience", () => {
     strictEqual(pollFitsMember("methodology", "methodology_committee"), true);
   });
 });
+
+describe("custom meeting types", () => {
+  test("Forum and custom meetings can be attached to any member's invitation", () => {
+    strictEqual(pollFitsMember("forum", "advisor"), true);
+    strictEqual(pollFitsMember("Executive Working Session", "board_member"), true);
+  });
+});
