@@ -1,5 +1,6 @@
 import type { z } from "zod";
 import { intendedDesignationSchema, projectIntendedDesignation } from "./intended-designation";
+import { importWhyYouSchema, linkedinSourceUrlSchema } from "./member-import-validation";
 
 type IntendedDesignation = z.infer<typeof intendedDesignationSchema>;
 type IntendedRole = IntendedDesignation["roles"][number];
@@ -191,11 +192,13 @@ export function parseMemberList(text: string): { rows: MemberImportRow[]; errors
       if (!record.first_name || !record.last_name) throw new Error("first and last name are required.");
       const intended = parseDesignation(record, legacy);
       const projected = projectIntendedDesignation(intended);
+      const whyYou = importWhyYouSchema.parse(record.why_you);
+      const linkedinUrl = linkedinSourceUrlSchema.parse(record.linkedin_url);
       rows.push({
         first_name: record.first_name, last_name: record.last_name, email,
         organization: record.organization ?? "", title: record.title ?? "", entity: projected.entity, role: projected.role,
-        why_you: record.why_you ?? "", is_methodology_committee: projected.is_methodology_committee,
-        is_candidate: projected.is_candidate, linkedin_url: (record.linkedin_url ?? "").slice(0, 300),
+        why_you: whyYou, is_methodology_committee: projected.is_methodology_committee,
+        is_candidate: projected.is_candidate, linkedin_url: linkedinUrl ?? "",
         background: (record.background ?? "").slice(0, 8000), intended_designation: intended,
       });
     } catch (error) { errors.push(`${label}: ${(error as Error).message}`); }

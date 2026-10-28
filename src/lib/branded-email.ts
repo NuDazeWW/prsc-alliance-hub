@@ -1,4 +1,4 @@
-import { memberRoleLabel, memberDesignation } from "./member-role-labels";
+import { memberRoleLabel, memberDesignation, FORUM_ENTITY_LABEL, FORUM_ENTITY_FULL_NAME } from "./member-role-labels";
 
 export type EmailSignature = { name: string; title: string };
 
@@ -79,8 +79,8 @@ export function buildMemberTokens(member: {
     full_name: `${member.first_name ?? ""} ${member.last_name ?? ""}`.trim(),
     organization: member.organization ?? "",
     title: member.title ?? "",
-    entity: entity.toUpperCase(),
-    entity_full: ENTITY_FULL[entity] ?? entity.toUpperCase(),
+    entity: member.is_candidate ? FORUM_ENTITY_LABEL : entity.toUpperCase(),
+    entity_full: member.is_candidate ? FORUM_ENTITY_FULL_NAME : ENTITY_FULL[entity] ?? entity.toUpperCase(),
     role: memberDesignation({ ...member, role, entity }),
     role_label: memberDesignation({ ...member, role, entity }),
     package_label: member.is_candidate ? "United Forum" : PACKAGE_LABEL[role] ?? "Board / Advisor",

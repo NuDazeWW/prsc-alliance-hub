@@ -25,11 +25,11 @@ type Doc = {
 };
 type Completion = { document_id: string; kind: string; signed_name: string | null; acknowledged_at: string };
 
-type Props = { documents: Doc[]; completions: Completion[]; entity: string; forum?: boolean; forumCleared?: boolean; entityReleased?: { prsc: boolean; dis: boolean } };
+type Props = { documents: Doc[]; completions: Completion[]; entity: string; forum?: boolean; forumOnly?: boolean; forumCleared?: boolean; entityReleased?: { prsc: boolean; dis: boolean } };
 
 const TRACK_LABEL = { shared: "Shared Forum", prsc: "PRSC", dis: "DIS" } as const;
 
-export function MemberDocuments({ documents: all, completions, entity, forum = true, forumCleared = true, entityReleased = { prsc: false, dis: false } }: Props) {
+export function MemberDocuments({ documents: all, completions, entity, forum = true, forumOnly = false, forumCleared = true, entityReleased = { prsc: false, dis: false } }: Props) {
   const documents = all.filter((d: any) => !d.superseded_at && (forum || d.journey_stage !== 1));
   const history = all.filter((d: any) => d.superseded_at);
   const [openId, setOpenId] = useState<string | null>(null);
@@ -57,7 +57,7 @@ export function MemberDocuments({ documents: all, completions, entity, forum = t
         )}
       </div>
       {awaitingClearance && (
-        <p className="mt-4 border border-gold/30 px-5 py-3 text-[14px] text-gold">Your Forum preparation is complete. Your clearance is now with the Secretariat for review, and we'll email you when the next stage opens</p>
+        <p className="mt-4 border border-gold/30 px-5 py-3 text-[14px] text-gold">Your Forum preparation is complete. Your clearance is now with the Secretariat for review{forumOnly ? "." : ", and we'll email you when the next stage opens"}</p>
       )}
       {STAGES.slice(0, 4).map((stage) => {
         const docs = onboarding.filter((d) => d.journey_stage === stage.n);

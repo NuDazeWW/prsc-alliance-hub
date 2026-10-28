@@ -1177,6 +1177,7 @@ export type Database = {
           is_methodology_committee: boolean
           last_access_at: string | null
           last_name: string
+          linkedin_url: string | null
           nda_entities: Database["public"]["Enums"]["portal_entity"] | null
           nda_reference: string | null
           nda_scope: string | null
@@ -1220,6 +1221,7 @@ export type Database = {
           is_methodology_committee?: boolean
           last_access_at?: string | null
           last_name: string
+          linkedin_url?: string | null
           nda_entities?: Database["public"]["Enums"]["portal_entity"] | null
           nda_reference?: string | null
           nda_scope?: string | null
@@ -1263,6 +1265,7 @@ export type Database = {
           is_methodology_committee?: boolean
           last_access_at?: string | null
           last_name?: string
+          linkedin_url?: string | null
           nda_entities?: Database["public"]["Enums"]["portal_entity"] | null
           nda_reference?: string | null
           nda_scope?: string | null
@@ -1710,6 +1713,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      save_member_invitation_notes: {
+        Args: { p_member_id: string; p_expected_updated_at: string; p_why_you: string; p_linkedin_url: string | null; p_admin_id: string }
+        Returns: Json
+      }
       save_member_intended_designation: {
         Args: { p_member_id: string; p_expected_updated_at: string; p_designation: Json; p_admin_id: string }
         Returns: Json

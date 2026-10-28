@@ -121,6 +121,35 @@ describe("member CSV staging with intended designations", () => {
     assert.equal(Object.keys(parsed.rows[0]).some((key) => key.startsWith("nda_")), false);
   });
 
+  it("stages Forum-only roster records before Why you notes are complete, retaining each supplied source", () => {
+    const cases = [1, 2, 3, 4].map((n) => {
+      const row = person(n, "forum_invitee", "None", "", "Undetermined");
+      row[10] = `https://www.linkedin.com/in/fictional-test-${n}/`;
+      row[12] = n === 1 ? "" : n === 2 ? "Draft later." : row[12];
+      return row;
+    });
+    const parsed = parseMemberList(fixture(cases));
+    assert.deepEqual(parsed.errors, []);
+    assert.equal(parsed.rows.length, 4);
+    assert.equal(parsed.rows[0].why_you, "");
+    assert.equal(parsed.rows[1].why_you, "Draft later.");
+    parsed.rows.forEach((row, i) => {
+      assert.equal(row.linkedin_url, cases[i][10]);
+      assert.equal(row.intended_designation.entity, "none");
+      assert.equal(row.is_candidate, true);
+    });
+  });
+
+  it("rejects invalid or oversized source URLs instead of silently truncating a stored source", () => {
+    for (const url of ["https://example.test/in/test", "https://linkedin.com/in/" + "x".repeat(300)]) {
+      const row = person(1, "forum_invitee", "None", "", "Undetermined");
+      row[10] = url;
+      const parsed = parseMemberList(fixture([row]));
+      assert.equal(parsed.rows.length, 0);
+      assert.ok(parsed.errors.length > 0);
+    }
+  });
+
   it("rejects contradictory Forum/entity roles, unknown roles, and unspecified Other roles", () => {
     for (const row of [
       person(1, "forum_invitee", "None", "PRSC Board", "No"),

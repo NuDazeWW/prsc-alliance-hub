@@ -3,6 +3,8 @@ import { assertNdaRecipient, assertInviteIdentity } from "@/lib/invitation-evide
 import { assertReviewedInvitationNda } from "@/lib/invitation-nda";
 import { z } from "zod";
 import { intendedDesignationSchema, projectIntendedDesignation, readIntendedDesignation, requiredInvitationNdaEntity, type IntendedDesignation } from "@/lib/intended-designation";
+import { invitationWhyYouSchema, saveMemberInvitationNotesSchema } from "@/lib/member-import-validation";
+import { invitePortalMemberSchema as inviteSchema, importPortalMembersSchema as importSchema, portalRoleSchema as roleSchema, portalEntitySchema as entitySchema } from "@/lib/portal-member-input";
 import { parseProfileSaveInput, assertCommunicationPreferencesNotDowngraded } from "@/lib/portal-profile-schema";
 import type { PortalProfileRecord } from "@/lib/portal-profile-fields";
 import { getRequest } from "@tanstack/react-start/server";
@@ -23,6 +25,7 @@ type PortalMember = {
   invited_at: string; first_access_at: string | null; last_access_at: string | null;
   acceptance_complete?: { prsc: boolean; dis: boolean };
   intended_designation?: IntendedDesignation | null;
+  linkedin_url?: string | null;
 };
 
 type PortalProfile = {
@@ -34,9 +37,6 @@ type PortalProfile = {
   final_notes: string | null; questions: string | null; contact_requested: boolean;
   submitted_at: string | null; updated_at: string;
 };
-
-const roleSchema = z.enum(["board_member", "advisor", "prsc_board_dis_advisor", "prsc_advisor_dis_board", "methodology_committee"]);
-const entitySchema = z.enum(["prsc", "dis", "both"]);
 
 async function assertAdmin(context: { supabase: any; userId: string }) {
   const { data } = await context.supabase.from("user_roles").select("role").eq("user_id", context.userId).eq("role", "admin").maybeSingle();
@@ -200,31 +200,6 @@ export const submitPortalInquiry = createServerFn({ method: "POST" })
     return { ok: true };
   });
 
-const inviteSchema = z.object({
-  email: z.string().trim().email().max(200), first_name: z.string().trim().min(1).max(80),
-  last_name: z.string().trim().min(1).max(80), organization: z.string().trim().max(180).default(""),
-  title: z.string().trim().max(160).default(""), entity: entitySchema, role: roleSchema,
-  why_you: z.string().trim().min(20).max(2000),
-  is_methodology_committee: z.boolean().optional(),
-  participates_in_forum: z.boolean().optional(),
-  is_candidate: z.boolean().optional(),
-  intended_designation: intendedDesignationSchema.optional(),
-  poll_id: z.string().uuid().nullable().optional(),
-  nda_confirmed: z.boolean().optional(),
-  nda_recipient_email: z.string().trim().email().max(200).optional(),
-  nda_reference: z.string().trim().max(400).optional(),
-  nda_entities: entitySchema.optional(),
-  nda_scope: z.string().trim().max(600).optional(),
-  selected_member_id: z.string().uuid().optional(),
-  nda_review_id: z.string().uuid().optional(),
-  role_review: z.object({
-    decision: z.literal("approved"),
-    notes: z.string().trim().min(5).max(2000),
-    prsc_scope: z.string().trim().min(3).max(1000),
-    dis_scope: z.string().trim().min(3).max(1000),
-    conflict_controls: z.string().trim().min(3).max(1000),
-  }).optional(),
-});
 type InviteInput = z.infer<typeof inviteSchema>;
 
 /** Forum candidates hold no PRSC/DIS seat: store a neutral single-entity record (no board/committee claims). */
@@ -239,12 +214,13 @@ function normalizeCandidate<T extends InviteInput>(m: T): T {
 }
 
 async function requireIntendedDesignationStorage(admin: any) {
-  const { error } = await admin.from("portal_members").select("intended_designation").limit(0);
+  const { error } = await admin.from("portal_members").select("intended_designation,linkedin_url").limit(0);
   if (error) throw new Error("Member role setup is not complete. No accounts or invitations were created. Please try again after setup is complete.");
 }
 
 /** NDA and role-combination gates every invitation must pass, before any account is created. */
 function invitationGates(m: InviteInput, adminId: string) {
+  invitationWhyYouSchema.parse(m.why_you);
   assertNdaRecipient(m.email, m.nda_recipient_email);
   const nda = { verified_at: m.nda_confirmed ? new Date().toISOString() : null, verified_by: m.nda_confirmed ? adminId : null, reference: m.nda_reference ?? null, entities: m.nda_entities ?? null, scope: m.nda_scope ?? null };
   const ndaErr = ndaProblem(nda, requiredInvitationNdaEntity(m));
@@ -294,7 +270,7 @@ export const invitePortalMember = createServerFn({ method: "POST" })
     const gates = invitationGates(data, context.userId);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { poll_id: pollId, nda_confirmed: _n, nda_recipient_email: _ne, nda_reference: _r, nda_entities: _e, nda_scope: _s, selected_member_id: _sm, nda_review_id: _nr, role_review: _rv, ...member } = data;
-    if (data.intended_designation && !data.selected_member_id) await requireIntendedDesignationStorage(supabaseAdmin);
+    if (!data.selected_member_id && (data.intended_designation || data.linkedin_url)) await requireIntendedDesignationStorage(supabaseAdmin);
     if (Boolean(data.selected_member_id) !== Boolean(data.nda_review_id)) throw new Error("Select the candidate and save their reviewed NDA information before proceeding.");
     const { data: existing, error: existingError } = await supabaseAdmin.from("portal_members").select("*").eq("email", data.email.toLowerCase()).maybeSingle();
     if (existingError) throw existingError;
@@ -334,6 +310,7 @@ export const invitePortalMember = createServerFn({ method: "POST" })
       participates_in_forum: member.participates_in_forum ?? true,
       is_candidate: member.is_candidate ?? false,
       ...(!existing && member.intended_designation ? { intended_designation: member.intended_designation } : {}),
+      ...(!existing && member.linkedin_url ? { linkedin_url: member.linkedin_url } : {}),
       ...gates.columns,
     }, { onConflict: "email" }).select("id").single();
     if (memberError) throw memberError;
@@ -347,17 +324,13 @@ export const invitePortalMember = createServerFn({ method: "POST" })
     return { ok: true };
   });
 
-const importSchema = z.object({
-  send_invitations: z.boolean(),
-  rows: z.array(inviteSchema.omit({ selected_member_id: true, nda_review_id: true }).strict()).min(1).max(200),
-});
 export const importPortalMembers = createServerFn({ method: "POST" })
   .middleware([requirePortalAccess])
   .inputValidator((input) => importSchema.parse(input))
   .handler(async ({ context, data }) => {
     await assertAdmin(context);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    if (data.rows.some((row) => row.intended_designation)) await requireIntendedDesignationStorage(supabaseAdmin);
+    await requireIntendedDesignationStorage(supabaseAdmin);
     const results: { email: string; ok: boolean; message: string }[] = [];
 
     for (const rawRow of data.rows) {
@@ -395,6 +368,7 @@ export const importPortalMembers = createServerFn({ method: "POST" })
           user_id: userId, email, first_name: row.first_name, last_name: row.last_name,
           organization: row.organization, title: row.title || null, entity: row.entity,
           role: row.role, why_you: row.why_you, status: "invited",
+          linkedin_url: row.linkedin_url,
           is_methodology_committee: row.is_methodology_committee ?? false,
           is_candidate: row.is_candidate ?? false,
           ...(row.intended_designation ? { intended_designation: row.intended_designation } : {}),
@@ -1314,6 +1288,24 @@ export const saveMemberIntendedDesignation = createServerFn({ method: "POST" })
       throw new Error("The intended roles could not be saved. Reload the member’s details and try again.");
     }
     return saved as { member_id: string; intended_designation: IntendedDesignation; updated_at: string };
+  });
+
+/** Save invitation preparation only. This never creates an account, verifies an NDA, or sends an email. */
+export const saveMemberInvitationNotes = createServerFn({ method: "POST" })
+  .middleware([requirePortalAccess])
+  .inputValidator((input) => saveMemberInvitationNotesSchema.parse(input))
+  .handler(async ({ context, data }) => {
+    await assertAdmin(context);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { data: saved, error } = await supabaseAdmin.rpc("save_member_invitation_notes", {
+      p_member_id: data.member_id, p_expected_updated_at: data.expected_updated_at,
+      p_why_you: data.why_you, p_linkedin_url: data.linkedin_url, p_admin_id: context.userId,
+    });
+    if (error) {
+      if (error.code === "40001") throw new Error("This member’s record changed. Reload their details before saving the invitation note again.");
+      throw new Error("The invitation note could not be saved. Reload the member details and try again.");
+    }
+    return saved as { member_id: string; why_you: string; linkedin_url: string | null; updated_at: string };
   });
 
 const memberDetailsSchema = z.object({

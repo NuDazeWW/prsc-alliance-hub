@@ -2,6 +2,14 @@
 import { entityAppointmentStatus } from "./governance";
 export const FORUM_INVITEE_LABEL = "United Forum Invitee";
 export const FORUM_PARTICIPANT_LABEL = "Forum Participant";
+export const FORUM_ENTITY_LABEL = "United Forum";
+export const FORUM_ENTITY_FULL_NAME = "United Strategic Coordination Forum";
+
+/** The required storage entity is not an entity assignment for a Forum-only member. */
+export function memberEntityDesignationLabel(member: { entity?: string | null; is_candidate?: boolean | null }): string {
+  if (member.is_candidate) return "None";
+  return member.entity === "both" ? "PRSC and DIS" : member.entity === "prsc" ? "PRSC" : member.entity === "dis" ? "DIS" : "None";
+}
 /** Forum-only members: "United Forum Invitee" before clearance, "Forum Participant" after. */
 export function forumMemberLabel(forumClearance?: string | null) {
   return forumClearance === "cleared" || forumClearance === "cleared_restricted" ? FORUM_PARTICIPANT_LABEL : FORUM_INVITEE_LABEL;

@@ -53,6 +53,7 @@ import {
   setMemberAccess,
   setMemberPackageStatus,
   updateInquiry,
+  saveMemberInvitationNotes,
 } from "@/lib/portal.functions";
 import { draftWhyYou, draftWhyYouPreview } from "@/lib/why-you-draft.functions";
 import {
@@ -84,6 +85,7 @@ import { memberRoleLabel, memberDesignation, memberCandidateLabel } from "@/lib/
 import { STAGES, type JourneyStatus } from "@/lib/journey";
 import type { InviteEmailReview } from "@/lib/portal-invite-email.functions";
 import { MemberDetailsEditor } from "@/components/portal/MemberDetailsEditor";
+import { AdminForumInvitationBatch } from "@/components/portal/AdminForumInvitationBatch";
 import {
   communicationReadoutRows,
   fitReadoutRows,
@@ -110,6 +112,11 @@ const demoOverview: any = {
       organization: "Northline Partners",
       entity: "both",
       role: "advisor",
+      is_candidate: true,
+      intended_designation: { version: 1, kind: "forum_invitee", entity: "none", roles: [], other_text: "", committee: "undetermined" },
+      linkedin_url: "https://www.linkedin.com/in/alex-morgan-example/",
+      why_you: "",
+      updated_at: new Date().toISOString(),
       status: "active",
       package_status: "in_preparation",
       last_access_at: new Date().toISOString(),
@@ -236,12 +243,12 @@ const emptyInvite: InviteEmailReview = {
   organization: "",
   title: "",
   entity: "prsc",
-  role: "board_member",
+  role: "advisor",
   why_you: "",
   is_methodology_committee: false,
   participates_in_forum: true,
-  is_candidate: false,
-  intended_designation: { version: 1, kind: "identified", entity: "prsc", roles: ["prsc_board"], other_text: "", committee: "undetermined" },
+  is_candidate: true,
+  intended_designation: { version: 1, kind: "forum_invitee", entity: "none", roles: [], other_text: "", committee: "undetermined" },
 };
 
 function downloadListTemplate() {
@@ -344,24 +351,44 @@ export function AdminCenter({ page }: { page: "overview" | "send" }) {
   const [aiBackground, setAiBackground] = useState("");
   const [aiDrafting, setAiDrafting] = useState(false);
   const [aiStatus, setAiStatus] = useState("");
+  const aiInputVersion = useRef("");
+  aiInputVersion.current = JSON.stringify([inviteDraft, aiLinkedin, aiBackground]);
+  const [savingInviteNotes, setSavingInviteNotes] = useState(false);
   const runAiDraft = async () => {
     if (aiDrafting) return;
     const generation = inviteNdaGeneration.current;
+    const inputVersion = aiInputVersion.current;
     setAiDrafting(true); setAiStatus("");
     try {
-      const { draft: text } = await (preview ? draftWhyYouPreview : draftWhyYou)({ data: {
+      const { draft: text, source } = await (preview ? draftWhyYouPreview : draftWhyYou)({ data: {
         first_name: inviteDraft.first_name, last_name: inviteDraft.last_name, organization: inviteDraft.organization,
         title: inviteDraft.title, entity: inviteDraft.entity, role: inviteDraft.role, is_candidate: !!inviteDraft.is_candidate,
         intended_designation: inviteIntended,
         linkedin_url: aiLinkedin, background: aiBackground,
       } });
       if (generation !== inviteNdaGeneration.current) return;
+      if (inputVersion !== aiInputVersion.current) { setAiStatus("The recipient details changed while drafting. Generate a new draft for the current details."); return; }
       setInviteDraft((d) => ({ ...d, why_you: text }));
-      setAiStatus("Draft added below. Review and edit before sending.");
+      setAiStatus(source.kind === "administrator_background" ? "Drafted from the background you supplied. Review and edit before sending." : "Draft added from the supplied details and profile-link reference. Review and edit before sending.");
     } catch (err) {
       if (generation === inviteNdaGeneration.current) setAiStatus(userFacingError(err, "The draft could not be created."));
     } finally { if (generation === inviteNdaGeneration.current) setAiDrafting(false); }
   };
+  async function saveInviteNotes() {
+    if (!inviteCandidateId || !inviteNda || savingInviteNotes) return;
+    if (preview) return setAiStatus("Sign in to save this member’s note without sending an invitation.");
+    const generation = inviteNdaGeneration.current;
+    setSavingInviteNotes(true); setAiStatus("");
+    try {
+      const saved = await saveMemberInvitationNotes({ data: { member_id: inviteCandidateId, expected_updated_at: inviteNda.member.updated_at, why_you: inviteDraft.why_you, linkedin_url: aiLinkedin || null } });
+      if (generation !== inviteNdaGeneration.current) return;
+      setInviteNda((current) => current ? { ...current, member: { ...current.member, updated_at: saved.updated_at } } : current);
+      setAiStatus("Note and LinkedIn link saved. No invitation was sent.");
+      void overview.refetch();
+    } catch (error) {
+      if (generation === inviteNdaGeneration.current) setAiStatus(userFacingError(error, "The invitation note could not be saved."));
+    } finally { if (generation === inviteNdaGeneration.current) setSavingInviteNotes(false); }
+  }
   const [invitePreviewOpen, setInvitePreviewOpen] = useState(false);
   const [invitePreviewHtml, setInvitePreviewHtml] = useState("");
   const inviteFormRef = useRef<HTMLFormElement>(null);
@@ -369,7 +396,7 @@ export function AdminCenter({ page }: { page: "overview" | "send" }) {
     inviteNdaGeneration.current += 1;
     setInviteCandidateId(""); setInviteNda(null); setInviteNdaReviewId(""); setInviteNdaLoading(false); setInviteNdaSaving(false); setInviteNdaMessage("");
     setInviteDraft({ ...emptyInvite }); setInviteGov(freshInviteGovernance()); setInvitePollId("");
-    setInvitePreviewOpen(false); setInvitePreviewHtml(""); setAiLinkedin(""); setAiBackground(""); setAiStatus(""); setAiDrafting(false);
+    setInvitePreviewOpen(false); setInvitePreviewHtml(""); setAiLinkedin(""); setAiBackground(""); setAiStatus(""); setAiDrafting(false); setSavingInviteNotes(false);
     inviteFormRef.current?.reset();
   }
   function invalidateInviteNda() {
@@ -384,11 +411,14 @@ export function AdminCenter({ page }: { page: "overview" | "send" }) {
     const generation = ++inviteNdaGeneration.current;
     setInviteCandidateId(id); setInviteNda(null); setInviteNdaReviewId(""); setInviteNdaMessage("");
     setInviteGov(freshInviteGovernance()); setInviteDraft({ ...emptyInvite }); setInvitePollId("");
-    setInvitePreviewOpen(false); setInvitePreviewHtml(""); setAiLinkedin(""); setAiBackground(""); setAiStatus(""); setAiDrafting(false);
+    setInvitePreviewOpen(false); setInvitePreviewHtml(""); setAiLinkedin(""); setAiBackground(""); setAiStatus(""); setAiDrafting(false); setSavingInviteNotes(false);
     setInviteNdaSaving(false); setInviteNdaLoading(Boolean(id));
     if (!id) return;
     const candidate = (overview.data?.members ?? []).find((m: any) => m.id === id);
-    if (candidate) setInviteDraft({ ...emptyInvite, ...Object.fromEntries(Object.keys(emptyInvite).filter((key) => candidate[key] != null).map((key) => [key, candidate[key]])), intended_designation: readIntendedDesignation(candidate) });
+    if (candidate) {
+      setInviteDraft({ ...emptyInvite, ...Object.fromEntries(Object.keys(emptyInvite).filter((key) => candidate[key] != null).map((key) => [key, candidate[key]])), intended_designation: readIntendedDesignation(candidate) });
+      setAiLinkedin(candidate.linkedin_url ?? "");
+    }
     try {
       if (preview) throw new Error("Open the signed-in admin page to load this candidate’s stored NDA record.");
       const detail = await getInvitationNda({ data: { member_id: id } });
@@ -540,7 +570,7 @@ export function AdminCenter({ page }: { page: "overview" | "send" }) {
     importInFlight.current = true;
     setImporting(true);
     try {
-      const rows: MemberRow[] = importRows.map(({ linkedin_url: _l, background: _b, ...rest }) => rest);
+      const rows = importRows.map(({ background: _b, ...rest }) => rest);
       const res = await importPortalMembers({ data: { rows, send_invitations: sendOnImport } });
       if (generation === importGeneration.current) {
         importGeneration.current += 1;
@@ -719,7 +749,7 @@ export function AdminCenter({ page }: { page: "overview" | "send" }) {
       intendedDesignationSchema.parse(inviteIntended);
       const needsReview = !inviteDraft.is_candidate && roleCombinationTier(inviteDraft.entity, inviteDraft.role, inviteDraft.is_methodology_committee ?? false).tier === "review";
       if (inviteCandidateId && (!inviteNdaReviewId || !inviteGov.nda_confirmed || inviteNdaLoading || inviteNdaSaving)) throw new Error("Review and save this candidate’s NDA verification before proceeding.");
-      await invitePortalMember({ data: { ...inviteDraft, poll_id: invitePollId || null,
+      await invitePortalMember({ data: { ...inviteDraft, linkedin_url: aiLinkedin || null, poll_id: invitePollId || null,
         selected_member_id: inviteCandidateId || undefined, nda_review_id: inviteCandidateId ? inviteNdaReviewId : undefined,
         nda_confirmed: inviteGov.nda_confirmed, nda_recipient_email: inviteGov.nda_recipient_email, nda_reference: inviteGov.nda_reference, nda_entities: inviteGov.nda_entities || undefined, nda_scope: inviteGov.nda_scope,
         role_review: needsReview ? { decision: "approved", notes: inviteGov.review_notes, prsc_scope: inviteGov.prsc_scope, dis_scope: inviteGov.dis_scope, conflict_controls: inviteGov.conflict_controls } : undefined } });
@@ -893,7 +923,7 @@ export function AdminCenter({ page }: { page: "overview" | "send" }) {
         firstName={m?.first_name ?? "Shirley"}
         recipientEmail={m?.email ?? "member@example.com"}
         entity={entity}
-        roleLabel={memberRoleLabel(m?.role ?? "advisor", entity)}
+        roleLabel={memberCandidateLabel(m?.role ?? "advisor", entity, !!m?.is_candidate)}
         copy={draft}
         meetingBlock={composePollBlock}
         whyYou={m?.why_you}
@@ -986,7 +1016,7 @@ export function AdminCenter({ page }: { page: "overview" | "send" }) {
       const vis = p.visibility_instructions ?? {};
       const fitValues = new Map(hasFitAnswers(ans) ? fitReadoutRows(ans).map(({ label, value }) => [label, value]) : []);
       const communicationValues = new Map(hasCommunicationPreferences(vis) ? communicationReadoutRows(vis).map(({ label, value }) => [label, value]) : []);
-      return [m.first_name, m.last_name, m.email, m.organization, m.title, String(m.entity).toUpperCase(), memberDesignation(m as any), m.status, stageOf(m).label,
+      return [m.first_name, m.last_name, m.email, m.organization, m.title, m.is_candidate ? "None" : String(m.entity).toUpperCase(), memberDesignation(m as any), m.status, stageOf(m).label,
         date(m.invited_at), date(m.last_access_at), date(p.submitted_at), prog?.done ?? "", prog?.total ?? "", date(m.documents_completed_at),
         p.preferred_name, p.professional_role, p.current_organization, p.preferred_email, p.preferred_phone, p.bio,
         ...FIT_EXPORT_LABELS.map((label) => fitValues.get(label) ?? ""),
@@ -1055,6 +1085,7 @@ export function AdminCenter({ page }: { page: "overview" | "send" }) {
             ))}
           </div>
         )}
+        {page === "send" && <AdminForumInvitationBatch members={members} preview={preview} onSaved={() => { void overview.refetch(); void email.refetch(); }} />}
         <div className={`mt-6 grid gap-5 ${page === "overview" ? "lg:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)]" : "lg:grid-cols-2 2xl:grid-cols-[minmax(0,1fr)_minmax(0,1.3fr)_minmax(0,0.8fr)]"}`}>
           <div className="contents">
             <section className={`${S("send",1)} admin-card p-6 sm:p-8 ${inviteCollapsed ? "[&>*:not(:first-child)]:hidden" : ""}`}>
@@ -1067,7 +1098,7 @@ export function AdminCenter({ page }: { page: "overview" | "send" }) {
                 </button>
                 <InfoTip
                   title="Invite a member"
-                  body="Add a board member or advisor here. Before sending their first welcome email, explain why this person was chosen. That private, personalized message appears prominently in their welcome center. Choose PRSC, DIS, or Both — their portal language adapts to the designation."
+                  body="United Forum Invitees can enter the Forum journey with entity None. Prepare and review their private Why You note and recipient-specific NDA before sending. PRSC/DIS role choices can be recorded later."
                 />
               </div>
               <form ref={inviteFormRef} onSubmit={invite} className="mt-7 grid gap-4 sm:grid-cols-2">
@@ -1171,13 +1202,14 @@ export function AdminCenter({ page }: { page: "overview" | "send" }) {
                 })()}
                 <div className="grid gap-3 border border-gold/20 p-4 sm:col-span-2">
                   <span className="text-base font-medium text-ivory/90">Draft “Why You” with AI (optional)</span>
-                  <span className="text-sm leading-6 text-ivory/55">Fill in their name, title, and organization above, then click Draft with AI — the “Why this candidate was chosen” field fills in for you to review. For a more personal note, optionally paste their LinkedIn About and Experience text below.</span>
-                  <Input value={aiLinkedin} onChange={(e) => setAiLinkedin(e.target.value)} placeholder="LinkedIn profile link (optional)" className="text-base" />
-                  <Textarea value={aiBackground} onChange={(e) => setAiBackground(e.target.value)} placeholder="Optional: paste their LinkedIn About and Experience text for a more personal note" className="min-h-28 text-base" />
+                  <span className="text-sm leading-6 text-ivory/55">Enter the LinkedIn profile link, then generate and review the Why You note using the same AI drafting action available for a batch. Optional pasted About and Experience text gives the draft more detail.</span>
+                  <Input aria-label="LinkedIn profile link" disabled={aiDrafting || savingInviteNotes} value={aiLinkedin} onChange={(e) => setAiLinkedin(e.target.value)} placeholder="LinkedIn profile link" className="text-base" />
+                  <Textarea aria-label="Supplied LinkedIn background" disabled={aiDrafting || savingInviteNotes} value={aiBackground} onChange={(e) => setAiBackground(e.target.value)} placeholder="Optional: paste their LinkedIn About and Experience text" className="min-h-28 text-base" />
                   <div className="flex flex-wrap items-center gap-3">
-                    <Button type="button" variant="outline" disabled={aiDrafting} className="rounded-none text-base" onClick={() => void runAiDraft()}>
-                      {aiDrafting ? "Drafting…" : "Draft with AI"}
+                    <Button type="button" variant="outline" disabled={aiDrafting || savingInviteNotes} className="rounded-none text-base" onClick={() => void runAiDraft()}>
+                      {aiDrafting ? "Drafting…" : "Generate from AI"}
                     </Button>
+                    {inviteCandidateId && <Button type="button" variant="outline" disabled={!inviteNda || aiDrafting || savingInviteNotes || inviteNdaSaving || inviteNdaLoading} onClick={() => void saveInviteNotes()}>{savingInviteNotes ? "Saving note…" : "Save note without sending"}</Button>}
                     {aiStatus && <span className="text-sm text-ivory/60">{aiStatus}</span>}
                   </div>
                 </div>
@@ -1188,6 +1220,7 @@ export function AdminCenter({ page }: { page: "overview" | "send" }) {
                   </span>
                   <Textarea
                     name="why_you"
+                    disabled={aiDrafting || savingInviteNotes}
                     value={inviteDraft.why_you}
                     onChange={(e) => setInviteDraft({ ...inviteDraft, why_you: e.target.value })}
                     placeholder="Describe the experience, judgment, perspective, or relationships that led to this invitation."
@@ -1213,15 +1246,15 @@ export function AdminCenter({ page }: { page: "overview" | "send" }) {
                 </div>
                 <InfoTip
                   title="Upload a member list"
-                  body="Stage new members from a CSV file using the downloaded template. Select multiple intended roles using semicolons, and record Methodology Committee as Yes, No, or Undetermined. Background is administrator-supplied; click Generate AI notes for all to draft missing why_you notes. Review the rows before saving. NDA verification is reviewed separately."
+                  body="Save the roster with United Forum Invitee and entity None. LinkedIn links are saved for later batch preparation; Why You can stay blank. Generate and review the notes in Prepare Forum invitations when you are ready to invite. NDA verification remains separate."
                 />
               </div>
 
               <p className="mt-5 text-base leading-7 text-ivory/60">
                 Use one row per person. Invitation type is forum_invitee or identified; entity is None, PRSC, DIS, or Both.
                 Separate multiple intended roles with semicolons, such as PRSC Board; DIS Advisor. Other requires a description.
-                Methodology Committee accepts Yes, No, or Undetermined. Background is supplied by the administrator; use Generate AI notes for all to draft missing why_you notes.
-                Selecting a file stages rows in this browser. Add members saves them. NDA columns are not imported or verified by this uploader.
+                Methodology Committee accepts Yes, No, or Undetermined. Why You can stay blank when saving the roster; LinkedIn links are retained for later AI drafting.
+                Selecting a file stages rows in this browser. Add members saves them without sending when the invitation checkbox is off. NDA columns are not imported or verified by this uploader.
               </p>
 
               <div className="mt-6 flex flex-wrap items-center gap-3">
@@ -1298,7 +1331,7 @@ export function AdminCenter({ page }: { page: "overview" | "send" }) {
                     />
                     Send welcome invitations now
                   </label>
-                  <Button type="button" disabled={importing || batchDrafting || importRows.some((r) => r.why_you.trim().length < 20)} className="rounded-none bg-gold text-base text-navy hover:bg-gold-light hover:text-navy" onClick={runImport}>
+                  <Button type="button" disabled={importing || batchDrafting || (sendOnImport && importRows.some((r) => r.why_you.trim().length < 20))} className="rounded-none bg-gold text-base text-navy hover:bg-gold-light hover:text-navy" onClick={runImport}>
                     {importing ? "Uploading…" : `${sendOnImport ? "Add & invite" : "Add"} ${importRows.length} member${importRows.length === 1 ? "" : "s"}`}
                   </Button>
                   <Button type="button" variant="ghost" disabled={importing} className="rounded-none text-base text-ivory/60" onClick={clearImport}>
@@ -2331,7 +2364,7 @@ export function AdminCenter({ page }: { page: "overview" | "send" }) {
               </div>
               <div className="bg-navy px-5 py-3">
                 <p className="text-xs uppercase tracking-[0.14em] text-gold">Logos shown</p>
-                <p className="mt-1 text-base text-ivory">{inviteDraft.entity === "both" ? "PRSC + DIS" : inviteDraft.entity.toUpperCase()}</p>
+                <p className="mt-1 text-base text-ivory">{inviteDraft.is_candidate || inviteDraft.entity === "both" ? "PRSC + DIS" : inviteDraft.entity.toUpperCase()}</p>
               </div>
               <div className="bg-navy px-5 py-3">
                 <p className="text-xs uppercase tracking-[0.14em] text-gold">Contact</p>

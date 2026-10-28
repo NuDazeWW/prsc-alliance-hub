@@ -40,10 +40,11 @@ import { MemberExecutiveQuestions } from "@/components/portal/MemberExecutiveQue
 import { LeadershipTeam } from "@/components/portal/LeadershipTeam";
 import { getMyMeetings } from "@/lib/meetings.functions";
 import { getMyDocuments, getMyHeadshotUrl, getPortalSession } from "@/lib/portal.functions";
-import { memberRoleChips, memberRoleKinds, memberRoleLabel, memberRoleLabels, memberDesignation, memberDesignationChips } from "@/lib/member-role-labels";
+import { memberRoleChips, memberRoleKinds, memberRoleLabel, memberRoleLabels, memberDesignation, memberDesignationChips, memberEntityDesignationLabel } from "@/lib/member-role-labels";
 import { ROLE_DETAILS } from "@/data/orientation-hub";
 import { JourneyTimeline } from "@/components/portal/JourneyTimeline";
-import { journeyStatus, isOnboarding } from "@/lib/journey";
+import { journeyStatus, isOnboarding, STAGES } from "@/lib/journey";
+import { memberJourneyPresentation } from "@/lib/member-journey-presentation";
 import { supabase } from "@/integrations/supabase/client";
 import { PortalShell } from "@/components/portal/PortalShell";
 import { isPreviewHost } from "@/routes/_authenticated/route";
@@ -178,7 +179,7 @@ function PortalHome() {
   const name = m.professional_name || m.first_name;
   const initials = `${(m.first_name || "").charAt(0)}${(m.last_name || "").charAt(0)}`.toUpperCase();
   // Every member can read about both organizations, regardless of designation.
-  const entityWord = m.entity === "both" ? "PRSC and DIS" : m.entity.toUpperCase();
+  const entityWord = memberEntityDesignationLabel(m);
   const designations = memberRoleLabels(m.role, m.entity);
   const roleChips = memberDesignationChips(m as any);
   const roleKinds = memberRoleKinds(m.role, Boolean((m as { is_methodology_committee?: boolean }).is_methodology_committee), !!(m as { is_candidate?: boolean }).is_candidate);
@@ -189,15 +190,16 @@ function PortalHome() {
   const acknowledged = new Set(documents.data?.acknowledged ?? []);
   const docEntity = (documents.data as { entity?: string } | null)?.entity ?? m.entity;
   const journey = journeyStatus((myDocs as any[]).filter((d) => !d.superseded_at), acknowledged, docEntity, (documents.data as any)?.activation ?? { prsc: null, dis: null }, m.participates_in_forum !== false, (documents.data as any)?.forumCleared === true);
+  const { forumOnly, forumParticipationComplete, label: journeyLabel } = memberJourneyPresentation(m, journey);
   const trackedDocs = myDocs.some((d: any) => isOnboarding(d)) ? myDocs.filter((d: any) => isOnboarding(d)) : myDocs;
   const signDocs = trackedDocs.filter((d) => d.category === "sign");
   const readDocs = trackedDocs.filter((d) => d.category === "read");
   const signLeft = signDocs.filter((d) => !acknowledged.has(d.id)).length;
   const readLeft = readDocs.filter((d) => !acknowledged.has(d.id)).length;
   const allDone = documentsReleased && signLeft + readLeft === 0;
-  const docSummary = allDone
-    ? `${journey.label} · all ${trackedDocs.length} journey documents complete`
-    : `${journey.label} · ${trackedDocs.length - signLeft - readLeft} of ${trackedDocs.length} complete · ${[signLeft ? `${signLeft} to sign` : "", readLeft ? `${readLeft} to acknowledge` : ""].filter(Boolean).join(", ")}`;
+  const docSummary = forumOnly ? journeyLabel : allDone
+    ? `${journeyLabel} · all ${trackedDocs.length} journey documents complete`
+    : `${journeyLabel} · ${trackedDocs.length - signLeft - readLeft} of ${trackedDocs.length} complete · ${[signLeft ? `${signLeft} to sign` : "", readLeft ? `${readLeft} to acknowledge` : ""].filter(Boolean).join(", ")}`;
 
 
   const sideNav = [
@@ -244,7 +246,14 @@ function PortalHome() {
               </Button>
             ))}
           </div>
-          <JourneyTimeline currentStage={journey.currentStage} stageDone={journey.stageDone} forum={m.participates_in_forum !== false} />
+          {forumOnly ? <ol aria-label="Your journey" className="flex items-center gap-3">
+            <li className="flex items-center gap-3 text-[11px] text-ivory/85">
+              <span className={`flex h-[18px] w-[18px] shrink-0 items-center justify-center rounded-full border border-gold ${forumParticipationComplete ? "bg-gold text-navy" : "bg-navy"}`}>
+                {forumParticipationComplete ? <Check aria-hidden className="h-3 w-3" /> : <span aria-hidden className="h-1.5 w-1.5 rounded-full bg-gold" />}
+              </span>
+              {STAGES[0].label}<span className="text-[9px] uppercase tracking-[0.14em] text-gold">{forumParticipationComplete ? "Complete" : "Now"}</span>
+            </li>
+          </ol> : <JourneyTimeline currentStage={journey.currentStage} stageDone={journey.stageDone} forum={m.participates_in_forum !== false} />}
         </div>
       }
     >
@@ -490,9 +499,9 @@ function PortalHome() {
                     </section>
                   ))}
                 </div>
-                <p className="mt-6 max-w-[36rem] text-[13px] leading-6 text-ivory/55">
+                {!m.is_candidate && <p className="mt-6 max-w-[36rem] text-[13px] leading-6 text-ivory/55">
                   Your individualized package provides the formal terms and complete scope of your role.
-                </p>
+                </p>}
               </div>
               <div className="border-t border-gold/20 pt-7 lg:border-l lg:border-t-0 lg:pl-10 lg:pt-1">
                 <dl className="space-y-7">
@@ -533,7 +542,7 @@ function PortalHome() {
               ) : (
                 <>
                   {documentsReleased ? (
-                    <MemberDocuments documents={myDocs as any} completions={documents.data?.completions ?? []} entity={docEntity} forum={(documents.data as any)?.forum !== false} forumCleared={(documents.data as any)?.forumCleared === true} entityReleased={(documents.data as any)?.entityReleased} />
+                    <MemberDocuments documents={myDocs as any} completions={documents.data?.completions ?? []} entity={docEntity} forum={(documents.data as any)?.forum !== false} forumOnly={forumOnly} forumCleared={(documents.data as any)?.forumCleared === true} entityReleased={(documents.data as any)?.entityReleased} />
                   ) : (
                     <div className="mt-8 border border-gold/25 bg-ivory/[.03] p-8 text-center"><FileText className="mx-auto h-7 w-7 text-gold"/><h3 className="mt-5 font-display text-[24px] leading-snug">Your documents are being prepared.</h3><p className="mx-auto mt-4 max-w-[34rem] text-[15px] leading-7 text-ivory/65">We will email you when your assigned documents are released. Your executive profile is optional for Forum participation.</p></div>
                   )}

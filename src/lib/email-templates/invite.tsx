@@ -2,6 +2,8 @@ import * as React from 'react'
 import { Body, Button, Column, Container, Head, Heading, Html, Img, Link, Preview, Row, Section, Text } from '@react-email/components'
 import prscLogo from '@/assets/prsc-horizontal-lockup.png.asset.json'
 import disLogo from '@/assets/dis-lockup-site.png.asset.json'
+import { FORUM_INVITEE_LABEL, FORUM_ENTITY_LABEL, FORUM_ENTITY_FULL_NAME } from '@/lib/member-role-labels'
+import { SYSTEM_EMAIL_DEFAULTS } from '@/lib/system-email-defaults'
 
 export type InviteEntity = 'prsc' | 'dis' | 'both'
 
@@ -74,9 +76,13 @@ export const InviteEmail = ({
   whyYou,
 }: InviteEmailProps) => {
   const inviteeName = capitalizeInviteName(firstName) || 'There'
-  const selectedEntity = inviteEntityCopy[entity]
-  const showPrsc = entity === 'prsc' || entity === 'both'
-  const showDis = entity === 'dis' || entity === 'both'
+  const forumOnly = roleLabel === FORUM_INVITEE_LABEL
+  const selectedEntity = forumOnly ? { full: FORUM_ENTITY_FULL_NAME, short: FORUM_ENTITY_LABEL } : inviteEntityCopy[entity]
+  const showPrsc = forumOnly || entity === 'prsc' || entity === 'both'
+  const showDis = forumOnly || entity === 'dis' || entity === 'both'
+  // The existing auth hook already supplies the Forum-only label. Preserve saved
+  // administrator copy, and use the approved orientation copy for an empty fallback.
+  if (!copy?.body?.trim() && forumOnly) copy = SYSTEM_EMAIL_DEFAULTS.invite
   if (copy?.body?.trim()) {
     const tokens = { first_name: inviteeName, full_name: inviteeName, entity_full: selectedEntity.full, entity: selectedEntity.short, role: roleLabel, email: recipientEmail, why_you: whyYou?.trim() || 'We have been intentional about who we invite into this next chapter, and your experience and judgment are a meaningful part of why you were selected.' }
     const fill = (v?: string | null, d = '') => fillInviteTokens(v?.trim() || d, tokens)
@@ -117,7 +123,7 @@ export const InviteEmail = ({
             <Text style={signatureTitle}>{sigTitle.join('|').split(',').map((part, i) => <React.Fragment key={i}>{i > 0 && <br />}{part.trim()}</React.Fragment>)}</Text>
           </Section>
           <Section style={securityFooter}>
-            <Text style={securityText}>This invitation was sent specifically to <Link href={`mailto:${recipientEmail}`} style={footerLink}>{recipientEmail}</Link> in connection with your previously discussed {roleLabel} role. If you have questions about this invitation before accessing the portal, contact us at <Link href="mailto:info@readinessterminal.com" style={footerLink}>info@readinessterminal.com</Link>.</Text>
+            <Text style={securityText}>This invitation was sent specifically to <Link href={`mailto:${recipientEmail}`} style={footerLink}>{recipientEmail}</Link>{forumOnly ? '.' : <> in connection with your previously discussed {roleLabel} role.</>} If you have questions about this invitation before accessing the portal, contact us at <Link href="mailto:info@readinessterminal.com" style={footerLink}>info@readinessterminal.com</Link>.</Text>
             <Text style={securityText}>This invitation provides access to the private onboarding process. Formal entity appointments and authority are governed by separate documentation and authorization.</Text>
           </Section>
         </Container>

@@ -1,31 +1,11 @@
 import { createServerFn } from "@tanstack/react-start";
-import { z } from "zod";
 import { requirePortalAccess } from "@/lib/portal-access";
-import { intendedDesignationSchema, intendedDesignationLabel } from "./intended-designation";
 import { buildProfileBioPrompt, isAiDraftPreviewHost, profileBioDraftSchema, type ProfileBioInvitation } from "@/lib/profile-bio-draft";
-
-const schema = z.object({
-  first_name: z.string().trim().max(80),
-  last_name: z.string().trim().max(80),
-  organization: z.string().trim().max(180),
-  title: z.string().trim().max(160),
-  entity: z.enum(["prsc", "dis", "both"]),
-  role: z.enum(["board_member", "advisor", "prsc_board_dis_advisor", "prsc_advisor_dis_board", "methodology_committee"]),
-  is_candidate: z.boolean().optional(),
-  intended_designation: intendedDesignationSchema.optional(),
-  linkedin_url: z.string().trim().max(300),
-  background: z.string().trim().max(8000).default(""),
-});
-
-const ENTITY: Record<string, string> = {
-  prsc: "the Partnership Readiness Standards Council (PRSC), an independent body that governs the PRSC Readiness Standard™ and PRSC Readiness Score™ for sponsorship and partnership readiness",
-  dis: "Decision Intelligence Systems (DIS), a decision-intelligence company now entering investor prospecting",
-  both: "both the Partnership Readiness Standards Council (PRSC), which governs the PRSC Readiness Standard™ for sponsorship and partnership readiness, and Decision Intelligence Systems (DIS), a decision-intelligence company now entering investor prospecting",
-};
+import { generateWhyYouWithSource, whyYouDraftSchema, type WhyYouDraftInput } from "./why-you-draft";
 
 export const draftWhyYou = createServerFn({ method: "POST" })
   .middleware([requirePortalAccess])
-  .inputValidator((input) => schema.parse(input))
+  .inputValidator((input) => whyYouDraftSchema.parse(input))
   .handler(async ({ context, data }) => {
     const { data: admin } = await context.supabase.from("user_roles").select("role").eq("user_id", context.userId).eq("role", "admin").maybeSingle();
     if (!admin) throw new Error("Unauthorized");
@@ -34,7 +14,7 @@ export const draftWhyYou = createServerFn({ method: "POST" })
 
 // Builder-preview only: the preview is not signed in, so allow drafting only on preview/local hosts.
 export const draftWhyYouPreview = createServerFn({ method: "POST" })
-  .inputValidator((input) => schema.parse(input))
+  .inputValidator((input) => whyYouDraftSchema.parse(input))
   .handler(async ({ data }) => {
     const { getRequest } = await import("@tanstack/react-start/server");
     const host = new URL(getRequest().url).hostname;
@@ -61,30 +41,10 @@ export const draftMyProfileBioPreview = createServerFn({ method: "POST" })
     return generateAiDraft(buildProfileBioPrompt({ first_name: "", last_name: "" }, data));
   });
 
-async function generateDraft(data: z.infer<typeof schema>) {
-    const { INVITE_ROLE_LABELS } = await import("@/lib/invite-email-config");
-    const role = data.intended_designation ? `${intendedDesignationLabel(data.intended_designation)} (under consideration only; no appointment or entity authority is conferred; never imply an activated seat)` : data.is_candidate ? "United Forum invitee (invited to strategic coordination in the United Strategic Coordination Forum; not appointed to any PRSC or DIS board, advisory, or committee seat and not a participant in the Readiness Vanguard benchmarking program; never imply a seat)" : INVITE_ROLE_LABELS[data.role];
-    const languageEntity = data.intended_designation && data.intended_designation.entity !== "none" ? data.intended_designation.entity : data.entity;
-    const instructions = `Write a private, personal note from Shirley Johnson, Founder, on behalf of ${ENTITY[languageEntity]}, explaining directly to an invited ${role} why we chose them.
-
-Voice and point of view:
-- Speak as PRSC, DIS, or both, according to the selected entity. Use first-person plural language such as "we," "our work," and "we believe," while addressing the candidate as "you."
-- Sound warm, friendly, direct, and personal—not like an assessment, résumé summary, or generic executive profile.
-- Connect the candidate's supplied experience to concrete ways they can strengthen our work.
-- Prefer direct phrasing such as "Your experience in X will help us Y" and "We value the perspective you bring from Z."
-- Never write detached inference language such as "your role suggests," "your title indicates," "you likely," "may have," or "appears to."
-
-Content rules:
-- Write 90–140 words with no greeting, signature, heading, or bullet points.
-- Use only the facts provided: name, title, organization, and background.
-- When background is provided, incorporate its specific experience naturally rather than restating it as a résumé.
-- When background is missing, acknowledge the candidate's current role and organization without inventing achievements, responsibilities, employers, or history. Explain why that perspective is relevant to our work in plain language.
-- Do not call the candidate's position "our role." "Role" refers only to their invited ${role} position.
-- Return only the finished note.`;
-    const input = `Candidate: ${data.first_name} ${data.last_name}\nTitle: ${data.title || "n/a"}\nOrganization: ${data.organization || "n/a"}\nLinkedIn: ${data.linkedin_url || "n/a"}\n\nBackground (from their LinkedIn About/Experience):\n${data.background || "Not provided."}`;
-
-    return generateAiDraft({ instructions, input });
-  }
+async function generateDraft(data: WhyYouDraftInput) {
+  // Single and batch drafting share the existing AI gateway and administrator-supplied facts.
+  return generateWhyYouWithSource(data, { generateDraft: generateAiDraft });
+}
 
 async function generateAiDraft({ instructions, input }: { instructions: string; input: string }) {
     const key = process.env.LOVABLE_API_KEY;
