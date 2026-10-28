@@ -67,7 +67,7 @@ import { AdminMeetings } from "@/components/portal/AdminMeetings";
 import { listAdminPolls } from "@/lib/meetings.functions";
 import { MeetingSetupForm } from "@/components/portal/MeetingSetupForm";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { MEETING_TYPE_LABEL, meetingBlockText, pollFitsMember } from "@/lib/meeting-block";
+import { meetingTypeLabel, meetingBlockText, pollFitsMember } from "@/lib/meeting-block";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -1151,7 +1151,7 @@ export function AdminCenter({ page }: { page: "overview" | "send" }) {
                         <select value={invitePollId} onChange={(e) => setInvitePollId(e.target.value)} className="h-10 w-full min-w-0 rounded-md border border-input bg-navy px-3 text-base">
                           <option value="">No meeting attached</option>
                           {fitting.map((p) => (
-                            <option key={p.id} value={p.id}>{p.title} — {MEETING_TYPE_LABEL[p.meeting_type]} · {p.slots?.length ?? 0} proposed time{p.slots?.length === 1 ? "" : "s"}</option>
+                            <option key={p.id} value={p.id}>{p.title} — {meetingTypeLabel(p.meeting_type)} · {p.slots?.length ?? 0} proposed time{p.slots?.length === 1 ? "" : "s"}</option>
                           ))}
                         </select>
                       ) : (
@@ -1508,7 +1508,7 @@ export function AdminCenter({ page }: { page: "overview" | "send" }) {
                 >
                   <option value="">{openPolls.length ? "Choose a meeting…" : "No open meetings yet — set one up"}</option>
                   {openPolls.map((p) => (
-                    <option key={p.id} value={p.id}>{p.title} — {MEETING_TYPE_LABEL[p.meeting_type]} · {p.slots?.length ?? 0} times</option>
+                    <option key={p.id} value={p.id}>{p.title} — {meetingTypeLabel(p.meeting_type)} · {p.slots?.length ?? 0} times</option>
                   ))}
                 </select>
                 <button type="button" onClick={() => setMeetingDialog("compose")} className="inline-flex shrink-0 items-center gap-2 rounded-full border border-gold/50 px-4 py-2 text-sm text-gold hover:bg-gold/10">

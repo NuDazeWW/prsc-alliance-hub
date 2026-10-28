@@ -1,3 +1,4 @@
+import { meetingTypeLabel } from "@/lib/meeting-block";
 import { userFacingError } from "@/lib/user-facing-error";
 import { fetchPrivateFile } from "@/lib/private-file-client";
 import { DEFAULT_MEETING_TZ, timezoneLabel } from "@/lib/meeting-block";
@@ -48,11 +49,6 @@ function demoPolls() {
   ];
 }
 
-const TYPE_LABEL: Record<string, string> = {
-  board: "Official Board Meeting",
-  advisory: "Advisory Meeting",
-  methodology: "Methodology Committee Meeting",
-};
 
 const CHOICES = [
   { value: "available", label: "Available", active: "border-emerald-400 bg-emerald-500/20 text-emerald-200" },
@@ -162,7 +158,7 @@ export function MemberMeetings({ hideWhenEmpty = false, hideIntro = false, asMem
         const answeredCount = Object.keys(answers).length;
         return (
           <div key={p.id} className="rounded-lg border border-gold/25 bg-navy-deep/40 p-5">
-            <p className="text-[11px] uppercase tracking-[0.16em] text-gold">{TYPE_LABEL[p.meeting_type]}</p>
+            <p className="text-[11px] uppercase tracking-[0.16em] text-gold">{meetingTypeLabel(p.meeting_type)}</p>
             <h4 className="mt-1 font-display text-lg text-ivory">{p.title}</h4>
             {p.description && <p className="mt-1 text-sm text-ivory/60">{p.description}</p>}
             <p className="mt-1 text-xs text-ivory/45">
@@ -251,7 +247,7 @@ export function MemberMeetings({ hideWhenEmpty = false, hideIntro = false, asMem
               return (
                 <div key={p.id} className="flex flex-col gap-3 rounded-lg border border-emerald-400/25 bg-navy-deep/40 p-5 sm:flex-row sm:items-center sm:justify-between">
                   <div className="min-w-0">
-                    <p className="text-[11px] uppercase tracking-[0.16em] text-emerald-300">{TYPE_LABEL[p.meeting_type]}</p>
+                    <p className="text-[11px] uppercase tracking-[0.16em] text-emerald-300">{meetingTypeLabel(p.meeting_type)}</p>
                     <p className="mt-1 font-display text-lg text-ivory">{p.title}</p>
                     {slot && (
                       <p className="mt-1 text-sm text-ivory/70">

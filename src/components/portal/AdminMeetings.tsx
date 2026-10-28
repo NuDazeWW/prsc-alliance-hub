@@ -1,3 +1,4 @@
+import { meetingTypeLabel } from "@/lib/meeting-block";
 import { userFacingError } from "@/lib/user-facing-error";
 import { useEffect, useState } from "react";
 import { CalendarDays, Check, Clock, MapPin, Plus, RefreshCw, Video, X } from "lucide-react";
@@ -16,11 +17,6 @@ import { Button } from "@/components/ui/button";
 import { MeetingSetupForm } from "@/components/portal/MeetingSetupForm";
 import { formatSlot, timezoneLabel } from "@/lib/meeting-block";
 
-const TYPE_LABEL: Record<string, string> = {
-  board: "Official Board Meeting",
-  advisory: "Advisory Meeting",
-  methodology: "Methodology Committee Meeting",
-};
 
 const AVAIL_STYLE: Record<string, string> = {
   available: "bg-emerald-500/20 text-emerald-300 border-emerald-400/40",
@@ -139,7 +135,7 @@ export function AdminMeetings() {
                     <div className="min-w-0">
                       <p className="font-display text-lg text-ivory">{p.title}</p>
                       <p className="mt-1 text-xs text-ivory/50">
-                        {TYPE_LABEL[p.meeting_type]} · {p.duration_minutes} min · {timezoneLabel(p.timezone)} ·{" "}
+                        {meetingTypeLabel(p.meeting_type)} · {p.duration_minutes} min · {timezoneLabel(p.timezone)} ·{" "}
                         {p.format === "virtual" ? (
                           <span className="inline-flex items-center gap-1"><Video className="h-3 w-3" /> Virtual</span>
                         ) : (
