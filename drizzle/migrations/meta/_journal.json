@@ -176,6 +176,13 @@
       "when": 1793139226345,
       "tag": "0024_six_finding_corrections",
       "breakpoints": true
+    },
+    {
+      "idx": 25,
+      "version": "7",
+      "when": 1793153784408,
+      "tag": "0025_allow_custom_meeting_types",
+      "breakpoints": true
     }
   ]
 }
