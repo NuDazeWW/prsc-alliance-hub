@@ -1,5 +1,6 @@
 import { createServerFn } from "@tanstack/react-start";
 import { assertNdaRecipient, assertInviteIdentity } from "@/lib/invitation-evidence";
+import { assertReviewedInvitationNda } from "@/lib/invitation-nda";
 import { z } from "zod";
 import { parseProfileSaveInput, assertCommunicationPreferencesNotDowngraded } from "@/lib/portal-profile-schema";
 import type { PortalProfileRecord } from "@/lib/portal-profile-fields";
@@ -211,6 +212,8 @@ const inviteSchema = z.object({
   nda_reference: z.string().trim().max(400).optional(),
   nda_entities: entitySchema.optional(),
   nda_scope: z.string().trim().max(600).optional(),
+  selected_member_id: z.string().uuid().optional(),
+  nda_review_id: z.string().uuid().optional(),
   role_review: z.object({
     decision: z.literal("approved"),
     notes: z.string().trim().min(5).max(2000),
@@ -277,9 +280,21 @@ export const invitePortalMember = createServerFn({ method: "POST" })
     const data = normalizeCandidate(rawData);
     const gates = invitationGates(data, context.userId);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const { poll_id: pollId, nda_confirmed: _n, nda_recipient_email: _ne, nda_reference: _r, nda_entities: _e, nda_scope: _s, role_review: _rv, ...member } = data;
-    const { data: existing, error: existingError } = await supabaseAdmin.from("portal_members").select("id,user_id").eq("email", data.email.toLowerCase()).maybeSingle();
+    const { poll_id: pollId, nda_confirmed: _n, nda_recipient_email: _ne, nda_reference: _r, nda_entities: _e, nda_scope: _s, selected_member_id: _sm, nda_review_id: _nr, role_review: _rv, ...member } = data;
+    if (Boolean(data.selected_member_id) !== Boolean(data.nda_review_id)) throw new Error("Select the candidate and save their reviewed NDA information before proceeding.");
+    const { data: existing, error: existingError } = await supabaseAdmin.from("portal_members").select("*").eq("email", data.email.toLowerCase()).maybeSingle();
     if (existingError) throw existingError;
+    if (data.selected_member_id && data.nda_review_id) {
+      const { data: review, error: reviewError } = await supabaseAdmin.from("governance_reviews").select("member_id,kind,decision,reviewer_id,details").eq("id", data.nda_review_id).eq("member_id", data.selected_member_id).maybeSingle();
+      if (reviewError) throw new Error("The administrator’s NDA review could not be verified. Please review and save it again.");
+      assertReviewedInvitationNda({ ...data, selected_member_id: data.selected_member_id }, existing, review, context.userId);
+      // A fresh administrator review does not overwrite unchanged historical verification evidence.
+      gates.nda.verified_at = existing!.nda_verified_at;
+      gates.nda.verified_by = existing!.nda_verified_by;
+      gates.columns.nda_verified_at = existing!.nda_verified_at;
+      gates.columns.nda_verified_by = existing!.nda_verified_by;
+      gates.columns.nda_reference = existing!.nda_reference;
+    }
     const { data: reused, error: evidenceError } = await supabaseAdmin.from("governance_reviews").select("member_id").eq("kind", "nda").eq("notes", gates.nda.reference ?? "");
     if (evidenceError) throw evidenceError;
     if ((reused ?? []).some(r => r.member_id !== existing?.id)) throw new Error("This NDA reference is already recorded for another recipient. Verify this recipient's own executed NDA");

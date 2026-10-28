@@ -1,6 +1,9 @@
 import { csvCell } from "@/lib/csv";
 import { userFacingError } from "@/lib/user-facing-error";
 import { freshInviteGovernance, normalizedRecipient } from "@/lib/invitation-evidence";
+import { getInvitationNda, saveInvitationNdaVerification } from "@/lib/invitation-nda.functions";
+import { invitationNdaFormValues, clearInvitationNdaConfirmation } from "@/lib/invitation-nda-form";
+import { normalizedNdaReference } from "@/lib/invitation-nda";
 import { useStoredFlag } from "@/hooks/use-stored-flag";
 import { ChevronDown, ChevronUp } from "lucide-react";
 import { AdminLeadership } from "@/components/portal/AdminLeadership";
@@ -348,7 +351,7 @@ function downloadListTemplate() {
 }
 
 type InviteGov = ReturnType<typeof freshInviteGovernance>;
-/** Fresh per-recipient governance state; NDA coverage is never preselected. */
+/** A new recipient always starts without an administrator attestation. */
 const EMPTY_INVITE_GOV: InviteGov = freshInviteGovernance();
 
 export function AdminCenter({ page }: { page: "overview" | "send" }) {
@@ -379,6 +382,13 @@ export function AdminCenter({ page }: { page: "overview" | "send" }) {
   const openPolls: any[] = (polls.data?.polls ?? []).filter((p: any) => p.status === "open");
   const [invitePollId, setInvitePollId] = useState("");
   const [inviteGov, setInviteGov] = useState(EMPTY_INVITE_GOV);
+  const [inviteCandidateId, setInviteCandidateId] = useState("");
+  const [inviteNda, setInviteNda] = useState<Awaited<ReturnType<typeof getInvitationNda>> | null>(null);
+  const [inviteNdaReviewId, setInviteNdaReviewId] = useState("");
+  const [inviteNdaLoading, setInviteNdaLoading] = useState(false);
+  const [inviteNdaSaving, setInviteNdaSaving] = useState(false);
+  const [inviteNdaMessage, setInviteNdaMessage] = useState("");
+  const inviteNdaGeneration = useRef(0);
   const [inviteCollapsed, setInviteCollapsed] = useStoredFlag("admin.inviteCollapsed");
   const PLACE: Record<"overview" | "send", Record<number, string>> = {
     overview: {
@@ -432,6 +442,7 @@ export function AdminCenter({ page }: { page: "overview" | "send" }) {
   const [aiStatus, setAiStatus] = useState("");
   const runAiDraft = async () => {
     if (aiDrafting) return;
+    const generation = inviteNdaGeneration.current;
     setAiDrafting(true); setAiStatus("");
     try {
       const { draft: text } = await (preview ? draftWhyYouPreview : draftWhyYou)({ data: {
@@ -439,19 +450,68 @@ export function AdminCenter({ page }: { page: "overview" | "send" }) {
         title: inviteDraft.title, entity: inviteDraft.entity, role: inviteDraft.role, is_candidate: !!inviteDraft.is_candidate,
         linkedin_url: aiLinkedin, background: aiBackground,
       } });
+      if (generation !== inviteNdaGeneration.current) return;
       setInviteDraft((d) => ({ ...d, why_you: text }));
       setAiStatus("Draft added below. Review and edit before sending.");
     } catch (err) {
-      setAiStatus(userFacingError(err, "The draft could not be created."));
-    } finally { setAiDrafting(false); }
+      if (generation === inviteNdaGeneration.current) setAiStatus(userFacingError(err, "The draft could not be created."));
+    } finally { if (generation === inviteNdaGeneration.current) setAiDrafting(false); }
   };
   const [invitePreviewOpen, setInvitePreviewOpen] = useState(false);
   const [invitePreviewHtml, setInvitePreviewHtml] = useState("");
   const inviteFormRef = useRef<HTMLFormElement>(null);
   function resetInvitation() {
+    inviteNdaGeneration.current += 1;
+    setInviteCandidateId(""); setInviteNda(null); setInviteNdaReviewId(""); setInviteNdaLoading(false); setInviteNdaSaving(false); setInviteNdaMessage("");
     setInviteDraft({ ...emptyInvite }); setInviteGov(freshInviteGovernance()); setInvitePollId("");
-    setInvitePreviewOpen(false); setInvitePreviewHtml(""); setAiLinkedin(""); setAiBackground(""); setAiStatus("");
+    setInvitePreviewOpen(false); setInvitePreviewHtml(""); setAiLinkedin(""); setAiBackground(""); setAiStatus(""); setAiDrafting(false);
     inviteFormRef.current?.reset();
+  }
+  function invalidateInviteNda() {
+    setInviteGov((current) => clearInvitationNdaConfirmation(current));
+    setInviteNdaReviewId(""); setInviteNdaMessage("");
+  }
+  function editInviteNda(patch: Partial<InviteGov>) {
+    setInviteGov((current) => clearInvitationNdaConfirmation({ ...current, ...patch }));
+    setInviteNdaReviewId(""); setInviteNdaMessage("");
+  }
+  async function selectInviteCandidate(id: string) {
+    const generation = ++inviteNdaGeneration.current;
+    setInviteCandidateId(id); setInviteNda(null); setInviteNdaReviewId(""); setInviteNdaMessage("");
+    setInviteGov(freshInviteGovernance()); setInviteDraft({ ...emptyInvite }); setInvitePollId("");
+    setInvitePreviewOpen(false); setInvitePreviewHtml(""); setAiLinkedin(""); setAiBackground(""); setAiStatus(""); setAiDrafting(false);
+    setInviteNdaSaving(false); setInviteNdaLoading(Boolean(id));
+    if (!id) return;
+    const candidate = (overview.data?.members ?? []).find((m: any) => m.id === id);
+    if (candidate) setInviteDraft({ ...emptyInvite, ...Object.fromEntries(Object.keys(emptyInvite).filter((key) => candidate[key] != null).map((key) => [key, candidate[key]])) });
+    try {
+      if (preview) throw new Error("Open the signed-in admin page to load this candidate’s stored NDA record.");
+      const detail = await getInvitationNda({ data: { member_id: id } });
+      if (generation !== inviteNdaGeneration.current) return;
+      setInviteNda(detail);
+      setInviteDraft((current) => ({ ...current, first_name: detail.member.first_name, last_name: detail.member.last_name, email: detail.member.email }));
+      setInviteGov(invitationNdaFormValues(detail.member, detail.evidenceOptions));
+    } catch (error) {
+      if (generation === inviteNdaGeneration.current) setInviteNdaMessage(userFacingError(error, "Could not load this candidate’s NDA record."));
+    } finally {
+      if (generation === inviteNdaGeneration.current) setInviteNdaLoading(false);
+    }
+  }
+  async function saveInviteNda() {
+    if (!inviteNda || !inviteCandidateId || !inviteGov.nda_confirmed || !inviteGov.nda_entities) return;
+    const generation = inviteNdaGeneration.current;
+    setInviteNdaSaving(true); setInviteNdaMessage("");
+    try {
+      const result = await saveInvitationNdaVerification({ data: { member_id: inviteCandidateId, expected_updated_at: inviteNda.member.updated_at,
+        reference: inviteGov.nda_reference, entities: inviteGov.nda_entities, scope: inviteGov.nda_scope, confirmed: true } });
+      if (generation !== inviteNdaGeneration.current) return;
+      setInviteNda(result); setInviteNdaReviewId(result.reviewId);
+      setInviteGov((current) => ({ ...current, nda_reference: result.member.nda_reference ?? "", nda_entities: result.member.nda_entities ?? "", nda_scope: result.member.nda_scope ?? "", nda_confirmed: true, nda_recipient_email: normalizedRecipient(result.member.email) }));
+      setInviteNdaMessage(result.verificationPreserved ? "Review saved. The stored verification date and reviewer were retained." : "Correction and administrator verification saved to this candidate’s record.");
+      void overview.refetch();
+    } catch (error) {
+      if (generation === inviteNdaGeneration.current) { setInviteNdaReviewId(""); setInviteNdaMessage(userFacingError(error, "Could not save the NDA review.")); }
+    } finally { if (generation === inviteNdaGeneration.current) setInviteNdaSaving(false); }
   }
   const [draft, setDraft] = useState<Draft>(emptyDraft);
   const [emailMode, setEmailMode] = useState<"compose" | "template">("compose");
@@ -705,28 +765,33 @@ export function AdminCenter({ page }: { page: "overview" | "send" }) {
   async function invite(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     const form = e.currentTarget;
+    const generation = inviteNdaGeneration.current;
     if (preview) {
       setStatus("Preview mode: invitation validated but not sent. Invites send on the live admin page.");
       return;
     }
     try {
       const needsReview = !inviteDraft.is_candidate && roleCombinationTier(inviteDraft.entity, inviteDraft.role, inviteDraft.is_methodology_committee ?? false).tier === "review";
+      if (inviteCandidateId && (!inviteNdaReviewId || !inviteGov.nda_confirmed || inviteNdaLoading || inviteNdaSaving)) throw new Error("Review and save this candidate’s NDA verification before proceeding.");
       await invitePortalMember({ data: { ...inviteDraft, poll_id: invitePollId || null,
+        selected_member_id: inviteCandidateId || undefined, nda_review_id: inviteCandidateId ? inviteNdaReviewId : undefined,
         nda_confirmed: inviteGov.nda_confirmed, nda_recipient_email: inviteGov.nda_recipient_email, nda_reference: inviteGov.nda_reference, nda_entities: inviteGov.nda_entities || undefined, nda_scope: inviteGov.nda_scope,
         role_review: needsReview ? { decision: "approved", notes: inviteGov.review_notes, prsc_scope: inviteGov.prsc_scope, dis_scope: inviteGov.dis_scope, conflict_controls: inviteGov.conflict_controls } : undefined } });
+      void polls.refetch();
+      if (generation !== inviteNdaGeneration.current) { void overview.refetch(); return; }
       setStatus(invitePollId ? "Invitation sent with the meeting dates attached." : "Invitation sent.");
       setInvitePollId("");
-      void polls.refetch();
       resetInvitation();
       await overview.refetch();
     } catch (error) {
-      setStatus(userFacingError(error, "Invitation failed."));
+      if (generation === inviteNdaGeneration.current) setStatus(userFacingError(error, "Invitation failed."));
     }
   }
 
   async function openInvitePreview() {
     const form = inviteFormRef.current;
     if (!form?.reportValidity()) return;
+    const generation = inviteNdaGeneration.current;
     setStatus("");
     try {
       const html = await render(
@@ -741,10 +806,11 @@ export function AdminCenter({ page }: { page: "overview" | "send" }) {
           whyYou={inviteDraft.why_you}
         />,
       );
+      if (generation !== inviteNdaGeneration.current) return;
       setInvitePreviewHtml(html);
       setInvitePreviewOpen(true);
     } catch {
-      setStatus("The invitation preview could not be prepared.");
+      if (generation === inviteNdaGeneration.current) setStatus("The invitation preview could not be prepared.");
     }
   }
 
@@ -1059,9 +1125,16 @@ export function AdminCenter({ page }: { page: "overview" | "send" }) {
                 />
               </div>
               <form ref={inviteFormRef} onSubmit={invite} className="mt-7 grid gap-4 sm:grid-cols-2">
-                <Input name="first_name" value={inviteDraft.first_name} onChange={(e) => setInviteDraft({ ...inviteDraft, first_name: e.target.value })} placeholder="First name" required className="text-base" />
-                <Input name="last_name" value={inviteDraft.last_name} onChange={(e) => setInviteDraft({ ...inviteDraft, last_name: e.target.value })} placeholder="Last name" required className="text-base" />
-                <Input name="email" type="email" value={inviteDraft.email} onChange={(e) => { if (normalizedRecipient(e.target.value) !== normalizedRecipient(inviteDraft.email)) { setInviteGov(freshInviteGovernance()); setInvitePreviewHtml(""); setInvitePreviewOpen(false); } setInviteDraft({ ...inviteDraft, email: e.target.value }); }} placeholder="Email" required className="text-base" />
+                <label className="text-base text-ivory/80 sm:col-span-2">Existing candidate / member
+                  <select value={inviteCandidateId} onChange={(event) => void selectInviteCandidate(event.target.value)} className="mt-2 h-10 w-full rounded-md border border-input bg-navy px-3 text-base">
+                    <option value="">Choose an existing individual, or enter a new recipient below…</option>
+                    {members.filter((m) => m.status !== "revoked").map((m) => <option key={m.id} value={m.id}>{m.first_name} {m.last_name} · {m.email}</option>)}
+                  </select>
+                </label>
+                <Input name="first_name" aria-label="First name" readOnly={Boolean(inviteCandidateId)} value={inviteDraft.first_name} onChange={(e) => { invalidateInviteNda(); setInviteDraft({ ...inviteDraft, first_name: e.target.value }); }} placeholder="First name" required className="text-base" />
+                <Input name="last_name" aria-label="Last name" readOnly={Boolean(inviteCandidateId)} value={inviteDraft.last_name} onChange={(e) => { invalidateInviteNda(); setInviteDraft({ ...inviteDraft, last_name: e.target.value }); }} placeholder="Last name" required className="text-base" />
+                <Input name="email" aria-label="Invitation email" readOnly={Boolean(inviteCandidateId)} type="email" value={inviteDraft.email} onChange={(e) => { if (normalizedRecipient(e.target.value) !== normalizedRecipient(inviteDraft.email)) { setInviteGov(freshInviteGovernance()); setInvitePreviewHtml(""); setInvitePreviewOpen(false); } setInviteDraft({ ...inviteDraft, email: e.target.value }); }} placeholder="Email" required className="text-base" />
+                {inviteCandidateId && <p className="text-sm text-ivory/55 sm:col-span-2">Name and email come from the selected record. Use Edit member details if they need correction.</p>}
                 <p className="text-sm uppercase tracking-[0.16em] text-gold/80 sm:col-span-2">Current position <span className="normal-case tracking-normal text-ivory/45">— optional</span></p>
                 <Input name="organization" value={inviteDraft.organization} onChange={(e) => setInviteDraft({ ...inviteDraft, organization: e.target.value })} placeholder="Current company / organization (optional)" aria-label="Current company or organization (optional)" className="text-base" />
                 <Input name="title" value={inviteDraft.title} onChange={(e) => setInviteDraft({ ...inviteDraft, title: e.target.value })} placeholder="Current professional title (optional)" aria-label="Current professional title (optional)" className="text-base" />
@@ -1072,20 +1145,20 @@ export function AdminCenter({ page }: { page: "overview" | "send" }) {
                     { value: false, title: "Identified for a PRSC / DIS role", note: "Intended role — shown as Candidate until appointment is activated" },
                   ] as const).map((opt) => (
                     <label key={String(opt.value)} className={`flex cursor-pointer items-start gap-3 border px-4 py-3 ${!!inviteDraft.is_candidate === opt.value ? "border-gold bg-gold/10" : "border-gold/20"}`}>
-                      <input type="radio" name="alliance_status" checked={!!inviteDraft.is_candidate === opt.value}
-                        onChange={() => setInviteDraft({ ...inviteDraft, is_candidate: opt.value, ...(opt.value ? { role: "advisor" as const, is_methodology_committee: false, participates_in_forum: true } : {}) })}
+                      <input type="radio" name="alliance_status" checked={!!inviteDraft.is_candidate === opt.value} disabled={inviteNdaLoading || inviteNdaSaving}
+                        onChange={() => { invalidateInviteNda(); setInviteDraft({ ...inviteDraft, is_candidate: opt.value, ...(opt.value ? { role: "advisor" as const, is_methodology_committee: false, participates_in_forum: true } : {}) }); }}
                         className="mt-1 h-4 w-4 accent-[#d4af37]" />
                       <span><span className="block text-base text-ivory">{opt.title}</span><span className="block text-sm text-ivory/55">{opt.note}</span></span>
                     </label>
                   ))}
                 </fieldset>
                 {!inviteDraft.is_candidate && (<>
-                <select name="entity" value={inviteDraft.entity} onChange={(e) => { const entity = e.target.value as InviteEmailReview["entity"]; setInviteDraft({ ...inviteDraft, entity, role: entity !== "both" && inviteDraft.role.startsWith("prsc_") ? "board_member" : inviteDraft.role }); }} required className="h-9 w-full min-w-0 rounded-md border border-input bg-navy px-3 text-base">
+                <select name="entity" disabled={inviteNdaLoading || inviteNdaSaving} value={inviteDraft.entity} onChange={(e) => { invalidateInviteNda(); const entity = e.target.value as InviteEmailReview["entity"]; setInviteDraft({ ...inviteDraft, entity, role: entity !== "both" && inviteDraft.role.startsWith("prsc_") ? "board_member" : inviteDraft.role }); }} required className="h-9 w-full min-w-0 rounded-md border border-input bg-navy px-3 text-base">
                   <option value="prsc">PRSC</option>
                   <option value="dis">DIS</option>
                   <option value="both">Both</option>
                 </select>
-                <select name="role" value={inviteDraft.role} onChange={(e) => { const role = e.target.value as InviteEmailReview["role"]; setInviteDraft({ ...inviteDraft, role, entity: role.startsWith("prsc_") ? "both" : inviteDraft.entity }); }} required className="h-9 w-full min-w-0 rounded-md border border-input bg-navy px-3 text-base">
+                <select name="role" disabled={inviteNdaLoading || inviteNdaSaving} value={inviteDraft.role} onChange={(e) => { invalidateInviteNda(); const role = e.target.value as InviteEmailReview["role"]; setInviteDraft({ ...inviteDraft, role, entity: role.startsWith("prsc_") ? "both" : inviteDraft.entity }); }} required className="h-9 w-full min-w-0 rounded-md border border-input bg-navy px-3 text-base">
                   <option value="board_member">{memberRoleLabel("board_member", inviteDraft.entity)}</option>
                   <option value="advisor">{memberRoleLabel("advisor", inviteDraft.entity)}</option>
                   <option value="prsc_board_dis_advisor">PRSC Board / DIS Advisor</option>
@@ -1106,7 +1179,7 @@ export function AdminCenter({ page }: { page: "overview" | "send" }) {
                   <input
                     type="checkbox"
                     checked={inviteDraft.is_methodology_committee ?? false}
-                    onChange={(e) => setInviteDraft({ ...inviteDraft, is_methodology_committee: e.target.checked })}
+                    disabled={inviteNdaLoading || inviteNdaSaving} onChange={(e) => { invalidateInviteNda(); setInviteDraft({ ...inviteDraft, is_methodology_committee: e.target.checked }); }}
                     className="h-4 w-4 accent-[#d4af37]"
                   />
                   <span className="text-base text-ivory/85">Also appoint to the Methodology Committee <span className="text-ivory/45">— they will be included in committee meetings</span></span>
@@ -1117,7 +1190,7 @@ export function AdminCenter({ page }: { page: "overview" | "send" }) {
                   <input
                     type="checkbox"
                     checked={inviteDraft.participates_in_forum ?? true}
-                    onChange={(e) => setInviteDraft({ ...inviteDraft, participates_in_forum: e.target.checked })}
+                    disabled={inviteNdaLoading || inviteNdaSaving} onChange={(e) => { invalidateInviteNda(); setInviteDraft({ ...inviteDraft, participates_in_forum: e.target.checked }); }}
                     className="h-4 w-4 accent-[#d4af37]"
                   />
                   <span className="text-base text-ivory/85">Participates in Readiness Vanguard Forum <span className="text-ivory/45">— uncheck to skip Stage 1 and use a 4-stage journey</span></span>
@@ -1125,12 +1198,26 @@ export function AdminCenter({ page }: { page: "overview" | "send" }) {
                 )}
                 <div className="grid gap-3 border border-gold/30 p-4 sm:col-span-2 sm:grid-cols-3">
                   <span className="text-base font-medium text-ivory/90 sm:col-span-3">NDA verification (required before inviting)</span>
-                  <Input value={inviteGov.nda_reference} onChange={(e) => setInviteGov({ ...inviteGov, nda_reference: e.target.value })} placeholder="NDA reference or storage location" className="text-base" />
-                  <select value={inviteGov.nda_entities} onChange={(e) => setInviteGov({ ...inviteGov, nda_entities: e.target.value as InviteGov["nda_entities"] })} aria-label="Entities the NDA covers" className="h-9 w-full rounded-md border border-input bg-navy px-3 text-base">
+                  {inviteCandidateId && <div className="text-sm text-ivory/65 sm:col-span-3" aria-live="polite">
+                    <p className="text-gold">{inviteNdaLoading ? "Loading this candidate’s NDA…" : inviteNdaReviewId && !inviteNda?.eligibilityProblem ? "Administrator review saved" : "Needs Verification"}</p>
+                    {inviteNda?.member.nda_verified_at && <p>Stored verification: {new Date(inviteNda.member.nda_verified_at).toLocaleString()} · Reviewer: {inviteNda.member.nda_verified_by || "Not recorded"}</p>}
+                    {inviteNda?.eligibilityProblem && <p>{inviteNda.eligibilityProblem}</p>}
+                    {inviteNda && !inviteNda.member.nda_verified_at && !inviteNda.evidenceOptions.length && <p>No executed-NDA verification is recorded. Supply and verify the recipient’s own evidence before inviting.</p>}
+                  </div>}
+                  {!!inviteNda?.evidenceOptions.length && <label className="text-sm text-ivory/70 sm:col-span-3">Stored NDA evidence
+                    <select className="mt-1 h-10 w-full rounded-md border border-input bg-navy px-3 text-base" disabled={inviteNdaLoading || inviteNdaSaving} value={inviteNda.evidenceOptions.some((record) => normalizedNdaReference(record.reference) === normalizedNdaReference(inviteGov.nda_reference)) ? normalizedNdaReference(inviteGov.nda_reference) : ""} onChange={(event) => { const record = inviteNda.evidenceOptions.find((option) => option.reference === event.target.value); if (record) editInviteNda({ nda_reference: record.reference, nda_entities: record.entities as InviteGov["nda_entities"], nda_scope: record.scope }); }}>
+                      <option value="">Choose existing evidence, or correct the fields below…</option>
+                      {inviteNda.evidenceOptions.map((record) => <option key={record.reference} value={record.reference}>{record.reference} · verified {new Date(record.verified_at).toLocaleDateString()} · {record.reviewer_id}</option>)}
+                    </select>
+                  </label>}
+                  <Input aria-label="NDA reference or storage location" disabled={inviteNdaLoading || inviteNdaSaving} value={inviteGov.nda_reference} onChange={(e) => editInviteNda({ nda_reference: e.target.value })} placeholder="NDA reference or storage location" className="text-base" />
+                  <select disabled={inviteNdaLoading || inviteNdaSaving} value={inviteGov.nda_entities} onChange={(e) => editInviteNda({ nda_entities: e.target.value as InviteGov["nda_entities"] })} aria-label="Entities the NDA covers" className="h-9 w-full rounded-md border border-input bg-navy px-3 text-base">
                     <option value="">Choose NDA coverage…</option><option value="prsc">NDA covers PRSC</option><option value="dis">NDA covers DIS</option><option value="both">NDA covers PRSC and DIS</option>
                   </select>
-                  <Input value={inviteGov.nda_scope} onChange={(e) => setInviteGov({ ...inviteGov, nda_scope: e.target.value })} placeholder="Information-sharing scope" className="text-base" />
-                  <label className="flex items-center gap-3 sm:col-span-3"><input type="checkbox" checked={inviteGov.nda_confirmed} disabled={!inviteDraft.email.trim()} onChange={(e) => setInviteGov({ ...inviteGov, nda_confirmed: e.target.checked, nda_recipient_email: e.target.checked ? normalizedRecipient(inviteDraft.email) : "" })} className="h-4 w-4" /><span className="text-base text-ivory/85">I verified this executed NDA today for {inviteDraft.email || "this recipient"}</span></label>
+                  <Input aria-label="NDA information-sharing scope" disabled={inviteNdaLoading || inviteNdaSaving} value={inviteGov.nda_scope} onChange={(e) => editInviteNda({ nda_scope: e.target.value })} placeholder="Information-sharing scope" className="text-base" />
+                  <label className="flex items-center gap-3 sm:col-span-3"><input type="checkbox" checked={inviteGov.nda_confirmed} disabled={!inviteDraft.email.trim() || inviteNdaLoading || inviteNdaSaving || Boolean(inviteCandidateId && !inviteNda)} onChange={(e) => { setInviteGov({ ...inviteGov, nda_confirmed: e.target.checked, nda_recipient_email: e.target.checked ? normalizedRecipient(inviteDraft.email) : "" }); if (!e.target.checked) setInviteNdaReviewId(""); }} className="h-4 w-4" /><span className="text-base text-ivory/85">I reviewed the executed NDA and verified that it applies to {inviteDraft.email || "this recipient"} and this intended invitation.</span></label>
+                  {inviteCandidateId && <div className="sm:col-span-3"><Button type="button" variant="outline" disabled={!inviteNda || inviteNdaLoading || inviteNdaSaving || !inviteGov.nda_confirmed || !inviteGov.nda_entities || inviteGov.nda_reference.trim().length < 3 || inviteGov.nda_scope.trim().length < 3} onClick={() => void saveInviteNda()}>{inviteNdaSaving ? "Saving review…" : "Save reviewed NDA"}</Button><Button type="button" variant="ghost" disabled={inviteNdaLoading || inviteNdaSaving} onClick={() => void selectInviteCandidate(inviteCandidateId)}>Reload stored details</Button></div>}
+                  {inviteNdaMessage && <p role="status" className="text-sm text-gold sm:col-span-3">{inviteNdaMessage}</p>}
                 </div>
                 {!inviteDraft.is_candidate && roleCombinationTier(inviteDraft.entity, inviteDraft.role, inviteDraft.is_methodology_committee ?? false).tier === "review" && (
                   <div className="grid gap-3 border border-amber-400/40 p-4 sm:col-span-2 sm:grid-cols-2">
@@ -1197,7 +1284,7 @@ export function AdminCenter({ page }: { page: "overview" | "send" }) {
                 <Button type="button" variant="outline" className="rounded-none text-base" onClick={() => void openInvitePreview()}>
                   <Eye className="mr-2 h-4 w-4" /> Preview invitation
                 </Button>
-                <Button type="submit" className="rounded-none bg-gold text-base font-semibold text-navy opacity-100 hover:bg-gold/85 hover:text-navy focus-visible:bg-gold/85 active:bg-gold/75">Send invitation</Button>
+                <Button type="submit" disabled={Boolean(inviteCandidateId && (!inviteNdaReviewId || !inviteGov.nda_confirmed || inviteNda?.eligibilityProblem || inviteNdaLoading || inviteNdaSaving))} className="rounded-none bg-gold text-base font-semibold text-navy opacity-100 hover:bg-gold/85 hover:text-navy focus-visible:bg-gold/85 active:bg-gold/75">Send invitation</Button>
                 {status && <p className="text-base text-ivory/60 sm:col-span-2">{status}</p>}
               </form>
             </section>
