@@ -165,7 +165,7 @@ export const getMyHeadshotUrl = createServerFn({ method: "GET" })
     if (!member) return { url: null };
     const { data: profile } = await context.supabase.from("portal_profiles").select("headshot_path").eq("member_id", member.id).maybeSingle();
     if (!profile?.headshot_path) return { url: null };
-    return { url: `/api/public/portal-file?kind=headshot&id=${member.id}` };
+    return { url: `/api/public/portal-file?kind=headshot&id=${member.id}&v=${mediaVersion(profile.headshot_path)}` };
   });
 
 const inquirySchema = z.object({ subject: z.string().trim().min(1).max(160), message: z.string().trim().min(10).max(4000) });
@@ -1440,3 +1440,11 @@ export const reconcileEntityRelease = createServerFn({ method: "POST" })
     await supabaseAdmin.from("portal_activity").insert({ member_id: m.id, actor_user_id: context.userId, event_type: "entity_release_reconciled", metadata: { entity: data.entity, release_id: release.id, reason: data.reason, prior_signed: row.signed.length } });
     return { ok: true };
   });
+
+
+/** Short opaque version tag so a replaced file gets a new URL without exposing its storage path. */
+function mediaVersion(path: string): string {
+  let h = 5381;
+  for (let i = 0; i < path.length; i++) h = ((h << 5) + h + path.charCodeAt(i)) >>> 0;
+  return h.toString(36);
+}
