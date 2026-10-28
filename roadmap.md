@@ -153,3 +153,10 @@
 - [x] Leadership heading access limited to current portal access (critical finding fixed)
 - [x] Gate A controlled publication for fictional-account rehearsal
 - [x] Fictional BoldSign signing test (PASS, TEST evidence retained)
+
+## Draft-document end-to-end test (Oct 28)
+- [x] Convert seven Word drafts to PDF and load all eight Forum drafts (DRAFT- version labels)
+- [x] Per-member BoldSign Addendum and Conflict requests for Tests 1, 2, 4; Jared brief granted to Test 4 only; Secretariat/Run of Show admin-only
+- [x] Open TEST Forum poll (3 times) and fresh invitations to admin+test1–4@readinessterminal.com
+- [ ] Team walkthrough using the testing scope (waiting on team)
+- [ ] Replace drafts with approved final PDFs after the test (waiting on founder uploads)
