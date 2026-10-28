@@ -1,0 +1,2 @@
+ALTER TABLE public.meeting_polls DROP CONSTRAINT IF EXISTS meeting_polls_meeting_type_check;
+ALTER TABLE public.meeting_polls ADD CONSTRAINT meeting_polls_meeting_type_check CHECK (char_length(btrim(meeting_type)) BETWEEN 2 AND 100);
