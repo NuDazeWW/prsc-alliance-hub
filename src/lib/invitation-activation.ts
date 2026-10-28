@@ -2,7 +2,7 @@
 // invitation link, not from an unrelated existing sign-in.
 
 export const INVITE_LINK_METHODS = ["otp", "invite", "magiclink", "recovery", "email/signup"];
-export const INVITE_SESSION_MAX_AGE_SECONDS = 2 * 60 * 60;
+export const INVITE_SESSION_MAX_AGE_SECONDS = 24 * 60 * 60;
 
 export type AmrEntry = { method?: string; timestamp?: number };
 export type ActivationMember = { user_id: string; email: string; status: string; first_access_at: string | null } | null;
