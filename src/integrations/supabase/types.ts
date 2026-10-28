@@ -1172,6 +1172,7 @@ export type Database = {
           forum_restrictions: string | null
           id: string
           invited_at: string
+          intended_designation: Json | null
           is_candidate: boolean
           is_methodology_committee: boolean
           last_access_at: string | null
@@ -1214,6 +1215,7 @@ export type Database = {
           forum_restrictions?: string | null
           id?: string
           invited_at?: string
+          intended_designation?: Json | null
           is_candidate?: boolean
           is_methodology_committee?: boolean
           last_access_at?: string | null
@@ -1256,6 +1258,7 @@ export type Database = {
           forum_restrictions?: string | null
           id?: string
           invited_at?: string
+          intended_designation?: Json | null
           is_candidate?: boolean
           is_methodology_committee?: boolean
           last_access_at?: string | null
@@ -1707,6 +1710,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      save_member_intended_designation: {
+        Args: { p_member_id: string; p_expected_updated_at: string; p_designation: Json; p_admin_id: string }
+        Returns: Json
+      }
       bind_invitation_nda: {
         Args: {
           p_email: string

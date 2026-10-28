@@ -1,6 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requirePortalAccess } from "@/lib/portal-access";
+import { intendedDesignationSchema, intendedDesignationLabel } from "./intended-designation";
 import { buildProfileBioPrompt, isAiDraftPreviewHost, profileBioDraftSchema, type ProfileBioInvitation } from "@/lib/profile-bio-draft";
 
 const schema = z.object({
@@ -11,6 +12,7 @@ const schema = z.object({
   entity: z.enum(["prsc", "dis", "both"]),
   role: z.enum(["board_member", "advisor", "prsc_board_dis_advisor", "prsc_advisor_dis_board", "methodology_committee"]),
   is_candidate: z.boolean().optional(),
+  intended_designation: intendedDesignationSchema.optional(),
   linkedin_url: z.string().trim().max(300),
   background: z.string().trim().max(8000).default(""),
 });
@@ -61,8 +63,9 @@ export const draftMyProfileBioPreview = createServerFn({ method: "POST" })
 
 async function generateDraft(data: z.infer<typeof schema>) {
     const { INVITE_ROLE_LABELS } = await import("@/lib/invite-email-config");
-    const role = data.is_candidate ? "United Forum invitee (invited to strategic coordination in the United Strategic Coordination Forum; not appointed to any PRSC or DIS board, advisory, or committee seat and not a participant in the Readiness Vanguard benchmarking program; never imply a seat)" : INVITE_ROLE_LABELS[data.role];
-    const instructions = `Write a private, personal note from Shirley Johnson, Founder, on behalf of ${ENTITY[data.entity]}, explaining directly to an invited ${role} why we chose them.
+    const role = data.intended_designation ? `${intendedDesignationLabel(data.intended_designation)} (under consideration only; no appointment or entity authority is conferred; never imply an activated seat)` : data.is_candidate ? "United Forum invitee (invited to strategic coordination in the United Strategic Coordination Forum; not appointed to any PRSC or DIS board, advisory, or committee seat and not a participant in the Readiness Vanguard benchmarking program; never imply a seat)" : INVITE_ROLE_LABELS[data.role];
+    const languageEntity = data.intended_designation && data.intended_designation.entity !== "none" ? data.intended_designation.entity : data.entity;
+    const instructions = `Write a private, personal note from Shirley Johnson, Founder, on behalf of ${ENTITY[languageEntity]}, explaining directly to an invited ${role} why we chose them.
 
 Voice and point of view:
 - Speak as PRSC, DIS, or both, according to the selected entity. Use first-person plural language such as "we," "our work," and "we believe," while addressing the candidate as "you."

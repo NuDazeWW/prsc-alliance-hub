@@ -4,7 +4,7 @@ import {
   type InvitationNdaEvidence, type InvitationNdaMember,
 } from "./invitation-nda";
 
-const memberFields = "id,first_name,last_name,email,entity,is_candidate,status,updated_at,nda_reference,nda_entities,nda_scope,nda_verified_at,nda_verified_by";
+const memberFields = "*";
 export async function loadInvitationNda(client: any, memberId: string) {
   const { data, error } = await client.from("portal_members").select(memberFields).eq("id", memberId).single();
   if (error || !data) throw new Error("This candidate’s NDA record could not be loaded. Please refresh the candidate list.");

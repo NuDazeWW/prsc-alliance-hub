@@ -1,5 +1,6 @@
 import { ndaProblem } from "./governance";
 import { z } from "zod";
+import { intendedDesignationSchema, requiredInvitationNdaEntity, type IntendedDesignation } from "./intended-designation";
 
 export const invitationNdaSaveSchema = z.object({
   member_id: z.string().uuid(), expected_updated_at: z.string().datetime({ offset: true }),
@@ -17,6 +18,7 @@ export type InvitationNdaMember = {
   is_candidate: boolean; status: string; updated_at: string;
   nda_reference: string | null; nda_entities: InvitationNdaEntities | null; nda_scope: string | null;
   nda_verified_at: string | null; nda_verified_by: string | null;
+  intended_designation?: IntendedDesignation | null;
 };
 export type InvitationNdaEvidence = {
   reference: string; recipient_email: string; recipient_name: string; entities: string; scope: string;
@@ -63,7 +65,7 @@ export function assertInvitationNdaEvidenceOwner(member: InvitationNdaMember, ev
 }
 export function invitationNdaEligibilityProblem(member: InvitationNdaMember, evidence: InvitationNdaEvidence | null) {
   if (member.status === "revoked") return "This candidate’s portal access is revoked; an NDA review does not restore access.";
-  const problem = ndaProblem({ verified_at: member.nda_verified_at, verified_by: member.nda_verified_by, reference: member.nda_reference, entities: member.nda_entities, scope: member.nda_scope }, member.entity);
+  const problem = ndaProblem({ verified_at: member.nda_verified_at, verified_by: member.nda_verified_by, reference: member.nda_reference, entities: member.nda_entities, scope: member.nda_scope }, requiredInvitationNdaEntity(member));
   if (problem) return problem;
   if (!evidence) return "Review and save this recipient’s NDA evidence before inviting.";
   if (normalizedEmail(evidence.recipient_email) !== normalizedEmail(member.email) || evidence.recipient_name !== invitationNdaRecipientName(member) ||
@@ -74,7 +76,7 @@ export function invitationNdaEligibilityProblem(member: InvitationNdaMember, evi
 }
 export function invitationNdaSnapshot(member: InvitationNdaMember) {
   const verifiedAt = member.nda_verified_at ? new Date(member.nda_verified_at) : null;
-  return { member_id: member.id, recipient_email: normalizedEmail(member.email), recipient_name: invitationNdaRecipientName(member), ...invitationNdaProof(member), verified_at: verifiedAt && Number.isFinite(verifiedAt.getTime()) ? verifiedAt.toISOString() : member.nda_verified_at, verified_by: member.nda_verified_by };
+  return { member_id: member.id, recipient_email: normalizedEmail(member.email), recipient_name: invitationNdaRecipientName(member), ...invitationNdaProof(member), verified_at: verifiedAt && Number.isFinite(verifiedAt.getTime()) ? verifiedAt.toISOString() : member.nda_verified_at, verified_by: member.nda_verified_by, intended_designation: member.intended_designation ? JSON.stringify(intendedDesignationSchema.parse(member.intended_designation)) : null };
 }
 /** An invitation may reuse only the exact reviewed member/proof/stamp; IDs from another candidate never qualify. */
 export function invitationNdaReviewMatches(review: { member_id?: string; kind?: string; decision?: string; details?: unknown } | null, member: InvitationNdaMember) {
@@ -93,6 +95,6 @@ export function assertReviewedInvitationNda(input: { selected_member_id: string;
       review?.reviewer_id !== adminId || !invitationNdaReviewMatches(review, member)) {
     throw new Error("This candidate’s identity or NDA review has changed. Reload their stored details, confirm and save the review again before proceeding.");
   }
-  const problem = ndaProblem({ verified_at: member.nda_verified_at, verified_by: member.nda_verified_by, reference: member.nda_reference, entities: member.nda_entities, scope: member.nda_scope }, member.entity);
+  const problem = ndaProblem({ verified_at: member.nda_verified_at, verified_by: member.nda_verified_by, reference: member.nda_reference, entities: member.nda_entities, scope: member.nda_scope }, requiredInvitationNdaEntity(member));
   if (problem) throw new Error(problem);
 }

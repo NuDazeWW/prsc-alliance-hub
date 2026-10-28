@@ -183,6 +183,13 @@
       "when": 1793153784408,
       "tag": "0025_allow_custom_meeting_types",
       "breakpoints": true
+    },
+    {
+      "idx": 26,
+      "version": "7",
+      "when": 1793215393692,
+      "tag": "0026_intended_member_designation",
+      "breakpoints": true
     }
   ]
 }

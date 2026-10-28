@@ -107,6 +107,16 @@ describe("recipient-specific invitation NDA review", () => {
     assert.equal(invitationNdaReviewMatches(review, { ...member, email: members[1].email }), false);
     assert.equal(invitationNdaReviewMatches(review, { ...member, nda_verified_by: currentReviewer }), false);
   });
+  it("requires a fresh recipient NDA review after intended roles change and retains the wider existing coverage requirement", () => {
+    const oldIntent = { version: 1 as const, kind: "identified" as const, entity: "prsc" as const, roles: ["prsc_board" as const], other_text: "", committee: "undetermined" as const };
+    const original = { ...members[0], intended_designation: oldIntent };
+    const review = { member_id: original.id, kind: "nda", decision: "verified", details: { source: "invitation_nda_review", saved: invitationNdaSnapshot(original) } };
+    const changed = { ...original, intended_designation: { ...oldIntent, entity: "both" as const, roles: ["prsc_board" as const, "dis_advisor" as const] } };
+    assert.equal(invitationNdaReviewMatches(review, changed), false);
+    assert.match(invitationNdaEligibilityProblem(changed, evidenceFor(changed))!, /every entity/);
+    const existingBoth = { ...original, is_candidate: false, entity: "both" };
+    assert.match(invitationNdaEligibilityProblem(existingBoth, evidenceFor(existingBoth))!, /every entity/);
+  });
 });
 
 describe("reviewed invitation recipient gate", () => {

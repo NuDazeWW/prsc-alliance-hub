@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { intendedDesignationSchema } from "./intended-designation";
 
 const inviteReviewSchema = z.object({
   first_name: z.string().trim().min(1).max(80),
@@ -12,6 +13,7 @@ const inviteReviewSchema = z.object({
   is_methodology_committee: z.boolean().optional(),
   participates_in_forum: z.boolean().optional(),
   is_candidate: z.boolean().optional(),
+  intended_designation: intendedDesignationSchema.optional(),
 });
 
 export type InviteEmailReview = z.infer<typeof inviteReviewSchema>;

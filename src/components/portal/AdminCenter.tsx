@@ -4,6 +4,9 @@ import { freshInviteGovernance, normalizedRecipient } from "@/lib/invitation-evi
 import { getInvitationNda, saveInvitationNdaVerification } from "@/lib/invitation-nda.functions";
 import { invitationNdaFormValues, clearInvitationNdaConfirmation } from "@/lib/invitation-nda-form";
 import { normalizedNdaReference } from "@/lib/invitation-nda";
+import { parseMemberList, MEMBER_LIST_TEMPLATE, type MemberImportRow } from "@/lib/member-import";
+import { intendedDesignationSchema, readIntendedDesignation, intendedDesignationLabel, projectIntendedDesignation } from "@/lib/intended-designation";
+import { IntendedDesignationFields } from "@/components/portal/IntendedDesignationFields";
 import { useStoredFlag } from "@/hooks/use-stored-flag";
 import { ChevronDown, ChevronUp } from "lucide-react";
 import { AdminLeadership } from "@/components/portal/AdminLeadership";
@@ -223,14 +226,8 @@ const emptyDraft = {
 
 type Draft = typeof emptyDraft;
 
-type MemberRow = {
-  first_name: string; last_name: string; email: string; organization: string;
-  title: string; entity: "prsc" | "dis" | "both"; role: "board_member" | "advisor" | "prsc_board_dis_advisor" | "prsc_advisor_dis_board" | "methodology_committee"; why_you: string;
-  is_methodology_committee?: boolean;
-  participates_in_forum?: boolean;
-  is_candidate?: boolean;
-};
-type StagedRow = MemberRow & { linkedin_url: string; background: string };
+type MemberRow = Omit<MemberImportRow, "linkedin_url" | "background">;
+type StagedRow = MemberImportRow;
 
 const emptyInvite: InviteEmailReview = {
   first_name: "",
@@ -244,105 +241,11 @@ const emptyInvite: InviteEmailReview = {
   is_methodology_committee: false,
   participates_in_forum: true,
   is_candidate: false,
+  intended_designation: { version: 1, kind: "identified", entity: "prsc", roles: ["prsc_board"], other_text: "", committee: "undetermined" },
 };
 
-const LIST_HEADERS = "first_name,last_name,email,organization,title,entity,role,methodology_committee,linkedin_url,background,why_you";
-const LIST_TEMPLATE = `${LIST_HEADERS}\nJane,Doe,jane@example.com,Example Group,Managing Partner,both,prsc_board_dis_advisor,yes,https://www.linkedin.com/in/janedoe,"Paste their LinkedIn About and Experience text here. Leave why_you blank to have it drafted.",\n`;
-
-function splitCsvLine(line: string) {
-  const out: string[] = [];
-  let value = "";
-  let quoted = false;
-  for (let i = 0; i < line.length; i += 1) {
-    const ch = line[i];
-    if (quoted) {
-      if (ch === '"' && line[i + 1] === '"') { value += '"'; i += 1; }
-      else if (ch === '"') quoted = false;
-      else value += ch;
-    } else if (ch === '"') quoted = true;
-    else if (ch === ",") { out.push(value); value = ""; }
-    else value += ch;
-  }
-  out.push(value);
-  return out.map((v) => v.trim());
-}
-
-// Split CSV into records, keeping line breaks inside quoted cells (pasted LinkedIn text often has them).
-function splitCsvRecords(text: string) {
-  const records: string[] = [];
-  let cur = "";
-  let quoted = false;
-  for (const ch of text.replace(/\r\n?/g, "\n")) {
-    if (ch === '"') quoted = !quoted;
-    if (ch === "\n" && !quoted) { records.push(cur); cur = ""; } else cur += ch;
-  }
-  records.push(cur);
-  return records.filter((l) => l.trim().length > 0);
-}
-
-function normalizeKey(key: string) {
-  return key.trim().toLowerCase().replace(/[^a-z]+/g, "_").replace(/^_|_$/g, "");
-}
-
-function parseMemberList(text: string): { rows: StagedRow[]; errors: string[] } {
-  const lines = splitCsvRecords(text);
-  const errors: string[] = [];
-  if (lines.length < 2) return { rows: [], errors: ["The file needs a header row and at least one member."] };
-
-  const headers = splitCsvLine(lines[0]).map(normalizeKey);
-  const alias: Record<string, string> = {
-    first: "first_name", firstname: "first_name", last: "last_name", lastname: "last_name",
-    email_address: "email", company: "organization", org: "organization",
-    designation: "entity", entity_designation: "entity", why: "why_you", why_they_were_chosen: "why_you",
-    linkedin: "linkedin_url", linkedin_profile: "linkedin_url",
-    bio: "background", about: "background", experience: "background", linkedin_bio: "background", linkedin_background: "background",
-    committee: "methodology_committee", methodology: "methodology_committee", is_methodology_committee: "methodology_committee",
-  };
-  const keys = headers.map((h) => alias[h] ?? h);
-  const required = ["first_name", "last_name", "email", "role"];
-  const missing = required.filter((r) => !keys.includes(r));
-  if (missing.length) return { rows: [], errors: [`Missing column${missing.length > 1 ? "s" : ""}: ${missing.join(", ")}`] };
-
-  const rows: StagedRow[] = [];
-  lines.slice(1).forEach((line, index) => {
-    const cells = splitCsvLine(line);
-    const record: Record<string, string> = {};
-    keys.forEach((k, i) => { record[k] = cells[i] ?? ""; });
-    const label = `Row ${index + 2}`;
-
-    const entityRaw = record["entity"]?.toLowerCase();
-    const roleRaw = record["role"]?.toLowerCase().replace(/[\s-]+/g, "_");
-    const isCandidate = ["candidate", "forum_candidate", "forum_invitee", "united_forum_invitee"].includes(roleRaw ?? "");
-    const entity = entityRaw === "prsc" || entityRaw === "dis" || entityRaw === "both" ? entityRaw : isCandidate ? "prsc" : null;
-    const mixed: Record<string, MemberRow["role"]> = {
-      prsc_board_dis_advisor: "prsc_board_dis_advisor", prsc_board_member_dis_advisor: "prsc_board_dis_advisor", "prsc_board_+_dis_advisor": "prsc_board_dis_advisor",
-      prsc_advisor_dis_board: "prsc_advisor_dis_board", prsc_advisor_dis_board_member: "prsc_advisor_dis_board", "prsc_advisor_+_dis_board": "prsc_advisor_dis_board",
-    };
-    const role = isCandidate ? "advisor" : roleRaw === "advisor" ? "advisor" : roleRaw === "board_member" || roleRaw === "board" ? "board_member" : roleRaw === "methodology_committee" || roleRaw === "committee" || roleRaw === "methodology_committee_member" ? "methodology_committee" : roleRaw ? mixed[roleRaw] ?? null : null;
-
-    if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(record["email"] ?? "")) return errors.push(`${label}: a valid email is required.`);
-    if (!record["first_name"] || !record["last_name"]) return errors.push(`${label}: first and last name are required.`);
-    if (!entity) return errors.push(`${label}: designation must be PRSC, DIS, or Both.`);
-    if (!role) return errors.push(`${label}: role must be forum_invitee, board_member, advisor, methodology_committee, prsc_board_dis_advisor, or prsc_advisor_dis_board.`);
-    if (role.startsWith("prsc_") && entity !== "both") return errors.push(`${label}: mixed PRSC/DIS roles require designation Both.`);
-    const why = (record["why_you"] ?? "").trim();
-    const background = (record["background"] ?? "").trim().slice(0, 8000);
-
-    rows.push({
-      first_name: record["first_name"], last_name: record["last_name"], email: record["email"],
-      organization: record["organization"], title: record["title"] ?? "",
-      entity, role, why_you: why,
-      is_methodology_committee: !isCandidate && /^(yes|true|1|y)$/i.test((record["methodology_committee"] ?? "").trim()),
-      is_candidate: isCandidate,
-      linkedin_url: (record["linkedin_url"] ?? "").slice(0, 300), background,
-    });
-  });
-
-  return { rows, errors };
-}
-
 function downloadListTemplate() {
-  const url = URL.createObjectURL(new Blob([LIST_TEMPLATE], { type: "text/csv" }));
+  const url = URL.createObjectURL(new Blob([MEMBER_LIST_TEMPLATE], { type: "text/csv" }));
   const a = document.createElement("a");
   a.href = url;
   a.download = "prsc-member-list-template.csv";
@@ -436,6 +339,7 @@ export function AdminCenter({ page }: { page: "overview" | "send" }) {
   const composePollBlock = blockFor(composePollId);
   const [status, setStatus] = useState("");
   const [inviteDraft, setInviteDraft] = useState<InviteEmailReview>(emptyInvite);
+  const inviteIntended = inviteDraft.intended_designation ?? readIntendedDesignation(inviteDraft);
   const [aiLinkedin, setAiLinkedin] = useState("");
   const [aiBackground, setAiBackground] = useState("");
   const [aiDrafting, setAiDrafting] = useState(false);
@@ -448,6 +352,7 @@ export function AdminCenter({ page }: { page: "overview" | "send" }) {
       const { draft: text } = await (preview ? draftWhyYouPreview : draftWhyYou)({ data: {
         first_name: inviteDraft.first_name, last_name: inviteDraft.last_name, organization: inviteDraft.organization,
         title: inviteDraft.title, entity: inviteDraft.entity, role: inviteDraft.role, is_candidate: !!inviteDraft.is_candidate,
+        intended_designation: inviteIntended,
         linkedin_url: aiLinkedin, background: aiBackground,
       } });
       if (generation !== inviteNdaGeneration.current) return;
@@ -483,13 +388,13 @@ export function AdminCenter({ page }: { page: "overview" | "send" }) {
     setInviteNdaSaving(false); setInviteNdaLoading(Boolean(id));
     if (!id) return;
     const candidate = (overview.data?.members ?? []).find((m: any) => m.id === id);
-    if (candidate) setInviteDraft({ ...emptyInvite, ...Object.fromEntries(Object.keys(emptyInvite).filter((key) => candidate[key] != null).map((key) => [key, candidate[key]])) });
+    if (candidate) setInviteDraft({ ...emptyInvite, ...Object.fromEntries(Object.keys(emptyInvite).filter((key) => candidate[key] != null).map((key) => [key, candidate[key]])), intended_designation: readIntendedDesignation(candidate) });
     try {
       if (preview) throw new Error("Open the signed-in admin page to load this candidate’s stored NDA record.");
       const detail = await getInvitationNda({ data: { member_id: id } });
       if (generation !== inviteNdaGeneration.current) return;
       setInviteNda(detail);
-      setInviteDraft((current) => ({ ...current, first_name: detail.member.first_name, last_name: detail.member.last_name, email: detail.member.email }));
+      setInviteDraft((current) => ({ ...current, first_name: detail.member.first_name, last_name: detail.member.last_name, email: detail.member.email, intended_designation: detail.member.intended_designation ?? current.intended_designation }));
       setInviteGov(invitationNdaFormValues(detail.member, detail.evidenceOptions));
     } catch (error) {
       if (generation === inviteNdaGeneration.current) setInviteNdaMessage(userFacingError(error, "Could not load this candidate’s NDA record."));
@@ -544,83 +449,123 @@ export function AdminCenter({ page }: { page: "overview" | "send" }) {
   const [importResults, setImportResults] = useState<{ email: string; ok: boolean; message: string }[]>([]);
   const [sendOnImport, setSendOnImport] = useState(false);
   const [importing, setImporting] = useState(false);
+  const importGeneration = useRef(0);
+  const importInFlight = useRef(false);
 
   async function onMemberList(file: File) {
+    const generation = ++importGeneration.current;
+    setImportRows([]);
+    setImportErrors([]);
     setImportResults([]);
     setImportStatus("");
-    const { rows, errors } = parseMemberList(await file.text());
-    setImportRows(rows);
-    setImportErrors(errors);
-    setImportStatus(
-      rows.length
-        ? `${rows.length} member${rows.length === 1 ? "" : "s"} ready from ${file.name}.`
-        : `No usable rows found in ${file.name}.`,
-    );
+    setBatchDrafting(false); setBatchProgress(""); setRowDrafting("");
+    if (!/\.csv$/i.test(file.name)) { setImportRows([]); setImportErrors(["Save the member list as CSV UTF-8 using the downloaded template. Excel workbooks are not imported by this uploader."]); setImportStatus("No members were staged or added."); return; }
+    try {
+      const text = await file.text();
+      if (generation !== importGeneration.current) return;
+      const { rows, errors } = parseMemberList(text);
+      setImportRows(rows);
+      setImportErrors(errors);
+      setImportStatus(
+        rows.length
+          ? `${rows.length} member${rows.length === 1 ? "" : "s"} staged in this browser from ${file.name}. Review the rows, then use Add members to save them.`
+          : `No usable rows found in ${file.name}.`,
+      );
+    } catch (error) {
+      if (generation !== importGeneration.current) return;
+      setImportErrors([userFacingError(error, "Could not read this file. Choose the CSV again.")]);
+      setImportStatus("No members were staged or added.");
+    }
   }
 
-  function updateImportRow(i: number, patch: Partial<StagedRow>) {
-    setImportRows((rows) => rows.map((r, idx) => (idx === i ? { ...r, ...patch } : r)));
+  function updateImportRow(i: number, patch: Partial<StagedRow>, generation = importGeneration.current, expectedEmail?: string) {
+    setImportRows((rows) => generation !== importGeneration.current ? rows : rows.map((r, idx) => (idx === i && (!expectedEmail || normalizedRecipient(r.email) === normalizedRecipient(expectedEmail)) ? { ...r, ...patch } : r)));
   }
 
   async function draftNote(r: StagedRow) {
     const { draft: text } = await (preview ? draftWhyYouPreview : draftWhyYou)({ data: {
       first_name: r.first_name, last_name: r.last_name, organization: r.organization, title: r.title,
-      entity: r.entity, role: r.role, linkedin_url: r.linkedin_url, background: r.background,
+      entity: r.entity, role: r.role, is_candidate: r.is_candidate, intended_designation: r.intended_designation, linkedin_url: r.linkedin_url, background: r.background,
     } });
     return text;
   }
 
   async function draftRow(i: number) {
+    const generation = importGeneration.current;
     const r = importRows[i];
+    if (!r) return;
     setRowDrafting(r.email);
-    try { updateImportRow(i, { why_you: await draftNote(r) }); }
-    catch (err) { setBatchProgress(`${r.first_name}: ${userFacingError(err, "The draft could not be created.")}`); }
-    finally { setRowDrafting(""); }
+    try {
+      const text = await draftNote(r);
+      if (generation === importGeneration.current) updateImportRow(i, { why_you: text }, generation, r.email);
+    } catch (err) {
+      if (generation === importGeneration.current) setBatchProgress(`${r.first_name}: ${userFacingError(err, "The draft could not be created.")}`);
+    } finally {
+      if (generation === importGeneration.current) setRowDrafting((current) => current === r.email ? "" : current);
+    }
   }
 
   async function draftAllNotes() {
+    const generation = importGeneration.current;
     const targets = importRows.map((r, i) => ({ r, i })).filter(({ r }) => r.why_you.trim().length < 20);
     setBatchDrafting(true);
     let done = 0, failed = 0;
-    for (const { r, i } of targets) {
-      setBatchProgress(`Drafting note ${done + failed + 1} of ${targets.length} for ${r.first_name} ${r.last_name}…`);
-      try { const text = await draftNote(r); updateImportRow(i, { why_you: text }); done += 1; }
-      catch (err) {
-        failed += 1;
-        if (/credits|Too many/.test((err as Error)?.message ?? "")) { setBatchProgress(userFacingError(err, "Drafting is temporarily unavailable. Please try again later.")); break; }
+    try {
+      for (const { r, i } of targets) {
+        if (generation !== importGeneration.current) return;
+        setBatchProgress(`Drafting note ${done + failed + 1} of ${targets.length} for ${r.first_name} ${r.last_name}…`);
+        try {
+          const text = await draftNote(r);
+          if (generation !== importGeneration.current) return;
+          updateImportRow(i, { why_you: text }, generation, r.email); done += 1;
+        } catch (err) {
+          if (generation !== importGeneration.current) return;
+          failed += 1;
+          if (/credits|Too many/.test((err as Error)?.message ?? "")) { setBatchProgress(userFacingError(err, "Drafting is temporarily unavailable. Please try again later.")); break; }
+        }
       }
+      if (generation === importGeneration.current) setBatchProgress(`${done} note${done === 1 ? "" : "s"} drafted${failed ? `, ${failed} failed — use Draft with AI to retry` : ""}. Review each before sending.`);
+    } finally {
+      if (generation === importGeneration.current) setBatchDrafting(false);
     }
-    setBatchDrafting(false);
-    setBatchProgress(`${done} note${done === 1 ? "" : "s"} drafted${failed ? `, ${failed} failed — use Draft with AI to retry` : ""}. Review each before sending.`);
   }
 
   async function runImport() {
-    if (!importRows.length) return;
+    if (!importRows.length || importInFlight.current) return;
+    const generation = importGeneration.current;
     if (preview) {
       setImportStatus("Preview mode: the list uploads once you are signed in.");
       return;
     }
+    importInFlight.current = true;
     setImporting(true);
     try {
       const rows: MemberRow[] = importRows.map(({ linkedin_url: _l, background: _b, ...rest }) => rest);
       const res = await importPortalMembers({ data: { rows, send_invitations: sendOnImport } });
-      setImportResults(res.results);
-      setImportStatus(`${res.added} added${res.failed ? `, ${res.failed} could not be added` : ""}.`);
-      setImportRows([]);
-      if (listRef.current) listRef.current.value = "";
+      if (generation === importGeneration.current) {
+        importGeneration.current += 1;
+        setImportResults(res.results);
+        setImportStatus(`${res.added} added${res.failed ? `, ${res.failed} could not be added` : ""}.`);
+        setImportRows([]);
+        setBatchDrafting(false); setBatchProgress(""); setRowDrafting("");
+        if (listRef.current) listRef.current.value = "";
+      }
       await overview.refetch();
     } catch (error) {
-      setImportStatus(userFacingError(error, "The list could not be uploaded."));
+      if (generation === importGeneration.current) setImportStatus(userFacingError(error, "The list could not be uploaded."));
     } finally {
+      importInFlight.current = false;
       setImporting(false);
     }
   }
 
   function clearImport() {
+    importGeneration.current += 1;
     setImportRows([]);
     setImportErrors([]);
     setImportResults([]);
     setImportStatus("");
+    setBatchDrafting(false); setBatchProgress(""); setRowDrafting("");
     if (listRef.current) listRef.current.value = "";
   }
 
@@ -771,6 +716,7 @@ export function AdminCenter({ page }: { page: "overview" | "send" }) {
       return;
     }
     try {
+      intendedDesignationSchema.parse(inviteIntended);
       const needsReview = !inviteDraft.is_candidate && roleCombinationTier(inviteDraft.entity, inviteDraft.role, inviteDraft.is_methodology_committee ?? false).tier === "review";
       if (inviteCandidateId && (!inviteNdaReviewId || !inviteGov.nda_confirmed || inviteNdaLoading || inviteNdaSaving)) throw new Error("Review and save this candidate’s NDA verification before proceeding.");
       await invitePortalMember({ data: { ...inviteDraft, poll_id: invitePollId || null,
@@ -1138,53 +1084,23 @@ export function AdminCenter({ page }: { page: "overview" | "send" }) {
                 <p className="text-sm uppercase tracking-[0.16em] text-gold/80 sm:col-span-2">Current position <span className="normal-case tracking-normal text-ivory/45">— optional</span></p>
                 <Input name="organization" value={inviteDraft.organization} onChange={(e) => setInviteDraft({ ...inviteDraft, organization: e.target.value })} placeholder="Current company / organization (optional)" aria-label="Current company or organization (optional)" className="text-base" />
                 <Input name="title" value={inviteDraft.title} onChange={(e) => setInviteDraft({ ...inviteDraft, title: e.target.value })} placeholder="Current professional title (optional)" aria-label="Current professional title (optional)" className="text-base" />
-                <fieldset className="grid gap-2 border border-gold/30 p-4 sm:col-span-2 sm:grid-cols-2">
-                  <legend className="px-1 text-sm uppercase tracking-[0.16em] text-gold/80">PRSC / DIS status</legend>
-                  {([
-                    { value: true, title: "United Forum invitee", note: "Invited to strategic coordination only — no PRSC/DIS role identified" },
-                    { value: false, title: "Identified for a PRSC / DIS role", note: "Intended role — shown as Candidate until appointment is activated" },
-                  ] as const).map((opt) => (
-                    <label key={String(opt.value)} className={`flex cursor-pointer items-start gap-3 border px-4 py-3 ${!!inviteDraft.is_candidate === opt.value ? "border-gold bg-gold/10" : "border-gold/20"}`}>
-                      <input type="radio" name="alliance_status" checked={!!inviteDraft.is_candidate === opt.value} disabled={inviteNdaLoading || inviteNdaSaving}
-                        onChange={() => { invalidateInviteNda(); setInviteDraft({ ...inviteDraft, is_candidate: opt.value, ...(opt.value ? { role: "advisor" as const, is_methodology_committee: false, participates_in_forum: true } : {}) }); }}
-                        className="mt-1 h-4 w-4 accent-[#d4af37]" />
-                      <span><span className="block text-base text-ivory">{opt.title}</span><span className="block text-sm text-ivory/55">{opt.note}</span></span>
-                    </label>
-                  ))}
-                </fieldset>
-                {!inviteDraft.is_candidate && (<>
-                <select name="entity" disabled={inviteNdaLoading || inviteNdaSaving} value={inviteDraft.entity} onChange={(e) => { invalidateInviteNda(); const entity = e.target.value as InviteEmailReview["entity"]; setInviteDraft({ ...inviteDraft, entity, role: entity !== "both" && inviteDraft.role.startsWith("prsc_") ? "board_member" : inviteDraft.role }); }} required className="h-9 w-full min-w-0 rounded-md border border-input bg-navy px-3 text-base">
-                  <option value="prsc">PRSC</option>
-                  <option value="dis">DIS</option>
-                  <option value="both">Both</option>
-                </select>
-                <select name="role" disabled={inviteNdaLoading || inviteNdaSaving} value={inviteDraft.role} onChange={(e) => { invalidateInviteNda(); const role = e.target.value as InviteEmailReview["role"]; setInviteDraft({ ...inviteDraft, role, entity: role.startsWith("prsc_") ? "both" : inviteDraft.entity }); }} required className="h-9 w-full min-w-0 rounded-md border border-input bg-navy px-3 text-base">
-                  <option value="board_member">{memberRoleLabel("board_member", inviteDraft.entity)}</option>
-                  <option value="advisor">{memberRoleLabel("advisor", inviteDraft.entity)}</option>
-                  <option value="prsc_board_dis_advisor">PRSC Board / DIS Advisor</option>
-                  <option value="prsc_advisor_dis_board">PRSC Advisor / DIS Board</option>
-                  <option value="methodology_committee">{memberRoleLabel("methodology_committee", inviteDraft.entity)}</option>
-                </select>
-                </>)}
+                <div className="border border-gold/30 p-4 sm:col-span-2">
+                  <IntendedDesignationFields value={inviteIntended} disabled={Boolean(inviteCandidateId) || inviteNdaLoading || inviteNdaSaving} onChange={(value) => {
+                    invalidateInviteNda();
+                    const parsed = intendedDesignationSchema.safeParse(value);
+                    const projection = parsed.success ? projectIntendedDesignation(parsed.data) : null;
+                    setInviteDraft((current) => ({ ...current, ...(projection ? { entity: projection.entity, role: projection.role, is_candidate: projection.is_candidate, is_methodology_committee: projection.is_methodology_committee } : {}), intended_designation: value }));
+                  }} />
+                  {inviteCandidateId && <p className="mt-3 text-sm text-ivory/60">Use Edit intended designation in the member record to change these selections, then reload this recipient’s details.</p>}
+                </div>
                 {(() => {
                   const dup = members.find((m) => m.email?.toLowerCase() === inviteDraft.email.trim().toLowerCase());
                   return dup && inviteDraft.email.trim() ? (
                     <p className="border border-amber-400/40 bg-amber-500/10 px-4 py-3 text-sm text-amber-200 sm:col-span-2">
-                      {dup.first_name} {dup.last_name} is already a member with this email. Sending again gives them a fresh invitation link and updates their details.
+                      {dup.first_name} {dup.last_name} is already a member with this email. Select this existing member before proceeding so their saved identity, NDA and appointment history are retained.
                     </p>
                   ) : null;
                 })()}
-                {!inviteDraft.is_candidate && inviteDraft.role !== "methodology_committee" && (
-                <label className="flex cursor-pointer items-center gap-3 border border-gold/20 px-4 py-3 sm:col-span-2">
-                  <input
-                    type="checkbox"
-                    checked={inviteDraft.is_methodology_committee ?? false}
-                    disabled={inviteNdaLoading || inviteNdaSaving} onChange={(e) => { invalidateInviteNda(); setInviteDraft({ ...inviteDraft, is_methodology_committee: e.target.checked }); }}
-                    className="h-4 w-4 accent-[#d4af37]"
-                  />
-                  <span className="text-base text-ivory/85">Also appoint to the Methodology Committee <span className="text-ivory/45">— they will be included in committee meetings</span></span>
-                </label>
-                )}
                 {!inviteDraft.is_candidate && (
                 <label className="flex cursor-pointer items-center gap-3 border border-gold/20 px-4 py-3 sm:col-span-2">
                   <input
@@ -1297,26 +1213,28 @@ export function AdminCenter({ page }: { page: "overview" | "send" }) {
                 </div>
                 <InfoTip
                   title="Upload a member list"
-                  body="Add many board members and advisors at once from a spreadsheet saved as CSV. Background text is optional — the AI can draft from name, title, and organization. Leave why_you blank — then click Generate AI notes for all. Review and edit each note, then add everyone and send all invitations in one click."
+                  body="Stage new members from a CSV file using the downloaded template. Select multiple intended roles using semicolons, and record Methodology Committee as Yes, No, or Undetermined. Background is administrator-supplied; click Generate AI notes for all to draft missing why_you notes. Review the rows before saving. NDA verification is reviewed separately."
                 />
               </div>
 
               <p className="mt-5 text-base leading-7 text-ivory/60">
-                One row per person: first name, last name, email, organization, title, designation (PRSC, DIS, or Both),
-                role (board_member, advisor, methodology_committee, or for Both: prsc_board_dis_advisor / prsc_advisor_dis_board), LinkedIn URL, LinkedIn background, and an optional “why you” note — leave
-                it blank to have it drafted for you.
+                Use one row per person. Invitation type is forum_invitee or identified; entity is None, PRSC, DIS, or Both.
+                Separate multiple intended roles with semicolons, such as PRSC Board; DIS Advisor. Other requires a description.
+                Methodology Committee accepts Yes, No, or Undetermined. Background is supplied by the administrator; use Generate AI notes for all to draft missing why_you notes.
+                Selecting a file stages rows in this browser. Add members saves them. NDA columns are not imported or verified by this uploader.
               </p>
 
               <div className="mt-6 flex flex-wrap items-center gap-3">
                 <Button type="button" variant="outline" className="rounded-none text-base" onClick={downloadListTemplate}>
                   Download template
                 </Button>
-                <Button type="button" variant="outline" className="rounded-none text-base" onClick={() => listRef.current?.click()}>
+                <Button type="button" variant="outline" disabled={importing} className="rounded-none text-base" onClick={() => listRef.current?.click()}>
                   Choose file
                 </Button>
                 <input
                   ref={listRef}
                   type="file"
+                  disabled={importing}
                   accept=".csv,text/csv"
                   className="hidden"
                   onChange={(e) => {
@@ -1343,7 +1261,7 @@ export function AdminCenter({ page }: { page: "overview" | "send" }) {
                         <span className="font-medium">{r.first_name} {r.last_name}</span>
                         <span className="text-ivory/60">{r.email}</span>
                         <span className="text-ivory/60">{[r.title, r.organization].filter(Boolean).join(", ")}</span>
-                        <span className="text-ivory/60">{memberRoleLabel(r.role, r.entity, !!r.is_candidate)}</span>
+                        <span className="text-ivory/60">{intendedDesignationLabel(r.intended_designation)}</span>
                         <Button type="button" variant="outline" size="sm" disabled={batchDrafting || rowDrafting === r.email} className="ml-auto rounded-none" onClick={() => void draftRow(i)}>
                           {rowDrafting === r.email ? "Drafting…" : r.why_you.trim() ? "Regenerate" : "Draft with AI"}
                         </Button>
@@ -1383,7 +1301,7 @@ export function AdminCenter({ page }: { page: "overview" | "send" }) {
                   <Button type="button" disabled={importing || batchDrafting || importRows.some((r) => r.why_you.trim().length < 20)} className="rounded-none bg-gold text-base text-navy hover:bg-gold-light hover:text-navy" onClick={runImport}>
                     {importing ? "Uploading…" : `${sendOnImport ? "Add & invite" : "Add"} ${importRows.length} member${importRows.length === 1 ? "" : "s"}`}
                   </Button>
-                  <Button type="button" variant="ghost" className="rounded-none text-base text-ivory/60" onClick={clearImport}>
+                  <Button type="button" variant="ghost" disabled={importing} className="rounded-none text-base text-ivory/60" onClick={clearImport}>
                     <Trash2 className="mr-2 h-4 w-4" /> Discard
                   </Button>
                 </div>
@@ -1889,7 +1807,7 @@ export function AdminCenter({ page }: { page: "overview" | "send" }) {
                             </button>
                           </div>
                         </td>
-                        <td>{memberDesignation(m as any)}{(m as { participates_in_forum?: boolean }).participates_in_forum === false && <span className="ml-2 whitespace-nowrap border border-gold/30 px-1.5 py-0.5 text-[10px] uppercase tracking-[0.12em] text-gold/80">No Forum</span>}</td>
+                        <td>{memberDesignation(m as any)}{m.intended_designation && <p className="mt-1 text-xs text-ivory/55">{intendedDesignationLabel(m as any)}</p>}{(m as { participates_in_forum?: boolean }).participates_in_forum === false && <span className="ml-2 whitespace-nowrap border border-gold/30 px-1.5 py-0.5 text-[10px] uppercase tracking-[0.12em] text-gold/80">No Forum</span>}</td>
                         <td className="py-4 pr-3">
                           <span className={`inline-block border px-2 py-1 text-xs uppercase tracking-[0.12em] ${st.tone}`}>{st.label}</span>
                           {journey && (

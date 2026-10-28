@@ -2,6 +2,7 @@ import { createServerFn } from "@tanstack/react-start";
 import { assertNdaRecipient, assertInviteIdentity } from "@/lib/invitation-evidence";
 import { assertReviewedInvitationNda } from "@/lib/invitation-nda";
 import { z } from "zod";
+import { intendedDesignationSchema, projectIntendedDesignation, readIntendedDesignation, requiredInvitationNdaEntity, type IntendedDesignation } from "@/lib/intended-designation";
 import { parseProfileSaveInput, assertCommunicationPreferencesNotDowngraded } from "@/lib/portal-profile-schema";
 import type { PortalProfileRecord } from "@/lib/portal-profile-fields";
 import { getRequest } from "@tanstack/react-start/server";
@@ -21,6 +22,7 @@ type PortalMember = {
   package_status: "awaiting_profile" | "in_preparation" | "profile_received" | "package_ready";
   invited_at: string; first_access_at: string | null; last_access_at: string | null;
   acceptance_complete?: { prsc: boolean; dis: boolean };
+  intended_designation?: IntendedDesignation | null;
 };
 
 type PortalProfile = {
@@ -206,6 +208,7 @@ const inviteSchema = z.object({
   is_methodology_committee: z.boolean().optional(),
   participates_in_forum: z.boolean().optional(),
   is_candidate: z.boolean().optional(),
+  intended_designation: intendedDesignationSchema.optional(),
   poll_id: z.string().uuid().nullable().optional(),
   nda_confirmed: z.boolean().optional(),
   nda_recipient_email: z.string().trim().email().max(200).optional(),
@@ -226,15 +229,25 @@ type InviteInput = z.infer<typeof inviteSchema>;
 
 /** Forum candidates hold no PRSC/DIS seat: store a neutral single-entity record (no board/committee claims). */
 function normalizeCandidate<T extends InviteInput>(m: T): T {
+  if (m.selected_member_id) return m;
+  if (m.intended_designation && !m.selected_member_id) {
+    const { requiresAssignmentReview: _review, ...projection } = projectIntendedDesignation(m.intended_designation);
+    m = { ...m, ...projection };
+  }
   if (!m.is_candidate) return m;
   return { ...m, role: "advisor", entity: m.nda_entities === "dis" ? "dis" : "prsc", is_methodology_committee: false, role_review: undefined, participates_in_forum: true };
+}
+
+async function requireIntendedDesignationStorage(admin: any) {
+  const { error } = await admin.from("portal_members").select("intended_designation").limit(0);
+  if (error) throw new Error("Member role setup is not complete. No accounts or invitations were created. Please try again after setup is complete.");
 }
 
 /** NDA and role-combination gates every invitation must pass, before any account is created. */
 function invitationGates(m: InviteInput, adminId: string) {
   assertNdaRecipient(m.email, m.nda_recipient_email);
   const nda = { verified_at: m.nda_confirmed ? new Date().toISOString() : null, verified_by: m.nda_confirmed ? adminId : null, reference: m.nda_reference ?? null, entities: m.nda_entities ?? null, scope: m.nda_scope ?? null };
-  const ndaErr = ndaProblem(nda, m.entity);
+  const ndaErr = ndaProblem(nda, requiredInvitationNdaEntity(m));
   if (ndaErr) throw new Error(`${m.email}: ${ndaErr}`);
   const combo = roleCombinationTier(m.entity, m.role, m.is_methodology_committee ?? false);
   if (combo.tier === "prohibited") throw new Error(`${m.email}: this role combination is prohibited (${combo.clause}) and cannot be approved by an administrator`);
@@ -281,13 +294,17 @@ export const invitePortalMember = createServerFn({ method: "POST" })
     const gates = invitationGates(data, context.userId);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { poll_id: pollId, nda_confirmed: _n, nda_recipient_email: _ne, nda_reference: _r, nda_entities: _e, nda_scope: _s, selected_member_id: _sm, nda_review_id: _nr, role_review: _rv, ...member } = data;
+    if (data.intended_designation && !data.selected_member_id) await requireIntendedDesignationStorage(supabaseAdmin);
     if (Boolean(data.selected_member_id) !== Boolean(data.nda_review_id)) throw new Error("Select the candidate and save their reviewed NDA information before proceeding.");
     const { data: existing, error: existingError } = await supabaseAdmin.from("portal_members").select("*").eq("email", data.email.toLowerCase()).maybeSingle();
     if (existingError) throw existingError;
+    if (existing && data.intended_designation && !data.selected_member_id) throw new Error("This member already exists. Select their existing record so their saved identity, NDA and appointment history are preserved.");
     if (data.selected_member_id && data.nda_review_id) {
       const { data: review, error: reviewError } = await supabaseAdmin.from("governance_reviews").select("member_id,kind,decision,reviewer_id,details").eq("id", data.nda_review_id).eq("member_id", data.selected_member_id).maybeSingle();
       if (reviewError) throw new Error("The administrator’s NDA review could not be verified. Please review and save it again.");
-      assertReviewedInvitationNda({ ...data, selected_member_id: data.selected_member_id }, existing, review, context.userId);
+      assertReviewedInvitationNda({ ...data, selected_member_id: data.selected_member_id }, existing ? { ...existing, intended_designation: existing.intended_designation ? intendedDesignationSchema.parse(existing.intended_designation) : null } : null, review, context.userId);
+      if (data.intended_designation && JSON.stringify(data.intended_designation) !== JSON.stringify(readIntendedDesignation(existing))) throw new Error("The member’s intended roles changed. Reload the saved record and review the NDA again.");
+      if (existing!.entity !== data.entity || existing!.role !== data.role || Boolean(existing!.is_candidate) !== Boolean(data.is_candidate) || Boolean(existing!.is_methodology_committee) !== Boolean(data.is_methodology_committee)) throw new Error("The selected member’s onboarding designation changed. Reload their record before proceeding.");
       // A fresh administrator review does not overwrite unchanged historical verification evidence.
       gates.nda.verified_at = existing!.nda_verified_at;
       gates.nda.verified_by = existing!.nda_verified_by;
@@ -316,6 +333,7 @@ export const invitePortalMember = createServerFn({ method: "POST" })
       is_methodology_committee: member.is_methodology_committee ?? false,
       participates_in_forum: member.participates_in_forum ?? true,
       is_candidate: member.is_candidate ?? false,
+      ...(!existing && member.intended_designation ? { intended_designation: member.intended_designation } : {}),
       ...gates.columns,
     }, { onConflict: "email" }).select("id").single();
     if (memberError) throw memberError;
@@ -331,7 +349,7 @@ export const invitePortalMember = createServerFn({ method: "POST" })
 
 const importSchema = z.object({
   send_invitations: z.boolean(),
-  rows: z.array(inviteSchema).min(1).max(200),
+  rows: z.array(inviteSchema.omit({ selected_member_id: true, nda_review_id: true }).strict()).min(1).max(200),
 });
 export const importPortalMembers = createServerFn({ method: "POST" })
   .middleware([requirePortalAccess])
@@ -339,6 +357,7 @@ export const importPortalMembers = createServerFn({ method: "POST" })
   .handler(async ({ context, data }) => {
     await assertAdmin(context);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    if (data.rows.some((row) => row.intended_designation)) await requireIntendedDesignationStorage(supabaseAdmin);
     const results: { email: string; ok: boolean; message: string }[] = [];
 
     for (const rawRow of data.rows) {
@@ -348,11 +367,11 @@ export const importPortalMembers = createServerFn({ method: "POST" })
         let userId: string | null = null;
         // Staged rows may wait for NDA/review; invitations may not.
         const gates = data.send_invitations ? invitationGates(row, context.userId) : null;
+        const { data: existingMember, error: existingError } = await supabaseAdmin
+          .from("portal_members").select("id,user_id").eq("email", email).maybeSingle();
+        if (existingError) throw existingError;
+        if (existingMember) throw new Error("This member already exists. Use Edit member details to update their intended roles; the import did not change their record or send an invitation.");
         if (gates) await bindInvitationNda(supabaseAdmin, row, context.userId, gates);
-
-        const { data: existingMember } = await supabaseAdmin
-          .from("portal_members").select("user_id").eq("email", email).maybeSingle();
-        if (existingMember?.user_id) userId = existingMember.user_id as string;
 
         if (!userId && data.send_invitations) {
           const { data: invitation, error } = await supabaseAdmin.auth.admin.inviteUserByEmail(email, {
@@ -372,14 +391,15 @@ export const importPortalMembers = createServerFn({ method: "POST" })
           userId = created.user.id;
         }
 
-        const { error: memberError } = await supabaseAdmin.from("portal_members").upsert({
+        const { error: memberError } = await supabaseAdmin.from("portal_members").insert({
           user_id: userId, email, first_name: row.first_name, last_name: row.last_name,
           organization: row.organization, title: row.title || null, entity: row.entity,
           role: row.role, why_you: row.why_you, status: "invited",
           is_methodology_committee: row.is_methodology_committee ?? false,
           is_candidate: row.is_candidate ?? false,
+          ...(row.intended_designation ? { intended_designation: row.intended_designation } : {}),
           ...(gates ? gates.columns : { role_review_status: initialRoleReviewStatus(row.entity, row.role, row.is_methodology_committee ?? false) }),
-        }, { onConflict: "email" });
+        });
         if (memberError) throw memberError;
         if (gates) {
           const { data: saved } = await supabaseAdmin.from("portal_members").select("id").eq("email", email).single();
@@ -1279,6 +1299,23 @@ export const getRequestHost = createServerFn({ method: "GET" })
     return { host, isPortalDomain: PORTAL_HOSTS.has(host.split(":")[0]) };
   });
 
+export const saveMemberIntendedDesignation = createServerFn({ method: "POST" })
+  .middleware([requirePortalAccess])
+  .inputValidator((input) => z.object({ member_id: z.string().uuid(), expected_updated_at: z.string().datetime({ offset: true }), intended_designation: intendedDesignationSchema }).strict().parse(input))
+  .handler(async ({ context, data }) => {
+    await assertAdmin(context);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { data: saved, error } = await supabaseAdmin.rpc("save_member_intended_designation", {
+      p_member_id: data.member_id, p_expected_updated_at: data.expected_updated_at,
+      p_designation: data.intended_designation, p_admin_id: context.userId,
+    });
+    if (error) {
+      if (error.code === "40001") throw new Error("This member’s record changed. Reload their details before saving the intended roles again.");
+      throw new Error("The intended roles could not be saved. Reload the member’s details and try again.");
+    }
+    return saved as { member_id: string; intended_designation: IntendedDesignation; updated_at: string };
+  });
+
 const memberDetailsSchema = z.object({
   member_id: z.string().uuid(),
   first_name: z.string().trim().min(1).max(80), last_name: z.string().trim().min(1).max(80),
@@ -1304,6 +1341,7 @@ export const updateMemberDetails = createServerFn({ method: "POST" })
     const combo = roleCombinationTier(entity, role, committee);
     if (combo.tier === "prohibited") throw new Error(`This role combination is prohibited (${combo.clause}).`);
     const designationChanged = entity !== m.entity || role !== m.role || committee !== m.is_methodology_committee || data.is_candidate !== m.is_candidate;
+    if (designationChanged && (m.prsc_activated_at || m.dis_activated_at)) throw new Error("This member has an activated appointment. Save future plans under Intended designation; a new role must go through appointment review before changing the entity onboarding designation.");
     const { error } = await supabaseAdmin.from("portal_members").update({
       first_name: data.first_name, last_name: data.last_name, organization: data.organization, title: data.title || null,
       is_candidate: data.is_candidate, entity, role, is_methodology_committee: committee,
