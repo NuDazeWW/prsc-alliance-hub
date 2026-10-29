@@ -124,7 +124,15 @@ const COMMUNICATION_EXPORT_LABELS = communicationReadoutRows({
   version: PORTAL_COMMUNICATION_VERSION,
 }).map((row) => row.label);
 
-const demoOverview: any = {
+/** Preview-only sample data, shaped like the server response with the fields the screen reads. */
+type AdminOverview = Awaited<ReturnType<typeof getAdminOverview>>;
+type AdminMemberDetail = Awaited<ReturnType<typeof getMemberDetail>>;
+type AdminMember = AdminOverview["members"][number];
+type AdminProfile = NonNullable<AdminOverview["profiles"]>[number];
+type AdminPoll = Awaited<ReturnType<typeof listAdminPolls>>["polls"][number];
+type PackageStatus = "awaiting_profile" | "in_preparation" | "profile_received" | "package_ready";
+
+const demoOverview = {
   members: [
     {
       id: "11111111-1111-4111-8111-111111111111",
@@ -173,9 +181,9 @@ const demoOverview: any = {
     },
   ],
   activity: [{ id: "a1" }],
-};
+} as unknown as AdminOverview;
 
-const demoMemberDetail: any = {
+const demoMemberDetail = {
   member: demoOverview.members[0],
   profile: {
     current_stage: 3,
@@ -216,7 +224,7 @@ const demoMemberDetail: any = {
     documentCount: 0,
     acknowledgedDocumentCount: 0,
   },
-};
+} as unknown as AdminMemberDetail;
 
 const demoEmailCenter: { templates: EmailTemplate[]; sends: EmailSend[] } = {
   templates: [
@@ -348,10 +356,10 @@ export function AdminCenter({ page }: { page: "overview" | "send" }) {
 
   const polls = useQuery({
     queryKey: ["portal-admin-polls", preview],
-    queryFn: () => (preview ? Promise.resolve({ polls: [] as any[] }) : listAdminPolls()),
+    queryFn: () => (preview ? Promise.resolve({ polls: [] as AdminPoll[] }) : listAdminPolls()),
     retry: false,
   });
-  const openPolls: any[] = (polls.data?.polls ?? []).filter((p: any) => p.status === "open");
+  const openPolls = (polls.data?.polls ?? []).filter((p) => p.status === "open");
   const [invitePollId, setInvitePollId] = useState("");
   const [inviteGov, setInviteGov] = useState(EMPTY_INVITE_GOV);
   const [inviteCandidateId, setInviteCandidateId] = useState("");
@@ -409,7 +417,7 @@ export function AdminCenter({ page }: { page: "overview" | "send" }) {
     const target = meetingDialog;
     setMeetingDialog(null);
     const res = await polls.refetch();
-    const p = (res.data?.polls ?? []).find((x: any) => x.id === pollId);
+    const p = (res.data?.polls ?? []).find((x) => x.id === pollId);
     if (target === "invite") setInvitePollId(pollId);
     if (target === "compose") {
       setComposePollId(pollId);
@@ -552,14 +560,16 @@ export function AdminCenter({ page }: { page: "overview" | "send" }) {
     setInviteNdaSaving(false);
     setInviteNdaLoading(Boolean(id));
     if (!id) return;
-    const candidate = (overview.data?.members ?? []).find((m: any) => m.id === id);
+    const candidate = (overview.data?.members ?? []).find((m) => m.id === id);
     if (candidate) {
+      // Invite-draft fields are all strings; only the non-null values on the member are copied.
+      const candidateFields = candidate as unknown as Record<string, string | null | undefined>;
       setInviteDraft({
         ...emptyInvite,
         ...Object.fromEntries(
           Object.keys(emptyInvite)
-            .filter((key) => candidate[key] != null)
-            .map((key) => [key, candidate[key]]),
+            .filter((key) => candidateFields[key] != null)
+            .map((key) => [key, candidateFields[key]]),
         ),
         intended_designation: readIntendedDesignation(candidate),
       });
@@ -871,7 +881,9 @@ export function AdminCenter({ page }: { page: "overview" | "send" }) {
     if (preview)
       return setMemberBusy("Preview mode: package changes are available once you are signed in.");
     try {
-      await setMemberPackageStatus({ data: { member_id: id, package_status: value as any } });
+      await setMemberPackageStatus({
+        data: { member_id: id, package_status: value as PackageStatus },
+      });
       setMemberBusy("Package status updated.");
       await overview.refetch();
     } catch (error) {
@@ -943,7 +955,7 @@ export function AdminCenter({ page }: { page: "overview" | "send" }) {
     }
   }
 
-  const members: any[] = overview.data?.members ?? [];
+  const members = overview.data?.members ?? [];
   const templates: EmailTemplate[] = (preview && demoTemplates) || email.data?.templates || [];
   const inviteTemplate = templates.find((t) => t.system_key === "invite") ?? null;
   const editingInvite = !!inviteTemplate && draft.id === inviteTemplate.id;
@@ -1299,12 +1311,10 @@ export function AdminCenter({ page }: { page: "overview" | "send" }) {
     );
 
   const d = overview.data;
-  const profilesById = new Map<string, any>(
-    ((d as any).profiles ?? []).map((p: any) => [p.member_id, p]),
-  );
-  const docProgress: Record<string, { total: number; done: number }> = (d as any).docProgress ?? {};
+  const profilesById = new Map((d.profiles ?? []).map((p) => [p.member_id, p]));
+  const docProgress: Record<string, { total: number; done: number }> = d.docProgress ?? {};
   const journeys: Record<string, JourneyStatus> = d.journeys ?? {};
-  const stageOf = (m: any) => {
+  const stageOf = (m: AdminMember) => {
     const p = profilesById.get(m.id);
     const prog = docProgress[m.id];
     if (m.status === "revoked")
@@ -1362,7 +1372,7 @@ export function AdminCenter({ page }: { page: "overview" | "send" }) {
     };
   };
   const q = memberSearch.trim().toLowerCase();
-  const filteredMembers = d.members.filter((m: any) => {
+  const filteredMembers = d.members.filter((m) => {
     if (filterEntity && m.entity !== filterEntity) return false;
     if (filterRole) {
       const roles =
@@ -1379,7 +1389,7 @@ export function AdminCenter({ page }: { page: "overview" | "send" }) {
       return false;
     return true;
   });
-  const nudge = async (m: any) => {
+  const nudge = async (m: AdminMember) => {
     if (preview) {
       setMemberBusy("Preview mode: Nudge now sends from the live admin page.");
       return;
@@ -1438,11 +1448,14 @@ export function AdminCenter({ page }: { page: "overview" | "send" }) {
       "Questions",
       "Contact requested",
     ];
-    const rows = filteredMembers.map((m: any) => {
-      const p = profilesById.get(m.id) ?? {};
+    const rows = filteredMembers.map((m) => {
+      // The overview query does not select bio or contact_requested, so those export columns are
+      // currently always blank / "No".
+      const p: Partial<AdminProfile> & { bio?: string | null; contact_requested?: boolean | null } =
+        profilesById.get(m.id) ?? {};
       const prog = docProgress[m.id];
-      const ans = p.experience_answers ?? {};
-      const vis = p.visibility_instructions ?? {};
+      const ans = (p.experience_answers ?? {}) as Record<string, string>;
+      const vis = (p.visibility_instructions ?? {}) as Record<string, string>;
       const fitValues = new Map(
         hasFitAnswers(ans) ? fitReadoutRows(ans).map(({ label, value }) => [label, value]) : [],
       );
@@ -1458,7 +1471,7 @@ export function AdminCenter({ page }: { page: "overview" | "send" }) {
         m.organization,
         m.title,
         m.is_candidate ? "None" : String(m.entity).toUpperCase(),
-        memberDesignation(m as any),
+        memberDesignation(m),
         m.status,
         stageOf(m).label,
         date(m.invited_at),
@@ -1509,7 +1522,7 @@ export function AdminCenter({ page }: { page: "overview" | "send" }) {
     },
     {
       label: "Open inquiries",
-      value: d.inquiries.filter((x: any) => x.status === "open").length,
+      value: d.inquiries.filter((x) => x.status === "open").length,
       icon: MessageSquare,
       note: "New inquiries",
       href: "/admin#inquiries",
@@ -3031,7 +3044,7 @@ export function AdminCenter({ page }: { page: "overview" | "send" }) {
                           </td>
                         </tr>
                       )}
-                      {filteredMembers.map((m: any) => {
+                      {filteredMembers.map((m) => {
                         const st = stageOf(m);
                         const journey = journeys[m.id];
                         const forum = m.participates_in_forum !== false;
@@ -3076,10 +3089,10 @@ export function AdminCenter({ page }: { page: "overview" | "send" }) {
                               </div>
                             </td>
                             <td>
-                              {memberDesignation(m as any)}
+                              {memberDesignation(m)}
                               {m.intended_designation && (
                                 <p className="mt-1 text-xs text-ivory/55">
-                                  {intendedDesignationLabel(m as any)}
+                                  {intendedDesignationLabel(m)}
                                 </p>
                               )}
                               {(m as { participates_in_forum?: boolean }).participates_in_forum ===
@@ -3244,7 +3257,7 @@ export function AdminCenter({ page }: { page: "overview" | "send" }) {
                       No members match these filters.
                     </p>
                   )}
-                  {filteredMembers.map((m: any) => {
+                  {filteredMembers.map((m) => {
                     const st = stageOf(m);
                     const all = sendsByMember.get(m.id) ?? [];
                     const list = all.filter((s) => s.status === "sent");
@@ -3282,7 +3295,7 @@ export function AdminCenter({ page }: { page: "overview" | "send" }) {
                             </span>
                           </button>
                           <span className="max-w-[45%] text-right text-xs text-ivory/70">
-                            {memberDesignation(m as any)}
+                            {memberDesignation(m)}
                           </span>
                         </div>
 
@@ -3434,7 +3447,7 @@ export function AdminCenter({ page }: { page: "overview" | "send" }) {
                   {d.inquiries.length === 0 ? (
                     <p className="text-base text-ivory/45">No inquiries yet.</p>
                   ) : (
-                    d.inquiries.slice(0, 8).map((q: any) => {
+                    d.inquiries.slice(0, 8).map((q) => {
                       const member = members.find((x) => x.id === q.member_id);
                       const resolved = q.status === "resolved";
                       const notes = inquiryDraft[q.id] ?? q.admin_notes ?? "";
@@ -3522,7 +3535,7 @@ export function AdminCenter({ page }: { page: "overview" | "send" }) {
                       <option value="">Choose a member…</option>
                       {members.map((m) => (
                         <option key={m.id} value={m.id}>
-                          {m.first_name} {m.last_name} · {memberDesignation(m as any)}
+                          {m.first_name} {m.last_name} · {memberDesignation(m)}
                         </option>
                       ))}
                     </select>
@@ -3563,16 +3576,17 @@ export function AdminCenter({ page }: { page: "overview" | "send" }) {
                 <div
                   className={`mt-5 overflow-y-auto border border-gold/15 ${showAllActivity ? "max-h-[28rem]" : ""}`}
                 >
-                  {d.activity.filter((a: any) => a.event_type).length === 0 ? (
+                  {d.activity.filter((a) => a.event_type).length === 0 ? (
                     <p className="p-4 text-base text-ivory/45">No activity recorded yet.</p>
                   ) : (
                     <ul className="divide-y divide-ivory/10">
                       {d.activity
-                        .filter((a: any) => a.event_type)
+                        .filter((a) => a.event_type)
                         .slice(0, showAllActivity ? undefined : 5)
-                        .map((a: any) => {
+                        .map((a) => {
                           const who = members.find((x) => x.id === a.member_id);
                           const byAdmin = a.actor_user_id && who && a.actor_user_id !== who.user_id;
+                          const nudgeKind = (a.metadata as { kind?: string } | null)?.kind;
                           return (
                             <li
                               key={a.id}
@@ -3580,8 +3594,8 @@ export function AdminCenter({ page }: { page: "overview" | "send" }) {
                             >
                               <span className="min-w-0 text-base text-ivory/80">
                                 {activityLabel(a.event_type)}
-                                {a.event_type === "nudge_sent" && a.metadata?.kind
-                                  ? ` (${a.metadata.kind})`
+                                {a.event_type === "nudge_sent" && nudgeKind
+                                  ? ` (${nudgeKind})`
                                   : ""}
                                 <span className="text-ivory/45">
                                   {" "}
@@ -3598,7 +3612,7 @@ export function AdminCenter({ page }: { page: "overview" | "send" }) {
                     </ul>
                   )}
                 </div>
-                {d.activity.filter((a: any) => a.event_type).length > 5 && (
+                {d.activity.filter((a) => a.event_type).length > 5 && (
                   <button
                     type="button"
                     onClick={() => setShowAllActivity(!showAllActivity)}
@@ -3664,13 +3678,13 @@ export function AdminCenter({ page }: { page: "overview" | "send" }) {
                           ? "In progress"
                           : "Not started";
                       const openInquiries = journey.inquiries.filter(
-                        (inquiry: any) => inquiry.status === "open",
+                        (inquiry) => inquiry.status === "open",
                       ).length;
                       return (
                         <>
                           <MemberDetailsEditor
                             key={member.id}
-                            member={member as any}
+                            member={member}
                             preview={preview}
                             onSaved={() => {
                               void overview.refetch();
@@ -3738,7 +3752,7 @@ export function AdminCenter({ page }: { page: "overview" | "send" }) {
 
                           <Block label="Recent journey activity">
                             {journey.activity.length ? (
-                              journey.activity.slice(0, 8).map((event: any) => (
+                              journey.activity.slice(0, 8).map((event) => (
                                 <div
                                   key={event.id}
                                   className="flex gap-3 border-l border-gold/30 pl-3"

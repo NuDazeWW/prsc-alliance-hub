@@ -9,8 +9,10 @@ import {
   forumIdempotencyKey,
   type ForumEmailKey,
 } from "@/lib/forum-communications";
+import type { DbClient } from "@/lib/db-types";
+import type { Tables } from "@/integrations/supabase/types";
 
-async function assertAdmin(context: { supabase: any; userId: string }) {
+async function assertAdmin(context: { supabase: DbClient; userId: string }) {
   const { data } = await context.supabase
     .from("user_roles")
     .select("role")
@@ -35,7 +37,7 @@ const input = z.object({
   tokens: z.record(z.string().max(60), z.string().trim().max(300)).default({}),
 });
 
-async function evaluate(context: any, data: z.infer<typeof input>) {
+async function evaluate(context: { supabase: DbClient }, data: z.infer<typeof input>) {
   const [{ data: members }, docRes, { data: sent }] = await Promise.all([
     context.supabase
       .from("portal_members")
@@ -60,7 +62,7 @@ async function evaluate(context: any, data: z.infer<typeof input>) {
   const doc = docRes.data;
   // Question emails are tied to one open round: access, deadline and reminder rules come from it.
   const isQuestion = data.email_key === "input_requested" || data.email_key === "input_reminder";
-  let round: any = null,
+  let round: Tables<"question_rounds"> | null = null,
     responded = new Set<string>();
   if (isQuestion) {
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
@@ -78,9 +80,9 @@ async function evaluate(context: any, data: z.infer<typeof input>) {
           .select("member_id")
           .eq("round_id", round.id)
       : { data: [] };
-    responded = new Set((resp ?? []).map((r: any) => r.member_id));
+    responded = new Set((resp ?? []).map((r) => r.member_id));
   }
-  const sentMap = new Map((sent ?? []).map((r: any) => [r.member_id, r.created_at]));
+  const sentMap = new Map((sent ?? []).map((r) => [r.member_id, r.created_at]));
   // A confirmed Meetings poll already emailed its confirmation: the manual
   // Forum confirmation must not duplicate it for the same members.
   let confirmedPolls: { invited_member_ids: unknown }[] = [];
@@ -97,10 +99,10 @@ async function evaluate(context: any, data: z.infer<typeof input>) {
   const { memberVisibilityFlags } = await import("@/lib/portal.functions");
   const flagsById = new Map(
     await Promise.all(
-      (members ?? []).map(async (m: any) => [m.id, await memberVisibilityFlags(m.id)] as const),
+      (members ?? []).map(async (m) => [m.id, await memberVisibilityFlags(m.id)] as const),
     ),
   );
-  const rows = (members ?? []).map((m: any) => {
+  const rows = (members ?? []).map((m) => {
     let reason = forumEmailBlock(
       data.email_key,
       { ...m, ...(flagsById.get(m.id) ?? {}) },
@@ -139,7 +141,7 @@ async function evaluate(context: any, data: z.infer<typeof input>) {
     for (const r of rows)
       if (!r.reason) r.reason = (await memberRoundAccess(supabaseAdmin, r.member, round)) ?? null;
   }
-  return rows.map(({ member: _m, ...r }: any) => r);
+  return rows.map(({ member: _m, ...r }) => r);
 }
 
 export const getForumRecipients = createServerFn({ method: "POST" })

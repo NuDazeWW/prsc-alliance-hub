@@ -46,7 +46,7 @@ export function AdminForumCommunications() {
           tokens,
         },
       });
-      setRounds((res as any).rounds ?? []);
+      setRounds(res.rounds ?? []);
       setRows(res.recipients as Recipient[]);
       setDocs(res.documents as { id: string; title: string }[]);
       setPicked(
@@ -230,7 +230,8 @@ export function AdminForumCommunications() {
                       checked={picked.has(r.id)}
                       onChange={(e) => {
                         const n = new Set(picked);
-                        e.target.checked ? n.add(r.id) : n.delete(r.id);
+                        if (e.target.checked) n.add(r.id);
+                        else n.delete(r.id);
                         setPicked(n);
                       }}
                     />

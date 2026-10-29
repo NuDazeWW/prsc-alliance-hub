@@ -3,10 +3,13 @@ import { z } from "zod";
 import { requirePortalAccess } from "@/lib/portal-access";
 
 import { formatSlot, meetingTypeLabel, zonedToUtc } from "@/lib/meeting-block";
+import type { DbClient } from "@/lib/db-types";
+import type { Tables } from "@/integrations/supabase/types";
+import type { ConfirmationRow } from "@/lib/meeting-confirmations";
 
 const PORTAL_URL = "https://access.prscstandards.org/portal";
 
-async function assertAdmin(context: { supabase: any; userId: string }) {
+async function assertAdmin(context: { supabase: DbClient; userId: string }) {
   const { data } = await context.supabase
     .from("user_roles")
     .select("role")
@@ -16,14 +19,14 @@ async function assertAdmin(context: { supabase: any; userId: string }) {
   if (!data) throw new Error("Unauthorized");
 }
 
-async function getMyMember(context: { supabase: any; userId: string }) {
+async function getMyMember(context: { supabase: DbClient; userId: string }) {
   const { data } = await context.supabase
     .from("portal_members")
     .select("*")
     .eq("user_id", context.userId)
     .maybeSingle();
   if (!data) throw new Error("Portal access has not been granted");
-  return data as any;
+  return data;
 }
 
 const slotSchema = z.object({
@@ -148,7 +151,7 @@ export const listAdminPolls = createServerFn({ method: "GET" })
     if (error) throw error;
     if (!polls?.length) return { polls: [] };
 
-    const pollIds = polls.map((p: any) => p.id);
+    const pollIds = polls.map((p) => p.id);
     const [{ data: slots }, { data: responses }, { data: notes }, { data: members }] =
       await Promise.all([
         supabaseAdmin
@@ -166,14 +169,12 @@ export const listAdminPolls = createServerFn({ method: "GET" })
       ]);
 
     return {
-      polls: polls.map((p: any) => ({
+      polls: polls.map((p) => ({
         ...p,
-        slots: (slots ?? []).filter((s: any) => s.poll_id === p.id),
-        responses: (responses ?? []).filter((r: any) => r.poll_id === p.id),
-        notes: (notes ?? []).filter((n: any) => n.poll_id === p.id),
-        invited: (members ?? []).filter((m: any) =>
-          (p.invited_member_ids as string[]).includes(m.id),
-        ),
+        slots: (slots ?? []).filter((s) => s.poll_id === p.id),
+        responses: (responses ?? []).filter((r) => r.poll_id === p.id),
+        notes: (notes ?? []).filter((n) => n.poll_id === p.id),
+        invited: (members ?? []).filter((m) => (p.invited_member_ids as string[]).includes(m.id)),
       })),
     };
   });
@@ -251,12 +252,12 @@ export const confirmPollSlot = createServerFn({ method: "POST" })
     const owed = new Set(
       recipientsToConfirm(
         (members ?? []).map((m) => m.id),
-        (existing ?? []) as any,
+        (existing ?? []) as ConfirmationRow[],
       ),
     );
     for (const m of members ?? []) {
       if (!owed.has(m.id)) continue;
-      const prior = (existing ?? []).find((r: any) => r.member_id === m.id) as any;
+      const prior = (existing ?? []).find((r) => r.member_id === m.id);
       await supabaseAdmin.from("meeting_confirmation_sends").upsert(
         {
           poll_id: poll.id,
@@ -342,8 +343,8 @@ export const getMyMeetings = createServerFn({ method: "GET" })
     z.object({ asMemberId: z.string().uuid().optional() }).parse(input ?? {}),
   )
   .handler(async ({ context: ctx, data: input }) => {
-    let context: any = ctx;
-    let member: any;
+    let context: { supabase: DbClient } = ctx;
+    let member: Tables<"portal_members">;
     if (input.asMemberId) {
       const { data: isAdmin } = await ctx.supabase
         .from("user_roles")
@@ -372,7 +373,7 @@ export const getMyMeetings = createServerFn({ method: "GET" })
     if (error) throw error;
     if (!polls?.length) return { polls: [], member_id: member.id };
 
-    const pollIds = polls.map((p: any) => p.id);
+    const pollIds = polls.map((p) => p.id);
     const [{ data: slots }, { data: responses }, { data: notes }] = await Promise.all([
       context.supabase
         .from("meeting_poll_slots")
@@ -392,14 +393,14 @@ export const getMyMeetings = createServerFn({ method: "GET" })
     ]);
 
     const withTokens = await Promise.all(
-      polls.map(async (p: any) => ({
+      polls.map(async (p) => ({
         ...p,
         ics_token: p.status === "confirmed" ? "authenticated" : null,
         invited_member_ids: undefined,
-        slots: (slots ?? []).filter((s: any) => s.poll_id === p.id),
-        my_responses: (responses ?? []).filter((r: any) => r.poll_id === p.id),
-        my_note: (notes ?? []).find((n: any) => n.poll_id === p.id)?.note ?? "",
-        my_responded_at: (notes ?? []).find((n: any) => n.poll_id === p.id)?.responded_at ?? null,
+        slots: (slots ?? []).filter((s) => s.poll_id === p.id),
+        my_responses: (responses ?? []).filter((r) => r.poll_id === p.id),
+        my_note: (notes ?? []).find((n) => n.poll_id === p.id)?.note ?? "",
+        my_responded_at: (notes ?? []).find((n) => n.poll_id === p.id)?.responded_at ?? null,
       })),
     );
     return { polls: withTokens, member_id: member.id };

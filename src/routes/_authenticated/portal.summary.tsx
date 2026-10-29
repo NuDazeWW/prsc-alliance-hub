@@ -37,9 +37,9 @@ function SummaryPage() {
     queryFn: () => getMyDocuments().catch(() => null),
     retry: false,
   });
-  const m: any = (session.data as any)?.member;
+  const m = session.data?.member;
   const list = docs.data?.documents ?? [];
-  const byDoc = new Map((docs.data?.completions ?? []).map((c: any) => [c.document_id, c]));
+  const byDoc = new Map((docs.data?.completions ?? []).map((c) => [c.document_id, c]));
   const name = m ? `${m.first_name ?? ""} ${m.last_name ?? ""}`.trim() : "";
 
   return (
@@ -80,8 +80,8 @@ function SummaryPage() {
           </p>
         )}
         <ul className="mt-8 divide-y divide-gold/15 border border-gold/25">
-          {list.map((d: any) => {
-            const c: any = byDoc.get(d.id);
+          {list.map((d) => {
+            const c = byDoc.get(d.id);
             return (
               <li key={d.id} className="p-5">
                 <p className="text-lg">{d.title}</p>

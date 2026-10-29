@@ -124,7 +124,7 @@ export function MemberDetailsEditor({
           <p className="mt-2 text-base text-ivory">
             {[member.title, member.organization].filter(Boolean).join(", ")}
           </p>
-          <p className="mt-1 text-sm text-ivory/60">{memberDesignation(member as any)}</p>
+          <p className="mt-1 text-sm text-ivory/60">{memberDesignation(member)}</p>
         </div>
         {!open && (
           <button

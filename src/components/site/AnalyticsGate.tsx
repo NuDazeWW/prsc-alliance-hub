@@ -3,21 +3,28 @@ import { useEffect, useState } from "react";
 const GA_ID = "G-ZMZCN0S0RV";
 const CONSENT_KEY = "prsc-analytics-consent";
 
+type GaWindow = Window & {
+  __gaLoaded?: boolean;
+  dataLayer?: unknown[][];
+  gtag?: (...args: unknown[]) => void;
+};
+
 function loadGA() {
   if (typeof window === "undefined") return;
-  if ((window as any).__gaLoaded) return;
-  (window as any).__gaLoaded = true;
+  const w = window as GaWindow;
+  if (w.__gaLoaded) return;
+  w.__gaLoaded = true;
 
   const s = document.createElement("script");
   s.src = `https://www.googletagmanager.com/gtag/js?id=${GA_ID}`;
   s.async = true;
   document.head.appendChild(s);
 
-  (window as any).dataLayer = (window as any).dataLayer || [];
+  const dataLayer = (w.dataLayer = w.dataLayer || []);
   function gtag(...args: unknown[]) {
-    (window as any).dataLayer.push(args);
+    dataLayer.push(args);
   }
-  (window as any).gtag = gtag;
+  w.gtag = gtag;
   gtag("js", new Date());
   gtag("config", GA_ID, { anonymize_ip: true });
 }

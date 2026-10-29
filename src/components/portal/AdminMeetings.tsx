@@ -29,16 +29,27 @@ const AVAIL_STYLE: Record<string, string> = {
   unavailable: "bg-rose-500/20 text-rose-300 border-rose-400/40",
 };
 
-function memberName(m: any) {
+type InvitableMember = Awaited<ReturnType<typeof listInvitableMembers>>["members"][number];
+type AdminPoll = Awaited<ReturnType<typeof listAdminPolls>>["polls"][number];
+/** The server's connection result, or the minimal failure object used when the check itself fails. */
+type CalendarConnection = Pick<Awaited<ReturnType<typeof getCalendarConnection>>, "connected"> & {
+  error: string | null;
+  name?: string;
+  email?: string;
+  calendar?: string;
+  canEdit?: boolean;
+};
+
+function memberName(m: Pick<InvitableMember, "first_name" | "last_name" | "email">) {
   return `${m.first_name ?? ""} ${m.last_name ?? ""}`.trim() || m.email;
 }
 
 export function AdminMeetings() {
-  const [members, setMembers] = useState<any[]>([]);
-  const [polls, setPolls] = useState<any[]>([]);
+  const [members, setMembers] = useState<InvitableMember[]>([]);
+  const [polls, setPolls] = useState<AdminPoll[]>([]);
   const [loading, setLoading] = useState(true);
   const [proposeOpen, setProposeOpen] = useState(false);
-  const [cal, setCal] = useState<any>(null);
+  const [cal, setCal] = useState<CalendarConnection | null>(null);
   const [syncing, setSyncing] = useState<string | null>(null);
 
   async function resync(pollId: string) {
@@ -158,8 +169,8 @@ export function AdminMeetings() {
         ) : (
           <div className="mt-4 space-y-5">
             {polls.map((p) => {
-              const responded = new Set(p.responses.map((r: any) => r.member_id));
-              const pending = p.invited.filter((m: any) => !responded.has(m.id));
+              const responded = new Set(p.responses.map((r) => r.member_id));
+              const pending = p.invited.filter((m) => !responded.has(m.id));
               return (
                 <div key={p.id} className="rounded-lg border border-gold/20 bg-navy-deep/40 p-5">
                   <div className="flex flex-wrap items-start justify-between gap-3">
@@ -220,7 +231,7 @@ export function AdminMeetings() {
                       <thead>
                         <tr className="text-left text-[11px] uppercase tracking-[0.12em] text-ivory/45">
                           <th className="border-b border-gold/15 py-2 pr-3">Member</th>
-                          {p.slots.map((s: any) => (
+                          {p.slots.map((s) => (
                             <th
                               key={s.id}
                               className="border-b border-gold/15 px-2 py-2 text-center"
@@ -232,12 +243,12 @@ export function AdminMeetings() {
                         </tr>
                       </thead>
                       <tbody>
-                        {p.invited.map((m: any) => (
+                        {p.invited.map((m) => (
                           <tr key={m.id} className="border-b border-ivory/5">
                             <td className="py-2 pr-3 text-ivory/85">{memberName(m)}</td>
-                            {p.slots.map((s: any) => {
+                            {p.slots.map((s) => {
                               const r = p.responses.find(
-                                (x: any) => x.slot_id === s.id && x.member_id === m.id,
+                                (x) => x.slot_id === s.id && x.member_id === m.id,
                               );
                               return (
                                 <td key={s.id} className="px-2 py-2 text-center">
@@ -263,16 +274,15 @@ export function AdminMeetings() {
                           <td className="py-2 pr-3 text-[11px] uppercase tracking-[0.12em]">
                             Available
                           </td>
-                          {p.slots.map((s: any) => {
+                          {p.slots.map((s) => {
                             const count = p.responses.filter(
-                              (r: any) => r.slot_id === s.id && r.availability === "available",
+                              (r) => r.slot_id === s.id && r.availability === "available",
                             ).length;
                             const best = Math.max(
                               ...p.slots.map(
-                                (x: any) =>
+                                (x) =>
                                   p.responses.filter(
-                                    (r: any) =>
-                                      r.slot_id === x.id && r.availability === "available",
+                                    (r) => r.slot_id === x.id && r.availability === "available",
                                   ).length,
                               ),
                             );
@@ -290,12 +300,12 @@ export function AdminMeetings() {
                     </table>
                   </div>
 
-                  {p.notes.filter((n: any) => n.note).length > 0 && (
+                  {p.notes.filter((n) => n.note).length > 0 && (
                     <div className="mt-3 space-y-1">
                       {p.notes
-                        .filter((n: any) => n.note)
-                        .map((n: any) => {
-                          const m = p.invited.find((x: any) => x.id === n.member_id);
+                        .filter((n) => n.note)
+                        .map((n) => {
+                          const m = p.invited.find((x) => x.id === n.member_id);
                           return (
                             <p key={n.member_id} className="text-xs text-ivory/55">
                               <span className="text-gold/80">{m ? memberName(m) : "Member"}:</span>{" "}
@@ -308,7 +318,7 @@ export function AdminMeetings() {
 
                   {p.status === "open" && (
                     <div className="mt-4 flex flex-wrap items-center gap-2">
-                      {p.slots.map((s: any) => (
+                      {p.slots.map((s) => (
                         <Button
                           key={s.id}
                           type="button"
@@ -332,7 +342,7 @@ export function AdminMeetings() {
                       </Button>
                       {pending.length > 0 && (
                         <span className="text-xs text-ivory/45">
-                          Waiting on: {pending.map((m: any) => memberName(m)).join(", ")}
+                          Waiting on: {pending.map((m) => memberName(m)).join(", ")}
                         </span>
                       )}
                     </div>

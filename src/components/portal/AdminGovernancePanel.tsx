@@ -111,7 +111,7 @@ export function AdminGovernancePanel({
       </p>
     );
   if (!q.data) return <p className="mt-5 text-base text-gold">Loading governance record…</p>;
-  const m: any = q.data.member;
+  const m = q.data.member;
   const box = "mt-5 border border-gold/25 p-4";
   const sel = "mt-1 h-10 w-full border border-gold/25 bg-navy-deep px-3 text-base text-ivory";
 
@@ -148,7 +148,7 @@ export function AdminGovernancePanel({
             <select
               className={sel}
               value={nda.entities}
-              onChange={(e) => setNda({ ...nda, entities: e.target.value as any })}
+              onChange={(e) => setNda({ ...nda, entities: e.target.value as typeof nda.entities })}
             >
               <option value="prsc">PRSC</option>
               <option value="dis">DIS</option>
@@ -278,10 +278,10 @@ export function AdminGovernancePanel({
             you record a decision here.
           </p>
           {q.data.conflicts.length > 0 ? (
-            q.data.conflicts.map((c: any) => (
+            q.data.conflicts.map((c) => (
               <p key={c.document_id + c.acknowledged_at} className="mt-2 text-base text-ivory/80">
                 Disclosure {new Date(c.acknowledged_at).toLocaleDateString()}:{" "}
-                <span className="text-gold">{CONFLICT_LABEL[c.conflict_answer]}</span>
+                <span className="text-gold">{CONFLICT_LABEL[c.conflict_answer ?? ""]}</span>
                 {c.conflict_details ? `: ${c.conflict_details}` : ""}
               </p>
             ))
@@ -310,7 +310,7 @@ export function AdminGovernancePanel({
               <select
                 className={sel}
                 value={cr.decision}
-                onChange={(e) => setCr({ ...cr, decision: e.target.value as any })}
+                onChange={(e) => setCr({ ...cr, decision: e.target.value as typeof cr.decision })}
               >
                 <option value="approved">Approve</option>
                 <option value="hold">Hold</option>
@@ -345,7 +345,7 @@ export function AdminGovernancePanel({
               <select
                 className={sel}
                 value={cl.decision}
-                onChange={(e) => setCl({ ...cl, decision: e.target.value as any })}
+                onChange={(e) => setCl({ ...cl, decision: e.target.value as typeof cl.decision })}
               >
                 <option value="cleared">Clear</option>
                 <option value="cleared_restricted">Clear with restrictions</option>
@@ -439,8 +439,8 @@ export function AdminGovernancePanel({
               onChange={(e) => setGrantReason(e.target.value)}
             />
           </label>
-          {(restricted.data ?? []).map((d: any) => {
-            const active = grants.data?.grants.some((g: any) => g.document_id === d.id);
+          {(restricted.data ?? []).map((d) => {
+            const active = grants.data?.grants.some((g) => g.document_id === d.id);
             return (
               <div key={d.id} className="mt-2 flex flex-wrap items-center gap-3">
                 <span className="text-base text-ivory/80">
@@ -496,7 +496,7 @@ export function AdminGovernancePanel({
             Governance history ({q.data.reviews.length})
           </summary>
           <ul className="mt-2 space-y-1">
-            {q.data.reviews.map((r: any) => (
+            {q.data.reviews.map((r) => (
               <li key={r.id} className="text-sm text-ivory/70">
                 {new Date(r.created_at).toLocaleString()} · {r.kind.replace(/_/g, " ")} ·{" "}
                 {r.decision}

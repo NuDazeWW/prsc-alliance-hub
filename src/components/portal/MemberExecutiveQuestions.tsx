@@ -21,13 +21,15 @@ const blank = (p: number): Q => ({
 });
 const field = "mt-1 w-full rounded-md border border-input bg-navy px-3 py-2 text-base text-ivory";
 
+type QuestionRound = Awaited<ReturnType<typeof getMyQuestionRounds>>["rounds"][number];
+
 /** Executive Questions inside the Forum workspace. Shown only to cleared participants with briefing access. */
 export function MemberExecutiveQuestions({ readOnly = false }: { readOnly?: boolean }) {
   const q = useQuery({
     queryKey: ["my-question-rounds"],
     queryFn: () => getMyQuestionRounds().catch(() => ({ rounds: [] })),
   });
-  const rounds = (q.data?.rounds ?? []) as any[];
+  const rounds: QuestionRound[] = q.data?.rounds ?? [];
   if (!rounds.length) return null;
   return (
     <section
@@ -49,14 +51,14 @@ export function MemberExecutiveQuestions({ readOnly = false }: { readOnly?: bool
   );
 }
 
-function RoundForm({ round, readOnly }: { round: any; readOnly: boolean }) {
+function RoundForm({ round, readOnly }: { round: QuestionRound; readOnly: boolean }) {
   const qc = useQueryClient();
   const [items, setItems] = useState<Q[]>([]);
   const [status, setStatus] = useState("");
   useEffect(() => {
     setItems(
       round.questions.length
-        ? round.questions.map((x: any) => ({ ...x, context: x.context ?? "" }))
+        ? round.questions.map((x) => ({ ...x, context: x.context ?? "" }))
         : [blank(1)],
     );
   }, [round.id]);

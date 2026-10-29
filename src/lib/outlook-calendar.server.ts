@@ -1,4 +1,5 @@
 import { planHoldChanges, holdTransactionId, type HoldRow } from "@/lib/calendar-holds";
+import type { Tables } from "@/integrations/supabase/types";
 
 const GATEWAY_URL = "https://connector-gateway.lovable.dev/microsoft_outlook";
 
@@ -9,7 +10,18 @@ function keys() {
   return { lovable, outlook };
 }
 
-async function graph(path: string, init: { method?: string; body?: unknown } = {}) {
+type GraphCalendar = {
+  name?: string;
+  canEdit?: boolean;
+  owner?: { address?: string; name?: string };
+};
+type GraphProfile = { displayName?: string };
+type GraphEvent = { id: string };
+
+async function graph<T = unknown>(
+  path: string,
+  init: { method?: string; body?: unknown } = {},
+): Promise<T | null> {
   const k = keys();
   const res = await fetch(`${GATEWAY_URL}${path}`, {
     method: init.method ?? "GET",
@@ -34,13 +46,13 @@ async function graph(path: string, init: { method?: string; body?: unknown } = {
  *  (profile) scope, so /me is only a best-effort extra detail. */
 export async function getConnectedCalendar() {
   try {
-    const cal: any = await graph("/me/calendar?$select=name,canEdit,owner");
+    const cal = await graph<GraphCalendar>("/me/calendar?$select=name,canEdit,owner");
     const owner = cal?.owner ?? {};
     const email = owner.address ?? "";
     let name = owner.name ?? "";
     if (!email || !name) {
       try {
-        const me: any = await graph("/me?$select=displayName,mail,userPrincipalName");
+        const me = await graph<GraphProfile>("/me?$select=displayName,mail,userPrincipalName");
         name = name || me?.displayName || "";
       } catch {
         // Profile scope not granted — calendar owner above is sufficient.
@@ -66,7 +78,7 @@ export async function getConnectedCalendar() {
   }
 }
 
-function eventBody(poll: any, startsAt: string, kind: "hold" | "final") {
+function eventBody(poll: Tables<"meeting_polls">, startsAt: string, kind: "hold" | "final") {
   const start = new Date(startsAt);
   const end = new Date(start.getTime() + poll.duration_minutes * 60000);
   const where =
@@ -91,7 +103,7 @@ function eventBody(poll: any, startsAt: string, kind: "hold" | "final") {
 /** Brings the organizer calendar in line with the poll. Safe to run repeatedly. Never throws. */
 export async function reconcilePollHolds(pollId: string) {
   const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-  const db = supabaseAdmin as any;
+  const db = supabaseAdmin;
   const { data: poll } = await db.from("meeting_polls").select("*").eq("id", pollId).maybeSingle();
   if (!poll) return { ok: false, error: "Meeting not found" };
   const [{ data: slots }, { data: holds }] = await Promise.all([
@@ -100,7 +112,7 @@ export async function reconcilePollHolds(pollId: string) {
   ]);
   const plan = planHoldChanges(
     poll,
-    (slots ?? []).map((s: any) => s.id),
+    (slots ?? []).map((s) => s.id),
     (holds ?? []) as HoldRow[],
   );
   const errors: string[] = [];
@@ -115,20 +127,20 @@ export async function reconcilePollHolds(pollId: string) {
   }
 
   for (const c of plan.create) {
-    const slot = (slots ?? []).find((s: any) => s.id === c.slot_id);
+    const slot = (slots ?? []).find((s) => s.id === c.slot_id);
     const transaction_id = holdTransactionId(pollId, c.slot_id);
     try {
       // transactionId lets Outlook return the same event on retry instead of a duplicate.
-      const ev: any = await graph("/me/events", {
+      const ev = await graph<GraphEvent>("/me/events", {
         method: "POST",
-        body: { ...eventBody(poll, slot.starts_at, c.kind), transactionId: transaction_id },
+        body: { ...eventBody(poll, slot!.starts_at, c.kind), transactionId: transaction_id },
       });
       await db.from("meeting_calendar_holds").upsert(
         {
           poll_id: pollId,
           slot_id: c.slot_id,
           kind: c.kind,
-          outlook_event_id: ev.id,
+          outlook_event_id: ev!.id,
           transaction_id,
           status: "synced",
           last_error: null,
@@ -154,12 +166,12 @@ export async function reconcilePollHolds(pollId: string) {
   }
 
   for (const slotId of plan.promote) {
-    const h = (holds ?? []).find((x: any) => x.slot_id === slotId);
-    const slot = (slots ?? []).find((s: any) => s.id === slotId);
+    const h = (holds ?? []).find((x) => x.slot_id === slotId);
+    const slot = (slots ?? []).find((s) => s.id === slotId);
     try {
-      await graph(`/me/events/${encodeURIComponent(h.outlook_event_id)}`, {
+      await graph(`/me/events/${encodeURIComponent(h!.outlook_event_id!)}`, {
         method: "PATCH",
-        body: eventBody(poll, slot.starts_at, "final"),
+        body: eventBody(poll, slot!.starts_at, "final"),
       });
       await db
         .from("meeting_calendar_holds")

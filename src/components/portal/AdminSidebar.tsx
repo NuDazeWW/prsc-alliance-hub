@@ -240,7 +240,7 @@ function ChangePasswordDialog({ open, onClose }: { open: boolean; onClose: () =>
     const { error } = await supabase.auth.updateUser({
       password: next,
       current_password: current,
-    } as any);
+    } as Parameters<typeof supabase.auth.updateUser>[0]);
     setBusy(false);
     if (error)
       return toast.error(

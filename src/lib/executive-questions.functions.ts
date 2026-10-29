@@ -9,9 +9,12 @@ import {
   shareBlock,
   QUESTION_CATEGORIES,
   ROUTES,
+  type QuestionMember,
 } from "@/lib/executive-questions";
+import type { DbClient } from "@/lib/db-types";
+import type { TablesUpdate } from "@/integrations/supabase/types";
 
-async function assertAdmin(context: { supabase: any; userId: string }) {
+async function assertAdmin(context: { supabase: DbClient; userId: string }) {
   const { data } = await context.supabase
     .from("user_roles")
     .select("role")
@@ -25,7 +28,11 @@ const MEMBER_COLS =
   "id, status, participates_in_forum, nda_verified_at, forum_clearance_status, is_candidate";
 
 /** Server-side access check for one member and round; uses the privileged client after identity is fixed by the session. */
-export async function memberRoundAccess(admin: any, member: any, round: any) {
+export async function memberRoundAccess(
+  admin: DbClient,
+  member: QuestionMember & { id: string },
+  round: { briefing_document_id: string | null },
+) {
   let hasBriefing = false;
   if (round.briefing_document_id) {
     const { data: doc } = await admin
@@ -39,7 +46,7 @@ export async function memberRoundAccess(admin: any, member: any, round: any) {
     const flags = await memberVisibilityFlags(member.id);
     // Executive Questions require the same exact-version individual grant as the restricted brief.
     hasBriefing =
-      Boolean(doc) &&
+      doc != null &&
       (!doc.member_id || doc.member_id === member.id) &&
       grantCovers(flags.grants, doc) &&
       documentVisible(
@@ -382,7 +389,7 @@ export const updateOutbound = createServerFn({ method: "POST" })
       .maybeSingle();
     if (!o) throw new Error("Not found");
     const now = new Date().toISOString();
-    let patch: any = {};
+    let patch: TablesUpdate<"question_outbound"> = {};
     if (data.action === "approve") patch = { approved_by: context.userId, approved_at: now };
     if (data.action === "mark_shared") {
       const b = shareBlock(o);

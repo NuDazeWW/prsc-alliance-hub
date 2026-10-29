@@ -45,6 +45,7 @@ import {
   appointmentProblems,
   memberTracksFor,
 } from "@/lib/governance";
+import type { DbClient } from "@/lib/db-types";
 
 type PortalMember = {
   id: string;
@@ -68,6 +69,8 @@ type PortalMember = {
   acceptance_complete?: { prsc: boolean; dis: boolean };
   intended_designation?: IntendedDesignation | null;
   linkedin_url?: string | null;
+  forum_clearance_status?: string | null;
+  orientation_acknowledged_at?: string | null;
 };
 
 type PortalProfile = {
@@ -92,7 +95,7 @@ type PortalProfile = {
   updated_at: string;
 };
 
-async function assertAdmin(context: { supabase: any; userId: string }) {
+async function assertAdmin(context: { supabase: DbClient; userId: string }) {
   const { data } = await context.supabase
     .from("user_roles")
     .select("role")
@@ -245,10 +248,11 @@ export const saveMyProfile = createServerFn({ method: "POST" })
           submit: data.submit,
           alreadySubmitted,
           memberId: member.id,
-          submittedAt: String((payload as any).submitted_at),
+          submittedAt: String((payload as { submitted_at?: string }).submitted_at),
           adminEmail: ADMIN_EMAIL,
           member,
-          roleLabel: memberRoleLabel(member.role, member.entity, !!(member as any).is_candidate),
+          // is_candidate is not part of this handler's member select, so the value is always false today.
+          roleLabel: memberRoleLabel(member.role, member.entity, false),
         }),
         { load: loadSystemEmail, send: sendPortalEmail },
       );
@@ -282,7 +286,7 @@ export const getMyHeadshotUrl = createServerFn({ method: "GET" })
     z.object({ asMemberId: z.string().uuid().optional() }).parse(input ?? {}),
   )
   .handler(async ({ context: ctx, data: input }) => {
-    let context: any = ctx;
+    let context: { supabase: DbClient } = ctx;
     if (input.asMemberId) {
       await assertAdmin(ctx);
       const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
@@ -376,7 +380,7 @@ function normalizeCandidate<T extends InviteInput>(m: T): T {
   };
 }
 
-async function requireIntendedDesignationStorage(admin: any) {
+async function requireIntendedDesignationStorage(admin: DbClient) {
   const { error } = await admin
     .from("portal_members")
     .select("intended_designation,linkedin_url")
@@ -427,12 +431,12 @@ function invitationGates(m: InviteInput, adminId: string) {
 }
 
 async function recordInviteReviews(
-  admin: any,
+  admin: DbClient,
   memberId: string,
   adminId: string,
   gates: ReturnType<typeof invitationGates>,
 ) {
-  const rows: any[] = [
+  const rows: TablesInsert<"governance_reviews">[] = [
     {
       member_id: memberId,
       kind: "nda",
@@ -462,7 +466,7 @@ async function recordInviteReviews(
   await admin.from("governance_reviews").insert(rows);
 }
 async function bindInvitationNda(
-  admin: any,
+  admin: DbClient,
   row: InviteInput,
   adminId: string,
   gates: ReturnType<typeof invitationGates>,
@@ -477,16 +481,16 @@ async function bindInvitationNda(
     .from("governance_reviews")
     .select("member_id")
     .eq("kind", "nda")
-    .eq("notes", gates.nda.reference);
+    .eq("notes", gates.nda.reference!); // ndaProblem has already required a reference
   if (reviewError) throw reviewError;
   if ((oldReviews ?? []).some((r: { member_id: string }) => r.member_id !== oldMember?.id))
     throw new Error("This NDA reference belongs to another recipient");
   const { error } = await admin.rpc("bind_invitation_nda", {
-    p_reference: gates.nda.reference,
+    p_reference: gates.nda.reference!,
     p_email: row.email,
     p_name: `${row.first_name} ${row.last_name}`,
-    p_entities: gates.nda.entities,
-    p_scope: gates.nda.scope,
+    p_entities: gates.nda.entities!,
+    p_scope: gates.nda.scope!,
     p_reviewer: adminId,
   });
   if (error)
@@ -827,7 +831,7 @@ export const getAdminOverview = createServerFn({ method: "GET" })
       list.map(async (m) => {
         const docs = await applicableDocuments(context.supabase, m as unknown as DocMember);
         const done = new Set(
-          (acks ?? []).filter((a: any) => a.member_id === m.id).map((a: any) => a.document_id),
+          (acks ?? []).filter((a) => a.member_id === m.id).map((a) => a.document_id),
         );
         const active = docs.filter(isActive);
         m.acceptance_complete = entityAcceptanceComplete(active, done, m.entity);
@@ -837,7 +841,7 @@ export const getAdminOverview = createServerFn({ method: "GET" })
           m.entity,
           { prsc: m.prsc_activated_at ?? null, dis: m.dis_activated_at ?? null },
           m.participates_in_forum !== false,
-          forumCleared((m as any).forum_clearance_status),
+          forumCleared(m.forum_clearance_status),
         );
         if (m.documents_released_at)
           docProgress[m.id] = {
@@ -1145,11 +1149,15 @@ export type PortalDocumentRecord = {
   audience_role: "board_member" | "advisor" | null;
   journey_stage: number | null;
   journey_track: "shared" | "prsc" | "dis" | null;
+  forum_role?: string | null;
+  signing_approved?: boolean | null;
+  boldsign_template_id?: string | null;
+  countersignature_required?: boolean | null;
 };
 
 export type PortalCompletion = {
   document_id: string;
-  kind: "acknowledged" | "signed";
+  kind: "acknowledged" | "signed" | "external_confirmed";
   initials: string;
   signed_name: string | null;
   acknowledged_at: string;
@@ -1164,6 +1172,8 @@ type DocMember = {
   nda_verified_at?: string | null;
   forum_clearance_status?: string | null;
   role_review_status?: string | null;
+  prsc_activated_at?: string | null;
+  dis_activated_at?: string | null;
 };
 const GOV_COLS = "nda_verified_at, forum_clearance_status, role_review_status";
 
@@ -1191,8 +1201,8 @@ export async function memberVisibilityFlags(memberId: string) {
     ]);
   return {
     addendum_complete: addendumSatisfied(
-      (addenda ?? []) as any,
-      (assignments ?? []) as any,
+      (addenda ?? []) as Parameters<typeof addendumSatisfied>[0],
+      (assignments ?? []) as Parameters<typeof addendumSatisfied>[1],
       memberId,
     ),
     grants: (grants ?? []) as RestrictedGrant[],
@@ -1215,7 +1225,7 @@ async function memberVisible(
     participates_in_forum: m.participates_in_forum ?? true,
     ...flags,
   };
-  return docs.filter((d: any) =>
+  return docs.filter((d) =>
     documentVisible(
       {
         id: d.id,
@@ -1235,10 +1245,10 @@ async function memberVisible(
 
 export function appliesTo(doc: PortalDocumentRecord, m: DocMember) {
   // Members opted out of the Forum never receive Stage 1 documents.
-  if (m.participates_in_forum === false && (doc as any).journey_stage === 1) return false;
+  if (m.participates_in_forum === false && doc.journey_stage === 1) return false;
   if (doc.member_id) return doc.member_id === m.id;
   // Forum candidates are not on an appointment track: Stages 2–4 never apply until promotion.
-  const stage = (doc as any).journey_stage as number | null | undefined;
+  const stage = doc.journey_stage;
   if (m.is_candidate && stage != null && stage >= 2 && stage <= 4) return false;
   if (
     doc.audience_entity &&
@@ -1255,7 +1265,7 @@ export function appliesTo(doc: PortalDocumentRecord, m: DocMember) {
   return true;
 }
 
-async function applicableDocuments(supabase: any, member: DocMember) {
+async function applicableDocuments(supabase: DbClient, member: DocMember) {
   const { data, error } = await supabase
     .from("portal_documents")
     .select("*")
@@ -1268,7 +1278,7 @@ async function applicableDocuments(supabase: any, member: DocMember) {
 
 /** Read existing journey records only; never updates appointment or historical data. */
 export async function withAppointmentProgress<T extends DocMember & DesignationMember>(
-  client: any,
+  client: DbClient,
   member: T,
 ) {
   const [docs, acknowledgements] = await Promise.all([
@@ -1288,13 +1298,13 @@ export async function withAppointmentProgress<T extends DocMember & DesignationM
   };
 }
 
-async function entityReleases(client: any, memberId: string) {
+async function entityReleases(client: DbClient, memberId: string) {
   const { data, error } = await client
     .from("entity_onboarding_releases")
     .select("*")
     .eq("member_id", memberId);
   if (error) throw error;
-  const rows = (data ?? []) as any[];
+  const rows = data ?? [];
   return {
     rows,
     released: {
@@ -1310,7 +1320,7 @@ async function signDocumentUrls(documents: PortalDocumentRecord[], memberId: str
     ...doc,
     member_id: null,
     file_path: null,
-    signing_ready: signingReady(doc as any, memberId),
+    signing_ready: signingReady(doc, memberId),
     url: doc.file_path ? `/api/public/portal-file?kind=document&id=${doc.id}` : doc.external_url,
   }));
 }
@@ -1321,7 +1331,7 @@ export const getMyDocuments = createServerFn({ method: "GET" })
     z.object({ asMemberId: z.string().uuid().optional() }).parse(input ?? {}),
   )
   .handler(async ({ context: ctx, data: input }) => {
-    let context: any = ctx;
+    let context: { supabase: DbClient } = ctx;
     if (input.asMemberId) {
       await assertAdmin(ctx);
       const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
@@ -1371,7 +1381,7 @@ export const getMyDocuments = createServerFn({ method: "GET" })
     // Safe reasons for what is not available yet: reason and generic label only, never an id, title or file.
     const visibleIds = new Set(docs.map((d) => d.id));
     const unavailable = unavailableNotices(
-      all.map((d: any) => ({
+      all.map((d) => ({
         id: d.id,
         visible: visibleIds.has(d.id),
         classification: d.classification ?? null,
@@ -1584,7 +1594,7 @@ export const acknowledgeDocument = createServerFn({ method: "POST" })
         "forum-clearance-review",
       ).catch(() => undefined);
     }
-    await maybeCompletePackage(member as any);
+    await maybeCompletePackage(member);
     // Sequential journey: tell the member when this completion unlocks the next document.
     const before = lockedDocumentIds(docs, priorDone, member.entity, {
       released,
@@ -1639,19 +1649,19 @@ export const setEntityActivation = createServerFn({ method: "POST" })
         .eq("id", data.member_id)
         .single();
       if (!m) throw new Error("Member not found");
-      if ((m as any).is_candidate)
+      if (m.is_candidate)
         throw new Error(
           "Forum candidates hold no PRSC/DIS role. Assign an appointed role in Edit member details first.",
         );
-      const docs = (await applicableDocuments(supabaseAdmin, m as any)).filter(isActive);
+      const docs = (await applicableDocuments(supabaseAdmin, m)).filter(isActive);
       const { data: acks } = await supabaseAdmin
         .from("portal_document_acknowledgements")
         .select("document_id")
         .eq("member_id", m.id);
-      const done = new Set((acks ?? []).map((a: any) => a.document_id));
+      const done = new Set((acks ?? []).map((a) => a.document_id));
       const first = memberTracksFor(m.entity)[0];
       const trackDocs = docs.filter(
-        (d: any) =>
+        (d) =>
           (d.journey_stage === 2 || d.journey_stage === 3) &&
           (d.journey_track && d.journey_track !== "shared" ? d.journey_track : first) ===
             data.entity,
@@ -1669,7 +1679,7 @@ export const setEntityActivation = createServerFn({ method: "POST" })
         ),
         roleReviewOk: !roleReviewBlocks(m.role_review_status),
         forumOk: m.participates_in_forum === false || forumCleared(m.forum_clearance_status),
-        trackDocsComplete: trackDocs.length > 0 && trackDocs.every((d: any) => done.has(d.id)),
+        trackDocsComplete: trackDocs.length > 0 && trackDocs.every((d) => done.has(d.id)),
         countersigned: !!data.countersigned,
         appointmentRef: data.appointment_ref,
       });
@@ -1817,7 +1827,9 @@ export const listDocumentsForAdmin = createServerFn({ method: "GET" })
         .select("metadata")
         .eq("member_id", data.member_id)
         .eq("event_type", "hard_copy_requested");
-      hardCopyRequests = (reqs ?? []).map((r: any) => r.metadata?.document_id).filter(Boolean);
+      hardCopyRequests = (reqs ?? [])
+        .map((r) => (r.metadata as { document_id?: string } | null)?.document_id)
+        .filter((id): id is string => Boolean(id));
     }
     let contact = { email: "", firstName: "" };
     if (data.member_id) {
@@ -1844,14 +1856,14 @@ export const listDocumentsForAdmin = createServerFn({ method: "GET" })
       releasedAt: member?.documents_released_at ?? null,
       completedAt: member?.documents_completed_at ?? null,
       entity: member?.entity ?? "prsc",
-      forum: (member as any)?.participates_in_forum !== false,
-      forumCleared: forumCleared((member as any)?.forum_clearance_status),
+      forum: member?.participates_in_forum !== false,
+      forumCleared: forumCleared(member?.forum_clearance_status),
       entityReleases: data.member_id
         ? (await entityReleases(context.supabase, data.member_id)).rows
         : [],
       activation: {
-        prsc: (member as any)?.prsc_activated_at ?? null,
-        dis: (member as any)?.dis_activated_at ?? null,
+        prsc: member?.prsc_activated_at ?? null,
+        dis: member?.dis_activated_at ?? null,
       } as { prsc: string | null; dis: string | null },
     };
   });
@@ -2060,7 +2072,7 @@ export const confirmExternalSignature = createServerFn({ method: "POST" })
       .select("id, email, first_name, last_name, entity, role, documents_completed_at")
       .eq("id", data.member_id)
       .single();
-    if (member) await maybeCompletePackage(member as any);
+    if (member) await maybeCompletePackage(member);
     return { ok: true };
   });
 
@@ -2155,6 +2167,7 @@ import {
   SIGNED_COPY_EMAIL_ENABLED,
   SIGNED_COPY_EMAIL_DISABLED_MESSAGE,
 } from "@/lib/signed-copy-policy";
+import type { Tables, TablesInsert } from "@/integrations/supabase/types";
 
 export const sendSignedCopy = createServerFn({ method: "POST" })
   .middleware([requirePortalAccess])
@@ -2377,7 +2390,10 @@ export const updateMemberDetails = createServerFn({ method: "POST" })
     return { ok: true };
   });
 
-async function sendReleaseNotice(supabaseAdmin: any, release: any) {
+async function sendReleaseNotice(
+  supabaseAdmin: DbClient,
+  release: Tables<"entity_onboarding_releases">,
+) {
   const { data: m } = await supabaseAdmin
     .from("portal_members")
     .select("email, first_name, status")
@@ -2435,10 +2451,10 @@ export const releaseEntityOnboarding = createServerFn({ method: "POST" })
       .single();
     if (!m) throw new Error("Member not found");
     const first = memberTracksFor(m.entity)[0];
-    const docs = (await applicableDocuments(supabaseAdmin, m as any))
+    const docs = (await applicableDocuments(supabaseAdmin, m))
       .filter(isActive)
       .filter(
-        (d: any) =>
+        (d) =>
           d.journey_stage === 2 &&
           (d.journey_track && d.journey_track !== "shared" ? d.journey_track : first) ===
             data.entity,
@@ -2477,7 +2493,7 @@ export const releaseEntityOnboarding = createServerFn({ method: "POST" })
         entity: data.entity,
         role: m.role,
         released_by: context.userId,
-        documents: docs.map((d: any) => ({
+        documents: docs.map((d) => ({
           id: d.id,
           title: d.title,
           version: d.version_label ?? null,
@@ -2513,34 +2529,46 @@ export const retryReleaseNotice = createServerFn({ method: "POST" })
     return sendReleaseNotice(supabaseAdmin, release);
   });
 
-async function legacyReleaseRows(supabaseAdmin: any) {
+type LegacyReleaseRow = {
+  member_id: string;
+  name: string;
+  entity: "prsc" | "dis";
+  role: string;
+  kind: NonNullable<ReturnType<typeof import("@/lib/governance").legacyReleaseCase>>;
+  appointment: string;
+  signed: { title: string; version: string | null | undefined; at: string | undefined }[];
+  unsigned: { title: string; version: string | null | undefined; stage: number | null }[];
+};
+
+async function legacyReleaseRows(supabaseAdmin: DbClient) {
   const { legacyReleaseCase } = await import("@/lib/governance");
   const { data: members } = await supabaseAdmin
     .from("portal_members")
     .select("*")
     .neq("status", "revoked")
     .eq("is_candidate", false);
-  const out: any[] = [];
+  const out: LegacyReleaseRow[] = [];
   for (const m of members ?? []) {
     const [docs, acks, rel] = await Promise.all([
-      applicableDocuments(supabaseAdmin, m as any),
+      applicableDocuments(supabaseAdmin, m),
       supabaseAdmin
         .from("portal_document_acknowledgements")
         .select("document_id, acknowledged_at, kind")
         .eq("member_id", m.id),
       entityReleases(supabaseAdmin, m.id),
     ]);
-    const done = new Map<string, any>((acks.data ?? []).map((a: any) => [a.document_id, a]));
+    const done = new Map((acks.data ?? []).map((a) => [a.document_id, a]));
     const first = memberTracksFor(m.entity)[0];
     for (const t of memberTracksFor(m.entity)) {
       const trackDocs = docs.filter(
-        (d: any) =>
+        (d) =>
+          d.journey_stage != null &&
           d.journey_stage >= 2 &&
           d.journey_stage <= 4 &&
           (d.journey_track && d.journey_track !== "shared" ? d.journey_track : first) === t,
       );
-      const signed = trackDocs.filter((d: any) => done.has(d.id));
-      const unsigned = trackDocs.filter((d: any) => !done.has(d.id) && isActive(d));
+      const signed = trackDocs.filter((d) => done.has(d.id));
+      const unsigned = trackDocs.filter((d) => !done.has(d.id) && isActive(d));
       const activatedAt = t === "prsc" ? m.prsc_activated_at : m.dis_activated_at;
       const kind = legacyReleaseCase({
         hasRelease: rel.released[t],
@@ -2556,12 +2584,12 @@ async function legacyReleaseRows(supabaseAdmin: any) {
         role: m.role,
         kind,
         appointment: activatedAt ? "Activated" : "Not activated",
-        signed: signed.map((d: any) => ({
+        signed: signed.map((d) => ({
           title: d.title,
           version: d.version_label,
           at: done.get(d.id)?.acknowledged_at,
         })),
-        unsigned: unsigned.map((d: any) => ({
+        unsigned: unsigned.map((d) => ({
           title: d.title,
           version: d.version_label,
           stage: d.journey_stage,

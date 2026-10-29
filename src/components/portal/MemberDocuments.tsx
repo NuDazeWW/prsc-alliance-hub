@@ -32,6 +32,7 @@ type Doc = {
   sort_order: number;
   created_at: string;
   forum_role?: string | null;
+  superseded_at?: string | null;
   /** False when no approved signing request or administrator-recorded BoldSign document exists yet. */
   signing_ready?: boolean;
 };
@@ -84,8 +85,8 @@ export function MemberDocuments({
   signing = [],
   profileComplete = false,
 }: Props) {
-  const documents = all.filter((d: any) => !d.superseded_at && (forum || d.journey_stage !== 1));
-  const history = all.filter((d: any) => d.superseded_at);
+  const documents = all.filter((d) => !d.superseded_at && (forum || d.journey_stage !== 1));
+  const history = all.filter((d) => d.superseded_at);
   const [openId, setOpenId] = useState<string | null>(null);
   const open = all.find((d) => d.id === openId) ?? null;
   const doneMap = new Map(completions.map((c) => [c.document_id, c]));

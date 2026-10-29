@@ -17,11 +17,13 @@ import {
 
 type MeetingType = "board" | "advisory" | "methodology" | "forum" | "custom";
 
-function memberName(m: any) {
+type InvitableMember = Awaited<ReturnType<typeof listInvitableMembers>>["members"][number];
+
+function memberName(m: Pick<InvitableMember, "first_name" | "last_name" | "email">) {
   return `${m.first_name ?? ""} ${m.last_name ?? ""}`.trim() || m.email;
 }
 
-function autoAudience(members: any[], type: string) {
+function autoAudience(members: InvitableMember[], type: string) {
   return members
     .filter((m) => {
       if (type === "methodology")
@@ -138,7 +140,7 @@ export function MeetingSetupForm({
   onCreated?: (pollId: string) => void;
   submitLabel?: string;
 }) {
-  const [members, setMembers] = useState<any[]>([]);
+  const [members, setMembers] = useState<InvitableMember[]>([]);
   const [saving, setSaving] = useState(false);
   const [meetingType, setMeetingType] = useState<MeetingType>(defaultType);
   const [customType, setCustomType] = useState("");

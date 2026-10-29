@@ -9,9 +9,10 @@ import {
   type InvitationNdaEvidence,
   type InvitationNdaMember,
 } from "./invitation-nda";
+import type { DbClient } from "@/lib/db-types";
 
 const memberFields = "*";
-export async function loadInvitationNda(client: any, memberId: string) {
+export async function loadInvitationNda(client: DbClient, memberId: string) {
   const { data, error } = await client
     .from("portal_members")
     .select(memberFields)
@@ -54,7 +55,7 @@ export async function loadInvitationNda(client: any, memberId: string) {
 
 /** Persistence only: callers must authorize the administrator before supplying a service client. */
 export async function saveReviewedInvitationNda(
-  client: any,
+  client: DbClient,
   adminId: string,
   input: unknown,
   reviewedAt = new Date(),

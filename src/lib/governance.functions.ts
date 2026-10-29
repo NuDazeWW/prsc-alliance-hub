@@ -2,8 +2,11 @@ import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requirePortalAccess } from "@/lib/portal-access";
 import { roleCombinationTier, stage1ClearanceProblems } from "@/lib/governance";
+import type { DbClient } from "@/lib/db-types";
+import type { Json } from "@/integrations/supabase/types";
+import type { PortalDocumentRecord } from "@/lib/portal.functions";
 
-async function assertAdmin(context: { supabase: any; userId: string }) {
+async function assertAdmin(context: { supabase: DbClient; userId: string }) {
   const { data } = await context.supabase
     .from("user_roles")
     .select("role")
@@ -45,16 +48,21 @@ export const getMemberGovernance = createServerFn({ method: "GET" })
   });
 
 async function log(
-  context: any,
+  context: { supabase: DbClient; userId: string },
   member_id: string,
   kind: string,
   decision: string,
   notes: string | null,
   details: Record<string, unknown>,
 ) {
-  const { error } = await context.supabase
-    .from("governance_reviews")
-    .insert({ member_id, kind, decision, reviewer_id: context.userId, notes, details });
+  const { error } = await context.supabase.from("governance_reviews").insert({
+    member_id,
+    kind,
+    decision,
+    reviewer_id: context.userId,
+    notes,
+    details: details as Json,
+  });
   if (error) throw error;
   await context.supabase.from("portal_activity").insert({
     member_id,
@@ -322,13 +330,13 @@ export async function clearanceProblemsFor(memberId: string) {
   const flags = await memberVisibilityFlags(memberId);
   const done = new Set((acks ?? []).map((a) => a.document_id));
   const applicable = (docs ?? []).filter(
-    (d: any) =>
-      appliesTo(d, m as any) &&
+    (d) =>
+      appliesTo(d as PortalDocumentRecord, m) &&
       !["agenda", "restricted_brief", "secretariat_controls", "facilitator_run_of_show"].includes(
         d.forum_role ?? "",
       ),
   );
-  const conflictDocs = applicable.filter((d: any) => d.forum_role === "conflict");
+  const conflictDocs = applicable.filter((d) => d.forum_role === "conflict");
   return stage1ClearanceProblems({
     ndaVerified: !!m.nda_verified_at,
     addendumComplete: flags.addendum_complete,

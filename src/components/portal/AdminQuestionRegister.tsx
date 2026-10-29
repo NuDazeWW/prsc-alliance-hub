@@ -18,6 +18,25 @@ import {
 } from "@/lib/executive-questions";
 
 const f = "mt-1 h-10 w-full rounded-md border border-input bg-navy px-2 text-sm text-ivory";
+type Register = Awaited<ReturnType<typeof getQuestionRegister>>;
+type RoundRow = Register["rounds"][number];
+type OutboundItem = Register["outbound"][number];
+type RoundForm = {
+  id?: string;
+  forum_key: string;
+  title: string;
+  opens_at: string;
+  deadline: string;
+  status: string;
+  briefing_document_id: string | null;
+};
+type GroupCategory = (typeof QUESTION_CATEGORIES)[number];
+type GroupSource = "jared" | "internal" | "external";
+type GroupRoute = (typeof ROUTES)[number];
+type GroupReviewStatus =
+  "new" | "in_review" | "approved_external" | "internal_only" | "verify" | "closed";
+type GroupListTarget = "none" | "jared" | "internal";
+
 const toLocal = (iso?: string) => (iso ? new Date(iso).toISOString().slice(0, 16) : "");
 
 /** Secretariat Question Register. Nothing here is ever sent to Jared or any external party automatically. */
@@ -27,9 +46,9 @@ export function AdminQuestionRegister() {
     queryKey: ["question-register", roundId],
     queryFn: () => getQuestionRegister({ data: { round_id: roundId } }),
   });
-  const d = reg.data as any;
-  const round = d?.rounds?.find((r: any) => r.id === d.roundId);
-  const [form, setForm] = useState<any>(null);
+  const d = reg.data;
+  const round = d?.rounds?.find((r) => r.id === d.roundId);
+  const [form, setForm] = useState<RoundForm | null>(null);
   const [picked, setPicked] = useState<Set<string>>(new Set());
   const [group, setGroup] = useState({
     consolidated_text: "",
@@ -52,7 +71,7 @@ export function AdminQuestionRegister() {
       setStatus(userFacingError(e, "Failed"));
     }
   };
-  const editRound = (r?: any) =>
+  const editRound = (r?: RoundRow) =>
     setForm(
       r
         ? { ...r, opens_at: toLocal(r.opens_at), deadline: toLocal(r.deadline) }
@@ -82,7 +101,7 @@ export function AdminQuestionRegister() {
             onChange={(e) => setRoundId(e.target.value || null)}
             className={f}
           >
-            {(d?.rounds ?? []).map((r: any) => (
+            {(d?.rounds ?? []).map((r) => (
               <option key={r.id} value={r.id}>
                 {r.title} · {r.status}
               </option>
@@ -158,7 +177,7 @@ export function AdminQuestionRegister() {
               onChange={(e) => setForm({ ...form, briefing_document_id: e.target.value })}
             >
               <option value="">Choose…</option>
-              {(d?.documents ?? []).map((x: any) => (
+              {(d?.documents ?? []).map((x) => (
                 <option key={x.id} value={x.id}>
                   {x.title}
                 </option>
@@ -195,13 +214,13 @@ export function AdminQuestionRegister() {
         </div>
       )}
 
-      {round && (
+      {d && round && (
         <>
           <p className="mt-6 text-base text-ivory">Responses</p>
           <p className="text-sm text-ivory/60">
             {(d.responses ?? [])
               .map(
-                (r: any) =>
+                (r) =>
                   `${r.portal_members?.first_name} ${r.portal_members?.last_name}: ${r.status === "no_questions" ? "no additional questions" : "submitted"}`,
               )
               .join(" · ") || "None yet"}
@@ -209,7 +228,7 @@ export function AdminQuestionRegister() {
 
           <p className="mt-6 text-base text-ivory">Submitted questions</p>
           <div className="mt-2 space-y-2">
-            {(d.questions ?? []).map((q: any) => (
+            {(d.questions ?? []).map((q) => (
               <label
                 key={q.id}
                 className="flex gap-3 border border-gold/10 p-3 text-sm text-ivory/80"
@@ -219,7 +238,8 @@ export function AdminQuestionRegister() {
                   checked={picked.has(q.id)}
                   onChange={(e) => {
                     const n = new Set(picked);
-                    e.target.checked ? n.add(q.id) : n.delete(q.id);
+                    if (e.target.checked) n.add(q.id);
+                    else n.delete(q.id);
                     setPicked(n);
                   }}
                 />
@@ -348,12 +368,12 @@ export function AdminQuestionRegister() {
                     data: {
                       round_id: round.id,
                       ...group,
-                      route: (group.route || null) as any,
+                      route: (group.route || null) as GroupRoute | null,
                       priority: group.priority ? Number(group.priority) : null,
-                      category: group.category as any,
-                      source: group.source as any,
-                      review_status: group.review_status as any,
-                      list_target: group.list_target as any,
+                      category: group.category as GroupCategory,
+                      source: group.source as GroupSource,
+                      review_status: group.review_status as GroupReviewStatus,
+                      list_target: group.list_target as GroupListTarget,
                       question_ids: [...picked],
                     },
                   });
@@ -375,8 +395,8 @@ export function AdminQuestionRegister() {
               </p>
               <ol className="mt-2 list-decimal space-y-1 pl-5 text-sm text-ivory/80">
                 {(d.groups ?? [])
-                  .filter((g: any) => g.list_target === t)
-                  .map((g: any) => (
+                  .filter((g) => g.list_target === t)
+                  .map((g) => (
                     <li key={g.id}>
                       {g.consolidated_text}{" "}
                       <span className="text-ivory/45">
@@ -415,7 +435,7 @@ export function AdminQuestionRegister() {
                 Prepare from Jared list
               </Button>
             </div>
-            {(d.outbound ?? []).map((o: any) => (
+            {(d.outbound ?? []).map((o) => (
               <OutboundRow key={o.id} o={o} run={run} />
             ))}
           </div>
@@ -434,7 +454,7 @@ function OutboundRow({
   o,
   run,
 }: {
-  o: any;
+  o: OutboundItem;
   run: (fn: () => Promise<unknown>, ok: string) => Promise<void>;
 }) {
   const [responses, setResponses] = useState(o.responses ?? "");
@@ -449,7 +469,7 @@ function OutboundRow({
         · {o.shared_at ? `shared ${new Date(o.shared_at).toLocaleDateString()}` : "not shared"}
       </p>
       <ol className="mt-1 list-decimal pl-5">
-        {(o.questions ?? []).map((q: any) => (
+        {((o.questions ?? []) as { id: string; consolidated_text: string }[]).map((q) => (
           <li key={q.id}>{q.consolidated_text}</li>
         ))}
       </ol>

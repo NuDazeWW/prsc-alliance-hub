@@ -5,6 +5,7 @@ import {
   renderBrandedEmailText,
 } from "@/lib/branded-email";
 import { SYSTEM_EMAIL_DEFAULTS } from "@/lib/system-email-defaults";
+import type { Tables } from "@/integrations/supabase/types";
 
 type BrandedEmail = Parameters<typeof renderBrandedEmail>[0];
 
@@ -47,7 +48,7 @@ export function founderSignature() {
 /** Loads the admin-edited copy of an automatic email (falling back to the original wording) and fills in tokens. */
 export async function loadSystemEmail(key: string) {
   const fallback = SYSTEM_EMAIL_DEFAULTS[key];
-  let row: any = null;
+  let row: Tables<"portal_email_templates"> | null = null;
   try {
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { data } = await supabaseAdmin

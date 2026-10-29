@@ -46,11 +46,11 @@ export function planProfileEmails(i: {
 }
 
 /** Sends each planned email through the shared helper; a failure is logged and never undoes the saved profile. */
-export async function deliverProfileEmails(
+export async function deliverProfileEmails<TEmail>(
   plan: ProfileEmailPlan[],
   deps: {
-    load: (key: string) => Promise<(t: Record<string, string>) => any>;
-    send: (to: string, email: any, label: string, key: string) => Promise<boolean>;
+    load: (key: string) => Promise<(t: Record<string, string>) => TEmail>;
+    send: (to: string, email: TEmail, label: string, key: string) => Promise<boolean>;
     log?: (msg: string, e: unknown) => void;
   },
 ) {

@@ -18,7 +18,10 @@ import {
   isForumPoll,
 } from "@/lib/forum-meeting-intro";
 
-function downloadHold(p: any, s: any) {
+type MyPoll = Awaited<ReturnType<typeof getMyMeetings>>["polls"][number];
+type Availability = "available" | "if_needed" | "unavailable";
+
+function downloadHold(p: MyPoll, s: MyPoll["slots"][number]) {
   const ics = buildSlotHoldIcs({
     slotId: s.id,
     title: p.title,
@@ -60,7 +63,7 @@ function demoPolls() {
       my_responses: [],
       my_note: "",
     },
-  ];
+  ] as unknown as MyPoll[]; // Preview-only sample data: server-only columns are intentionally omitted.
 }
 
 const CHOICES = [
@@ -98,7 +101,7 @@ export function MemberMeetings({
   hideIntro = false,
   asMemberId,
 }: { hideWhenEmpty?: boolean; hideIntro?: boolean; asMemberId?: string } = {}) {
-  const [polls, setPolls] = useState<any[]>([]);
+  const [polls, setPolls] = useState<MyPoll[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState<string | null>(null);
   const [drafts, setDrafts] = useState<Record<string, Record<string, string>>>({});
@@ -107,7 +110,7 @@ export function MemberMeetings({
   async function refresh() {
     setLoading(true);
     try {
-      let res: { polls: any[] };
+      let res: { polls: MyPoll[] };
       try {
         res = await getMyMeetings({ data: { asMemberId } });
         if (isPreviewHost() && res.polls.length === 0) res = { polls: demoPolls() };
@@ -136,11 +139,11 @@ export function MemberMeetings({
     void refresh();
   }, []);
 
-  async function submit(poll: any) {
+  async function submit(poll: MyPoll) {
     const answers = drafts[poll.id] ?? {};
     const responses = poll.slots
-      .filter((s: any) => answers[s.id])
-      .map((s: any) => ({ slot_id: s.id, availability: answers[s.id] as any }));
+      .filter((s) => answers[s.id])
+      .map((s) => ({ slot_id: s.id, availability: answers[s.id] as Availability }));
     if (responses.length !== poll.slots.length) {
       return toast.error("Please mark every proposed time before sending");
     }
@@ -269,7 +272,7 @@ export function MemberMeetings({
                   </p>
                 )}
                 <div className="mt-4 space-y-3">
-                  {p.slots.map((s: any) => (
+                  {p.slots.map((s) => (
                     <div
                       key={s.id}
                       className="flex flex-col gap-2 rounded-md border border-ivory/10 p-3 sm:flex-row sm:items-center sm:justify-between"
@@ -349,7 +352,7 @@ export function MemberMeetings({
           <h4 className="font-display text-lg text-ivory">Confirmed meetings</h4>
           <div className="mt-3 space-y-3">
             {confirmed.map((p) => {
-              const slot = p.slots.find((s: any) => s.id === p.confirmed_slot_id);
+              const slot = p.slots.find((s) => s.id === p.confirmed_slot_id);
               return (
                 <div
                   key={p.id}
@@ -389,8 +392,8 @@ export function MemberMeetings({
                         Released times — if you saved a hold for any of these, you can delete it
                         from your calendar:{" "}
                         {p.slots
-                          .filter((s: any) => s.id !== p.confirmed_slot_id)
-                          .map((s: any) => fmt(s.starts_at, p.timezone))
+                          .filter((s) => s.id !== p.confirmed_slot_id)
+                          .map((s) => fmt(s.starts_at, p.timezone))
                           .join("; ")}
                       </p>
                     )}

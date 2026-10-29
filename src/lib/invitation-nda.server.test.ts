@@ -1,6 +1,7 @@
 import { describe, it } from "node:test";
 import assert from "node:assert/strict";
 import { loadInvitationNda, saveReviewedInvitationNda } from "./invitation-nda.server";
+import type { DbClient } from "./db-types";
 import {
   assertReviewedInvitationNda,
   invitationNdaReviewMatches,
@@ -8,8 +9,11 @@ import {
   type InvitationNdaEvidence,
 } from "./invitation-nda";
 
+// The in-memory double mirrors PostgREST's untyped JSON rows; assertions read nested JSON freely.
+/* eslint-disable @typescript-eslint/no-explicit-any */
 type Row = Record<string, any>;
 type Result = { data: any; error: { message: string } | null };
+/* eslint-enable @typescript-eslint/no-explicit-any */
 type Table =
   "portal_members" | "invitation_nda_evidence" | "governance_reviews" | "portal_activity";
 const oldDate = "2026-09-15T12:00:00+00:00";
@@ -143,7 +147,7 @@ class MemoryQuery implements PromiseLike<Result> {
   }
   then<T1 = Result, T2 = never>(
     fulfilled?: ((value: Result) => T1 | PromiseLike<T1>) | null,
-    rejected?: ((reason: any) => T2 | PromiseLike<T2>) | null,
+    rejected?: ((reason: unknown) => T2 | PromiseLike<T2>) | null,
   ): PromiseLike<T1 | T2> {
     return this.run().then(fulfilled, rejected);
   }
@@ -241,6 +245,9 @@ function inputFor(member: InvitationNdaMember) {
     confirmed: true,
   };
 }
+/** The in-memory mock implements only the query surface these helpers use. */
+const db = (client: MemoryClient) => client as unknown as DbClient;
+
 function reviewFor(client: MemoryClient, id: string) {
   return client.tables.governance_reviews.find((row) => row.id === id)!;
 }
@@ -250,7 +257,7 @@ describe("isolated invitation NDA persistence", () => {
     const { client, members } = fixture();
     await assert.rejects(
       saveReviewedInvitationNda(
-        client,
+        db(client),
         reviewingAdmin,
         { ...inputFor(members[0]), confirmed: false },
         reviewDate,
@@ -258,7 +265,7 @@ describe("isolated invitation NDA persistence", () => {
     );
     assert.equal(client.writes.length, 0);
     const saved = await saveReviewedInvitationNda(
-      client,
+      db(client),
       reviewingAdmin,
       inputFor(members[0]),
       reviewDate,
@@ -282,7 +289,7 @@ describe("isolated invitation NDA persistence", () => {
     const { client, members } = fixture();
     const correctedScope = "Corrected private PRSC information-sharing scope";
     const saved = await saveReviewedInvitationNda(
-      client,
+      db(client),
       reviewingAdmin,
       {
         ...inputFor(members[0]),
@@ -291,7 +298,7 @@ describe("isolated invitation NDA persistence", () => {
       },
       reviewDate,
     );
-    const reloaded = await loadInvitationNda(client, members[0].id);
+    const reloaded = await loadInvitationNda(db(client), members[0].id);
     const review = reviewFor(client, saved.reviewId);
     assert.equal(saved.proofChanged, true);
     assert.equal(saved.verificationPreserved, false);
@@ -330,14 +337,14 @@ describe("isolated invitation NDA persistence", () => {
   });
   it("keeps absent or inadequate proof ineligible without creating invitations", async () => {
     const { client, members } = fixture();
-    const missing = await loadInvitationNda(client, members[2].id);
+    const missing = await loadInvitationNda(db(client), members[2].id);
     assert.match(missing.eligibilityProblem!, /verification date/);
     await assert.rejects(
-      saveReviewedInvitationNda(client, reviewingAdmin, inputFor(members[2]), reviewDate),
+      saveReviewedInvitationNda(db(client), reviewingAdmin, inputFor(members[2]), reviewDate),
     );
     assert.equal(client.writes.length, 0);
     const incompleteCoverage = await saveReviewedInvitationNda(
-      client,
+      db(client),
       reviewingAdmin,
       inputFor(members[3]),
       reviewDate,
@@ -350,7 +357,7 @@ describe("isolated invitation NDA persistence", () => {
   it("creates a recipient-owned binding for missing proof only after a complete explicit review", async () => {
     const { client, members } = fixture();
     const saved = await saveReviewedInvitationNda(
-      client,
+      db(client),
       reviewingAdmin,
       {
         ...inputFor(members[2]),
@@ -388,7 +395,7 @@ describe("isolated invitation NDA persistence", () => {
     const before = clone(client.tables);
     await assert.rejects(
       saveReviewedInvitationNda(
-        client,
+        db(client),
         reviewingAdmin,
         { ...inputFor(members[1]), reference: members[0].nda_reference! },
         reviewDate,
@@ -399,7 +406,7 @@ describe("isolated invitation NDA persistence", () => {
     assert.equal(client.writes.length, 0);
     assert.equal(client.rpcCalls.length, 0);
     client.tables.portal_members[1].nda_reference = members[0].nda_reference;
-    const detail = await loadInvitationNda(client, members[1].id);
+    const detail = await loadInvitationNda(db(client), members[1].id);
     assert.equal(detail.evidence, null);
     assert.equal(
       detail.evidenceOptions.every((row) => row.recipient_email === members[1].email),
@@ -411,7 +418,7 @@ describe("isolated invitation NDA persistence", () => {
     const { client, members } = fixture();
     await assert.rejects(
       saveReviewedInvitationNda(
-        client,
+        db(client),
         reviewingAdmin,
         { ...inputFor(members[0]), expected_updated_at: "2026-01-01T00:00:00.000Z" },
         reviewDate,
@@ -426,7 +433,7 @@ describe("isolated invitation NDA persistence", () => {
       db.beforeUpdate = undefined;
     };
     await assert.rejects(
-      saveReviewedInvitationNda(client, reviewingAdmin, inputFor(members[0]), reviewDate),
+      saveReviewedInvitationNda(db(client), reviewingAdmin, inputFor(members[0]), reviewDate),
       /could not be completed/,
     );
     assert.equal(client.tables.portal_members[0].updated_at, concurrentDate);
@@ -447,7 +454,7 @@ describe("isolated invitation NDA persistence", () => {
     const before = clone(client.tables);
     await assert.rejects(
       saveReviewedInvitationNda(
-        client,
+        db(client),
         reviewingAdmin,
         { ...inputFor(members[0]), scope: "A proposed correction" },
         reviewDate,

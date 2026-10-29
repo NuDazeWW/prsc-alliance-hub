@@ -2,9 +2,10 @@ import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requirePortalAccess } from "@/lib/portal-access";
 import { invitationNdaSaveSchema } from "./invitation-nda";
+import type { DbClient } from "@/lib/db-types";
 
 const memberIdSchema = z.object({ member_id: z.string().uuid() }).strict();
-async function assertAdmin(context: { supabase: any; userId: string }) {
+async function assertAdmin(context: { supabase: DbClient; userId: string }) {
   const { data, error } = await context.supabase
     .from("user_roles")
     .select("role")

@@ -368,7 +368,7 @@ export function AdminLeadership() {
               <select
                 value={editing.member_id ?? ""}
                 onChange={(e) => {
-                  const m = (members.data ?? []).find((x: any) => x.id === e.target.value) as any;
+                  const m = (members.data ?? []).find((x) => x.id === e.target.value);
                   setEditing({
                     ...editing,
                     member_id: e.target.value || null,
@@ -383,7 +383,7 @@ export function AdminLeadership() {
                 className="mt-2 h-10 w-full border border-ivory/20 bg-navy-deep px-3 text-sm normal-case text-ivory"
               >
                 <option value="">Not linked</option>
-                {(members.data ?? []).map((m: any) => (
+                {(members.data ?? []).map((m) => (
                   <option key={m.id} value={m.id}>
                     {m.first_name} {m.last_name}
                   </option>

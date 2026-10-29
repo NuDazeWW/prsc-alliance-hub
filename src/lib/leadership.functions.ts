@@ -2,6 +2,7 @@ import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { leadershipPublicationAllowed, linkedProfilePermissions } from "./leadership-publication";
 import { requirePortalAccess } from "@/lib/portal-access";
+import type { DbClient } from "@/lib/db-types";
 
 export type LeaderRow = {
   id: string;
@@ -20,7 +21,7 @@ export type LeaderRow = {
 };
 export type LeadershipSettings = { eyebrow: string; heading: string; subtext: string };
 
-async function isAdmin(context: { supabase: any; userId: string }) {
+async function isAdmin(context: { supabase: DbClient; userId: string }) {
   const { data } = await context.supabase
     .from("user_roles")
     .select("role")
@@ -52,8 +53,10 @@ export const getLeadershipTeam = createServerFn({ method: "GET" })
         .maybeSingle(),
     ]);
     if (error) throw error;
-    const rows = (allRows ?? []).filter((r: any) => admin || leadershipPublicationAllowed(r));
-    const memberIds = (rows ?? []).map((r: any) => r.member_id).filter(Boolean);
+    const rows = (allRows ?? []).filter((r) => admin || leadershipPublicationAllowed(r));
+    const memberIds = (rows ?? [])
+      .map((r) => r.member_id)
+      .filter((id): id is string => Boolean(id));
     const profiles = new Map<
       string,
       {
@@ -75,7 +78,7 @@ export const getLeadershipTeam = createServerFn({ method: "GET" })
         });
     }
     const assembled = await Promise.all(
-      (rows ?? []).map(async (r: any) => {
+      (rows ?? []).map(async (r) => {
         const prof = r.member_id ? profiles.get(r.member_id) : undefined;
         const permitted = linkedProfilePermissions(prof?.visibility_instructions);
         if (!admin && r.member_id && !permitted.name) return null;

@@ -14,7 +14,7 @@ export async function loadOpenPoll(pollId: string) {
     .select("starts_at")
     .eq("poll_id", pollId)
     .order("starts_at");
-  return { poll, slots: slots ?? [], block: meetingBlockText(poll as any, slots ?? []) };
+  return { poll, slots: slots ?? [], block: meetingBlockText(poll, slots ?? []) };
 }
 
 /** Adds members to a poll's invite list so the availability card appears in their Welcome Center. Caller must be a verified admin. */

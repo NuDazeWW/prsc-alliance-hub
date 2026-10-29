@@ -10,7 +10,7 @@ export function AdminReleaseReview() {
     queryKey: ["legacy-release-report"],
     queryFn: () => getLegacyReleaseReport(),
   });
-  const rows = (q.data?.rows ?? []) as any[];
+  const rows = q.data?.rows ?? [];
   const [reason, setReason] = useState<Record<string, string>>({});
   const [status, setStatus] = useState("");
   return (
@@ -44,13 +44,13 @@ export function AdminReleaseReview() {
                   <p>
                     Signed:{" "}
                     {r.signed
-                      .map((s: any) => `${s.title}${s.version ? ` (${s.version})` : ""}`)
+                      .map((s) => `${s.title}${s.version ? ` (${s.version})` : ""}`)
                       .join(", ") || "none"}
                   </p>
                   <p>
                     Restricted until release:{" "}
                     {r.unsigned
-                      .map((s: any) => `${s.title}${s.version ? ` (${s.version})` : ""}`)
+                      .map((s) => `${s.title}${s.version ? ` (${s.version})` : ""}`)
                       .join(", ")}
                   </p>
                   {r.kind === "authorized" ? (

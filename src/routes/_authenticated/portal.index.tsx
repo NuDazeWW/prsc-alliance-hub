@@ -166,7 +166,7 @@ function PortalHome() {
         data?.member &&
         !data?.viewingAs &&
         !data?.isAdmin &&
-        !(data.member as any).orientation_acknowledged_at,
+        !data.member.orientation_acknowledged_at,
       );
   // Progress and "closed it myself" markers are kept per member, so a different account on the same browser never inherits them.
   const memberKey: string | undefined = isDemo
@@ -256,7 +256,7 @@ function PortalHome() {
   // Every member can read about both organizations, regardless of designation.
   const entityWord = memberEntityDesignationLabel(m);
   const designations = memberRoleLabels(m.role, m.entity);
-  const roleChips = memberDesignationChips(m as any);
+  const roleChips = memberDesignationChips(m);
   const roleKinds = memberRoleKinds(
     m.role,
     Boolean((m as { is_methodology_committee?: boolean }).is_methodology_committee),
@@ -269,20 +269,20 @@ function PortalHome() {
   const acknowledged = new Set(documents.data?.acknowledged ?? []);
   const docEntity = (documents.data as { entity?: string } | null)?.entity ?? m.entity;
   const journey = journeyStatus(
-    (myDocs as any[]).filter((d) => !d.superseded_at),
+    myDocs.filter((d) => !d.superseded_at),
     acknowledged,
     docEntity,
-    (documents.data as any)?.activation ?? { prsc: null, dis: null },
+    documents.data?.activation ?? { prsc: null, dis: null },
     m.participates_in_forum !== false,
-    (documents.data as any)?.forumCleared === true,
+    documents.data?.forumCleared === true,
   );
   const {
     forumOnly,
     forumParticipationComplete,
     label: journeyLabel,
   } = memberJourneyPresentation(m, journey);
-  const trackedDocs = myDocs.some((d: any) => isOnboarding(d))
-    ? myDocs.filter((d: any) => isOnboarding(d))
+  const trackedDocs = myDocs.some((d) => isOnboarding(d))
+    ? myDocs.filter((d) => isOnboarding(d))
     : myDocs;
   const signDocs = trackedDocs.filter((d) => d.category === "sign");
   const readDocs = trackedDocs.filter((d) => d.category === "read");
@@ -340,7 +340,7 @@ function PortalHome() {
   ];
 
   const pendingMeetings = (meetings.data?.polls ?? []).filter(
-    (p: any) => p.status === "open" && p.my_responses.length === 0,
+    (p) => p.status === "open" && p.my_responses.length === 0,
   ).length;
   const documentsRemaining = documentsReleased && !allDone ? signLeft + readLeft : 0;
   const nextStep = nextIncompleteStep({
@@ -802,7 +802,7 @@ function PortalHome() {
                     </DialogTitle>
                   </DialogHeader>
                   <p className="mt-5 font-display text-[clamp(1.35rem,1.8vw,2rem)] leading-tight text-gold">
-                    {memberDesignation(m as any)}
+                    {memberDesignation(m)}
                   </p>
                   {m.organization && (
                     <p className="mt-3 text-[16px] leading-7 text-ivory/70">{m.organization}</p>
@@ -858,7 +858,7 @@ function PortalHome() {
                         Capacity
                       </dt>
                       <dd className="mt-2 font-display text-2xl text-ivory">
-                        {memberDesignation(m as any)}
+                        {memberDesignation(m)}
                       </dd>
                     </div>
                     {m.organization && (
@@ -905,15 +905,15 @@ function PortalHome() {
                   <>
                     {documentsReleased ? (
                       <MemberDocuments
-                        documents={myDocs as any}
+                        documents={myDocs}
                         completions={documents.data?.completions ?? []}
                         entity={docEntity}
-                        forum={(documents.data as any)?.forum !== false}
+                        forum={documents.data?.forum !== false}
                         forumOnly={forumOnly}
-                        forumCleared={(documents.data as any)?.forumCleared === true}
-                        entityReleased={(documents.data as any)?.entityReleased}
-                        unavailable={(documents.data as any)?.unavailable ?? []}
-                        signing={(documents.data as any)?.signing ?? []}
+                        forumCleared={documents.data?.forumCleared === true}
+                        entityReleased={documents.data?.entityReleased}
+                        unavailable={documents.data?.unavailable ?? []}
+                        signing={documents.data?.signing ?? []}
                         profileComplete={profileComplete}
                       />
                     ) : (

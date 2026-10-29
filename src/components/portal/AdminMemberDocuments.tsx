@@ -175,8 +175,8 @@ export function AdminMemberDocuments({ memberId, memberName, preview }: Props) {
     msg: string;
   }>(null);
   const [working, setWorking] = useState<string>("");
-  const requested = new Set<string>((docs.data as any)?.hardCopyRequests ?? []);
-  const contact = (docs.data as any)?.contact ?? { email: "", firstName: "" };
+  const requested = new Set<string>(docs.data?.hardCopyRequests ?? []);
+  const contact = docs.data?.contact ?? { email: "", firstName: "" };
   async function toggleExternal(documentId: string, confirmed: boolean) {
     if (preview) return setStatus("Preview mode: check-offs save on the live admin page.");
     setWorking(documentId);
@@ -237,13 +237,13 @@ export function AdminMemberDocuments({ memberId, memberName, preview }: Props) {
   const entity = docs.data?.entity ?? "prsc";
   const activation = docs.data?.activation ?? { prsc: null, dis: null };
   const doneIds = new Set<string>(
-    acks.filter((a: any) => a.member_id === memberId).map((a: any) => a.document_id),
+    acks.filter((a) => a.member_id === memberId).map((a) => a.document_id),
   );
-  const forum = (docs.data as any)?.forum !== false;
-  const cleared = (docs.data as any)?.forumCleared === true;
-  const releases: any[] = (docs.data as any)?.entityReleases ?? [];
-  const active = list.filter((d: any) => !d.superseded_at);
-  const journey = journeyStatus(active as any, doneIds, entity, activation, forum, cleared);
+  const forum = docs.data?.forum !== false;
+  const cleared = docs.data?.forumCleared === true;
+  const releases = docs.data?.entityReleases ?? [];
+  const active = list.filter((d) => !d.superseded_at);
+  const journey = journeyStatus(active, doneIds, entity, activation, forum, cleared);
   async function setDocGov(
     id: string,
     patch: {
@@ -321,11 +321,11 @@ export function AdminMemberDocuments({ memberId, memberName, preview }: Props) {
       setStatus(userFacingError(e, "Could not retry"));
     }
   }
-  const lockedIds = lockedDocumentIds(active as any, doneIds, entity, {
+  const lockedIds = lockedDocumentIds(active, doneIds, entity, {
     forum,
     released: {
-      prsc: releases.some((r: any) => r.entity === "prsc"),
-      dis: releases.some((r: any) => r.entity === "dis"),
+      prsc: releases.some((r) => r.entity === "prsc"),
+      dis: releases.some((r) => r.entity === "dis"),
     },
   });
   async function toggleActivation(t: "prsc" | "dis", on: boolean) {
@@ -421,7 +421,7 @@ export function AdminMemberDocuments({ memberId, memberName, preview }: Props) {
         </p>
         <div className="mt-3 space-y-2">
           {memberTracks(entity).map((t) => {
-            const r = releases.find((x: any) => x.entity === t);
+            const r = releases.find((x) => x.entity === t);
             return (
               <div key={t} className="flex flex-wrap items-center gap-3 text-base text-ivory/80">
                 <span className="w-12 text-gold">{t.toUpperCase()}</span>
@@ -429,7 +429,8 @@ export function AdminMemberDocuments({ memberId, memberName, preview }: Props) {
                   <>
                     <span>
                       Started {new Date(r.released_at).toLocaleDateString()} ·{" "}
-                      {(r.documents ?? []).length} document(s) · notice {r.notify_status}
+                      {((r.documents ?? []) as unknown[]).length} document(s) · notice{" "}
+                      {r.notify_status}
                       {r.notify_error ? ` (${r.notify_error})` : ""}
                     </span>
                     {r.source === "reconciled" ? (
@@ -627,7 +628,7 @@ export function AdminMemberDocuments({ memberId, memberName, preview }: Props) {
             className={`mt-1 ${selectCls}`}
           >
             <option value="">None: this is a new document</option>
-            {active.map((d: any) => (
+            {active.map((d) => (
               <option key={d.id} value={d.id}>
                 {d.title}
                 {d.version_label ? ` (${d.version_label})` : ""}
@@ -718,7 +719,7 @@ export function AdminMemberDocuments({ memberId, memberName, preview }: Props) {
           <p className="text-base text-ivory/50">No documents have been posted yet.</p>
         )}
         {list.map((d) => {
-          const ack = acks.find((a: any) => a.document_id === d.id && a.member_id === memberId);
+          const ack = acks.find((a) => a.document_id === d.id && a.member_id === memberId);
           return (
             <div
               key={d.id}
@@ -727,21 +728,21 @@ export function AdminMemberDocuments({ memberId, memberName, preview }: Props) {
               <div className="min-w-0">
                 <p className="text-base text-ivory">{d.title}</p>
                 <p className="mt-1 text-sm uppercase tracking-[0.14em] text-gold/80">
-                  {(d as any).journey_stage
-                    ? `Stage ${(d as any).journey_stage} · ${STAGES[(d as any).journey_stage - 1].label}`
+                  {d.journey_stage
+                    ? `Stage ${d.journey_stage} · ${STAGES[d.journey_stage - 1].label}`
                     : "Ongoing record"}
-                  {(d as any).journey_track
-                    ? ` · ${(d as any).journey_track === "shared" ? "Shared" : (d as any).journey_track.toUpperCase()}`
+                  {d.journey_track
+                    ? ` · ${d.journey_track === "shared" ? "Shared" : d.journey_track.toUpperCase()}`
                     : ""}
                   {lockedIds.has(d.id) ? " · Waiting on earlier document" : ""}
-                  {(d as any).version_label ? ` · ${(d as any).version_label}` : ""}
-                  {(d as any).superseded_at ? " · Superseded (history only)" : ""}
-                  {!(d as any).classification_reviewed_at ? " · Classification needs review" : ""}
+                  {d.version_label ? ` · ${d.version_label}` : ""}
+                  {d.superseded_at ? " · Superseded (history only)" : ""}
+                  {!d.classification_reviewed_at ? " · Classification needs review" : ""}
                 </p>
                 <div className="mt-2 flex flex-wrap items-center gap-3">
                   <select
                     aria-label={`Classification for ${d.title}`}
-                    value={(d as any).classification ?? "entity_confidential"}
+                    value={d.classification ?? "entity_confidential"}
                     onChange={(e) =>
                       setDocGov(d.id, { classification: e.target.value as Classification })
                     }
@@ -755,7 +756,7 @@ export function AdminMemberDocuments({ memberId, memberName, preview }: Props) {
                   </select>
                   <select
                     aria-label={`Forum item for ${d.title}`}
-                    value={(d as any).forum_role ?? ""}
+                    value={d.forum_role ?? ""}
                     onChange={(e) => setDocGov(d.id, { forum_role: e.target.value || null })}
                     className="h-9 border border-gold/25 bg-navy-deep px-2 text-sm text-ivory"
                   >
@@ -774,18 +775,18 @@ export function AdminMemberDocuments({ memberId, memberName, preview }: Props) {
                         onClick={() => {
                           const t = prompt(
                             "Approved BoldSign template ID (leave blank to clear):",
-                            (d as any).boldsign_template_id ?? "",
+                            d.boldsign_template_id ?? "",
                           );
                           if (t !== null)
                             void setDocGov(d.id, { boldsign_template_id: t.trim() || null });
                         }}
                       >
-                        {(d as any).boldsign_template_id ? "Template set" : "Set template"}
+                        {d.boldsign_template_id ? "Template set" : "Set template"}
                       </Button>
                       <label className="flex items-center gap-1 text-sm text-ivory/75">
                         <input
                           type="checkbox"
-                          checked={!!(d as any).signing_approved}
+                          checked={!!d.signing_approved}
                           onChange={(e) => setDocGov(d.id, { signing_approved: e.target.checked })}
                         />{" "}
                         Approved for signing
@@ -793,7 +794,7 @@ export function AdminMemberDocuments({ memberId, memberName, preview }: Props) {
                       <label className="flex items-center gap-1 text-sm text-ivory/75">
                         <input
                           type="checkbox"
-                          checked={!!(d as any).countersignature_required}
+                          checked={!!d.countersignature_required}
                           onChange={(e) =>
                             setDocGov(d.id, { countersignature_required: e.target.checked })
                           }
@@ -802,7 +803,7 @@ export function AdminMemberDocuments({ memberId, memberName, preview }: Props) {
                       </label>
                     </>
                   )}
-                  {!(d as any).superseded_at && (
+                  {!d.superseded_at && (
                     <Button
                       type="button"
                       variant="outline"

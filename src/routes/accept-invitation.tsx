@@ -41,6 +41,8 @@ function AcceptInvitationPage() {
 
   useEffect(() => {
     let active = true;
+    // Read by the closures below before its single assignment, so it cannot be a const.
+    // eslint-disable-next-line prefer-const
     let timeout: number | undefined;
     let checking = false;
     const confirmInvitation = async () => {

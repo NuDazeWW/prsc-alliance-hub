@@ -10,6 +10,7 @@ import {
 } from "@/lib/branded-email";
 import { SYSTEM_EMAIL_DEFAULTS } from "@/lib/system-email-defaults";
 import { withAppointmentProgress } from "@/lib/portal.functions";
+import type { DbClient } from "@/lib/db-types";
 
 export type EmailTemplate = {
   id: string;
@@ -39,7 +40,7 @@ export type EmailSend = {
   created_at: string;
 };
 
-async function assertAdmin(context: { supabase: any; userId: string }) {
+async function assertAdmin(context: { supabase: DbClient; userId: string }) {
   const { data } = await context.supabase
     .from("user_roles")
     .select("role")
@@ -58,7 +59,7 @@ export const getEmailCenter = createServerFn({ method: "GET" })
       .from("portal_email_templates")
       .select("system_key")
       .not("system_key", "is", null);
-    const have = new Set((existing ?? []).map((r: any) => r.system_key));
+    const have = new Set((existing ?? []).map((r) => r.system_key));
     const missing = Object.entries(SYSTEM_EMAIL_DEFAULTS).filter(([k]) => !have.has(k));
     if (missing.length) {
       await context.supabase.from("portal_email_templates").upsert(
@@ -204,7 +205,7 @@ export const sendMemberEmail = createServerFn({ method: "POST" })
       const { addMembersToPoll } = await import("@/lib/meeting-poll.server");
       await addMembersToPoll(
         data.poll_id,
-        (members as any[]).map((m) => m.id),
+        members.map((m) => m.id),
       );
     }
 
@@ -213,7 +214,7 @@ export const sendMemberEmail = createServerFn({ method: "POST" })
 
     const signatures = parseSignatures(data.signatures);
 
-    for (const member of members as any[]) {
+    for (const member of members) {
       const tokens = buildMemberTokens(await withAppointmentProgress(context.supabase, member));
       const subject = applyTokens(data.subject, tokens);
       const composed = {

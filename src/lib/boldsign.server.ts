@@ -3,6 +3,7 @@ import {
   verifiedSigningState,
   type BoldSignProperties,
 } from "./boldsign-records";
+import type { DbClient } from "@/lib/db-types";
 
 /**
  * A failed BoldSign call keeps the same short message for the member, but the response body BoldSign
@@ -230,7 +231,7 @@ export async function reconcileBoldSign(documentId: string): Promise<ReconcileOu
  * otherwise never satisfy its gate even after BoldSign completed it.
  */
 async function recordCountersignature(
-  sb: any,
+  sb: DbClient,
   a: { id: string; document_id: string; signer_email: string; countersigned_at?: string | null },
   properties: BoldSignProperties,
   knownDoc?: { countersignature_required?: boolean | null },

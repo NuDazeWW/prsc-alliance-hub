@@ -184,7 +184,7 @@ describe("profile submission emails", () => {
       planProfileEmails({ ...base, submit: true, alreadySubmitted: false }),
       {
         load: async (k: string) => (t: Record<string, string>) => ({ k, t }),
-        send: async (_to: string, e: any) => {
+        send: async (_to: string, e) => {
           sent.push(e.k);
           if (e.k === "profile_received") throw new Error("down");
           return true;
