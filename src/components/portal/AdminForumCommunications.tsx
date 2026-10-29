@@ -5,6 +5,8 @@ import { FORUM_EMAILS, type ForumEmailKey } from "@/lib/forum-communications";
 import { SYSTEM_EMAIL_DEFAULTS } from "@/lib/system-email-defaults";
 import { getForumRecipients, sendForumEmail } from "@/lib/forum-communications.functions";
 import { applyTokens, parseSignatures, renderBrandedEmail } from "@/lib/branded-email";
+import { useStoredFlag } from "@/hooks/use-stored-flag";
+import { ChevronDown, ChevronUp } from "lucide-react";
 
 type Recipient = { id: string; name: string; email: string; reason: string | null; sent_at: string | null };
 
@@ -23,6 +25,7 @@ export function AdminForumCommunications() {
   const [status, setStatus] = useState("");
   const [preview, setPreview] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  const [open, setOpen] = useStoredFlag("admin.forumCommsOpen");
   const def = FORUM_EMAILS.find((d) => d.key === key)!;
 
   async function load() {
@@ -63,8 +66,14 @@ export function AdminForumCommunications() {
 
   return (
     <div>
-      <p className="label-caps text-gold">Forum Communications</p>
-      <h2 className="mt-2 font-display text-3xl">Strategic Coordination Forum emails</h2>
+      <button type="button" onClick={() => setOpen(!open)} aria-expanded={open} className="flex w-full items-center justify-between gap-3 text-left">
+        <span>
+          <span className="label-caps block text-gold">Forum Communications</span>
+          <h2 className="mt-2 font-display text-3xl">Strategic Coordination Forum emails</h2>
+        </span>
+        {open ? <ChevronUp className="h-5 w-5 shrink-0 text-gold" /> : <ChevronDown className="h-5 w-5 shrink-0 text-gold" />}
+      </button>
+      <div className={open ? "" : "hidden"}>
       <p className="mt-2 max-w-3xl text-sm text-ivory/60">Choose an email, fill in the details, and send to the members who qualify. Each person receives their own email that links into the portal. Nothing is attached.</p>
       <div className="mt-5 grid gap-3 md:grid-cols-4">
         <label className="text-xs text-ivory/60 md:col-span-2">Email
@@ -126,6 +135,7 @@ export function AdminForumCommunications() {
         {status && <span className="text-sm text-gold">{status}</span>}
       </div>
       {preview && <iframe title="Forum email preview" srcDoc={preview} className="mt-5 h-[640px] w-full rounded-md border border-ivory/10 bg-background" />}
+      </div>
     </div>
   );
 }

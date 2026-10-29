@@ -304,6 +304,7 @@ export function AdminCenter({ page }: { page: "overview" | "send" }) {
   const inviteNdaGeneration = useRef(0);
   const [inviteCollapsed, setInviteCollapsed] = useStoredFlag("admin.inviteCollapsed");
   const [sentLogOpen, setSentLogOpen] = useStoredFlag("admin.sentLogOpen");
+  const [recipientsOpen, setRecipientsOpen] = useStoredFlag("admin.recipientsOpen");
   const [membersCollapsed, setMembersCollapsed] = useStoredFlag("admin.membersCollapsed");
   const [expandedRows, setExpandedRows] = useState<string[]>([]);
   useEffect(() => {
@@ -1654,8 +1655,11 @@ export function AdminCenter({ page }: { page: "overview" | "send" }) {
 
               {!isTemplateMode && (
               <div className="mt-6 border-t border-gold/15 pt-5">
-                <p className="text-xs uppercase tracking-[0.18em] text-gold">Recipients</p>
-                <div className="mt-3 grid gap-2 sm:grid-cols-2">
+                <button type="button" onClick={() => setRecipientsOpen(!recipientsOpen)} aria-expanded={recipientsOpen} className="flex w-full items-center justify-between gap-3 text-left">
+                  <span className="text-xs uppercase tracking-[0.18em] text-gold">Recipients <span className="ml-2 normal-case tracking-normal text-ivory/55">{recipients.length} selected of {members.length}</span></span>
+                  {recipientsOpen ? <ChevronUp className="h-5 w-5 shrink-0 text-gold" /> : <ChevronDown className="h-5 w-5 shrink-0 text-gold" />}
+                </button>
+                <div className={`mt-3 grid gap-2 sm:grid-cols-2 ${recipientsOpen ? "" : "hidden"}`}>
                   {members.map((m) => {
                     const already = composeFromId
                       ? (sendsByMember.get(m.id) ?? []).some((s) => s.template_id === composeFromId && s.status === "sent")
