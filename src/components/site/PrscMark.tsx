@@ -18,5 +18,12 @@ export function PrscMark({
         : variant === "emblem"
           ? logoOnly.url
           : logo.url;
-  return <img src={src} alt="PRSC — Partnership Readiness Standards Council" className={className} loading="lazy" />;
+  return (
+    <img
+      src={src}
+      alt="PRSC — Partnership Readiness Standards Council"
+      className={className}
+      loading="lazy"
+    />
+  );
 }

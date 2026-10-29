@@ -24,8 +24,7 @@ export const Route = createFileRoute("/governance_/written-standards")({
       { name: "twitter:title", content: "Written Standards Document — PRSC" },
       {
         name: "twitter:description",
-        content:
-          "The published criteria governing the Readiness Certified™ mark. Version 1.0.",
+        content: "The published criteria governing the Readiness Certified™ mark. Version 1.0.",
       },
     ],
     links: [{ rel: "canonical", href: CANONICAL }],
@@ -62,7 +61,9 @@ const SECTIONS: Section[] = [
             can prove its audience creates commercial value.
           </li>
           <li>
-            <span className="font-semibold text-[#0A1322]">Strategic Positioning Readiness&trade;.</span>{" "}
+            <span className="font-semibold text-[#0A1322]">
+              Strategic Positioning Readiness&trade;.
+            </span>{" "}
             The entity clearly defines its value proposition and competitive differentiation.
           </li>
           <li>
@@ -74,8 +75,8 @@ const SECTIONS: Section[] = [
             possesses the infrastructure to service a partnership.
           </li>
           <li>
-            <span className="font-semibold text-[#0A1322]">Commercial Architecture.</span> The entity
-            maintains a pricing and packaging model aligned with market standards.
+            <span className="font-semibold text-[#0A1322]">Commercial Architecture.</span> The
+            entity maintains a pricing and packaging model aligned with market standards.
           </li>
         </ul>
       </>
@@ -93,7 +94,9 @@ const SECTIONS: Section[] = [
           that:
         </p>
         <ul className="mt-5 space-y-3 list-disc pl-6 marker:text-gold">
-          <li>Submits the required verifiable data to the Certifier&rsquo;s assessment platform.</li>
+          <li>
+            Submits the required verifiable data to the Certifier&rsquo;s assessment platform.
+          </li>
           <li>
             Achieves the minimum required PRSC Readiness Score&trade; as determined by the
             Certifier&rsquo;s proprietary methodology.
@@ -113,9 +116,9 @@ const SECTIONS: Section[] = [
         Compliance with the standards is evaluated through a quantitative scoring process. The
         applicant submits operational, financial, and audience data through the Evidence
         Portal&trade;. This data is processed by the Readiness Engine&trade; &mdash; a proprietary
-        scoring methodology governed by the Certifier&rsquo;s independent Methodology Committee.
-        The evaluation is objective, data-driven, and uniformly applied to all applicants within
-        their respective vertical categories.
+        scoring methodology governed by the Certifier&rsquo;s independent Methodology Committee. The
+        evaluation is objective, data-driven, and uniformly applied to all applicants within their
+        respective vertical categories.
       </p>
     ),
   },
@@ -126,11 +129,11 @@ const SECTIONS: Section[] = [
     body: (
       <p>
         The Certifier administers the certification program even-handedly. The Certifier does not
-        discriminate among applicants who meet the published criteria. The Certifier is
-        structurally independent and does not condition certification on the purchase of any
-        consulting, advisory, or matchmaking services from the Certifier or its affiliates. Any
-        entity that meets the objective scoring threshold and agrees to the standard licensing
-        terms shall be granted the right to use the Mark.
+        discriminate among applicants who meet the published criteria. The Certifier is structurally
+        independent and does not condition certification on the purchase of any consulting,
+        advisory, or matchmaking services from the Certifier or its affiliates. Any entity that
+        meets the objective scoring threshold and agrees to the standard licensing terms shall be
+        granted the right to use the Mark.
       </p>
     ),
   },
@@ -227,11 +230,7 @@ function WrittenStandardsPage() {
 
       {/* Sections */}
       {SECTIONS.map((s, i) => (
-        <section
-          key={s.id}
-          id={s.id}
-          className={i % 2 === 0 ? "bg-white" : "bg-[#F5F5F0]"}
-        >
+        <section key={s.id} id={s.id} className={i % 2 === 0 ? "bg-white" : "bg-[#F5F5F0]"}>
           <div className="mx-auto max-w-3xl px-6 py-16 md:py-24 scroll-mt-32">
             <p className="label-caps text-gold text-xs tracking-[0.18em] mb-3">{s.num}</p>
             <h2 className="font-display text-3xl md:text-5xl font-bold text-[#0A1322] leading-tight">

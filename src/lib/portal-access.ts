@@ -2,7 +2,9 @@ import { createMiddleware } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 
 export function portalAccessAllowed(member: { status: string } | null, admin: boolean) {
-  return member?.status === "revoked" ? false : admin || member?.status === "invited" || member?.status === "active";
+  return member?.status === "revoked"
+    ? false
+    : admin || member?.status === "invited" || member?.status === "active";
 }
 
 /** Recheck durable authorization on every RPC, including already-issued sessions. */
@@ -23,9 +25,19 @@ export async function authorizeInvitationRequest(request: Request) {
   const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
   const { data: user, error } = await supabaseAdmin.auth.getUser(token);
   if (error || !user.user) return false;
-  const [{ data: role, error: roleError }, { data: member, error: memberError }] = await Promise.all([
-    supabaseAdmin.from("user_roles").select("role").eq("user_id", user.user.id).eq("role", "admin").maybeSingle(),
-    supabaseAdmin.from("portal_members").select("status").eq("user_id", user.user.id).maybeSingle(),
-  ]);
+  const [{ data: role, error: roleError }, { data: member, error: memberError }] =
+    await Promise.all([
+      supabaseAdmin
+        .from("user_roles")
+        .select("role")
+        .eq("user_id", user.user.id)
+        .eq("role", "admin")
+        .maybeSingle(),
+      supabaseAdmin
+        .from("portal_members")
+        .select("status")
+        .eq("user_id", user.user.id)
+        .maybeSingle(),
+    ]);
   return !roleError && !memberError && Boolean(role) && portalAccessAllowed(member, true);
 }

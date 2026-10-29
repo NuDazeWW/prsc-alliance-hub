@@ -2,30 +2,74 @@ import { describe, it } from "node:test";
 import assert from "node:assert/strict";
 import { MEMBER_LIST_TEMPLATE, parseMemberList } from "./member-import";
 
-const headers = "first_name,last_name,email,organization,title,invitation_type,entity,roles,other_role,methodology_committee,linkedin_url,background,why_you";
+const headers =
+  "first_name,last_name,email,organization,title,invitation_type,entity,roles,other_role,methodology_committee,linkedin_url,background,why_you";
 const csvCell = (value: string) => `"${value.replace(/"/g, '""')}"`;
-const fixture = (rows: string[][], columns = headers) => `${columns}\n${rows.map((row) => row.map(csvCell).join(",")).join("\n")}`;
-const person = (n: number, invitation: string, entity: string, roles: string, committee: string, other = "") => [
-  "Test", String(n), `test${n}@example.test`, "Fictional Organization", "Executive", invitation, entity, roles, other, committee, "", "", "Administrator-reviewed fictional note.",
+const fixture = (rows: string[][], columns = headers) =>
+  `${columns}\n${rows.map((row) => row.map(csvCell).join(",")).join("\n")}`;
+const person = (
+  n: number,
+  invitation: string,
+  entity: string,
+  roles: string,
+  committee: string,
+  other = "",
+) => [
+  "Test",
+  String(n),
+  `test${n}@example.test`,
+  "Fictional Organization",
+  "Executive",
+  invitation,
+  entity,
+  roles,
+  other,
+  committee,
+  "",
+  "",
+  "Administrator-reviewed fictional note.",
 ];
 
 describe("member CSV staging with intended designations", () => {
   it("stages four fictional recipients with distinct names, emails, choices, and no invitation or NDA writes", () => {
-    const parsed = parseMemberList(fixture([
-      person(1, "United Forum invitee", "None", "", "Undetermined"),
-      person(2, "identified", "Both", "PRSC Board; DIS Advisor", "No"),
-      person(3, "identified", "PRSC", "PRSC Advisor", "Yes"),
-      person(4, "identified", "DIS", "DIS Board | DIS Advisor | Other", "No", "Research working group"),
-    ]));
+    const parsed = parseMemberList(
+      fixture([
+        person(1, "United Forum invitee", "None", "", "Undetermined"),
+        person(2, "identified", "Both", "PRSC Board; DIS Advisor", "No"),
+        person(3, "identified", "PRSC", "PRSC Advisor", "Yes"),
+        person(
+          4,
+          "identified",
+          "DIS",
+          "DIS Board | DIS Advisor | Other",
+          "No",
+          "Research working group",
+        ),
+      ]),
+    );
     assert.deepEqual(parsed.errors, []);
     assert.equal(parsed.rows.length, 4);
-    assert.deepEqual(parsed.rows.map((row) => row.email), [1, 2, 3, 4].map((n) => `test${n}@example.test`));
-    assert.deepEqual(parsed.rows[0].intended_designation, { version: 1, kind: "forum_invitee", entity: "none", roles: [], other_text: "", committee: "undetermined" });
+    assert.deepEqual(
+      parsed.rows.map((row) => row.email),
+      [1, 2, 3, 4].map((n) => `test${n}@example.test`),
+    );
+    assert.deepEqual(parsed.rows[0].intended_designation, {
+      version: 1,
+      kind: "forum_invitee",
+      entity: "none",
+      roles: [],
+      other_text: "",
+      committee: "undetermined",
+    });
     assert.equal(parsed.rows[0].is_candidate, true);
     assert.deepEqual(parsed.rows[1].intended_designation.roles, ["prsc_board", "dis_advisor"]);
     assert.equal(parsed.rows[2].intended_designation.committee, "yes");
     assert.equal(parsed.rows[2].is_methodology_committee, true);
-    assert.deepEqual(parsed.rows[3].intended_designation.roles, ["dis_board", "dis_advisor", "other"]);
+    assert.deepEqual(parsed.rows[3].intended_designation.roles, [
+      "dis_board",
+      "dis_advisor",
+      "other",
+    ]);
     for (const row of parsed.rows) {
       assert.equal("nda_verified_at" in row, false);
       assert.equal("nda_confirmed" in row, false);
@@ -51,18 +95,23 @@ describe("member CSV staging with intended designations", () => {
 
   it("accepts role as a singular header and both spaced and underscored Forum aliases", () => {
     for (const role of ["United Forum invitee", "united_forum_invitee", "forum_invitee"]) {
-      const parsed = parseMemberList(`first_name,last_name,email,entity,role\nTest,One,test1@example.test,None,${role}`);
+      const parsed = parseMemberList(
+        `first_name,last_name,email,entity,role\nTest,One,test1@example.test,None,${role}`,
+      );
       assert.deepEqual(parsed.errors, []);
       assert.equal(parsed.rows[0].intended_designation.kind, "forum_invitee");
       assert.equal(parsed.rows[0].intended_designation.entity, "none");
     }
-    const parsed = parseMemberList(`first_name,last_name,email,entity,role\nTest,One,test1@example.test,Both,"PRSC Board, DIS Advisor"`);
+    const parsed = parseMemberList(
+      `first_name,last_name,email,entity,role\nTest,One,test1@example.test,Both,"PRSC Board, DIS Advisor"`,
+    );
     assert.deepEqual(parsed.errors, []);
     assert.deepEqual(parsed.rows[0].intended_designation.roles, ["prsc_board", "dis_advisor"]);
   });
 
   it("retains legacy roles, combinations, and committee participation", () => {
-    const columns = "first_name,last_name,email,organization,title,entity,role,methodology_committee,linkedin_url,background,why_you";
+    const columns =
+      "first_name,last_name,email,organization,title,entity,role,methodology_committee,linkedin_url,background,why_you";
     const cases = [
       ["Test", "One", "test1@example.test", "", "", "prsc", "board_member", "yes"],
       ["Test", "Two", "test2@example.test", "", "", "both", "advisor", ""],
@@ -73,14 +122,28 @@ describe("member CSV staging with intended designations", () => {
     const parsed = parseMemberList(fixture(cases, columns));
     assert.deepEqual(parsed.errors, []);
     assert.equal(parsed.rows.length, cases.length);
-    assert.deepEqual(parsed.rows.map((row) => row.role), ["board_member", "advisor", "prsc_board_dis_advisor", "prsc_advisor_dis_board", "methodology_committee"]);
+    assert.deepEqual(
+      parsed.rows.map((row) => row.role),
+      [
+        "board_member",
+        "advisor",
+        "prsc_board_dis_advisor",
+        "prsc_advisor_dis_board",
+        "methodology_committee",
+      ],
+    );
     assert.equal(parsed.rows[1].intended_designation.committee, "no");
     assert.equal(parsed.rows[4].intended_designation.committee, "yes");
     assert.equal(parsed.rows[4].is_methodology_committee, true);
   });
 
   it("uses Undetermined for blank new-format committee cells and accepts the prior misspelled header", () => {
-    const parsed = parseMemberList(fixture([person(1, "forum_invitee", "None", "", "")], headers.replace("methodology_committee", "methodology_commitee")));
+    const parsed = parseMemberList(
+      fixture(
+        [person(1, "forum_invitee", "None", "", "")],
+        headers.replace("methodology_committee", "methodology_commitee"),
+      ),
+    );
     assert.deepEqual(parsed.errors, []);
     assert.equal(parsed.rows[0].intended_designation.committee, "undetermined");
   });
@@ -114,11 +177,21 @@ describe("member CSV staging with intended designations", () => {
   });
 
   it("does not turn spreadsheet NDA labels or references into verified evidence", () => {
-    const row = [...person(1, "forum_invitee", "None", "", "Undetermined"), "Verified", "nda-from-spreadsheet", "2026-10-01"];
-    const parsed = parseMemberList(fixture([row], `${headers},nda_status,nda_reference,nda_verified_at`));
+    const row = [
+      ...person(1, "forum_invitee", "None", "", "Undetermined"),
+      "Verified",
+      "nda-from-spreadsheet",
+      "2026-10-01",
+    ];
+    const parsed = parseMemberList(
+      fixture([row], `${headers},nda_status,nda_reference,nda_verified_at`),
+    );
     assert.deepEqual(parsed.errors, []);
     assert.equal(parsed.rows.length, 1);
-    assert.equal(Object.keys(parsed.rows[0]).some((key) => key.startsWith("nda_")), false);
+    assert.equal(
+      Object.keys(parsed.rows[0]).some((key) => key.startsWith("nda_")),
+      false,
+    );
   });
 
   it("stages Forum-only roster records before Why you notes are complete, retaining each supplied source", () => {
@@ -141,7 +214,10 @@ describe("member CSV staging with intended designations", () => {
   });
 
   it("rejects invalid or oversized source URLs instead of silently truncating a stored source", () => {
-    for (const url of ["https://example.test/in/test", "https://linkedin.com/in/" + "x".repeat(300)]) {
+    for (const url of [
+      "https://example.test/in/test",
+      "https://linkedin.com/in/" + "x".repeat(300),
+    ]) {
       const row = person(1, "forum_invitee", "None", "", "Undetermined");
       row[10] = url;
       const parsed = parseMemberList(fixture([row]));

@@ -21,7 +21,12 @@ export type LeaderRow = {
 export type LeadershipSettings = { eyebrow: string; heading: string; subtext: string };
 
 async function isAdmin(context: { supabase: any; userId: string }) {
-  const { data } = await context.supabase.from("user_roles").select("role").eq("user_id", context.userId).eq("role", "admin").maybeSingle();
+  const { data } = await context.supabase
+    .from("user_roles")
+    .select("role")
+    .eq("user_id", context.userId)
+    .eq("role", "admin")
+    .maybeSingle();
   return Boolean(data);
 }
 
@@ -33,19 +38,41 @@ export const getLeadershipTeam = createServerFn({ method: "GET" })
     // Raw roster is admin-only in RLS. Current portal membership was checked
     // above; this privileged projection returns only approved display fields.
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    let teamQuery = supabaseAdmin.from("leadership_team").select("*").order("sort_order").order("created_at");
+    let teamQuery = supabaseAdmin
+      .from("leadership_team")
+      .select("*")
+      .order("sort_order")
+      .order("created_at");
     if (!admin) teamQuery = teamQuery.eq("visible", true);
     const [{ data: allRows, error }, { data: settings }] = await Promise.all([
       teamQuery,
-      context.supabase.from("leadership_settings").select("eyebrow, heading, subtext").maybeSingle(),
+      context.supabase
+        .from("leadership_settings")
+        .select("eyebrow, heading, subtext")
+        .maybeSingle(),
     ]);
     if (error) throw error;
     const rows = (allRows ?? []).filter((r: any) => admin || leadershipPublicationAllowed(r));
     const memberIds = (rows ?? []).map((r: any) => r.member_id).filter(Boolean);
-    const profiles = new Map<string, { bio: string | null; headshot_path: string | null; visibility_instructions: Record<string, unknown> | null }>();
+    const profiles = new Map<
+      string,
+      {
+        bio: string | null;
+        headshot_path: string | null;
+        visibility_instructions: Record<string, unknown> | null;
+      }
+    >();
     if (memberIds.length) {
-      const { data } = await supabaseAdmin.from("portal_profiles").select("member_id, bio, headshot_path, visibility_instructions").in("member_id", memberIds);
-      for (const p of data ?? []) profiles.set(p.member_id, { bio: p.bio, headshot_path: p.headshot_path, visibility_instructions: p.visibility_instructions as Record<string, unknown> });
+      const { data } = await supabaseAdmin
+        .from("portal_profiles")
+        .select("member_id, bio, headshot_path, visibility_instructions")
+        .in("member_id", memberIds);
+      for (const p of data ?? [])
+        profiles.set(p.member_id, {
+          bio: p.bio,
+          headshot_path: p.headshot_path,
+          visibility_instructions: p.visibility_instructions as Record<string, unknown>,
+        });
     }
     const assembled = await Promise.all(
       (rows ?? []).map(async (r: any) => {
@@ -60,8 +87,14 @@ export const getLeadershipTeam = createServerFn({ method: "GET" })
           id: r.id,
           name: r.name,
           title: admin || !r.member_id || permitted.affiliation ? r.title : "",
-          affiliation: admin || !r.member_id || permitted.affiliation ? r.affiliation ?? null : null,
-          bio: admin || !r.member_id || permitted.bio ? (r.bio?.trim() ? r.bio : prof?.bio ?? null) : null,
+          affiliation:
+            admin || !r.member_id || permitted.affiliation ? (r.affiliation ?? null) : null,
+          bio:
+            admin || !r.member_id || permitted.bio
+              ? r.bio?.trim()
+                ? r.bio
+                : (prof?.bio ?? null)
+              : null,
           own_bio: admin ? r.bio : null,
           publication_scope: admin ? r.publication_scope : undefined,
           photo_url,
@@ -79,7 +112,8 @@ export const getLeadershipTeam = createServerFn({ method: "GET" })
       settings: (settings as LeadershipSettings | null) ?? {
         eyebrow: "Our Leadership Team",
         heading: "Our Leadership Team",
-        subtext: "A distinguished group of advisors and executives guiding PRSC's mission and industry impact.",
+        subtext:
+          "A distinguished group of advisors and executives guiding PRSC's mission and industry impact.",
       },
     };
   });
@@ -104,7 +138,14 @@ export const saveLeader = createServerFn({ method: "POST" })
     if (!(await isAdmin(context))) throw new Error("Unauthorized");
     const { id, ...rest } = data;
     const approved = rest.publication_scope === "portal_members";
-    const row = { ...rest, publication_approved_at: approved ? new Date().toISOString() : null, publication_approved_by: approved ? context.userId : null, bio: rest.bio || null, affiliation: rest.affiliation || null, is_placeholder: false };
+    const row = {
+      ...rest,
+      publication_approved_at: approved ? new Date().toISOString() : null,
+      publication_approved_by: approved ? context.userId : null,
+      bio: rest.bio || null,
+      affiliation: rest.affiliation || null,
+      is_placeholder: false,
+    };
     const q = id
       ? context.supabase.from("leadership_team").update(row).eq("id", id)
       : context.supabase.from("leadership_team").insert(row);
@@ -128,22 +169,36 @@ export const reorderLeaders = createServerFn({ method: "POST" })
   .inputValidator((i) => z.object({ ids: z.array(z.string().uuid()).max(200) }).parse(i))
   .handler(async ({ context, data }) => {
     if (!(await isAdmin(context))) throw new Error("Unauthorized");
-    await Promise.all(data.ids.map((id, i) => context.supabase.from("leadership_team").update({ sort_order: i + 1 }).eq("id", id)));
+    await Promise.all(
+      data.ids.map((id, i) =>
+        context.supabase
+          .from("leadership_team")
+          .update({ sort_order: i + 1 })
+          .eq("id", id),
+      ),
+    );
     return { ok: true };
   });
 
 export const saveLeadershipSettings = createServerFn({ method: "POST" })
   .middleware([requirePortalAccess])
   .inputValidator((i) =>
-    z.object({ eyebrow: z.string().trim().max(80), heading: z.string().trim().min(1).max(160), subtext: z.string().trim().max(600) }).parse(i),
+    z
+      .object({
+        eyebrow: z.string().trim().max(80),
+        heading: z.string().trim().min(1).max(160),
+        subtext: z.string().trim().max(600),
+      })
+      .parse(i),
   )
   .handler(async ({ context, data }) => {
     if (!(await isAdmin(context))) throw new Error("Unauthorized");
-    const { error } = await context.supabase.from("leadership_settings").upsert({ singleton: true, ...data, updated_at: new Date().toISOString() });
+    const { error } = await context.supabase
+      .from("leadership_settings")
+      .upsert({ singleton: true, ...data, updated_at: new Date().toISOString() });
     if (error) throw error;
     return { ok: true };
   });
-
 
 function mediaVersion(path: string): string {
   let h = 5381;

@@ -2,7 +2,13 @@ import { meetingTypeLabel } from "@/lib/meeting-block";
 import { userFacingError } from "@/lib/user-facing-error";
 import { useEffect, useState } from "react";
 import { CalendarDays, Check, Clock, MapPin, Plus, RefreshCw, Video, X } from "lucide-react";
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { toast } from "sonner";
 import {
   cancelPoll,
@@ -16,7 +22,6 @@ import {
 import { Button } from "@/components/ui/button";
 import { MeetingSetupForm } from "@/components/portal/MeetingSetupForm";
 import { formatSlot, timezoneLabel } from "@/lib/meeting-block";
-
 
 const AVAIL_STYLE: Record<string, string> = {
   available: "bg-emerald-500/20 text-emerald-300 border-emerald-400/40",
@@ -62,7 +67,9 @@ export function AdminMeetings() {
 
   useEffect(() => {
     void refresh();
-    getCalendarConnection().then(setCal).catch(() => setCal({ connected: false, error: "Could not check Outlook" }));
+    getCalendarConnection()
+      .then(setCal)
+      .catch(() => setCal({ connected: false, error: "Could not check Outlook" }));
   }, []);
 
   async function confirm(pollId: string, slotId: string) {
@@ -91,17 +98,36 @@ export function AdminMeetings() {
   return (
     <div className="space-y-6">
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <p className="text-sm text-ivory/60">Official board meetings and your calendar. Propose a meeting and members mark their availability.</p>
-        <Button type="button" onClick={() => setProposeOpen(true)} className="rounded-none bg-gold text-navy hover:bg-gold/90">
+        <p className="text-sm text-ivory/60">
+          Official board meetings and your calendar. Propose a meeting and members mark their
+          availability.
+        </p>
+        <Button
+          type="button"
+          onClick={() => setProposeOpen(true)}
+          className="rounded-none bg-gold text-navy hover:bg-gold/90"
+        >
           <Plus className="mr-1 h-4 w-4" /> Propose a meeting
         </Button>
       </div>
       <div className="rounded-md border border-gold/20 bg-navy-deep/40 px-4 py-3 text-xs text-ivory/70">
         <CalendarDays className="mr-1 inline h-3.5 w-3.5 text-gold" />
-        {!cal ? "Checking Outlook calendar…" : cal.connected && !cal.error ? (
-          <>Holds go to: <span className="text-ivory">{cal.name} · {cal.email}</span> ({cal.calendar}). Confirm this is your working calendar.</>
+        {!cal ? (
+          "Checking Outlook calendar…"
+        ) : cal.connected && !cal.error ? (
+          <>
+            Holds go to:{" "}
+            <span className="text-ivory">
+              {cal.name} · {cal.email}
+            </span>{" "}
+            ({cal.calendar}). Confirm this is your working calendar.
+          </>
         ) : (
-          <span className="text-amber-300">Outlook calendar not connected{cal.error ? ` — ${userFacingError(cal.error, "Could not check Outlook")}` : ""}. Polls still work; proposed times are not held on your calendar.</span>
+          <span className="text-amber-300">
+            Outlook calendar not connected
+            {cal.error ? ` — ${userFacingError(cal.error, "Could not check Outlook")}` : ""}. Polls
+            still work; proposed times are not held on your calendar.
+          </span>
         )}
       </div>
       <Dialog open={proposeOpen} onOpenChange={setProposeOpen}>
@@ -109,12 +135,17 @@ export function AdminMeetings() {
           <DialogHeader>
             <DialogTitle className="font-display text-2xl">Propose a meeting</DialogTitle>
             <DialogDescription className="text-ivory/55">
-              Pick the meeting type — the right members are pre-selected automatically (committee meetings go only to
-              Methodology Committee members). Pick dates from the calendar; everyone invited gets an email asking for their
-              availability.
+              Pick the meeting type — the right members are pre-selected automatically (committee
+              meetings go only to Methodology Committee members). Pick dates from the calendar;
+              everyone invited gets an email asking for their availability.
             </DialogDescription>
           </DialogHeader>
-          <MeetingSetupForm onCreated={() => { setProposeOpen(false); void refresh(); }} />
+          <MeetingSetupForm
+            onCreated={() => {
+              setProposeOpen(false);
+              void refresh();
+            }}
+          />
         </DialogContent>
       </Dialog>
 
@@ -135,11 +166,16 @@ export function AdminMeetings() {
                     <div className="min-w-0">
                       <p className="font-display text-lg text-ivory">{p.title}</p>
                       <p className="mt-1 text-xs text-ivory/50">
-                        {meetingTypeLabel(p.meeting_type)} · {p.duration_minutes} min · {timezoneLabel(p.timezone)} ·{" "}
+                        {meetingTypeLabel(p.meeting_type)} · {p.duration_minutes} min ·{" "}
+                        {timezoneLabel(p.timezone)} ·{" "}
                         {p.format === "virtual" ? (
-                          <span className="inline-flex items-center gap-1"><Video className="h-3 w-3" /> Virtual</span>
+                          <span className="inline-flex items-center gap-1">
+                            <Video className="h-3 w-3" /> Virtual
+                          </span>
                         ) : (
-                          <span className="inline-flex items-center gap-1"><MapPin className="h-3 w-3" /> {p.location || "In person"}</span>
+                          <span className="inline-flex items-center gap-1">
+                            <MapPin className="h-3 w-3" /> {p.location || "In person"}
+                          </span>
                         )}
                       </p>
                     </div>
@@ -157,12 +193,25 @@ export function AdminMeetings() {
                   </div>
                   <div className="mt-2 flex flex-wrap items-center gap-2 text-[11px]">
                     {p.calendar_sync_error ? (
-                      <span className="rounded-full border border-amber-400/40 px-2 py-0.5 text-amber-300" title={p.calendar_sync_error}>Calendar not synced</span>
+                      <span
+                        className="rounded-full border border-amber-400/40 px-2 py-0.5 text-amber-300"
+                        title={p.calendar_sync_error}
+                      >
+                        Calendar not synced
+                      </span>
                     ) : p.calendar_synced_at ? (
-                      <span className="rounded-full border border-emerald-400/40 px-2 py-0.5 text-emerald-300">Outlook in sync</span>
+                      <span className="rounded-full border border-emerald-400/40 px-2 py-0.5 text-emerald-300">
+                        Outlook in sync
+                      </span>
                     ) : null}
-                    <button type="button" disabled={syncing === p.id} onClick={() => void resync(p.id)} className="inline-flex items-center gap-1 text-ivory/50 hover:text-gold">
-                      <RefreshCw className={`h-3 w-3 ${syncing === p.id ? "animate-spin" : ""}`} /> Re-sync calendar
+                    <button
+                      type="button"
+                      disabled={syncing === p.id}
+                      onClick={() => void resync(p.id)}
+                      className="inline-flex items-center gap-1 text-ivory/50 hover:text-gold"
+                    >
+                      <RefreshCw className={`h-3 w-3 ${syncing === p.id ? "animate-spin" : ""}`} />{" "}
+                      Re-sync calendar
                     </button>
                   </div>
 
@@ -172,7 +221,10 @@ export function AdminMeetings() {
                         <tr className="text-left text-[11px] uppercase tracking-[0.12em] text-ivory/45">
                           <th className="border-b border-gold/15 py-2 pr-3">Member</th>
                           {p.slots.map((s: any) => (
-                            <th key={s.id} className="border-b border-gold/15 px-2 py-2 text-center">
+                            <th
+                              key={s.id}
+                              className="border-b border-gold/15 px-2 py-2 text-center"
+                            >
                               <Clock className="mr-1 inline h-3 w-3" />
                               {formatSlot(s.starts_at, p.timezone)}
                             </th>
@@ -184,12 +236,20 @@ export function AdminMeetings() {
                           <tr key={m.id} className="border-b border-ivory/5">
                             <td className="py-2 pr-3 text-ivory/85">{memberName(m)}</td>
                             {p.slots.map((s: any) => {
-                              const r = p.responses.find((x: any) => x.slot_id === s.id && x.member_id === m.id);
+                              const r = p.responses.find(
+                                (x: any) => x.slot_id === s.id && x.member_id === m.id,
+                              );
                               return (
                                 <td key={s.id} className="px-2 py-2 text-center">
                                   {r ? (
-                                    <span className={`inline-block rounded-full border px-2 py-0.5 text-[10px] ${AVAIL_STYLE[r.availability]}`}>
-                                      {r.availability === "available" ? "Yes" : r.availability === "if_needed" ? "If needed" : "No"}
+                                    <span
+                                      className={`inline-block rounded-full border px-2 py-0.5 text-[10px] ${AVAIL_STYLE[r.availability]}`}
+                                    >
+                                      {r.availability === "available"
+                                        ? "Yes"
+                                        : r.availability === "if_needed"
+                                          ? "If needed"
+                                          : "No"}
                                     </span>
                                   ) : (
                                     <span className="text-[10px] text-ivory/30">—</span>
@@ -200,7 +260,9 @@ export function AdminMeetings() {
                           </tr>
                         ))}
                         <tr className="text-ivory/60">
-                          <td className="py-2 pr-3 text-[11px] uppercase tracking-[0.12em]">Available</td>
+                          <td className="py-2 pr-3 text-[11px] uppercase tracking-[0.12em]">
+                            Available
+                          </td>
                           {p.slots.map((s: any) => {
                             const count = p.responses.filter(
                               (r: any) => r.slot_id === s.id && r.availability === "available",
@@ -208,12 +270,17 @@ export function AdminMeetings() {
                             const best = Math.max(
                               ...p.slots.map(
                                 (x: any) =>
-                                  p.responses.filter((r: any) => r.slot_id === x.id && r.availability === "available")
-                                    .length,
+                                  p.responses.filter(
+                                    (r: any) =>
+                                      r.slot_id === x.id && r.availability === "available",
+                                  ).length,
                               ),
                             );
                             return (
-                              <td key={s.id} className={`px-2 py-2 text-center font-semibold ${count === best && count > 0 ? "text-gold" : ""}`}>
+                              <td
+                                key={s.id}
+                                className={`px-2 py-2 text-center font-semibold ${count === best && count > 0 ? "text-gold" : ""}`}
+                              >
                                 {count}/{p.invited.length}
                               </td>
                             );
@@ -231,7 +298,8 @@ export function AdminMeetings() {
                           const m = p.invited.find((x: any) => x.id === n.member_id);
                           return (
                             <p key={n.member_id} className="text-xs text-ivory/55">
-                              <span className="text-gold/80">{m ? memberName(m) : "Member"}:</span> {n.note}
+                              <span className="text-gold/80">{m ? memberName(m) : "Member"}:</span>{" "}
+                              {n.note}
                             </p>
                           );
                         })}
@@ -249,7 +317,8 @@ export function AdminMeetings() {
                           onClick={() => void confirm(p.id, s.id)}
                           className="border-gold/40 text-gold hover:bg-gold/10"
                         >
-                          <Check className="mr-1 h-3.5 w-3.5" /> Confirm {formatSlot(s.starts_at, p.timezone)}
+                          <Check className="mr-1 h-3.5 w-3.5" /> Confirm{" "}
+                          {formatSlot(s.starts_at, p.timezone)}
                         </Button>
                       ))}
                       <Button

@@ -1,9 +1,19 @@
-import { applyTokens, parseSignatures, renderBrandedEmail, renderBrandedEmailText } from "@/lib/branded-email";
+import {
+  applyTokens,
+  parseSignatures,
+  renderBrandedEmail,
+  renderBrandedEmailText,
+} from "@/lib/branded-email";
 import { SYSTEM_EMAIL_DEFAULTS } from "@/lib/system-email-defaults";
 
 type BrandedEmail = Parameters<typeof renderBrandedEmail>[0];
 
-export async function sendPortalEmail(to: string, email: BrandedEmail, label: string, idempotencyKey?: string): Promise<boolean> {
+export async function sendPortalEmail(
+  to: string,
+  email: BrandedEmail,
+  label: string,
+  idempotencyKey?: string,
+): Promise<boolean> {
   const apiKey = process.env["LOVABLE_API_KEY"];
   if (!apiKey) return false;
   try {
@@ -40,7 +50,11 @@ export async function loadSystemEmail(key: string) {
   let row: any = null;
   try {
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const { data } = await supabaseAdmin.from("portal_email_templates").select("*").eq("system_key", key).maybeSingle();
+    const { data } = await supabaseAdmin
+      .from("portal_email_templates")
+      .select("*")
+      .eq("system_key", key)
+      .maybeSingle();
     row = data;
   } catch (err) {
     console.error(`Could not load template ${key}`, err);

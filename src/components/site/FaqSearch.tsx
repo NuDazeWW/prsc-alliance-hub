@@ -114,7 +114,6 @@ export function FaqSearch({ footer, source = "overlay" }: { footer?: ReactNode; 
     return () => clearTimeout(t);
   }, [query, category, results.length, source]);
 
-
   return (
     <div className="flex h-full flex-col">
       <div className="shrink-0 border-b border-navy/10 bg-card px-5 md:px-8 pt-4 pb-3">

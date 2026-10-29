@@ -70,7 +70,14 @@ export const formatSlotET = (iso: string) => formatSlot(iso);
 
 function zoneOffsetMs(ts: number, tz: string) {
   const parts = new Intl.DateTimeFormat("en-US", {
-    timeZone: tz, hourCycle: "h23", year: "numeric", month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit", second: "2-digit",
+    timeZone: tz,
+    hourCycle: "h23",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
   }).formatToParts(new Date(ts));
   const g = (k: string) => Number(parts.find((p) => p.type === k)!.value);
   return Date.UTC(g("year"), g("month") - 1, g("day"), g("hour"), g("minute"), g("second")) - ts;
@@ -92,15 +99,24 @@ export function zonedToUtc(local: string, tz?: string | null) {
 /** Plain-text meeting section used by invitations, Compose, and poll emails. */
 export function meetingBlockText(poll: MeetingBlockPoll, slots: { starts_at: string }[]) {
   const type = meetingTypeLabel(poll.meeting_type);
-  const where = poll.format === "in_person" ? `Format: In person${poll.location ? ` — ${poll.location}` : ""}` : "Format: Virtual — the joining link is shared once the time is confirmed";
-  const header = [`Upcoming meeting: ${poll.title} (${type})`, where, `Duration: ${poll.duration_minutes} minutes`].join("\n");
+  const where =
+    poll.format === "in_person"
+      ? `Format: In person${poll.location ? ` — ${poll.location}` : ""}`
+      : "Format: Virtual — the joining link is shared once the time is confirmed";
+  const header = [
+    `Upcoming meeting: ${poll.title} (${type})`,
+    where,
+    `Duration: ${poll.duration_minutes} minutes`,
+  ].join("\n");
   const times = [...slots]
     .sort((a, b) => a.starts_at.localeCompare(b.starts_at))
     .map((s) => `• ${formatSlot(s.starts_at, poll.timezone)}`)
     .join("\n");
   const parts = [header];
   if (poll.description?.trim()) parts.push(poll.description.trim());
-  parts.push(`Proposed times (${timezoneLabel(poll.timezone)} time — please confirm each time in your local time zone):\n${times}`);
+  parts.push(
+    `Proposed times (${timezoneLabel(poll.timezone)} time — please confirm each time in your local time zone):\n${times}`,
+  );
   parts.push(
     `Please mark your availability for each option in your private Welcome Center${poll.respond_by ? ` by ${formatSlot(poll.respond_by, poll.timezone)}` : ""}.`,
   );

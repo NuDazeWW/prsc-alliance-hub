@@ -27,13 +27,72 @@ export type ForumEmailDef = {
 const PRIORITY_B = "Available once the Strategic Forum workspace is live and tested";
 
 export const FORUM_EMAILS: ForumEmailDef[] = [
-  { key: "forum_confirmed", number: 2, label: "Forum confirmed", enabled: true, gate: "invite", fields: [{ token: "forum_date", label: "Forum date" }, { token: "forum_time", label: "Time and time zone" }, { token: "forum_location", label: "Location or virtual meeting" }] },
-  { key: "briefing_released", number: 3, label: "Strategic briefing released", enabled: true, gate: "cleared", needsDocument: true, fields: [] },
-  { key: "input_requested", number: 4, label: "Executive questions requested", enabled: true, gate: "cleared", fields: [{ token: "deadline", label: "Submission deadline" }] },
-  { key: "input_reminder", number: 5, label: "Executive questions reminder", enabled: true, gate: "cleared", fields: [{ token: "deadline", label: "Deadline" }] },
-  { key: "final_agenda", number: 6, label: "Final Forum agenda", enabled: true, gate: "cleared", fields: [{ token: "forum_when", label: "Forum date and time" }] },
-  { key: "coordination_summary", number: 7, label: "Forum coordination summary", enabled: true, gate: "cleared", fields: [] },
-  { key: "followup_assigned", number: 8, label: "Follow-up assignment", enabled: false, disabledReason: PRIORITY_B, gate: "cleared", fields: [{ token: "action_title", label: "Action" }, { token: "target_date", label: "Target date" }, { token: "coordinating_entity", label: "Coordinating entity" }] },
+  {
+    key: "forum_confirmed",
+    number: 2,
+    label: "Forum confirmed",
+    enabled: true,
+    gate: "invite",
+    fields: [
+      { token: "forum_date", label: "Forum date" },
+      { token: "forum_time", label: "Time and time zone" },
+      { token: "forum_location", label: "Location or virtual meeting" },
+    ],
+  },
+  {
+    key: "briefing_released",
+    number: 3,
+    label: "Strategic briefing released",
+    enabled: true,
+    gate: "cleared",
+    needsDocument: true,
+    fields: [],
+  },
+  {
+    key: "input_requested",
+    number: 4,
+    label: "Executive questions requested",
+    enabled: true,
+    gate: "cleared",
+    fields: [{ token: "deadline", label: "Submission deadline" }],
+  },
+  {
+    key: "input_reminder",
+    number: 5,
+    label: "Executive questions reminder",
+    enabled: true,
+    gate: "cleared",
+    fields: [{ token: "deadline", label: "Deadline" }],
+  },
+  {
+    key: "final_agenda",
+    number: 6,
+    label: "Final Forum agenda",
+    enabled: true,
+    gate: "cleared",
+    fields: [{ token: "forum_when", label: "Forum date and time" }],
+  },
+  {
+    key: "coordination_summary",
+    number: 7,
+    label: "Forum coordination summary",
+    enabled: true,
+    gate: "cleared",
+    fields: [],
+  },
+  {
+    key: "followup_assigned",
+    number: 8,
+    label: "Follow-up assignment",
+    enabled: false,
+    disabledReason: PRIORITY_B,
+    gate: "cleared",
+    fields: [
+      { token: "action_title", label: "Action" },
+      { token: "target_date", label: "Target date" },
+      { token: "coordinating_entity", label: "Coordinating entity" },
+    ],
+  },
 ];
 
 export type ForumRecipient = {
@@ -48,11 +107,20 @@ export type ForumRecipient = {
 
 /** May be invited to the Forum: participating, NDA verified, not declined. Not the same as cleared. */
 export function forumInviteEligible(m: ForumRecipient) {
-  return m.participates_in_forum !== false && Boolean(m.nda_verified_at) && m.forum_clearance_status !== "declined";
+  return (
+    m.participates_in_forum !== false &&
+    Boolean(m.nda_verified_at) &&
+    m.forum_clearance_status !== "declined"
+  );
 }
 
 /** Returns null when the member may receive the email, or the reason they may not. */
-export function forumEmailBlock(key: ForumEmailKey, m: ForumRecipient, doc?: VisibilityDoc | null, hasCompletion = false): string | null {
+export function forumEmailBlock(
+  key: ForumEmailKey,
+  m: ForumRecipient,
+  doc?: VisibilityDoc | null,
+  hasCompletion = false,
+): string | null {
   const def = FORUM_EMAILS.find((d) => d.key === key);
   if (!def) return "Unknown email";
   if (!def.enabled) return def.disabledReason ?? "Not yet available";
@@ -69,7 +137,12 @@ export function forumEmailBlock(key: ForumEmailKey, m: ForumRecipient, doc?: Vis
 }
 
 /** One send per forum, email, version and recipient. */
-export function forumIdempotencyKey(forumKey: string, emailKey: string, version: number, memberId: string) {
+export function forumIdempotencyKey(
+  forumKey: string,
+  emailKey: string,
+  version: number,
+  memberId: string,
+) {
   return `forum:${forumKey}:${emailKey}:v${version}:${memberId}`;
 }
 
@@ -77,6 +150,12 @@ export function forumIdempotencyKey(forumKey: string, emailKey: string, version:
  * A member already received a meeting confirmation through the Meetings poll
  * flow, so the manual Forum confirmation must not duplicate it.
  */
-export function confirmedThroughPoll(memberId: string, confirmedPolls: { invited_member_ids: unknown }[]): boolean {
-  return confirmedPolls.some((p) => Array.isArray(p.invited_member_ids) && (p.invited_member_ids as string[]).includes(memberId));
+export function confirmedThroughPoll(
+  memberId: string,
+  confirmedPolls: { invited_member_ids: unknown }[],
+): boolean {
+  return confirmedPolls.some(
+    (p) =>
+      Array.isArray(p.invited_member_ids) && (p.invited_member_ids as string[]).includes(memberId),
+  );
 }

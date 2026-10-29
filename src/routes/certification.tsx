@@ -34,12 +34,30 @@ export const Route = createFileRoute("/certification")({
 });
 
 const ELIGIBLE = [
-  { label: "Teams", body: "Signals institutional readiness to service partnership commitments at scale." },
-  { label: "Drivers", body: "Signals a personal-brand infrastructure a sponsor can measure and rely on." },
-  { label: "Series & Leagues", body: "Signals a governed commercial platform partners can activate against." },
-  { label: "Brands", body: "Signals a partnership organization equipped to buy, measure, and renew with rigor." },
-  { label: "Agencies", body: "Signals an advisory practice operating to a published, independent standard." },
-  { label: "Investors", body: "Signals underwriting and portfolio oversight aligned to the market's readiness standard." },
+  {
+    label: "Teams",
+    body: "Signals institutional readiness to service partnership commitments at scale.",
+  },
+  {
+    label: "Drivers",
+    body: "Signals a personal-brand infrastructure a sponsor can measure and rely on.",
+  },
+  {
+    label: "Series & Leagues",
+    body: "Signals a governed commercial platform partners can activate against.",
+  },
+  {
+    label: "Brands",
+    body: "Signals a partnership organization equipped to buy, measure, and renew with rigor.",
+  },
+  {
+    label: "Agencies",
+    body: "Signals an advisory practice operating to a published, independent standard.",
+  },
+  {
+    label: "Investors",
+    body: "Signals underwriting and portfolio oversight aligned to the market's readiness standard.",
+  },
 ];
 
 function CertificationPage() {
@@ -74,8 +92,8 @@ function CertificationPage() {
             <p>
               The Readiness Certified&trade; mark is not a membership badge or a sponsorship tier.
               It is a standards-based designation issued only to entities that have submitted
-              evidence through the Evidence Portal&trade;, received a PRSC Readiness Score&trade;
-              at or above the published certification threshold, and entered into a written
+              evidence through the Evidence Portal&trade;, received a PRSC Readiness Score&trade; at
+              or above the published certification threshold, and entered into a written
               Certification License Agreement with the Council.
             </p>
             <p>
@@ -142,10 +160,9 @@ function CertificationPage() {
           </h2>
           <div className="gold-rule my-8 mx-auto w-24" />
           <p className="text-lg text-white/70 leading-relaxed mb-10 max-w-2xl mx-auto">
-            The first cohort of Readiness Certified&trade; entities will be drawn from the
-            Readiness Vanguard&trade; program. Certification is not yet open to the general market.
-            If you want to be notified when certification criteria and applications open, register
-            below.
+            The first cohort of Readiness Certified&trade; entities will be drawn from the Readiness
+            Vanguard&trade; program. Certification is not yet open to the general market. If you
+            want to be notified when certification criteria and applications open, register below.
           </p>
           <CertificationNotifyForm />
           <p className="mt-6 text-xs italic text-white/50">

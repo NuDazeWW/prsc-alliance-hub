@@ -1,17 +1,37 @@
 import { describe, it } from "node:test";
 import { strictEqual, notStrictEqual } from "node:assert";
-import { confirmedThroughPoll, forumEmailBlock, forumInviteEligible, forumIdempotencyKey } from "./forum-communications";
+import {
+  confirmedThroughPoll,
+  forumEmailBlock,
+  forumInviteEligible,
+  forumIdempotencyKey,
+} from "./forum-communications";
 
-const cleared = { status: "active", participates_in_forum: true, nda_verified_at: "2026-10-01", forum_clearance_status: "cleared" };
+const cleared = {
+  status: "active",
+  participates_in_forum: true,
+  nda_verified_at: "2026-10-01",
+  forum_clearance_status: "cleared",
+};
 const invitable = { ...cleared, forum_clearance_status: "not_reviewed" };
-const briefing = { classification: "confidential_forum", superseded_at: null, is_forum_prep: false };
+const briefing = {
+  classification: "confidential_forum",
+  superseded_at: null,
+  is_forum_prep: false,
+};
 
 describe("Forum email recipients", () => {
   it("excludes a member with no verified NDA", () => {
-    strictEqual(forumEmailBlock("forum_confirmed", { ...cleared, nda_verified_at: null }), "NDA not verified");
+    strictEqual(
+      forumEmailBlock("forum_confirmed", { ...cleared, nda_verified_at: null }),
+      "NDA not verified",
+    );
   });
   it("excludes a member opted out of the Forum", () => {
-    strictEqual(forumEmailBlock("final_agenda", { ...cleared, participates_in_forum: false }), "Opted out of Forum");
+    strictEqual(
+      forumEmailBlock("final_agenda", { ...cleared, participates_in_forum: false }),
+      "Opted out of Forum",
+    );
   });
   it("sends Forum confirmation to an invitable member who is not yet cleared", () => {
     strictEqual(forumEmailBlock("forum_confirmed", invitable), null);
@@ -22,8 +42,17 @@ describe("Forum email recipients", () => {
   });
   it("requires both clearance and document permission for the briefing", () => {
     strictEqual(forumEmailBlock("briefing_released", invitable, briefing), "Not Forum-cleared");
-    strictEqual(forumEmailBlock("briefing_released", cleared, { ...briefing, classification: "restricted_opportunity" }), "No access to briefing");
-    strictEqual(forumEmailBlock("briefing_released", { ...cleared, addendum_complete: true }, briefing), null);
+    strictEqual(
+      forumEmailBlock("briefing_released", cleared, {
+        ...briefing,
+        classification: "restricted_opportunity",
+      }),
+      "No access to briefing",
+    );
+    strictEqual(
+      forumEmailBlock("briefing_released", { ...cleared, addendum_complete: true }, briefing),
+      null,
+    );
   });
   it("keeps Email 8 switched off until follow-up assignments exist", () => {
     notStrictEqual(forumEmailBlock("followup_assigned", cleared), null);

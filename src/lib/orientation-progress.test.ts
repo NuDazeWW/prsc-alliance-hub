@@ -1,6 +1,13 @@
 import { describe, it } from "node:test";
 import assert from "node:assert/strict";
-import { clearOrientationProgress, markOrientationDismissed, orientationDismissed, readOrientationStep, saveOrientationStep, shouldAutoOpenOrientation } from "./orientation-progress";
+import {
+  clearOrientationProgress,
+  markOrientationDismissed,
+  orientationDismissed,
+  readOrientationStep,
+  saveOrientationStep,
+  shouldAutoOpenOrientation,
+} from "./orientation-progress";
 
 function memoryStore(initial: Record<string, string> = {}) {
   const data = new Map(Object.entries(initial));
@@ -28,14 +35,28 @@ describe("orientation progress", () => {
 
   it("ignores corrupt or out-of-range saved values", () => {
     for (const bad of ["abc", "-1", "6", "2.5", ""]) {
-      assert.equal(readOrientationStep("m1", memoryStore({ "prsc-orientation-progress:m1": bad })), null, bad);
+      assert.equal(
+        readOrientationStep("m1", memoryStore({ "prsc-orientation-progress:m1": bad })),
+        null,
+        bad,
+      );
     }
   });
 
   it("works without storage and never throws", () => {
     assert.equal(readOrientationStep("m1", null), null);
     assert.doesNotThrow(() => saveOrientationStep("m1", 2, null));
-    const broken = { getItem: () => { throw new Error("blocked"); }, setItem: () => { throw new Error("blocked"); }, removeItem: () => { throw new Error("blocked"); } };
+    const broken = {
+      getItem: () => {
+        throw new Error("blocked");
+      },
+      setItem: () => {
+        throw new Error("blocked");
+      },
+      removeItem: () => {
+        throw new Error("blocked");
+      },
+    };
     assert.equal(readOrientationStep("m1", broken), null);
     assert.doesNotThrow(() => saveOrientationStep("m1", 2, broken));
     assert.equal(orientationDismissed("m1", broken), false);
@@ -55,7 +76,12 @@ describe("orientation progress", () => {
 });
 
 describe("orientation auto-open", () => {
-  const base = { needsOrientation: true, memberId: "m1", alreadyOpenedFor: null as string | null, dismissed: false };
+  const base = {
+    needsOrientation: true,
+    memberId: "m1",
+    alreadyOpenedFor: null as string | null,
+    dismissed: false,
+  };
 
   it("first login: a member who has not completed orientation is presented with it", () => {
     assert.equal(shouldAutoOpenOrientation(base), true);
@@ -70,7 +96,10 @@ describe("orientation auto-open", () => {
   });
 
   it("opens again for a different member signing in without leaving the page", () => {
-    assert.equal(shouldAutoOpenOrientation({ ...base, alreadyOpenedFor: "m1", memberId: "m2" }), true);
+    assert.equal(
+      shouldAutoOpenOrientation({ ...base, alreadyOpenedFor: "m1", memberId: "m2" }),
+      true,
+    );
   });
 
   it("does not trap a member who closed it on purpose", () => {

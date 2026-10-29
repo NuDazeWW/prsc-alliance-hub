@@ -215,8 +215,8 @@ function CharterPage() {
                 Governance &amp; Market-Trust Charter
               </h1>
               <p className="mt-5 italic text-lg md:text-xl text-white/60 max-w-2xl">
-                The foundational commitments that govern the Council's independence,
-                methodology, and accountability.
+                The foundational commitments that govern the Council's independence, methodology,
+                and accountability.
               </p>
               <p className="mt-6 text-xs tracking-[0.14em] uppercase text-gold">
                 Version 1.0 &nbsp;·&nbsp; Effective July 22, 2026 &nbsp;·&nbsp; Public Document
@@ -237,7 +237,6 @@ function CharterPage() {
             >
               Download PDF
             </a>
-
           </div>
         </div>
       </header>
@@ -266,15 +265,9 @@ function CharterPage() {
 
       {/* Articles */}
       {articles.map((a, i) => (
-        <section
-          key={a.id}
-          id={a.id}
-          className={i % 2 === 0 ? "bg-white" : "bg-[#F5F5F0]"}
-        >
+        <section key={a.id} id={a.id} className={i % 2 === 0 ? "bg-white" : "bg-[#F5F5F0]"}>
           <div className="mx-auto max-w-3xl px-6 py-16 md:py-24 scroll-mt-32">
-            <p className="label-caps text-gold text-xs tracking-[0.18em] mb-3">
-              {a.eyebrow}
-            </p>
+            <p className="label-caps text-gold text-xs tracking-[0.18em] mb-3">{a.eyebrow}</p>
             <h2 className="font-display text-3xl md:text-5xl font-bold text-[#0A1322] leading-tight">
               {a.title}
             </h2>
@@ -296,9 +289,8 @@ function CharterPage() {
       <section className="bg-[#0A1322] text-white">
         <div className="mx-auto max-w-3xl px-6 py-20 text-center">
           <p className="text-lg md:text-xl leading-relaxed text-white">
-            These commitments are binding on the Governing Body, the Methodology Committee,
-            and all affiliated commercial entities. They are published in full as a permanent
-            public record.
+            These commitments are binding on the Governing Body, the Methodology Committee, and all
+            affiliated commercial entities. They are published in full as a permanent public record.
           </p>
           <div className="mt-8">
             <Link

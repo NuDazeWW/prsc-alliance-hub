@@ -6,9 +6,14 @@ export function memberJourneyPresentation(
   journey: JourneyStatus,
 ) {
   const forumOnly = member.is_candidate === true;
-  const forumParticipationComplete = member.participates_in_forum !== false && journey.stageDone[0] === true && journey.forumCleared;
+  const forumParticipationComplete =
+    member.participates_in_forum !== false && journey.stageDone[0] === true && journey.forumCleared;
   const label = forumOnly
-    ? forumParticipationComplete ? `${STAGES[0].label} complete` : journey.currentStage === 1 ? journey.label : STAGES[0].label
+    ? forumParticipationComplete
+      ? `${STAGES[0].label} complete`
+      : journey.currentStage === 1
+        ? journey.label
+        : STAGES[0].label
     : journey.label;
   return { forumOnly, forumParticipationComplete, label };
 }

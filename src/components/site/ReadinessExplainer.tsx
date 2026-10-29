@@ -30,7 +30,17 @@ const STEPS = [
   },
 ];
 
-function StaticBar({ value, visible, Icon, label }: { value: number; visible: boolean; Icon: typeof Radio; label: string }) {
+function StaticBar({
+  value,
+  visible,
+  Icon,
+  label,
+}: {
+  value: number;
+  visible: boolean;
+  Icon: typeof Radio;
+  label: string;
+}) {
   return (
     <motion.div
       initial={false}
@@ -51,7 +61,10 @@ function StaticBar({ value, visible, Icon, label }: { value: number; visible: bo
         >
           {label}
         </p>
-        <div className="h-[6px] w-full rounded-full overflow-hidden" style={{ backgroundColor: "rgba(242,239,230,0.4)" }}>
+        <div
+          className="h-[6px] w-full rounded-full overflow-hidden"
+          style={{ backgroundColor: "rgba(242,239,230,0.4)" }}
+        >
           <motion.div
             className="h-full rounded-full"
             initial={false}
@@ -88,12 +101,27 @@ function StepGauge({ target, active }: { target: number; active: boolean }) {
   return (
     <div className="relative h-[180px] w-[180px] md:h-[220px] md:w-[220px]">
       <svg viewBox="0 0 200 200" className="h-full w-full -rotate-90">
-        <circle cx="100" cy="100" r="90" fill="none" stroke="rgba(255,255,255,0.06)" strokeWidth="1.5" />
+        <circle
+          cx="100"
+          cy="100"
+          r="90"
+          fill="none"
+          stroke="rgba(255,255,255,0.06)"
+          strokeWidth="1.5"
+        />
         <motion.circle
-          cx="100" cy="100" r="90" fill="none"
-          stroke="url(#explainerGoldGrad)" strokeWidth="3" strokeLinecap="round"
+          cx="100"
+          cy="100"
+          r="90"
+          fill="none"
+          stroke="url(#explainerGoldGrad)"
+          strokeWidth="3"
+          strokeLinecap="round"
           strokeDasharray="565.48"
-          style={{ strokeDashoffset: strokeOffset, filter: "drop-shadow(0 0 6px rgba(212,175,55,0.6))" }}
+          style={{
+            strokeDashoffset: strokeOffset,
+            filter: "drop-shadow(0 0 6px rgba(212,175,55,0.6))",
+          }}
         />
         <defs>
           <linearGradient id="explainerGoldGrad" x1="0" y1="0" x2="1" y2="1">
@@ -122,7 +150,10 @@ function StepVisual({ step }: { step: number }) {
   return (
     <div className="relative w-full max-w-xl mx-auto px-2">
       <motion.div
-        animate={{ filter: step === 0 ? "blur(10px)" : "blur(0px)", opacity: step === 0 ? 0.55 : 1 }}
+        animate={{
+          filter: step === 0 ? "blur(10px)" : "blur(0px)",
+          opacity: step === 0 ? 0.55 : 1,
+        }}
         transition={{ duration: 0.9, ease: "easeOut" }}
       >
         {/* Mobile: gauge on top, bars stacked below */}
@@ -138,7 +169,11 @@ function StepVisual({ step }: { step: number }) {
                     exit={{ opacity: 0 }}
                     transition={{ duration: 0.6, ease: "easeOut" }}
                     className="text-[11px] uppercase font-medium text-center leading-tight"
-                    style={{ color: "#D4AF37", letterSpacing: "0.14em", textShadow: "0 0 14px rgba(212,175,55,0.55)" }}
+                    style={{
+                      color: "#D4AF37",
+                      letterSpacing: "0.14em",
+                      textShadow: "0 0 14px rgba(212,175,55,0.55)",
+                    }}
                   >
                     Commercially Undeniable
                   </motion.div>
@@ -148,7 +183,13 @@ function StepVisual({ step }: { step: number }) {
           </div>
           <div className="grid grid-cols-1 gap-4 w-full max-w-sm">
             {DIMENSIONS.map((d, i) => (
-              <StaticBar key={d.key} value={d.value} visible={i < barsVisibleUpTo} Icon={d.icon} label={d.label} />
+              <StaticBar
+                key={d.key}
+                value={d.value}
+                visible={i < barsVisibleUpTo}
+                Icon={d.icon}
+                label={d.label}
+              />
             ))}
           </div>
         </div>
@@ -157,7 +198,13 @@ function StepVisual({ step }: { step: number }) {
         <div className="hidden lg:flex items-center gap-6">
           <div className="flex-1 flex flex-col justify-between gap-5" style={{ minHeight: 340 }}>
             {leftDims.map((d, i) => (
-              <StaticBar key={d.key} value={d.value} visible={i < barsVisibleUpTo} Icon={d.icon} label={d.label} />
+              <StaticBar
+                key={d.key}
+                value={d.value}
+                visible={i < barsVisibleUpTo}
+                Icon={d.icon}
+                label={d.label}
+              />
             ))}
           </div>
           <div className="shrink-0 flex flex-col items-center justify-center">
@@ -171,7 +218,11 @@ function StepVisual({ step }: { step: number }) {
                     exit={{ opacity: 0 }}
                     transition={{ duration: 0.6, ease: "easeOut" }}
                     className="text-[12px] uppercase font-medium text-center leading-tight"
-                    style={{ color: "#D4AF37", letterSpacing: "0.14em", textShadow: "0 0 14px rgba(212,175,55,0.55)" }}
+                    style={{
+                      color: "#D4AF37",
+                      letterSpacing: "0.14em",
+                      textShadow: "0 0 14px rgba(212,175,55,0.55)",
+                    }}
                   >
                     Commercially Undeniable
                   </motion.div>
@@ -181,7 +232,13 @@ function StepVisual({ step }: { step: number }) {
           </div>
           <div className="flex-1 flex flex-col justify-between gap-5" style={{ minHeight: 340 }}>
             {rightDims.map((d, i) => (
-              <StaticBar key={d.key} value={d.value} visible={i + 3 < barsVisibleUpTo} Icon={d.icon} label={d.label} />
+              <StaticBar
+                key={d.key}
+                value={d.value}
+                visible={i + 3 < barsVisibleUpTo}
+                Icon={d.icon}
+                label={d.label}
+              />
             ))}
           </div>
         </div>
@@ -205,7 +262,7 @@ export function ReadinessExplainer() {
             if (entry.isIntersecting) setActiveStep(idx);
           });
         },
-        { rootMargin: "-40% 0px -40% 0px", threshold: 0 }
+        { rootMargin: "-40% 0px -40% 0px", threshold: 0 },
       );
       io.observe(el);
       observers.push(io);
@@ -218,9 +275,7 @@ export function ReadinessExplainer() {
       <div className="mx-auto max-w-7xl px-6 pt-24 md:pt-32">
         <div className="text-center max-w-3xl mx-auto">
           <p className="label-caps text-gold mb-6">The Explainer</p>
-          <h2 className="font-display text-5xl md:text-6xl leading-[1.05]">
-            What Is Readiness?
-          </h2>
+          <h2 className="font-display text-5xl md:text-6xl leading-[1.05]">What Is Readiness?</h2>
           <div className="gold-rule my-8 mx-auto w-24" />
         </div>
       </div>
@@ -233,7 +288,9 @@ export function ReadinessExplainer() {
             return (
               <div
                 key={i}
-                ref={(el) => { stepRefs.current[i] = el; }}
+                ref={(el) => {
+                  stepRefs.current[i] = el;
+                }}
                 className="min-h-[24vh] lg:min-h-[36vh] flex items-center py-6 lg:py-4 lg:justify-end"
               >
                 <motion.div
@@ -275,7 +332,9 @@ export function ReadinessExplainer() {
                     </p>
                     <p
                       className="text-base md:text-[17px] leading-relaxed"
-                      style={{ color: isActive ? "rgba(242,239,230,0.7)" : "rgba(242,239,230,0.4)" }}
+                      style={{
+                        color: isActive ? "rgba(242,239,230,0.7)" : "rgba(242,239,230,0.4)",
+                      }}
                     >
                       {s.body}
                     </p>

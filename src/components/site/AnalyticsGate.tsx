@@ -14,7 +14,9 @@ function loadGA() {
   document.head.appendChild(s);
 
   (window as any).dataLayer = (window as any).dataLayer || [];
-  function gtag(...args: unknown[]) { (window as any).dataLayer.push(args); }
+  function gtag(...args: unknown[]) {
+    (window as any).dataLayer.push(args);
+  }
   (window as any).gtag = gtag;
   gtag("js", new Date());
   gtag("config", GA_ID, { anonymize_ip: true });
@@ -46,9 +48,10 @@ export function AnalyticsGate() {
         // Fail closed — don't load analytics if we can't determine region
       }
     })();
-    return () => { cancelled = true; };
+    return () => {
+      cancelled = true;
+    };
   }, []);
-
 
   const accept = () => {
     localStorage.setItem(CONSENT_KEY, "accepted");
@@ -71,9 +74,12 @@ export function AnalyticsGate() {
       className="fixed bottom-4 left-4 right-4 z-[70] mx-auto max-w-2xl rounded-sm border border-gold/40 bg-navy/95 p-5 text-ivory shadow-2xl backdrop-blur md:bottom-6 md:left-6 md:right-auto"
     >
       <p className="text-sm leading-relaxed text-ivory/90">
-        We use Google Analytics to understand how visitors use the Standard.
-        Analytics cookies are only set with your consent.{" "}
-        <a href="/governance" className="underline decoration-gold/60 underline-offset-2 hover:text-gold">
+        We use Google Analytics to understand how visitors use the Standard. Analytics cookies are
+        only set with your consent.{" "}
+        <a
+          href="/governance"
+          className="underline decoration-gold/60 underline-offset-2 hover:text-gold"
+        >
           Learn more
         </a>
         .

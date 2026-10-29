@@ -8,9 +8,16 @@ export const Route = createFileRoute("/request-briefing")({
   head: () => ({
     meta: [
       { title: "Request a Briefing — PRSC" },
-      { name: "description", content: "Request a private briefing on the PRSC Readiness Standard™, methodology, and how it applies to your organization." },
+      {
+        name: "description",
+        content:
+          "Request a private briefing on the PRSC Readiness Standard™, methodology, and how it applies to your organization.",
+      },
       { property: "og:title", content: "Request a Briefing — PRSC" },
-      { property: "og:description", content: "Private briefings for organizations, brands, investors, and industry leaders." },
+      {
+        property: "og:description",
+        content: "Private briefings for organizations, brands, investors, and industry leaders.",
+      },
       { property: "og:url", content: CANONICAL },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
@@ -38,7 +45,12 @@ export const Route = createFileRoute("/request-briefing")({
             "@type": "BreadcrumbList",
             "@id": CANONICAL + "#breadcrumb",
             itemListElement: [
-              { "@type": "ListItem", position: 1, name: "PRSC", item: "https://prscstandards.com/" },
+              {
+                "@type": "ListItem",
+                position: 1,
+                name: "PRSC",
+                item: "https://prscstandards.com/",
+              },
               { "@type": "ListItem", position: 2, name: "Request a Briefing", item: CANONICAL },
             ],
           },
@@ -56,11 +68,21 @@ function BriefingPage() {
         <div className="mx-auto max-w-4xl px-6 text-center">
           <p className="label-caps text-stone mb-6">Request a Briefing</p>
           <h1 className="font-display text-5xl md:text-6xl leading-[1.05] text-navy">
-            A private conversation<br />about the Standard.
+            A private conversation
+            <br />
+            about the Standard.
           </h1>
-          <div className="my-8 mx-auto w-24 h-px" style={{ background: "linear-gradient(90deg, transparent, #8C6E3B 30%, #8C6E3B 70%, transparent)" }} />
+          <div
+            className="my-8 mx-auto w-24 h-px"
+            style={{
+              background:
+                "linear-gradient(90deg, transparent, #8C6E3B 30%, #8C6E3B 70%, transparent)",
+            }}
+          />
           <p className="text-lg text-stone max-w-2xl mx-auto leading-relaxed">
-            Briefings are held with the Council on request — for organizations evaluating readiness, for brands and investors evaluating partnership decisions, and for industry leaders shaping the market.
+            Briefings are held with the Council on request — for organizations evaluating readiness,
+            for brands and investors evaluating partnership decisions, and for industry leaders
+            shaping the market.
           </p>
         </div>
       </section>

@@ -32,7 +32,10 @@ const CertificationSchema = z.object({
   email: z.string().trim().email().max(200),
 });
 
-async function insertRow(table: "briefing_requests" | "board_interest" | "vanguard_interest" | "certification_interest", row: Record<string, unknown>) {
+async function insertRow(
+  table: "briefing_requests" | "board_interest" | "vanguard_interest" | "certification_interest",
+  row: Record<string, unknown>,
+) {
   const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { error } = await (supabaseAdmin.from(table) as any).insert(row);
@@ -83,5 +86,3 @@ export const submitCertificationInterest = createServerFn({ method: "POST" })
     await notify("New Certification Notify Signup — PRSC", data);
     return result;
   });
-
-

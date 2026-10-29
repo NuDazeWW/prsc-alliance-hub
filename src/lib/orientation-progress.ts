@@ -19,7 +19,11 @@ function browserStore(kind: "local" | "session"): Store | null {
 }
 
 /** Saved chapter index (0-based), or null when there is no usable progress to resume. */
-export function readOrientationStep(memberId: string | null | undefined, store: Store | null = browserStore("local"), chapters = ORIENTATION_CHAPTERS): number | null {
+export function readOrientationStep(
+  memberId: string | null | undefined,
+  store: Store | null = browserStore("local"),
+  chapters = ORIENTATION_CHAPTERS,
+): number | null {
   if (!memberId || !store) return null;
   try {
     const raw = store.getItem(progressKey(memberId));
@@ -31,7 +35,11 @@ export function readOrientationStep(memberId: string | null | undefined, store: 
   }
 }
 
-export function saveOrientationStep(memberId: string | null | undefined, step: number, store: Store | null = browserStore("local")) {
+export function saveOrientationStep(
+  memberId: string | null | undefined,
+  step: number,
+  store: Store | null = browserStore("local"),
+) {
   if (!memberId || !store) return;
   try {
     store.setItem(progressKey(memberId), String(step));
@@ -40,14 +48,29 @@ export function saveOrientationStep(memberId: string | null | undefined, step: n
   }
 }
 
-export function clearOrientationProgress(memberId: string | null | undefined, local: Store | null = browserStore("local"), session: Store | null = browserStore("session")) {
+export function clearOrientationProgress(
+  memberId: string | null | undefined,
+  local: Store | null = browserStore("local"),
+  session: Store | null = browserStore("session"),
+) {
   if (!memberId) return;
-  try { local?.removeItem(progressKey(memberId)); } catch { /* ignore */ }
-  try { session?.removeItem(dismissedKey(memberId)); } catch { /* ignore */ }
+  try {
+    local?.removeItem(progressKey(memberId));
+  } catch {
+    /* ignore */
+  }
+  try {
+    session?.removeItem(dismissedKey(memberId));
+  } catch {
+    /* ignore */
+  }
 }
 
 /** True once the member has closed the orientation themselves during this browser session. */
-export function orientationDismissed(memberId: string | null | undefined, store: Store | null = browserStore("session")) {
+export function orientationDismissed(
+  memberId: string | null | undefined,
+  store: Store | null = browserStore("session"),
+) {
   if (!memberId || !store) return false;
   try {
     return store.getItem(dismissedKey(memberId)) === "1";
@@ -56,7 +79,10 @@ export function orientationDismissed(memberId: string | null | undefined, store:
   }
 }
 
-export function markOrientationDismissed(memberId: string | null | undefined, store: Store | null = browserStore("session")) {
+export function markOrientationDismissed(
+  memberId: string | null | undefined,
+  store: Store | null = browserStore("session"),
+) {
   if (!memberId || !store) return;
   try {
     store.setItem(dismissedKey(memberId), "1");
@@ -70,7 +96,12 @@ export function markOrientationDismissed(memberId: string | null | undefined, st
  * Members who have not completed it are shown it, unless they closed it on purpose this session
  * (they then get the Continue Orientation action instead of being forced back into a popup).
  */
-export function shouldAutoOpenOrientation(input: { needsOrientation: boolean; memberId: string | null | undefined; alreadyOpenedFor: string | null; dismissed: boolean }) {
+export function shouldAutoOpenOrientation(input: {
+  needsOrientation: boolean;
+  memberId: string | null | undefined;
+  alreadyOpenedFor: string | null;
+  dismissed: boolean;
+}) {
   if (!input.needsOrientation || !input.memberId) return false;
   if (input.alreadyOpenedFor === input.memberId) return false;
   return !input.dismissed;

@@ -1,8 +1,15 @@
 import { freshInviteGovernance } from "./invitation-evidence";
-import { suggestedInvitationNdaEvidence, type InvitationNdaEvidence, type InvitationNdaMember } from "./invitation-nda";
+import {
+  suggestedInvitationNdaEvidence,
+  type InvitationNdaEvidence,
+  type InvitationNdaMember,
+} from "./invitation-nda";
 
 /** Stored values are form suggestions, never an administrator's attestation. */
-export function invitationNdaFormValues(member: InvitationNdaMember, options: InvitationNdaEvidence[]) {
+export function invitationNdaFormValues(
+  member: InvitationNdaMember,
+  options: InvitationNdaEvidence[],
+) {
   const evidence = suggestedInvitationNdaEvidence(member, options);
   return {
     ...freshInviteGovernance(),
@@ -13,6 +20,8 @@ export function invitationNdaFormValues(member: InvitationNdaMember, options: In
 }
 
 /** Any correction or change to the intended invitation needs a new review. */
-export function clearInvitationNdaConfirmation<T extends { nda_confirmed: boolean; nda_recipient_email: string }>(form: T): T {
+export function clearInvitationNdaConfirmation<
+  T extends { nda_confirmed: boolean; nda_recipient_email: string },
+>(form: T): T {
   return { ...form, nda_confirmed: false, nda_recipient_email: "" };
 }

@@ -9,7 +9,8 @@ export function PortalMagicLinkEmail({ confirmationUrl }: { confirmationUrl: str
         Your confidential login link.
       </Text>
       <Text style={{ color: "#3A4050", fontSize: 15, lineHeight: 1.6, margin: "0 0 24px" }}>
-        Use the button below to sign in to the PRSC private center. This link is single-use and expires shortly.
+        Use the button below to sign in to the PRSC private center. This link is single-use and
+        expires shortly.
       </Text>
       <Cta href={confirmationUrl}>Sign in</Cta>
       <Text style={{ color: "#8A8F99", fontSize: 12, lineHeight: 1.5, margin: "24px 0 0" }}>

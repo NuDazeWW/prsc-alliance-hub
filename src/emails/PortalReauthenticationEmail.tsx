@@ -11,7 +11,16 @@ export function PortalReauthenticationEmail({ token }: { token: string }) {
       <Text style={{ color: "#3A4050", fontSize: 15, lineHeight: 1.6, margin: "0 0 24px" }}>
         Enter the code below to continue in the PRSC private center. It expires shortly.
       </Text>
-      <Text style={{ color: "#0A1322", fontSize: 28, letterSpacing: "0.2em", fontWeight: 600, margin: "0 0 24px", fontFamily: "monospace" }}>
+      <Text
+        style={{
+          color: "#0A1322",
+          fontSize: 28,
+          letterSpacing: "0.2em",
+          fontWeight: 600,
+          margin: "0 0 24px",
+          fontFamily: "monospace",
+        }}
+      >
         {token}
       </Text>
       <Text style={{ color: "#8A8F99", fontSize: 12, lineHeight: 1.5, margin: 0 }}>

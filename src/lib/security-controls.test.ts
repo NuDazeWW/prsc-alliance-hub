@@ -16,9 +16,20 @@ describe("retained member authorization", () => {
   });
 });
 describe("spreadsheet exports", () => {
-  for (const value of ["=HYPERLINK(\"https://example.com\")", "+SUM(1,2)", "-1+2", "@SUM(1,2)", "\t=1+1", "\r\n=1", " \u200b=1", "\u0000=1", "\ufeff@SUM(1)"]) it(`neutralizes ${JSON.stringify(value)}`, () => {
-    assert.equal(csvCell(value).startsWith('"\''), true);
-  });
+  for (const value of [
+    '=HYPERLINK("https://example.com")',
+    "+SUM(1,2)",
+    "-1+2",
+    "@SUM(1,2)",
+    "\t=1+1",
+    "\r\n=1",
+    " \u200b=1",
+    "\u0000=1",
+    "\ufeff@SUM(1)",
+  ])
+    it(`neutralizes ${JSON.stringify(value)}`, () => {
+      assert.equal(csvCell(value).startsWith("\"'"), true);
+    });
   it("preserves ordinary names, commas and quoted text", () => {
     assert.equal(csvCell('Shirley, "Founder"'), '"Shirley, ""Founder"""');
     assert.equal(csvCell(null), '""');

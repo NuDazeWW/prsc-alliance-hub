@@ -77,7 +77,8 @@ export const FAQ_ITEMS: FaqItem[] = [
   {
     id: 9,
     category: "About the Score",
-    question: "How do you compare a Trans Am driver with an IMSA team—or someone racing at a completely different level?",
+    question:
+      "How do you compare a Trans Am driver with an IMSA team—or someone racing at a completely different level?",
     answer:
       "You are not compared against everyone. You are compared against people like you. The Score is calibrated using comparable participants based on competitive context, including factors such as series, level of competition, and resource profile. A regional program is not expected to look like a factory-backed effort.",
   },
@@ -288,8 +289,7 @@ export const FAQ_ITEMS: FaqItem[] = [
     id: 39,
     category: "The Readiness Vanguard™",
     question: "Is it first come, first served?",
-    answer:
-      "No. Requesting consideration does not automatically guarantee a Vanguard slot.",
+    answer: "No. Requesting consideration does not automatically guarantee a Vanguard slot.",
   },
   {
     id: 40,
@@ -372,15 +372,13 @@ export const FAQ_ITEMS: FaqItem[] = [
     id: 51,
     category: "Your Data & Privacy",
     question: "Can another team see my Score?",
-    answer:
-      "Not through PRSC unless you choose to disclose it.",
+    answer: "Not through PRSC unless you choose to disclose it.",
   },
   {
     id: 52,
     category: "Your Data & Privacy",
     question: "Can a manufacturer see my Score without my permission?",
-    answer:
-      "No. Your individual Score is private by default.",
+    answer: "No. Your individual Score is private by default.",
   },
   {
     id: 53,
@@ -561,8 +559,7 @@ export const FAQ_ITEMS: FaqItem[] = [
     id: 81,
     category: "Cost",
     question: "How much does the PRSC Readiness Score™ cost?",
-    answer:
-      "The PRSC Readiness Score™ is always free for teams and drivers.",
+    answer: "The PRSC Readiness Score™ is always free for teams and drivers.",
   },
   {
     id: 82,
@@ -582,22 +579,19 @@ export const FAQ_ITEMS: FaqItem[] = [
     id: 84,
     category: "Cost",
     question: "Will I have to pay to see my Score?",
-    answer:
-      "No. Teams and drivers are not charged to receive their PRSC Readiness Score™.",
+    answer: "No. Teams and drivers are not charged to receive their PRSC Readiness Score™.",
   },
   {
     id: 85,
     category: "Cost",
     question: "Will I eventually have to pay to be scored?",
-    answer:
-      "No. The PRSC Readiness Score™ is always free for teams and drivers.",
+    answer: "No. The PRSC Readiness Score™ is always free for teams and drivers.",
   },
   {
     id: 86,
     category: "Cost",
     question: "Do I have to buy anything after receiving my Score?",
-    answer:
-      "No. Receiving a Score does not require you to purchase another product or service.",
+    answer: "No. Receiving a Score does not require you to purchase another product or service.",
   },
   {
     id: 87,
@@ -645,8 +639,7 @@ export const FAQ_ITEMS: FaqItem[] = [
     id: 94,
     category: "Getting Started",
     question: "I'm an individual driver, not a team. Does this work for me?",
-    answer:
-      "Yes. The PRSC Readiness Score™ is designed for individual drivers as well as teams.",
+    answer: "Yes. The PRSC Readiness Score™ is designed for individual drivers as well as teams.",
   },
   {
     id: 95,

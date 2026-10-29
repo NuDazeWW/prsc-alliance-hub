@@ -2,7 +2,10 @@ import { z } from "zod";
 
 export const boldSignPayload = z.object({
   event: z.object({ eventType: z.string().min(1).max(80) }).passthrough(),
-  data: z.object({ documentId: z.string().min(1).max(120).optional() }).passthrough().optional(),
+  data: z
+    .object({ documentId: z.string().min(1).max(120).optional() })
+    .passthrough()
+    .optional(),
 });
 
 /** The sole unsigned exception is a consistent, stateless URL verification. */
@@ -21,11 +24,17 @@ export async function readBoldSignBody(request: Request): Promise<string | null>
     const { value, done } = await reader.read();
     if (done) break;
     size += value.length;
-    if (size > limit) { await reader.cancel(); return null; }
+    if (size > limit) {
+      await reader.cancel();
+      return null;
+    }
     chunks.push(value);
   }
   const bytes = new Uint8Array(size);
   let offset = 0;
-  for (const chunk of chunks) { bytes.set(chunk, offset); offset += chunk.length; }
+  for (const chunk of chunks) {
+    bytes.set(chunk, offset);
+    offset += chunk.length;
+  }
   return new TextDecoder().decode(bytes);
 }

@@ -1,23 +1,50 @@
 import { z } from "zod";
 
-const linkedinUrl = z.string().trim().max(300, "Please keep the LinkedIn URL under 300 characters.").refine((value) => {
-  if (!value) return true;
-  try {
-    const url = new URL(value);
-    return url.protocol === "https:" && (url.hostname === "linkedin.com" || url.hostname.endsWith(".linkedin.com")) && !url.username && !url.password;
-  } catch {
-    return false;
-  }
-}, "Please provide a valid https://www.linkedin.com/ profile URL, or leave it blank.");
+const linkedinUrl = z
+  .string()
+  .trim()
+  .max(300, "Please keep the LinkedIn URL under 300 characters.")
+  .refine((value) => {
+    if (!value) return true;
+    try {
+      const url = new URL(value);
+      return (
+        url.protocol === "https:" &&
+        (url.hostname === "linkedin.com" || url.hostname.endsWith(".linkedin.com")) &&
+        !url.username &&
+        !url.password
+      );
+    } catch {
+      return false;
+    }
+  }, "Please provide a valid https://www.linkedin.com/ profile URL, or leave it blank.");
 
 /** Only current, member-supplied facts; identity and invitation facts come from the authenticated row. */
-export const profileBioDraftSchema = z.object({
-  preferred_name: z.string().trim().max(120, "Please keep your preferred name under 120 characters.").default(""),
-  professional_role: z.string().trim().max(160, "Please keep your professional role under 160 characters.").default(""),
-  current_organization: z.string().trim().max(180, "Please keep your organization under 180 characters.").default(""),
-  linkedin_url: linkedinUrl.default(""),
-  background: z.string().trim().max(8000, "Please keep the pasted background under 8,000 characters.").default(""),
-}).strict();
+export const profileBioDraftSchema = z
+  .object({
+    preferred_name: z
+      .string()
+      .trim()
+      .max(120, "Please keep your preferred name under 120 characters.")
+      .default(""),
+    professional_role: z
+      .string()
+      .trim()
+      .max(160, "Please keep your professional role under 160 characters.")
+      .default(""),
+    current_organization: z
+      .string()
+      .trim()
+      .max(180, "Please keep your organization under 180 characters.")
+      .default(""),
+    linkedin_url: linkedinUrl.default(""),
+    background: z
+      .string()
+      .trim()
+      .max(8000, "Please keep the pasted background under 8,000 characters.")
+      .default(""),
+  })
+  .strict();
 
 export type ProfileBioDraftInput = z.infer<typeof profileBioDraftSchema>;
 
@@ -32,9 +59,13 @@ export type ProfileBioInvitation = {
   background?: string | null;
 };
 
-const fact = (value: unknown, max: number) => typeof value === "string" ? value.trim().slice(0, max) : "";
+const fact = (value: unknown, max: number) =>
+  typeof value === "string" ? value.trim().slice(0, max) : "";
 
-export function buildProfileBioPrompt(invitation: ProfileBioInvitation, input: ProfileBioDraftInput) {
+export function buildProfileBioPrompt(
+  invitation: ProfileBioInvitation,
+  input: ProfileBioDraftInput,
+) {
   const instructions = `Write a concise, editable, third-person professional biography for the person described in the supplied JSON facts.
 
 Rules:
@@ -48,7 +79,9 @@ Rules:
 - Do not write a founder's invitation note, address the person as "you," or explain why an organization chose the person. Write their professional biography in the third person.`;
 
   const invitationFacts = {
-    name: fact(invitation.professional_name, 120) || `${fact(invitation.first_name, 80)} ${fact(invitation.last_name, 80)}`.trim(),
+    name:
+      fact(invitation.professional_name, 120) ||
+      `${fact(invitation.first_name, 80)} ${fact(invitation.last_name, 80)}`.trim(),
     title: fact(invitation.title, 160),
     organization: fact(invitation.organization, 180),
     linkedin_reference_url: fact(invitation.linkedin_url, 300),
@@ -61,9 +94,17 @@ Rules:
     linkedin_reference_url: input.linkedin_url || invitationFacts.linkedin_reference_url,
     pasted_professional_background: input.background,
   };
-  return { instructions, input: JSON.stringify({ invitation_facts: invitationFacts, current_profile: currentProfile }) };
+  return {
+    instructions,
+    input: JSON.stringify({ invitation_facts: invitationFacts, current_profile: currentProfile }),
+  };
 }
 
 export function isAiDraftPreviewHost(host: string) {
-  return host === "localhost" || host === "127.0.0.1" || /(^|\.)id-preview--[^.]+\.lovable\.app$/.test(host) || host.endsWith(".lovableproject.com");
+  return (
+    host === "localhost" ||
+    host === "127.0.0.1" ||
+    /(^|\.)id-preview--[^.]+\.lovable\.app$/.test(host) ||
+    host.endsWith(".lovableproject.com")
+  );
 }

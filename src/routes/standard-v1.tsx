@@ -36,7 +36,12 @@ export const Route = createFileRoute("/standard-v1")({
           "@type": "BreadcrumbList",
           itemListElement: [
             { "@type": "ListItem", position: 1, name: "Home", item: "https://prscstandards.com/" },
-            { "@type": "ListItem", position: 2, name: "The Standard", item: "https://prscstandards.com/the-standard" },
+            {
+              "@type": "ListItem",
+              position: 2,
+              name: "The Standard",
+              item: "https://prscstandards.com/the-standard",
+            },
             { "@type": "ListItem", position: 3, name: "Standard v1.0", item: CANONICAL },
           ],
         }),
@@ -62,10 +67,22 @@ const SECTIONS: Array<{ id: string; label: string }> = [
 const ENTITIES: Array<[string, string, string]> = [
   ["Teams & Racing Entities", "Supply-side — primary commercial asset", "PRSC Readiness Score™"],
   ["Drivers & Athletes", "Supply-side — individual commercial asset", "PRSC Readiness Score™"],
-  ["Series & Sanctioning Bodies", "Supply-side — ecosystem infrastructure", "PRSC Readiness Score™"],
-  ["Brands & Sponsors", "Demand-side — capital and activation partner", "Partnership Readiness Score™"],
+  [
+    "Series & Sanctioning Bodies",
+    "Supply-side — ecosystem infrastructure",
+    "PRSC Readiness Score™",
+  ],
+  [
+    "Brands & Sponsors",
+    "Demand-side — capital and activation partner",
+    "Partnership Readiness Score™",
+  ],
   ["Agencies", "Intermediary — advisory and activation", "Partnership Readiness Score™"],
-  ["Strategic Investors", "Capital — equity or structured investment", "Investment Readiness Score™"],
+  [
+    "Strategic Investors",
+    "Capital — equity or structured investment",
+    "Investment Readiness Score™",
+  ],
 ];
 
 const DIMENSIONS: Array<{ n: string; title: string; body: string[]; evaluated: string }> = [
@@ -253,7 +270,6 @@ function StandardV1Page() {
                 Download PDF
               </a>
             </div>
-
           </div>
         </div>
       </header>
@@ -331,15 +347,17 @@ function StandardV1Page() {
           <SectionHeading id="scope" num="2" title="Scope and Applicability" />
           <p className="mb-8">
             The Standard is designed to evaluate commercial readiness across the full range of
-            entities that participate in partnership-driven ecosystems. The Standard applies to,
-            but is not limited to, the following entity types:
+            entities that participate in partnership-driven ecosystems. The Standard applies to, but
+            is not limited to, the following entity types:
           </p>
           <div className="overflow-x-auto rounded-sm border border-navy/10 bg-white shadow-sm">
             <table className="w-full text-sm md:text-[15px] border-collapse">
               <thead>
                 <tr className="bg-navy text-ivory">
                   <th className="text-left px-4 py-3 font-semibold tracking-wide">Entity Type</th>
-                  <th className="text-left px-4 py-3 font-semibold tracking-wide">Ecosystem Role</th>
+                  <th className="text-left px-4 py-3 font-semibold tracking-wide">
+                    Ecosystem Role
+                  </th>
                   <th className="text-left px-4 py-3 font-semibold tracking-wide">
                     Score Type Generated
                   </th>
@@ -421,8 +439,8 @@ function StandardV1Page() {
             composite score is derived from the six dimensional scores using the Readiness Engine™.
             The Engine applies audience-specific weighting models calibrated to the entity type
             being evaluated — the weighting applied to a team differs from the weighting applied to
-            a brand, because the commercial priorities of each role differ. The specific weights
-            and calibration logic are not published; they are held as trade secrets of the Council.
+            a brand, because the commercial priorities of each role differ. The specific weights and
+            calibration logic are not published; they are held as trade secrets of the Council.
           </p>
           <p className="mb-8">
             Scores are interpreted in context. A score of 72 means different things for a regional
@@ -473,22 +491,22 @@ function StandardV1Page() {
         <section>
           <SectionHeading id="drift" num="5" title="Readiness Drift™" />
           <p className="mb-5">
-            A score has limited value without directional context. The Standard includes a
-            Readiness Drift™ framework that quantifies the variance between an entity's current
-            dimensional scores and the optimal benchmark scores required for commercial success in
-            their specific ecosystem tier.
+            A score has limited value without directional context. The Standard includes a Readiness
+            Drift™ framework that quantifies the variance between an entity's current dimensional
+            scores and the optimal benchmark scores required for commercial success in their
+            specific ecosystem tier.
           </p>
           <p className="mb-5">
-            Readiness Drift identifies the specific dimensions where an entity is falling behind
-            its benchmark — and by how much. It also identifies the dimensions where an entity is
-            performing above benchmark, which represents a competitive advantage to be protected
-            and leveraged. The Drift analysis generates Architecture Priority Signals™ — a
-            prioritized set of actionable interventions ranked by their potential to increase the
-            overall Readiness Score and reduce commercial friction.
+            Readiness Drift identifies the specific dimensions where an entity is falling behind its
+            benchmark — and by how much. It also identifies the dimensions where an entity is
+            performing above benchmark, which represents a competitive advantage to be protected and
+            leveraged. The Drift analysis generates Architecture Priority Signals™ — a prioritized
+            set of actionable interventions ranked by their potential to increase the overall
+            Readiness Score and reduce commercial friction.
           </p>
           <p>
-            Readiness Drift is provided in the scored Readiness Report. It is not a separate
-            product — it is the interpretive layer that transforms a score into a roadmap.
+            Readiness Drift is provided in the scored Readiness Report. It is not a separate product
+            — it is the interpretive layer that transforms a score into a roadmap.
           </p>
         </section>
 
@@ -502,16 +520,16 @@ function StandardV1Page() {
             sourced by the Readiness Engine™.
           </p>
           <p className="mb-5">
-            Evidence is classified by source, recency, and verifiability before it is applied to
-            the scoring architecture. Evidence submitted by the entity being scored is weighted
+            Evidence is classified by source, recency, and verifiability before it is applied to the
+            scoring architecture. Evidence submitted by the entity being scored is weighted
             differently from third-party verified data. More recent evidence is weighted more
             heavily than historical data. Evidence that can be independently verified is weighted
             more heavily than evidence that cannot.
           </p>
           <p>
             This evidence classification logic is a core feature of the Standard's integrity. It
-            means that a score cannot be inflated by submitting volume without substance. The
-            Engine is designed to reward genuine commercial readiness, not the appearance of it.
+            means that a score cannot be inflated by submitting volume without substance. The Engine
+            is designed to reward genuine commercial readiness, not the appearance of it.
           </p>
           <PullQuote>
             "The Standard measures what is actually true about an entity's commercial readiness —
@@ -530,7 +548,9 @@ function StandardV1Page() {
             Body and Methodology Committee under the methodology change governance process
             established in the PRSC Operating Agreement.
           </p>
-          <p className="mb-8">The Council commits to the following version governance principles:</p>
+          <p className="mb-8">
+            The Council commits to the following version governance principles:
+          </p>
           <dl className="space-y-5 pl-4 md:pl-6 border-l border-navy/10">
             {COMMITMENTS.map(([term, def]) => (
               <div key={term}>
@@ -545,8 +565,8 @@ function StandardV1Page() {
         <section>
           <SectionHeading id="not-published" num="8" title="What Is Not Published" />
           <p className="mb-6">
-            The Council is committed to transparency about what the Standard measures and how
-            scores are interpreted. The Council is equally committed to protecting the proprietary
+            The Council is committed to transparency about what the Standard measures and how scores
+            are interpreted. The Council is equally committed to protecting the proprietary
             intelligence architecture that makes the Standard valuable. The following components of
             the Readiness Engine™ are held as permanent trade secrets and are not published,
             disclosed, or licensed in any form:
@@ -575,10 +595,10 @@ function StandardV1Page() {
         <section>
           <SectionHeading id="governance" num="9" title="Governance and Independence" />
           <p className="mb-5">
-            The Standard is governed by the Partnership Readiness Standards Council, an
-            independent standards body organized as a Delaware limited liability company. The
-            Council's Governing Body holds exclusive authority over what the Standard measures, how
-            it evolves, and when it changes. No commercial party — including Decision Intelligence
+            The Standard is governed by the Partnership Readiness Standards Council, an independent
+            standards body organized as a Delaware limited liability company. The Council's
+            Governing Body holds exclusive authority over what the Standard measures, how it
+            evolves, and when it changes. No commercial party — including Decision Intelligence
             Systems, Inc. ("DIS"), the Council's exclusive technology operator — has authority to
             direct methodology decisions.
           </p>
@@ -587,8 +607,8 @@ function StandardV1Page() {
             Council governs the Standard independently. DIS licenses the Standard and operates the
             Readiness Terminal™ and Evidence Portal™ under an arm's-length licensing agreement.
             Governance safeguards — including the Conflict Prohibition, the Revenue Firewall, and
-            the Founder Recusal Protocol — are published in the Council's Governance &
-            Market-Trust Charter and are binding under the Council's Operating Agreement.
+            the Founder Recusal Protocol — are published in the Council's Governance & Market-Trust
+            Charter and are binding under the Council's Operating Agreement.
           </p>
           <p>
             The Council publishes an Annual Governance Statement covering board composition,

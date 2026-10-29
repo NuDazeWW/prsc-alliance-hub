@@ -1,7 +1,22 @@
 import { cn } from "@/lib/utils";
-import type { InputHTMLAttributes, TextareaHTMLAttributes, SelectHTMLAttributes, ReactNode } from "react";
+import type {
+  InputHTMLAttributes,
+  TextareaHTMLAttributes,
+  SelectHTMLAttributes,
+  ReactNode,
+} from "react";
 
-export function Field({ label, htmlFor, children, hint }: { label: string; htmlFor: string; children: ReactNode; hint?: string }) {
+export function Field({
+  label,
+  htmlFor,
+  children,
+  hint,
+}: {
+  label: string;
+  htmlFor: string;
+  children: ReactNode;
+  hint?: string;
+}) {
   return (
     <label htmlFor={htmlFor} className="block">
       <span className="label-caps text-[0.65rem] text-navy/70 mb-2 block">{label}</span>
@@ -11,7 +26,8 @@ export function Field({ label, htmlFor, children, hint }: { label: string; htmlF
   );
 }
 
-const base = "w-full rounded-sm border border-navy/20 bg-card px-4 py-3 text-navy placeholder:text-stone/40 focus:border-gold focus:outline-none focus:ring-1 focus:ring-gold transition-colors";
+const base =
+  "w-full rounded-sm border border-navy/20 bg-card px-4 py-3 text-navy placeholder:text-stone/40 focus:border-gold focus:outline-none focus:ring-1 focus:ring-gold transition-colors";
 
 export function Input(props: InputHTMLAttributes<HTMLInputElement>) {
   return <input {...props} className={cn(base, props.className)} />;
@@ -23,7 +39,15 @@ export function Select(props: SelectHTMLAttributes<HTMLSelectElement>) {
   return <select {...props} className={cn(base, "appearance-none", props.className)} />;
 }
 
-export function SubmitButton({ pending, children, className }: { pending: boolean; children: ReactNode; className?: string }) {
+export function SubmitButton({
+  pending,
+  children,
+  className,
+}: {
+  pending: boolean;
+  children: ReactNode;
+  className?: string;
+}) {
   return (
     <button
       type="submit"
@@ -42,7 +66,15 @@ export function SuccessPanel({ title, body }: { title: string; body: string }) {
   return (
     <div className="rounded-sm border border-gold/40 bg-gold/5 p-8 text-center">
       <div className="mx-auto mb-4 h-14 w-14 rounded-full border border-gold flex items-center justify-center">
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" className="text-gold">
+        <svg
+          width="24"
+          height="24"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="1.6"
+          className="text-gold"
+        >
           <path d="M4 12l6 6L20 6" />
         </svg>
       </div>

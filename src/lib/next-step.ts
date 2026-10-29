@@ -14,8 +14,18 @@ export function nextIncompleteStep(input: {
 }): NextStep | null {
   if (input.needsOrientation) {
     return input.orientationStarted
-      ? { key: "orientation", title: "Finish your 5-minute orientation", detail: "Pick up where you left off. Your place was saved.", action: "Continue Orientation" }
-      : { key: "orientation", title: "Begin your 5-minute orientation", detail: "A current picture of PRSC and DIS, and why your role matters.", action: "Begin Orientation" };
+      ? {
+          key: "orientation",
+          title: "Finish your 5-minute orientation",
+          detail: "Pick up where you left off. Your place was saved.",
+          action: "Continue Orientation",
+        }
+      : {
+          key: "orientation",
+          title: "Begin your 5-minute orientation",
+          detail: "A current picture of PRSC and DIS, and why your role matters.",
+          action: "Begin Orientation",
+        };
   }
   if (input.pendingMeetings > 0) {
     return {
@@ -34,7 +44,12 @@ export function nextIncompleteStep(input: {
     };
   }
   if (!input.profileComplete) {
-    return { key: "profile", title: "Complete your Executive Profile", detail: "Optional for Forum participation. About 7–10 minutes, and private.", action: "Complete Executive Profile" };
+    return {
+      key: "profile",
+      title: "Complete your Executive Profile",
+      detail: "Optional for Forum participation. About 7–10 minutes, and private.",
+      action: "Complete Executive Profile",
+    };
   }
   return null;
 }

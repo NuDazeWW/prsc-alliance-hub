@@ -85,9 +85,15 @@ function GaugeNeedle() {
         {/* sharply tapered blade */}
         <path d="M 198.05 200 L 199.62 68 L 200.38 68 L 201.95 200 Z" fill="url(#prscNeedleTop)" />
         {/* ice-white specular line */}
-        <path d="M 198.85 198 L 199.72 70 L 199.96 70 L 199.6 198 Z" fill="rgba(248,252,255,0.75)" />
+        <path
+          d="M 198.85 198 L 199.72 70 L 199.96 70 L 199.6 198 Z"
+          fill="rgba(248,252,255,0.75)"
+        />
         {/* small balanced counterweight */}
-        <path d="M 196.4 200 L 198.3 222 A 2.6 2.6 0 0 0 201.7 222 L 203.6 200 Z" fill="url(#prscNeedleTop)" />
+        <path
+          d="M 196.4 200 L 198.3 222 A 2.6 2.6 0 0 0 201.7 222 L 203.6 200 Z"
+          fill="url(#prscNeedleTop)"
+        />
       </g>
     </svg>
   );

@@ -4,7 +4,16 @@ import { PRSCReadinessGauge } from "@/components/site/PRSCReadinessGauge";
 import { ReadinessExplainer } from "@/components/site/ReadinessExplainer";
 
 import { ContinueReading } from "@/components/site/ContinueReading";
-import { Building2, Briefcase, Landmark, ArrowRight, ShieldCheck, Scale, GraduationCap, LineChart } from "lucide-react";
+import {
+  Building2,
+  Briefcase,
+  Landmark,
+  ArrowRight,
+  ShieldCheck,
+  Scale,
+  GraduationCap,
+  LineChart,
+} from "lucide-react";
 import prscCrest from "@/assets/prsc-logo-only.png.asset.json";
 import { getRequestHost } from "@/lib/portal.functions";
 
@@ -13,7 +22,16 @@ const CANONICAL = "https://prscstandards.com/";
 export const Route = createFileRoute("/")({
   beforeLoad: async () => {
     const { isPortalDomain } = await getRequestHost();
-    if (isPortalDomain) throw redirect({ to: "/auth", search: { redirect: "/portal", mode: undefined, email: undefined, passwordCreated: undefined } });
+    if (isPortalDomain)
+      throw redirect({
+        to: "/auth",
+        search: {
+          redirect: "/portal",
+          mode: undefined,
+          email: undefined,
+          passwordCreated: undefined,
+        },
+      });
   },
   head: () => ({
     meta: [
@@ -28,7 +46,10 @@ export const Route = createFileRoute("/")({
         content:
           "Partnership Readiness Standards Council, PRSC, PRSC Readiness Score™, Readiness Score, partnership readiness, sponsorship standard, independent standards body",
       },
-      { property: "og:title", content: "Partnership Readiness Standards Council (PRSC) | Readiness Score" },
+      {
+        property: "og:title",
+        content: "Partnership Readiness Standards Council (PRSC) | Readiness Score",
+      },
       {
         property: "og:description",
         content:
@@ -37,7 +58,10 @@ export const Route = createFileRoute("/")({
       { property: "og:url", content: CANONICAL },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
-      { name: "twitter:title", content: "Partnership Readiness Standards Council (PRSC) | Readiness Score" },
+      {
+        name: "twitter:title",
+        content: "Partnership Readiness Standards Council (PRSC) | Readiness Score",
+      },
       {
         name: "twitter:description",
         content:
@@ -84,12 +108,14 @@ function HomePage() {
   return (
     <>
       {/* HERO */}
-      <section className="relative bg-navy text-ivory overflow-hidden flex items-center" style={{ paddingTop: 80, paddingBottom: 80 }}>
+      <section
+        className="relative bg-navy text-ivory overflow-hidden flex items-center"
+        style={{ paddingTop: 80, paddingBottom: 80 }}
+      >
         <div
           className="absolute inset-0 pointer-events-none"
           style={{
-            backgroundImage:
-              "radial-gradient(rgba(212,175,55,0.35) 1px, transparent 1px)",
+            backgroundImage: "radial-gradient(rgba(212,175,55,0.35) 1px, transparent 1px)",
             backgroundSize: "22px 22px",
             WebkitMaskImage:
               "radial-gradient(ellipse 45% 60% at 75% 50%, rgba(0,0,0,1) 0%, rgba(0,0,0,0.6) 40%, rgba(0,0,0,0.15) 70%, transparent 100%)",
@@ -99,7 +125,6 @@ function HomePage() {
         />
         <div className="relative mx-auto max-w-7xl w-full px-6 grid gap-14 lg:grid-cols-2 items-center">
           <div className="max-w-xl">
-
             <div className="inline-block">
               <img
                 src={prscCrest.url}
@@ -114,13 +139,16 @@ function HomePage() {
               The independent body governing commercial readiness in sport.
             </h1>
             <p className="mt-8 text-lg text-ivory/60 max-w-lg leading-relaxed font-light">
-              An authoritative, evidence-based framework that brings clarity, discipline, and trust to a $100B+ market — governed independently, adopted globally.
+              An authoritative, evidence-based framework that brings clarity, discipline, and trust
+              to a $100B+ market — governed independently, adopted globally.
             </p>
             <p
               className="mt-4 font-display italic font-semibold text-[16px] md:text-[17px] leading-relaxed max-w-lg"
               style={{ color: "#CBB89A" }}
             >
-              The Standard is being established first within motorsport — a market where commercial relationships are highly visible, financially consequential, and historically unmeasured.
+              The Standard is being established first within motorsport — a market where commercial
+              relationships are highly visible, financially consequential, and historically
+              unmeasured.
             </p>
             <div className="mt-10 flex flex-wrap items-center gap-x-8 gap-y-4">
               <Link
@@ -169,16 +197,20 @@ function HomePage() {
         <div className="mx-auto max-w-4xl px-6 text-center">
           <p className="label-caps text-gold mb-6">The Case for a Standard</p>
           <h2 className="font-display text-4xl md:text-5xl leading-tight">
-            The market is broken.<br />
+            The market is broken.
+            <br />
             <span className="text-stone/80">We built the standard to fix it.</span>
           </h2>
           <div className="gold-rule my-10 mx-auto w-24" />
           <div className="space-y-5 text-lg leading-relaxed text-stone">
             <p>
-              The global sponsorship and partnership industry — worth more than $100 billion annually — operates without a shared definition of value. Organizations self-assess. Brands guess. Measurement is inconsistent, opaque, and rarely comparable.
+              The global sponsorship and partnership industry — worth more than $100 billion
+              annually — operates without a shared definition of value. Organizations self-assess.
+              Brands guess. Measurement is inconsistent, opaque, and rarely comparable.
             </p>
             <p>
-              The result: capital is misallocated, credible organizations are undervalued, and the market cannot function with the discipline it deserves.
+              The result: capital is misallocated, credible organizations are undervalued, and the
+              market cannot function with the discipline it deserves.
             </p>
             <p className="text-navy font-medium">
               PRSC™ exists to fix that — with a single, independent, evidence-based standard.
@@ -188,7 +220,6 @@ function HomePage() {
       </section>
 
       <ReadinessExplainer />
-
 
       {/* PATHWAY CARDS */}
       <section className="bg-[#F2EFE6] py-24 md:py-32">
@@ -228,10 +259,14 @@ function HomePage() {
             The Standard is here. The market is waiting.
           </h2>
           <p className="mt-4 text-ivory/70 max-w-2xl mx-auto">
-            The Readiness Vanguard is limited to the first organizations who help define the era of professionalized sponsorship.
+            The Readiness Vanguard is limited to the first organizations who help define the era of
+            professionalized sponsorship.
           </p>
           <div className="mt-8 flex flex-wrap justify-center gap-3">
-            <Link to="/readiness-vanguard" className="inline-flex items-center gap-2 rounded-sm bg-gold px-6 py-3.5 label-caps text-[0.7rem] text-navy hover:bg-antique transition-colors">
+            <Link
+              to="/readiness-vanguard"
+              className="inline-flex items-center gap-2 rounded-sm bg-gold px-6 py-3.5 label-caps text-[0.7rem] text-navy hover:bg-antique transition-colors"
+            >
               Join the Vanguard <ArrowRight size={14} />
             </Link>
           </div>
@@ -249,8 +284,20 @@ function HomePage() {
   );
 }
 
-function PathwayCard({ icon: Icon, eyebrow, title, body, to, cta }: {
-  icon: typeof Building2; eyebrow: string; title: string; body: string; to: string; cta: string;
+function PathwayCard({
+  icon: Icon,
+  eyebrow,
+  title,
+  body,
+  to,
+  cta,
+}: {
+  icon: typeof Building2;
+  eyebrow: string;
+  title: string;
+  body: string;
+  to: string;
+  cta: string;
 }) {
   return (
     <Link

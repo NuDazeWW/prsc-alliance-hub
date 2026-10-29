@@ -42,7 +42,9 @@ export async function sendNotification(subject: string, fields: Record<string, u
     return;
   }
 
-  const entries = Object.entries(fields).filter(([, v]) => v !== null && v !== undefined && v !== "");
+  const entries = Object.entries(fields).filter(
+    ([, v]) => v !== null && v !== undefined && v !== "",
+  );
 
   const text = entries.map(([k, v]) => `${labelFor(k)}: ${displayValue(k, v)}`).join("\n");
 
@@ -122,5 +124,8 @@ export async function sendNotification(subject: string, fields: Record<string, u
 }
 
 function escapeHtml(s: string) {
-  return s.replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c] as string));
+  return s.replace(
+    /[&<>"']/g,
+    (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c] as string,
+  );
 }

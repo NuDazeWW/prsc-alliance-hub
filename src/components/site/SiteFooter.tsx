@@ -8,31 +8,62 @@ export function SiteFooter() {
         <div className="space-y-4">
           <img src={logo.url} alt="PRSC" className="h-24 w-auto" />
           <p className="text-sm text-ivory/60 max-w-xs">
-            The independent standards body for partnership readiness. Authoritative. Timeless. Institutional.
+            The independent standards body for partnership readiness. Authoritative. Timeless.
+            Institutional.
           </p>
         </div>
         <div className="space-y-3">
           <p className="label-caps text-gold">The Council</p>
           <ul className="space-y-2 text-sm">
-            <li><Link to="/the-standard" className="hover:text-gold">The Standard</Link></li>
-            <li><Link to="/governance" className="hover:text-gold">Governance</Link></li>
-            <li><Link to="/certification" className="hover:text-gold">Certification</Link></li>
-            <li><Link to="/readiness-vanguard" className="hover:text-gold">Vanguard</Link></li>
-            <li><Link to="/request-briefing" className="hover:text-gold">Request a Briefing</Link></li>
-            <li><Link to="/faq" className="hover:text-gold">FAQ</Link></li>
+            <li>
+              <Link to="/the-standard" className="hover:text-gold">
+                The Standard
+              </Link>
+            </li>
+            <li>
+              <Link to="/governance" className="hover:text-gold">
+                Governance
+              </Link>
+            </li>
+            <li>
+              <Link to="/certification" className="hover:text-gold">
+                Certification
+              </Link>
+            </li>
+            <li>
+              <Link to="/readiness-vanguard" className="hover:text-gold">
+                Vanguard
+              </Link>
+            </li>
+            <li>
+              <Link to="/request-briefing" className="hover:text-gold">
+                Request a Briefing
+              </Link>
+            </li>
+            <li>
+              <Link to="/faq" className="hover:text-gold">
+                FAQ
+              </Link>
+            </li>
           </ul>
         </div>
         <div className="space-y-3">
           <p className="label-caps text-gold">Council</p>
           <p className="text-sm text-ivory/60">
-            Partnership Readiness Standards Council™ is an independent standards body serving the global sponsorship and partnership industry.
+            Partnership Readiness Standards Council™ is an independent standards body serving the
+            global sponsorship and partnership industry.
           </p>
         </div>
       </div>
       <div className="border-t border-ivory/10">
         <div className="mx-auto max-w-7xl px-6 py-6 flex flex-col md:flex-row justify-between gap-3 text-xs text-ivory/45">
-          <p>© {new Date().getFullYear()} Partnership Readiness Standards Council™. All rights reserved.</p>
-          <p className="label-caps">PRSC Readiness Standard&trade; · Version 1.0 · Published 2026</p>
+          <p>
+            © {new Date().getFullYear()} Partnership Readiness Standards Council™. All rights
+            reserved.
+          </p>
+          <p className="label-caps">
+            PRSC Readiness Standard&trade; · Version 1.0 · Published 2026
+          </p>
         </div>
       </div>
     </footer>

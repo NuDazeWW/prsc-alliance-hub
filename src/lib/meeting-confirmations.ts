@@ -13,7 +13,8 @@ export function recipientsToConfirm(memberIds: string[], existing: ConfirmationR
   return memberIds.filter((id) => !sent.has(id));
 }
 
-const CONFIDENTIAL_TERMS = /\b(confidential|restricted|nascar|jared|nda|addendum|strategy brief|recusal|conflict)\b/i;
+const CONFIDENTIAL_TERMS =
+  /\b(confidential|restricted|nascar|jared|nda|addendum|strategy brief|recusal|conflict)\b/i;
 /** Polls reach members before the Addendum: their wording must stay neutral. */
 export function pollWordingWarning(...texts: string[]) {
   return texts.some((t) => CONFIDENTIAL_TERMS.test(t))

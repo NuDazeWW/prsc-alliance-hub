@@ -5,7 +5,11 @@ import { activationProblem } from "@/lib/invitation-activation";
 
 async function check(context: { userId: string; claims: Record<string, unknown> }) {
   const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-  const { data: member } = await supabaseAdmin.from("portal_members").select("user_id, email, status, first_access_at").eq("user_id", context.userId).maybeSingle();
+  const { data: member } = await supabaseAdmin
+    .from("portal_members")
+    .select("user_id, email, status, first_access_at")
+    .eq("user_id", context.userId)
+    .maybeSingle();
   const problem = activationProblem({
     userId: context.userId,
     sessionEmail: typeof context.claims.email === "string" ? context.claims.email : null,
@@ -32,10 +36,24 @@ export const activateInvitation = createServerFn({ method: "POST" })
     const { problem } = await check(context as any);
     if (problem) throw new Error(problem);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const { error } = await supabaseAdmin.auth.admin.updateUserById(context.userId, { password: data.password });
+    const { error } = await supabaseAdmin.auth.admin.updateUserById(context.userId, {
+      password: data.password,
+    });
     if (error) throw error;
-    const email = typeof context.claims.email === "string" ? context.claims.email.trim().toLowerCase() : "";
-    if (email) await supabaseAdmin.from("portal_login_security").upsert({ normalized_email: email, failed_attempts: 0, reset_required: false, last_success_at: new Date().toISOString() }, { onConflict: "normalized_email" });
-    await supabaseAdmin.from("portal_activity").insert({ actor_user_id: context.userId, event_type: "invitation_activated", metadata: {} });
+    const email =
+      typeof context.claims.email === "string" ? context.claims.email.trim().toLowerCase() : "";
+    if (email)
+      await supabaseAdmin.from("portal_login_security").upsert(
+        {
+          normalized_email: email,
+          failed_attempts: 0,
+          reset_required: false,
+          last_success_at: new Date().toISOString(),
+        },
+        { onConflict: "normalized_email" },
+      );
+    await supabaseAdmin
+      .from("portal_activity")
+      .insert({ actor_user_id: context.userId, event_type: "invitation_activated", metadata: {} });
     return { ok: true };
   });

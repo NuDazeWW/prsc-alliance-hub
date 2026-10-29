@@ -1,7 +1,13 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requirePortalAccess } from "@/lib/portal-access";
-import { applyTokens, buildMemberTokens, parseSignatures, renderBrandedEmail, renderBrandedEmailText } from "@/lib/branded-email";
+import {
+  applyTokens,
+  buildMemberTokens,
+  parseSignatures,
+  renderBrandedEmail,
+  renderBrandedEmailText,
+} from "@/lib/branded-email";
 import { SYSTEM_EMAIL_DEFAULTS } from "@/lib/system-email-defaults";
 import { withAppointmentProgress } from "@/lib/portal.functions";
 
@@ -48,7 +54,10 @@ export const getEmailCenter = createServerFn({ method: "GET" })
   .handler(async ({ context }) => {
     await assertAdmin(context);
     // Make sure every automatic email is listed so admins can edit it.
-    const { data: existing } = await context.supabase.from("portal_email_templates").select("system_key").not("system_key", "is", null);
+    const { data: existing } = await context.supabase
+      .from("portal_email_templates")
+      .select("system_key")
+      .not("system_key", "is", null);
     const have = new Set((existing ?? []).map((r: any) => r.system_key));
     const missing = Object.entries(SYSTEM_EMAIL_DEFAULTS).filter(([k]) => !have.has(k));
     if (missing.length) {
@@ -58,8 +67,15 @@ export const getEmailCenter = createServerFn({ method: "GET" })
       );
     }
     const [{ data: templates }, { data: sends }] = await Promise.all([
-      context.supabase.from("portal_email_templates").select("*").order("created_at", { ascending: true }),
-      context.supabase.from("portal_email_sends").select("*").order("created_at", { ascending: false }).limit(500),
+      context.supabase
+        .from("portal_email_templates")
+        .select("*")
+        .order("created_at", { ascending: true }),
+      context.supabase
+        .from("portal_email_sends")
+        .select("*")
+        .order("created_at", { ascending: false })
+        .limit(500),
     ]);
     return {
       templates: (templates ?? []) as EmailTemplate[],
@@ -114,10 +130,17 @@ export const resetEmailTemplate = createServerFn({ method: "POST" })
   .inputValidator((input) => z.object({ id: z.string().uuid() }).parse(input))
   .handler(async ({ context, data }) => {
     await assertAdmin(context);
-    const { data: row } = await context.supabase.from("portal_email_templates").select("system_key").eq("id", data.id).maybeSingle();
+    const { data: row } = await context.supabase
+      .from("portal_email_templates")
+      .select("system_key")
+      .eq("id", data.id)
+      .maybeSingle();
     const original = row?.system_key ? SYSTEM_EMAIL_DEFAULTS[row.system_key] : null;
     if (!original) throw new Error("Only automatic emails can be reset");
-    const { error } = await context.supabase.from("portal_email_templates").update(original).eq("id", data.id);
+    const { error } = await context.supabase
+      .from("portal_email_templates")
+      .update(original)
+      .eq("id", data.id);
     if (error) throw error;
     return { ok: true, template: original };
   });
@@ -127,17 +150,25 @@ export const deleteEmailTemplate = createServerFn({ method: "POST" })
   .inputValidator((input) => z.object({ id: z.string().uuid() }).parse(input))
   .handler(async ({ context, data }) => {
     await assertAdmin(context);
-    const { error } = await context.supabase.from("portal_email_templates").delete().eq("id", data.id);
+    const { error } = await context.supabase
+      .from("portal_email_templates")
+      .delete()
+      .eq("id", data.id);
     if (error) throw error;
     return { ok: true };
   });
 
 export const deleteEmailHistory = createServerFn({ method: "POST" })
   .middleware([requirePortalAccess])
-  .inputValidator((input) => z.object({ send_ids: z.array(z.string().uuid()).min(1).max(500) }).parse(input))
+  .inputValidator((input) =>
+    z.object({ send_ids: z.array(z.string().uuid()).min(1).max(500) }).parse(input),
+  )
   .handler(async ({ context, data }) => {
     await assertAdmin(context);
-    const { error } = await context.supabase.from("portal_email_sends").delete().in("id", data.send_ids);
+    const { error } = await context.supabase
+      .from("portal_email_sends")
+      .delete()
+      .in("id", data.send_ids);
     if (error) throw error;
     return { ok: true, deleted: data.send_ids.length };
   });
@@ -165,12 +196,16 @@ export const sendMemberEmail = createServerFn({ method: "POST" })
     const { data: members, error } = await context.supabase
       .from("portal_members")
       .select("*")
-      .in("id", data.member_ids).neq("status", "revoked");
+      .in("id", data.member_ids)
+      .neq("status", "revoked");
     if (error) throw error;
     if (!members?.length) throw new Error("No recipients found");
     if (data.poll_id) {
       const { addMembersToPoll } = await import("@/lib/meeting-poll.server");
-      await addMembersToPoll(data.poll_id, (members as any[]).map((m) => m.id));
+      await addMembersToPoll(
+        data.poll_id,
+        (members as any[]).map((m) => m.id),
+      );
     }
 
     const apiKey = process.env["SENDGRID_API_KEY"];

@@ -54,7 +54,9 @@ export function SiteNav() {
       <header
         className={cn(
           "fixed inset-x-0 top-0 z-50 transition-all duration-300",
-          scrolled ? "bg-navy/95 backdrop-blur-md border-b border-gold/20" : "bg-navy/60 backdrop-blur-sm",
+          scrolled
+            ? "bg-navy/95 backdrop-blur-md border-b border-gold/20"
+            : "bg-navy/60 backdrop-blur-sm",
         )}
       >
         <nav className="mx-auto flex max-w-7xl items-center justify-between px-6 py-3">
@@ -81,7 +83,6 @@ export function SiteNav() {
                 {l.label}
               </Link>
             ))}
-
           </div>
           <button
             className="md:hidden text-ivory p-2 -mr-2 rounded-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold"
@@ -90,7 +91,15 @@ export function SiteNav() {
             aria-expanded={open}
             aria-controls="mobile-drawer"
           >
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+            <svg
+              width="24"
+              height="24"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+            >
               {open ? <path d="M6 6l12 12M6 18L18 6" /> : <path d="M4 7h16M4 12h16M4 17h16" />}
             </svg>
           </button>
@@ -131,7 +140,15 @@ export function SiteNav() {
               aria-label="Close menu"
               className="text-ivory p-2 -mr-2 rounded-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold"
             >
-              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+              <svg
+                width="22"
+                height="22"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+              >
                 <path d="M6 6l12 12M6 18L18 6" />
               </svg>
             </button>

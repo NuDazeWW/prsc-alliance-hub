@@ -82,8 +82,8 @@ function FaqPage() {
           </h1>
           <div className="gold-rule my-7 w-24" />
           <p className="text-lg text-white/70 max-w-3xl leading-relaxed">
-            Answers covering how the Score is built, what it measures, how your data is
-            handled, who governs the Standard, and what it costs.
+            Answers covering how the Score is built, what it measures, how your data is handled, who
+            governs the Standard, and what it costs.
           </p>
           <nav aria-label="FAQ categories" className="mt-8 flex flex-wrap gap-2">
             {FAQ_CATEGORIES.map((c) => (

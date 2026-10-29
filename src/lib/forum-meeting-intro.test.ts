@@ -1,6 +1,12 @@
 import { describe, it } from "node:test";
 import assert from "node:assert/strict";
-import { FORUM_INTRO_PARAGRAPHS, FORUM_NON_VOTING_NOTE, forumSlotsSentence, isForumPoll, slotCountWord } from "./forum-meeting-intro";
+import {
+  FORUM_INTRO_PARAGRAPHS,
+  FORUM_NON_VOTING_NOTE,
+  forumSlotsSentence,
+  isForumPoll,
+  slotCountWord,
+} from "./forum-meeting-intro";
 
 describe("Forum meeting calendar introduction", () => {
   it("uses the approved wording for the standard three slots", () => {
@@ -20,14 +26,19 @@ describe("Forum meeting calendar introduction", () => {
   it("recognises Forum polls only", () => {
     assert.equal(isForumPoll({ meeting_type: "forum", title: "Anything" }), true);
     assert.equal(isForumPoll({ meeting_type: "Forum", title: "x" }), true);
-    assert.equal(isForumPoll({ meeting_type: "custom", title: "United Strategic Coordination Forum" }), true);
+    assert.equal(
+      isForumPoll({ meeting_type: "custom", title: "United Strategic Coordination Forum" }),
+      true,
+    );
     assert.equal(isForumPoll({ meeting_type: "board", title: "Inaugural Board Meeting" }), false);
     assert.equal(isForumPoll({ meeting_type: "advisory", title: null }), false);
     assert.equal(isForumPoll({}), false);
   });
 
   it("keeps restricted briefing details out of the general scheduling copy", () => {
-    const copy = [...FORUM_INTRO_PARAGRAPHS, FORUM_NON_VOTING_NOTE, forumSlotsSentence(3)].join(" ");
+    const copy = [...FORUM_INTRO_PARAGRAPHS, FORUM_NON_VOTING_NOTE, forumSlotsSentence(3)].join(
+      " ",
+    );
     assert.doesNotMatch(copy, /jared|nascar/i);
   });
 

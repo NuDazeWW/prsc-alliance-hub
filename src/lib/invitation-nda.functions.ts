@@ -5,7 +5,12 @@ import { invitationNdaSaveSchema } from "./invitation-nda";
 
 const memberIdSchema = z.object({ member_id: z.string().uuid() }).strict();
 async function assertAdmin(context: { supabase: any; userId: string }) {
-  const { data, error } = await context.supabase.from("user_roles").select("role").eq("user_id", context.userId).eq("role", "admin").maybeSingle();
+  const { data, error } = await context.supabase
+    .from("user_roles")
+    .select("role")
+    .eq("user_id", context.userId)
+    .eq("role", "admin")
+    .maybeSingle();
   if (error || !data) throw new Error("Unauthorized");
 }
 export const getInvitationNda = createServerFn({ method: "GET" })

@@ -68,12 +68,18 @@ function ErrorComponent({ error: rawError, reset }: ErrorComponentProps) {
         <p className="mt-2 text-sm text-ivory/60">Something went wrong. Please try again.</p>
         <div className="mt-6 flex flex-wrap justify-center gap-2">
           <button
-            onClick={() => { router.invalidate(); reset(); }}
+            onClick={() => {
+              router.invalidate();
+              reset();
+            }}
             className="rounded-sm border border-gold bg-gold/10 px-4 py-2 text-xs tracking-[0.18em] uppercase text-gold hover:bg-gold hover:text-navy transition-colors"
           >
             Try again
           </button>
-          <a href="/" className="rounded-sm border border-ivory/30 px-4 py-2 text-xs tracking-[0.18em] uppercase text-ivory/80 hover:text-ivory">
+          <a
+            href="/"
+            className="rounded-sm border border-ivory/30 px-4 py-2 text-xs tracking-[0.18em] uppercase text-ivory/80 hover:text-ivory"
+          >
             Go home
           </a>
         </div>
@@ -119,7 +125,10 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient; host
           "PRSC is the independent standards body for partnership readiness — an authoritative, evidence-based framework for the global sponsorship market. Request a briefing.",
       },
       { name: "author", content: "Partnership Readiness Standards Council" },
-      { property: "og:title", content: "PRSC — The Independent Standard for Partnership Readiness" },
+      {
+        property: "og:title",
+        content: "PRSC — The Independent Standard for Partnership Readiness",
+      },
       {
         property: "og:description",
         content:
@@ -128,14 +137,25 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient; host
       { property: "og:type", content: "website" },
       { property: "og:site_name", content: "PRSC" },
       { name: "twitter:card", content: "summary_large_image" },
-      { name: "twitter:title", content: "PRSC — The Independent Standard for Partnership Readiness" },
+      {
+        name: "twitter:title",
+        content: "PRSC — The Independent Standard for Partnership Readiness",
+      },
       {
         name: "twitter:description",
         content:
           "PRSC is the independent standards body for partnership readiness — an authoritative, evidence-based framework for the global sponsorship market. Request a briefing.",
       },
-      { property: "og:image", content: "https://storage.googleapis.com/gpt-engineer-file-uploads/0JafHcnQtudk7ficMoAl5tUjyy42/social-images/social-1784099576877-ChatGPT_Image_Jul_15,_2026,_12_43_53_AM.webp" },
-      { name: "twitter:image", content: "https://storage.googleapis.com/gpt-engineer-file-uploads/0JafHcnQtudk7ficMoAl5tUjyy42/social-images/social-1784099576877-ChatGPT_Image_Jul_15,_2026,_12_43_53_AM.webp" },
+      {
+        property: "og:image",
+        content:
+          "https://storage.googleapis.com/gpt-engineer-file-uploads/0JafHcnQtudk7ficMoAl5tUjyy42/social-images/social-1784099576877-ChatGPT_Image_Jul_15,_2026,_12_43_53_AM.webp",
+      },
+      {
+        name: "twitter:image",
+        content:
+          "https://storage.googleapis.com/gpt-engineer-file-uploads/0JafHcnQtudk7ficMoAl5tUjyy42/social-images/social-1784099576877-ChatGPT_Image_Jul_15,_2026,_12_43_53_AM.webp",
+      },
     ],
     links: [
       { rel: "stylesheet", href: appCss },
@@ -200,7 +220,10 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient; host
 });
 
 function RootShell({ children }: { children: ReactNode }) {
-  const host = useRouterState({ select: (s) => (s.matches[0]?.context as { host?: string } | undefined)?.host }) ?? "";
+  const host =
+    useRouterState({
+      select: (s) => (s.matches[0]?.context as { host?: string } | undefined)?.host,
+    }) ?? "";
   const isPortalHost = PORTAL_HOSTS.has(host);
   return (
     <html lang="en">
@@ -226,10 +249,17 @@ function RootShell({ children }: { children: ReactNode }) {
 }
 
 function RootComponent() {
-  const { queryClient, host } = useRouterState({ select: (s) => s.matches[0]?.context as { queryClient: QueryClient; host: string } });
+  const { queryClient, host } = useRouterState({
+    select: (s) => s.matches[0]?.context as { queryClient: QueryClient; host: string },
+  });
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const isPortalHost = PORTAL_HOSTS.has(host);
-  const isPrivate = isPortalHost || pathname.startsWith("/portal") || pathname.startsWith("/admin") || pathname.startsWith("/auth") || pathname.startsWith("/accept-invitation");
+  const isPrivate =
+    isPortalHost ||
+    pathname.startsWith("/portal") ||
+    pathname.startsWith("/admin") ||
+    pathname.startsWith("/auth") ||
+    pathname.startsWith("/accept-invitation");
   const isChrome = !pathname.startsWith("/vanguard/") && !isPrivate;
   return (
     <QueryClientProvider client={queryClient}>

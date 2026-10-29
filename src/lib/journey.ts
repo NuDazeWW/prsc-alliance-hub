@@ -28,20 +28,30 @@ export function isOnboarding(d: Pick<JourneyDoc, "journey_stage">) {
 }
 
 function order(a: JourneyDoc, b: JourneyDoc) {
-  return ((a.journey_stage ?? 0) - (b.journey_stage ?? 0)) || a.sort_order - b.sort_order || a.created_at.localeCompare(b.created_at);
+  return (
+    (a.journey_stage ?? 0) - (b.journey_stage ?? 0) ||
+    a.sort_order - b.sort_order ||
+    a.created_at.localeCompare(b.created_at)
+  );
 }
 
 /** Stage 1 is always shared; later onboarding docs without a track belong to the member's first track. */
 function trackOf(d: JourneyDoc, entity: string): JourneyTrack {
   if (d.journey_stage === 1) return "shared";
-  return d.journey_track && d.journey_track !== "shared" ? d.journey_track : memberTracks(entity)[0];
+  return d.journey_track && d.journey_track !== "shared"
+    ? d.journey_track
+    : memberTracks(entity)[0];
 }
 
 /**
  * Why a locked onboarding document is locked, so the member sees an accurate reason:
  * an entity track that has not been released is "not_released"; anything else is the sequence.
  */
-export function lockReasonFor(d: JourneyDoc, entity: string, released: { prsc: boolean; dis: boolean }): "not_released" | "prior_action" {
+export function lockReasonFor(
+  d: JourneyDoc,
+  entity: string,
+  released: { prsc: boolean; dis: boolean },
+): "not_released" | "prior_action" {
   const track = trackOf(d, entity);
   if (track === "shared") return "prior_action";
   return released[track] ? "prior_action" : "not_released";
@@ -58,9 +68,16 @@ export type LockOptions = {
  * each entity track opens only after that entity's explicit administrative release,
  * independently of Forum participation or clearance.
  */
-export function lockedDocumentIds(docs: JourneyDoc[], done: Set<string>, entity: string, opts: LockOptions): Set<string> {
+export function lockedDocumentIds(
+  docs: JourneyDoc[],
+  done: Set<string>,
+  entity: string,
+  opts: LockOptions,
+): Set<string> {
   const locked = new Set<string>();
-  const onboarding = docs.filter(d => isOnboarding(d) && (opts.forum !== false || d.journey_stage !== 1));
+  const onboarding = docs.filter(
+    (d) => isOnboarding(d) && (opts.forum !== false || d.journey_stage !== 1),
+  );
   const shared = onboarding.filter((d) => trackOf(d, entity) === "shared").sort(order);
   let blocked = false;
   for (const d of shared) {
@@ -86,11 +103,19 @@ export type JourneyStatus = {
 };
 
 /** Per-entity acceptance completion; an empty Stage 3 is never acceptance. */
-export function entityAcceptanceComplete(docs: JourneyDoc[], done: Set<string>, entity: string): { prsc: boolean; dis: boolean } {
+export function entityAcceptanceComplete(
+  docs: JourneyDoc[],
+  done: Set<string>,
+  entity: string,
+): { prsc: boolean; dis: boolean } {
   const complete = (track: "prsc" | "dis") => {
     if (!memberTracks(entity).includes(track)) return false;
-    const requirements = docs.filter((d) => (d.journey_stage === 2 || d.journey_stage === 3) && trackOf(d, entity) === track);
-    return requirements.some((d) => d.journey_stage === 3) && requirements.every((d) => done.has(d.id));
+    const requirements = docs.filter(
+      (d) => (d.journey_stage === 2 || d.journey_stage === 3) && trackOf(d, entity) === track,
+    );
+    return (
+      requirements.some((d) => d.journey_stage === 3) && requirements.every((d) => done.has(d.id))
+    );
   };
   return { prsc: complete("prsc"), dis: complete("dis") };
 }
@@ -114,7 +139,8 @@ export function journeyStatus(
   };
   const allActivated = tracks.every((t) => activated[t]);
   // Members opted out of the Forum skip Stage 1 entirely (4-stage journey).
-  const s1 = !forum || (stageComplete(1) && onboarding.some((d) => d.journey_stage === 1) && cleared);
+  const s1 =
+    !forum || (stageComplete(1) && onboarding.some((d) => d.journey_stage === 1) && cleared);
   const s2 = s1 && stageComplete(2);
   const s3 = s2 && stageComplete(3);
   const s4 = s3 && stageComplete(4) && allActivated;
@@ -125,7 +151,11 @@ export function journeyStatus(
     : s3
       ? "Pending Activation"
       : s1
-        ? forum ? "Forum Cleared — In Entity Qualification" : "In Entity Qualification"
-        : forum && stageComplete(1) && onboarding.some((d) => d.journey_stage === 1) ? "Clearance Pending Review" : "Needs Forum Clearance";
+        ? forum
+          ? "Forum Cleared — In Entity Qualification"
+          : "In Entity Qualification"
+        : forum && stageComplete(1) && onboarding.some((d) => d.journey_stage === 1)
+          ? "Clearance Pending Review"
+          : "Needs Forum Clearance";
   return { currentStage, stageDone, label, forumCleared: s1 };
 }

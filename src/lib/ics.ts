@@ -8,7 +8,11 @@ function icsDateTime(iso: string) {
 }
 
 function escapeIcs(text: string) {
-  return text.replace(/\\/g, "\\\\").replace(/;/g, "\\;").replace(/,/g, "\\,").replace(/\r?\n/g, "\\n");
+  return text
+    .replace(/\\/g, "\\\\")
+    .replace(/;/g, "\\;")
+    .replace(/,/g, "\\,")
+    .replace(/\r?\n/g, "\\n");
 }
 
 export function buildMeetingIcs(input: {
@@ -41,11 +45,20 @@ export function buildMeetingIcs(input: {
 }
 
 /** Optional tentative hold an executive can import. Best effort: removal is not guaranteed. */
-export function buildSlotHoldIcs(input: { slotId: string; title: string; startsAt: string; durationMinutes: number }) {
+export function buildSlotHoldIcs(input: {
+  slotId: string;
+  title: string;
+  startsAt: string;
+  durationMinutes: number;
+}) {
   const start = new Date(input.startsAt);
   const end = new Date(start.getTime() + input.durationMinutes * 60000);
   return [
-    "BEGIN:VCALENDAR", "VERSION:2.0", "PRODID:-//PRSC//Board & Advisor Center//EN", "CALSCALE:GREGORIAN", "METHOD:PUBLISH",
+    "BEGIN:VCALENDAR",
+    "VERSION:2.0",
+    "PRODID:-//PRSC//Board & Advisor Center//EN",
+    "CALSCALE:GREGORIAN",
+    "METHOD:PUBLISH",
     "BEGIN:VEVENT",
     `UID:${input.slotId}-hold@prscstandards.org`,
     `DTSTAMP:${icsDateTime(new Date().toISOString())}`,
@@ -53,8 +66,9 @@ export function buildSlotHoldIcs(input: { slotId: string; title: string; startsA
     `DTEND:${icsDateTime(end.toISOString())}`,
     `SUMMARY:${escapeIcs(`HOLD (tentative): ${input.title} — may be released`)}`,
     `DESCRIPTION:${escapeIcs("Proposed time from the PRSC Board & Advisor Center. If another time is confirmed, the portal will list this hold as released so you can delete it.")}`,
-    "STATUS:TENTATIVE", "TRANSP:OPAQUE",
-    "END:VEVENT", "END:VCALENDAR",
+    "STATUS:TENTATIVE",
+    "TRANSP:OPAQUE",
+    "END:VEVENT",
+    "END:VCALENDAR",
   ].join("\r\n");
 }
-

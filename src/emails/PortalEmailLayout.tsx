@@ -1,4 +1,14 @@
-import { Html, Head, Body, Container, Section, Row, Column, Text, Link } from "@react-email/components";
+import {
+  Html,
+  Head,
+  Body,
+  Container,
+  Section,
+  Row,
+  Column,
+  Text,
+  Link,
+} from "@react-email/components";
 import * as React from "react";
 
 const colors = {
@@ -19,27 +29,69 @@ export function PortalEmailLayout({
   return (
     <Html lang="en">
       <Head />
-      <Body style={{ margin: 0, padding: 0, backgroundColor: colors.ivory, fontFamily: "Georgia, 'Times New Roman', serif" }}>
+      <Body
+        style={{
+          margin: 0,
+          padding: 0,
+          backgroundColor: colors.ivory,
+          fontFamily: "Georgia, 'Times New Roman', serif",
+        }}
+      >
         <Container style={{ maxWidth: 600, margin: "0 auto", padding: "48px 16px" }}>
           <Section style={{ backgroundColor: colors.navy, padding: "32px", textAlign: "center" }}>
-            <Text style={{ color: colors.gold, fontSize: 11, letterSpacing: "0.28em", textTransform: "uppercase", margin: 0 }}>
+            <Text
+              style={{
+                color: colors.gold,
+                fontSize: 11,
+                letterSpacing: "0.28em",
+                textTransform: "uppercase",
+                margin: 0,
+              }}
+            >
               Partnership Readiness Standards Council
             </Text>
           </Section>
-          <Section style={{ backgroundColor: "#FFFFFF", border: `1px solid ${colors.gold}30`, padding: "40px 32px" }}>
-            <Text style={{ color: colors.muted, fontSize: 11, letterSpacing: "0.2em", textTransform: "uppercase", margin: "0 0 16px" }}>
+          <Section
+            style={{
+              backgroundColor: "#FFFFFF",
+              border: `1px solid ${colors.gold}30`,
+              padding: "40px 32px",
+            }}
+          >
+            <Text
+              style={{
+                color: colors.muted,
+                fontSize: 11,
+                letterSpacing: "0.2em",
+                textTransform: "uppercase",
+                margin: "0 0 16px",
+              }}
+            >
               {preview}
             </Text>
             {children}
           </Section>
-          <Section style={{ backgroundColor: colors.navy, padding: "24px 32px", textAlign: "center" }}>
-            <Text style={{ color: colors.gold, fontSize: 11, letterSpacing: "0.18em", textTransform: "uppercase", margin: 0 }}>
+          <Section
+            style={{ backgroundColor: colors.navy, padding: "24px 32px", textAlign: "center" }}
+          >
+            <Text
+              style={{
+                color: colors.gold,
+                fontSize: 11,
+                letterSpacing: "0.18em",
+                textTransform: "uppercase",
+                margin: 0,
+              }}
+            >
               Private Center · access.prscstandards.org
             </Text>
           </Section>
           <Section>
-            <Text style={{ color: colors.muted, fontSize: 11, textAlign: "center", margin: "16px 0 0" }}>
-              This message was sent to you because access to the PRSC private center was requested. Please do not forward.
+            <Text
+              style={{ color: colors.muted, fontSize: 11, textAlign: "center", margin: "16px 0 0" }}
+            >
+              This message was sent to you because access to the PRSC private center was requested.
+              Please do not forward.
             </Text>
           </Section>
         </Container>

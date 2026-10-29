@@ -11,9 +11,17 @@ export const Route = createFileRoute("/readiness-vanguard")({
   head: () => ({
     meta: [
       { title: "The Readiness Vanguard — PRSC" },
-      { name: "description", content: "The Readiness Vanguard is the founding cohort of organizations helping define the era of professionalized sponsorship. Limited seats." },
+      {
+        name: "description",
+        content:
+          "The Readiness Vanguard is the founding cohort of organizations helping define the era of professionalized sponsorship. Limited seats.",
+      },
       { property: "og:title", content: "The Readiness Vanguard — PRSC" },
-      { property: "og:description", content: "A limited founding cohort of organizations. The credential, the benchmark, the legacy." },
+      {
+        property: "og:description",
+        content:
+          "A limited founding cohort of organizations. The credential, the benchmark, the legacy.",
+      },
       { property: "og:type", content: "article" },
       { property: "og:url", content: CANONICAL },
       { property: "og:image", content: OG_IMAGE },
@@ -44,7 +52,12 @@ export const Route = createFileRoute("/readiness-vanguard")({
             "@type": "BreadcrumbList",
             "@id": CANONICAL + "#breadcrumb",
             itemListElement: [
-              { "@type": "ListItem", position: 1, name: "PRSC", item: "https://prscstandards.com/" },
+              {
+                "@type": "ListItem",
+                position: 1,
+                name: "PRSC",
+                item: "https://prscstandards.com/",
+              },
               { "@type": "ListItem", position: 2, name: "The Readiness Vanguard", item: CANONICAL },
             ],
           },
@@ -56,9 +69,21 @@ export const Route = createFileRoute("/readiness-vanguard")({
 });
 
 const FEATURES = [
-  { icon: Award, title: "The Credential", body: "Vanguard members carry the PRSC founding-cohort designation — a permanent mark of leadership in a market moving toward disciplined, evidence-based partnership." },
-  { icon: TrendingUp, title: "The Benchmark", body: "Full Readiness Score™ assessment. Peer-relative benchmarks. Diagnostic guidance across all six dimensions — the fastest path to commercial clarity." },
-  { icon: Landmark, title: "The Legacy", body: "Vanguard organizations shape the calibration data behind the Standard itself. Their partnership defines what the industry will call ready for a generation." },
+  {
+    icon: Award,
+    title: "The Credential",
+    body: "Vanguard members carry the PRSC founding-cohort designation — a permanent mark of leadership in a market moving toward disciplined, evidence-based partnership.",
+  },
+  {
+    icon: TrendingUp,
+    title: "The Benchmark",
+    body: "Full Readiness Score™ assessment. Peer-relative benchmarks. Diagnostic guidance across all six dimensions — the fastest path to commercial clarity.",
+  },
+  {
+    icon: Landmark,
+    title: "The Legacy",
+    body: "Vanguard organizations shape the calibration data behind the Standard itself. Their partnership defines what the industry will call ready for a generation.",
+  },
 ];
 
 function VanguardPage() {
@@ -73,20 +98,35 @@ function VanguardPage() {
           className="absolute inset-0 h-full w-full object-cover"
           aria-hidden
         />
-        <div className="absolute inset-0" style={{ backgroundColor: "rgba(10,19,34,0.65)" }} aria-hidden />
-        <div className="absolute inset-0 opacity-[0.05] pointer-events-none"
-          style={{ backgroundImage: "radial-gradient(circle at 30% 40%, rgba(212,175,55,0.6), transparent 40%), radial-gradient(circle at 75% 60%, rgba(212,175,55,0.4), transparent 40%)" }} />
+        <div
+          className="absolute inset-0"
+          style={{ backgroundColor: "rgba(10,19,34,0.65)" }}
+          aria-hidden
+        />
+        <div
+          className="absolute inset-0 opacity-[0.05] pointer-events-none"
+          style={{
+            backgroundImage:
+              "radial-gradient(circle at 30% 40%, rgba(212,175,55,0.6), transparent 40%), radial-gradient(circle at 75% 60%, rgba(212,175,55,0.4), transparent 40%)",
+          }}
+        />
         <div className="relative mx-auto max-w-5xl px-6 text-center">
           <p className="label-caps text-gold mb-6">The Readiness Vanguard</p>
           <h1 className="font-display text-5xl md:text-7xl leading-[1.02]">
-            Be among the first organizations ever issued an independent<br /><span className="text-gold">PRSC Readiness Score™</span>
+            Be among the first organizations ever issued an independent
+            <br />
+            <span className="text-gold">PRSC Readiness Score™</span>
           </h1>
           <div className="gold-rule my-8 mx-auto w-24" />
           <p className="text-xl text-ivory/75 max-w-3xl mx-auto leading-relaxed">
-            The Readiness Vanguard is the founding group of rights holders in sport to receive an independent PRSC Readiness Score™. It costs nothing. The score is yours.
+            The Readiness Vanguard is the founding group of rights holders in sport to receive an
+            independent PRSC Readiness Score™. It costs nothing. The score is yours.
           </p>
           <p className="mt-6 text-lg text-ivory/70 max-w-3xl mx-auto leading-relaxed">
-            The Readiness Vanguard is open to teams, drivers, series, and venues across motorsport and emerging competitive sports — the markets where the gap between commercial potential and commercial proof is widest, and where the Standard will have the most immediate impact.
+            The Readiness Vanguard is open to teams, drivers, series, and venues across motorsport
+            and emerging competitive sports — the markets where the gap between commercial potential
+            and commercial proof is widest, and where the Standard will have the most immediate
+            impact.
           </p>
         </div>
       </section>
@@ -113,7 +153,9 @@ function VanguardPage() {
           <h2 className="font-display text-3xl md:text-4xl leading-tight">
             The Vanguard is capped. Every seat carries permanent standing.
           </h2>
-          <p className="mt-4 text-ivory/70">Applications reviewed on a rolling basis by the Council.</p>
+          <p className="mt-4 text-ivory/70">
+            Applications reviewed on a rolling basis by the Council.
+          </p>
         </div>
       </section>
 
@@ -122,7 +164,9 @@ function VanguardPage() {
         <div className="mx-auto max-w-3xl px-6">
           <div className="text-center mb-12">
             <p className="label-caps text-gold mb-4">Learn More</p>
-            <h2 className="font-display text-4xl md:text-5xl leading-tight">Submit your organization for consideration.</h2>
+            <h2 className="font-display text-4xl md:text-5xl leading-tight">
+              Submit your organization for consideration.
+            </h2>
             <div className="gold-rule my-6 mx-auto w-24" />
           </div>
           <VanguardInterestForm />

@@ -20,19 +20,22 @@ const PORTAL = "https://access.prscstandards.org/portal";
 export const SYSTEM_EMAIL_DEFAULTS: Record<string, SystemEmailCopy> = {
   invite: {
     name: "Email 1 · Private invitation and orientation (sent automatically)",
-    description: "Sent automatically when you invite a member. Tokens: {{first_name}}, {{why_you}}, {{entity_full}}, {{entity}}, {{role}}.",
+    description:
+      "Sent automatically when you invite a member. Tokens: {{first_name}}, {{why_you}}, {{entity_full}}, {{entity}}, {{role}}.",
     subject: "A private invitation to the next chapter of PRSC & DIS",
     eyebrow: "Private invitation",
     heading: "Hello {{first_name}},",
     body: "I'm pleased to welcome you to the next phase of our work with the Partnership Readiness Standards Council (PRSC) and Decision Intelligence Systems (DIS).\n\nWe've made meaningful progress in developing the independent readiness standard and the intelligence platform designed to support its adoption. As we prepare to bring our leadership and advisory community together for an important strategic discussion, I want to ensure everyone has a current understanding of what we're building, how the organizations work together, and where we're headed.\n\nWhy You're Here\n\n{{why_you}}\n\nWe've created a private Board & Advisor Center to make your experience straightforward, organized, and respectful of your time.\n\nHere's how to begin:\n\n• Accept your secure invitation and create your password\n• Start with the Orientation Hub and select \"Take the 5-Minute Orientation.\" This is an important first step, particularly as our framework has continued to evolve\n• Mark your meeting availability when an active poll is available\n• Complete your private executive profile\n• Continue to your Forum participation requirements\n\nThe orientation will give everyone a common foundation so our upcoming discussion can focus on strategic questions, informed perspectives, and the opportunities ahead rather than revisiting introductory material.\n\nYou'll receive additional information about our upcoming Strategic Coordination Forum through the portal.\n\nThank you for being part of this next chapter. I look forward to bringing this group together and benefiting from the experience and perspective each of you brings.",
     cta_label: "Accept Your Private Invitation",
     cta_url: "",
-    cta_subtext: "You'll create your own private password on the secure invitation page. No password is ever sent by email.",
+    cta_subtext:
+      "You'll create your own private password on the secure invitation page. No password is ever sent by email.",
     signatures: "Shirley Johnson|Founder, PRSC & DIS",
   },
   meeting_poll: {
     name: "Meeting availability request (automatic)",
-    description: "Sent when you propose meeting dates. Tokens: {{first_name}}, {{meeting_title}}, {{meeting_type}}, {{meeting_block}}.",
+    description:
+      "Sent when you propose meeting dates. Tokens: {{first_name}}, {{meeting_title}}, {{meeting_type}}, {{meeting_block}}.",
     subject: "Please share your availability: {{meeting_title}}",
     eyebrow: "{{meeting_type}}",
     heading: "{{first_name}}, we are scheduling the next {{meeting_type}}.",
@@ -44,11 +47,12 @@ export const SYSTEM_EMAIL_DEFAULTS: Record<string, SystemEmailCopy> = {
   },
   meeting_poll_reminder: {
     name: "Meeting availability reminder (automatic)",
-    description: "Sent once, 48 hours after a poll opens, only to invited members who have not answered. Tokens: {{first_name}}, {{meeting_title}}.",
+    description:
+      "Sent once, 48 hours after a poll opens, only to invited members who have not answered. Tokens: {{first_name}}, {{meeting_title}}.",
     subject: "Quick reminder: your availability for {{meeting_title}}",
     eyebrow: "Gentle reminder",
     heading: "{{first_name}}, we are still collecting availability.",
-    body: "We are finding a time for \"{{meeting_title}}\" and your answer is one of the few still outstanding.\n\nIt takes under a minute — open your private Welcome Center, go to Meetings, and mark each proposed time Available, If needed, or Unavailable.",
+    body: 'We are finding a time for "{{meeting_title}}" and your answer is one of the few still outstanding.\n\nIt takes under a minute — open your private Welcome Center, go to Meetings, and mark each proposed time Available, If needed, or Unavailable.',
     cta_label: "Share Your Availability",
     cta_url: `${PORTAL}#meetings`,
     cta_subtext: "",
@@ -56,7 +60,8 @@ export const SYSTEM_EMAIL_DEFAULTS: Record<string, SystemEmailCopy> = {
   },
   meeting_confirmed: {
     name: "Meeting confirmed (automatic)",
-    description: "Sent when you confirm a meeting time. Tokens: {{first_name}}, {{meeting_title}}, {{meeting_type}}, {{confirmed_time}}, {{meeting_duration}}, {{meeting_where}}, {{calendar_url}}.",
+    description:
+      "Sent when you confirm a meeting time. Tokens: {{first_name}}, {{meeting_title}}, {{meeting_type}}, {{confirmed_time}}, {{meeting_duration}}, {{meeting_where}}, {{calendar_url}}.",
     subject: "Confirmed: {{meeting_title}} — {{confirmed_time}}",
     eyebrow: "{{meeting_type}}",
     heading: "{{first_name}}, the {{meeting_type}} is confirmed.",
@@ -68,7 +73,8 @@ export const SYSTEM_EMAIL_DEFAULTS: Record<string, SystemEmailCopy> = {
   },
   profile_received: {
     name: "Profile received (automatic)",
-    description: "Sent to a member after they submit their profile. Role-neutral: suitable for Forum-only participants, candidates, pending appointees, and appointed members. Tokens: {{first_name}}.",
+    description:
+      "Sent to a member after they submit their profile. Role-neutral: suitable for Forum-only participants, candidates, pending appointees, and appointed members. Tokens: {{first_name}}.",
     subject: "We've received your executive profile",
     eyebrow: "Profile received",
     heading: "Thank you, {{first_name}}. Your profile has been received.",
@@ -80,7 +86,8 @@ export const SYSTEM_EMAIL_DEFAULTS: Record<string, SystemEmailCopy> = {
   },
   entity_documents_ready: {
     name: "Entity onboarding materials available (automatic)",
-    description: "Sent once when an admin starts a member's PRSC or DIS Stage 2 onboarding. Tokens: {{first_name}}, {{entity}}, {{stage_name}}, {{action_summary}}, {{due_date}}.",
+    description:
+      "Sent once when an admin starts a member's PRSC or DIS Stage 2 onboarding. Tokens: {{first_name}}, {{entity}}, {{stage_name}}, {{action_summary}}, {{due_date}}.",
     subject: "Your {{entity}} Onboarding Materials Are Available",
     eyebrow: "{{entity}} onboarding",
     heading: "Hello {{first_name}},",
@@ -92,7 +99,8 @@ export const SYSTEM_EMAIL_DEFAULTS: Record<string, SystemEmailCopy> = {
   },
   profile_submitted_admin_alert: {
     name: "Profile submitted, admin alert (automatic)",
-    description: "Sent to the administrator when a member submits their Executive Profile. Tokens: {{member_name}}, {{submitted_at}}, {{submission_id}}.",
+    description:
+      "Sent to the administrator when a member submits their Executive Profile. Tokens: {{member_name}}, {{submitted_at}}, {{submission_id}}.",
     subject: "Executive Profile Submitted | {{member_name}}",
     eyebrow: "Administrative notice",
     heading: "An executive profile submission has been recorded.",
@@ -104,7 +112,8 @@ export const SYSTEM_EMAIL_DEFAULTS: Record<string, SystemEmailCopy> = {
   },
   documents_ready: {
     name: "Forum documents ready (forum_documents_ready, automatic)",
-    description: "Sent once when you release a member's initial Forum Protocol, Pre-Read and Conflict/Recusal documents. PRSC/DIS Stage 2 uses Entity onboarding instead. Tokens: {{first_name}}, {{document_summary}}.",
+    description:
+      "Sent once when you release a member's initial Forum Protocol, Pre-Read and Conflict/Recusal documents. PRSC/DIS Stage 2 uses Entity onboarding instead. Tokens: {{first_name}}, {{document_summary}}.",
     subject: "Action needed: your Forum materials are ready",
     eyebrow: "Documents ready",
     heading: "{{first_name}}, your Forum materials are ready.",
@@ -119,37 +128,89 @@ export const SYSTEM_EMAIL_DEFAULTS: Record<string, SystemEmailCopy> = {
 const SHIRLEY = "Shirley";
 const FORUM_PORTAL = `${PORTAL}#meetings`;
 
-function forum(name: string, description: string, subject: string, eyebrow: string, body: string, cta_label: string, cta_url = PORTAL): SystemEmailCopy {
-  return { name, description, subject, eyebrow, heading: "Hello {{first_name}},", body, cta_label, cta_url, cta_subtext: "", signatures: SHIRLEY };
+function forum(
+  name: string,
+  description: string,
+  subject: string,
+  eyebrow: string,
+  body: string,
+  cta_label: string,
+  cta_url = PORTAL,
+): SystemEmailCopy {
+  return {
+    name,
+    description,
+    subject,
+    eyebrow,
+    heading: "Hello {{first_name}},",
+    body,
+    cta_label,
+    cta_url,
+    cta_subtext: "",
+    signatures: SHIRLEY,
+  };
 }
 
 Object.assign(SYSTEM_EMAIL_DEFAULTS, {
-  forum_confirmed: forum("Email 2 · Forum confirmed", "Sent from Forum Communications once the date is set. Tokens: {{first_name}}, {{forum_date}}, {{forum_time}}, {{forum_location}}.",
-    "Confirmed: DIS–PRSC Motorsport Strategic Coordination Forum", "Strategic Coordination Forum",
+  forum_confirmed: forum(
+    "Email 2 · Forum confirmed",
+    "Sent from Forum Communications once the date is set. Tokens: {{first_name}}, {{forum_date}}, {{forum_time}}, {{forum_location}}.",
+    "Confirmed: DIS–PRSC Motorsport Strategic Coordination Forum",
+    "Strategic Coordination Forum",
     "Our inaugural DIS–PRSC Motorsport Strategic Coordination Forum is now scheduled.\n\nDate: {{forum_date}}\nTime: {{forum_time}}\nLocation: {{forum_location}}\n\nThis confidential session will bring together our invited leadership, advisors, and methodology experts to examine an emerging motorsport opportunity, its implications for the Readiness Vanguard, and the path toward credible market validation.\n\nThe Forum is designed for strategic coordination and expert input. It is not a formal Board or Methodology Committee meeting, and no entity approvals or votes will occur.\n\nYour meeting information, preparation requirements, and calendar invitation are available in the private portal.\n\nIf you have not yet completed the five-minute Orientation Hub overview, please do so before the session.\n\nI look forward to a productive conversation.",
-    "View Forum Details", FORUM_PORTAL),
-  briefing_released: forum("Email 3 · Strategic briefing released", "Sent from Forum Communications to cleared members who can see the briefing. Tokens: {{first_name}}.",
-    "Your confidential strategic briefing is available", "Executive briefing",
+    "View Forum Details",
+    FORUM_PORTAL,
+  ),
+  briefing_released: forum(
+    "Email 3 · Strategic briefing released",
+    "Sent from Forum Communications to cleared members who can see the briefing. Tokens: {{first_name}}.",
+    "Your confidential strategic briefing is available",
+    "Executive briefing",
     "Our confidential strategic briefing is now available in the PRSC & DIS Private Board & Advisor Center.\n\nThe briefing outlines the emerging motorsport opportunity, the strategic questions it presents for DIS and PRSC, and its potential implications for the Readiness Vanguard and independent market validation.\n\nIt also distinguishes established facts from reported information and working hypotheses.\n\nPlease review the materials before submitting your strategic questions. The purpose of this advance briefing is to give everyone the opportunity to engage with the substance of the discussion before we convene.\n\nThese materials are confidential and intended only for authorized recipients.\n\nThank you for contributing your perspective.",
-    "Review the Executive Briefing", `${PORTAL}#documents`),
-  input_requested: forum("Email 4 · Executive questions requested", "Sent from Forum Communications for one question round, only to cleared participants with briefing access. Tokens: {{first_name}}, {{round_title}}, {{deadline}}.",
-    "Your perspective ahead of the Strategic Coordination Forum: {{round_title}}", "Executive input",
+    "Review the Executive Briefing",
+    `${PORTAL}#documents`,
+  ),
+  input_requested: forum(
+    "Email 4 · Executive questions requested",
+    "Sent from Forum Communications for one question round, only to cleared participants with briefing access. Tokens: {{first_name}}, {{round_title}}, {{deadline}}.",
+    "Your perspective ahead of the Strategic Coordination Forum: {{round_title}}",
+    "Executive input",
     "Now that the executive briefing is available, I'd like to invite your perspective ahead of our upcoming Strategic Coordination Forum.\n\nOne of the reasons we've brought together this group is the breadth of expertise represented. Your questions are just as valuable as your recommendations, particularly as we examine an opportunity with meaningful strategic, operational, and institutional implications.\n\nThrough the portal, please submit up to three questions you believe we should address before or during the Forum.\n\nThese might relate to market opportunity, commercial positioning, data and measurement, methodology, technology, governance, or execution priorities.\n\nWe'll consolidate the questions, identify the appropriate information sources, and use them to focus the discussion. Questions intended for Jared or another external party will be reviewed and coordinated before being shared.\n\nQuestion round: {{round_title}}\nRequested by: {{deadline}}\n\nThank you for helping make this a substantive and productive discussion.",
-    "Submit Your Executive Questions", `${PORTAL}#executive-questions`),
-  input_reminder: forum("Email 5 · Executive questions reminder", "Goes only to eligible members who have not submitted or chosen No additional questions. Tokens: {{first_name}}, {{round_title}}, {{deadline}}.",
-    "Reminder: {{round_title}} questions close {{deadline}}", "Executive input",
+    "Submit Your Executive Questions",
+    `${PORTAL}#executive-questions`,
+  ),
+  input_reminder: forum(
+    "Email 5 · Executive questions reminder",
+    "Goes only to eligible members who have not submitted or chosen No additional questions. Tokens: {{first_name}}, {{round_title}}, {{deadline}}.",
+    "Reminder: {{round_title}} questions close {{deadline}}",
+    "Executive input",
     "A quick reminder that the window for submitting questions ahead of our Motorsport Strategic Coordination Forum closes on {{deadline}}.\n\nWe're consolidating input from the group to identify information gaps, strengthen the discussion, and ensure we make the best use of everyone's time.\n\nIf you have one or two questions you believe we should explore, we'd welcome them.\n\nIf you have no additional questions at this stage, no submission is required.",
-    "Submit Questions", `${PORTAL}#executive-questions`),
-  final_agenda: forum("Email 6 · Final Forum agenda", "Sent from Forum Communications about two business days before the Forum. Tokens: {{first_name}}, {{forum_when}}.",
-    "Final preparation: Strategic Coordination Forum", "Final agenda",
+    "Submit Questions",
+    `${PORTAL}#executive-questions`,
+  ),
+  final_agenda: forum(
+    "Email 6 · Final Forum agenda",
+    "Sent from Forum Communications about two business days before the Forum. Tokens: {{first_name}}, {{forum_when}}.",
+    "Final preparation: Strategic Coordination Forum",
+    "Final agenda",
     "Our Strategic Coordination Forum is approaching, and the final preparation materials are now available.\n\nYour private portal contains the current agenda, the executive coordination dashboard, and the key questions we will address together.\n\nForum: {{forum_when}}\n\nBefore we meet, please:\n\n• Review the current agenda and coordination dashboard\n• Review any new or revised materials assigned to you\n• Confirm that your Forum participation and conflict disclosures remain accurate\n\nOur objective is to use the session to challenge assumptions, explore strategic options, and identify a practical path forward.\n\nNo formal entity decisions or approvals will occur during this joint Forum. Matters requiring PRSC or DIS authorization will be routed to their respective processes.\n\nI'm looking forward to the conversation.",
-    "Review Final Forum Materials"),
-  coordination_summary: forum("Email 7 · Forum coordination summary", "Sent from Forum Communications after the approved Coordination Note is released. Tokens: {{first_name}}.",
-    "Forum Coordination Summary now available", "Coordination summary",
+    "Review Final Forum Materials",
+  ),
+  coordination_summary: forum(
+    "Email 7 · Forum coordination summary",
+    "Sent from Forum Communications after the approved Coordination Note is released. Tokens: {{first_name}}.",
+    "Forum Coordination Summary now available",
+    "Coordination summary",
     "Thank you for contributing to our DIS–PRSC Motorsport Strategic Coordination Forum.\n\nI appreciate the thoughtful perspectives and expertise brought into the discussion.\n\nThe approved Coordination Summary is now available in your private portal. It captures the principal discussion themes, outstanding questions, agreed coordination actions, and matters requiring separate review or authorization.\n\nPlease note that the summary records strategic coordination, not formal PRSC or DIS corporate action.\n\nWe'll continue communicating through the portal as the next steps develop.\n\nThank you again for your involvement.",
-    "Review the Coordination Summary", `${PORTAL}#documents`),
-  followup_assigned: forum("Email 8 · Follow-up assignment (available in Priority B)", "Switched off until follow-up assignments are live. Tokens: {{first_name}}, {{action_title}}, {{target_date}}, {{coordinating_entity}}.",
-    "A Forum follow-up has been assigned to you", "Follow-up",
+    "Review the Coordination Summary",
+    `${PORTAL}#documents`,
+  ),
+  followup_assigned: forum(
+    "Email 8 · Follow-up assignment (available in Priority B)",
+    "Switched off until follow-up assignments are live. Tokens: {{first_name}}, {{action_title}}, {{target_date}}, {{coordinating_entity}}.",
+    "A Forum follow-up has been assigned to you",
+    "Follow-up",
     "A follow-up item from the DIS–PRSC Strategic Coordination Forum has been assigned to you in the private portal.\n\nAction: {{action_title}}\nTarget Date: {{target_date}}\nCoordinating Entity: {{coordinating_entity}}\n\nYou can review the context, expected contribution, and any supporting materials in your Forum workspace.\n\nIf the assignment requires formal entity authority, approval, or access beyond your current role, please flag it through the portal before proceeding.\n\nThank you for your continued contribution.",
-    "View Your Follow-Up"),
+    "View Your Follow-Up",
+  ),
 } satisfies Record<string, SystemEmailCopy>);

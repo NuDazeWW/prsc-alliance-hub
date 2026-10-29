@@ -4,9 +4,12 @@ import { ContinueReading } from "@/components/site/ContinueReading";
 import boardroom from "@/assets/prsc-boardroom.jpg.asset.json";
 import sealBadge from "@/assets/prsc-seal-badge.png.asset.json";
 
-const slugify = (s: string) => s.toLowerCase().replace(/™/g, "").replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
-
-
+const slugify = (s: string) =>
+  s
+    .toLowerCase()
+    .replace(/™/g, "")
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/(^-|-$)/g, "");
 
 const CANONICAL = "https://prscstandards.com/the-standard";
 const OG_IMAGE = `https://prscstandards.com${boardroom.url}`;
@@ -15,16 +18,35 @@ export const Route = createFileRoute("/the-standard")({
   head: () => ({
     meta: [
       { title: "PRSC Readiness Score™ — The Independent Standard for Partnership Readiness" },
-      { name: "description", content: "The PRSC Readiness Score™ is the independent, evidence-based measure of commercial partnership readiness — built on the Six Readiness Dimensions™ and governed by the Partnership Readiness Standards Council." },
-      { name: "keywords", content: "PRSC Readiness Score™, PRSC Readiness Standard™, Partnership Readiness Standards Council, Six Readiness Dimensions, commercial readiness score, sponsorship readiness" },
-      { property: "og:title", content: "PRSC Readiness Score™ — The Independent Standard for Partnership Readiness" },
-      { property: "og:description", content: "The PRSC Readiness Score™ — the independent, evidence-based measure of commercial partnership readiness, governed by the Partnership Readiness Standards Council." },
+      {
+        name: "description",
+        content:
+          "The PRSC Readiness Score™ is the independent, evidence-based measure of commercial partnership readiness — built on the Six Readiness Dimensions™ and governed by the Partnership Readiness Standards Council.",
+      },
+      {
+        name: "keywords",
+        content:
+          "PRSC Readiness Score™, PRSC Readiness Standard™, Partnership Readiness Standards Council, Six Readiness Dimensions, commercial readiness score, sponsorship readiness",
+      },
+      {
+        property: "og:title",
+        content: "PRSC Readiness Score™ — The Independent Standard for Partnership Readiness",
+      },
+      {
+        property: "og:description",
+        content:
+          "The PRSC Readiness Score™ — the independent, evidence-based measure of commercial partnership readiness, governed by the Partnership Readiness Standards Council.",
+      },
       { property: "og:type", content: "article" },
       { property: "og:url", content: CANONICAL },
       { property: "og:image", content: OG_IMAGE },
       { name: "twitter:card", content: "summary_large_image" },
       { name: "twitter:title", content: "PRSC Readiness Score™ — The Independent Standard" },
-      { name: "twitter:description", content: "The independent, evidence-based measure of commercial partnership readiness — built on the Six Readiness Dimensions™." },
+      {
+        name: "twitter:description",
+        content:
+          "The independent, evidence-based measure of commercial partnership readiness — built on the Six Readiness Dimensions™.",
+      },
       { name: "twitter:image", content: OG_IMAGE },
     ],
     links: [
@@ -53,7 +75,8 @@ export const Route = createFileRoute("/the-standard")({
             "@context": "https://schema.org",
             "@type": "Article",
             "@id": CANONICAL + "#article",
-            headline: "The PRSC Readiness Score™ — The Independent Standard for Partnership Readiness",
+            headline:
+              "The PRSC Readiness Score™ — The Independent Standard for Partnership Readiness",
             description:
               "An overview of the PRSC Readiness Score™ methodology, the Six Readiness Dimensions, and the governance of the Partnership Readiness Standards Council.",
             mainEntityOfPage: { "@id": CANONICAL + "#webpage" },
@@ -70,7 +93,8 @@ export const Route = createFileRoute("/the-standard")({
             "@id": CANONICAL + "#prsc-readiness-score",
             name: "PRSC Readiness Score™",
             alternateName: ["PRSC Readiness Score™", "Readiness Score"],
-            description: "The PRSC Readiness Score™ is the independent, evidence-based measure of an organization's commercial partnership readiness, calculated across the Six Readiness Dimensions and governed by the Partnership Readiness Standards Council (PRSC).",
+            description:
+              "The PRSC Readiness Score™ is the independent, evidence-based measure of an organization's commercial partnership readiness, calculated across the Six Readiness Dimensions and governed by the Partnership Readiness Standards Council (PRSC).",
             url: CANONICAL,
             inDefinedTermSet: {
               "@type": "DefinedTermSet",
@@ -82,15 +106,46 @@ export const Route = createFileRoute("/the-standard")({
             "@context": "https://schema.org",
             "@type": "DefinedTermSet",
             name: "The Six Readiness Dimensions",
-            description: "The six independent dimensions of the PRSC Readiness Score™ methodology for measuring commercial partnership readiness.",
+            description:
+              "The six independent dimensions of the PRSC Readiness Score™ methodology for measuring commercial partnership readiness.",
             url: CANONICAL,
             hasDefinedTerm: [
-              { "@type": "DefinedTerm", name: "Signal Strength", description: "The clarity, consistency, and reach of an organization's public presence — the raw broadcast footprint on which every partnership is built." },
-              { "@type": "DefinedTerm", name: "Audience Value", description: "The quality, composition, and commercial relevance of the audience delivered — not just size, but purchasing power, loyalty, and cultural weight." },
-              { "@type": "DefinedTerm", name: "Platform Identity", description: "The distinctness of the brand an organization carries — how sharply it stands apart in a crowded, undifferentiated market." },
-              { "@type": "DefinedTerm", name: "Activation Capability", description: "The organization's ability to execute — creative capacity, operational rigor, and speed from partnership idea to market." },
-              { "@type": "DefinedTerm", name: "Measurement Confidence", description: "The reliability of the data, methodology, and reporting infrastructure a partner receives — the foundation of any credible ROI conversation." },
-              { "@type": "DefinedTerm", name: "Relationship Strength", description: "The trust, retention, and depth of partner relationships — the leading indicator of long-term commercial value." },
+              {
+                "@type": "DefinedTerm",
+                name: "Signal Strength",
+                description:
+                  "The clarity, consistency, and reach of an organization's public presence — the raw broadcast footprint on which every partnership is built.",
+              },
+              {
+                "@type": "DefinedTerm",
+                name: "Audience Value",
+                description:
+                  "The quality, composition, and commercial relevance of the audience delivered — not just size, but purchasing power, loyalty, and cultural weight.",
+              },
+              {
+                "@type": "DefinedTerm",
+                name: "Platform Identity",
+                description:
+                  "The distinctness of the brand an organization carries — how sharply it stands apart in a crowded, undifferentiated market.",
+              },
+              {
+                "@type": "DefinedTerm",
+                name: "Activation Capability",
+                description:
+                  "The organization's ability to execute — creative capacity, operational rigor, and speed from partnership idea to market.",
+              },
+              {
+                "@type": "DefinedTerm",
+                name: "Measurement Confidence",
+                description:
+                  "The reliability of the data, methodology, and reporting infrastructure a partner receives — the foundation of any credible ROI conversation.",
+              },
+              {
+                "@type": "DefinedTerm",
+                name: "Relationship Strength",
+                description:
+                  "The trust, retention, and depth of partner relationships — the leading indicator of long-term commercial value.",
+              },
             ],
           },
           {
@@ -120,7 +175,12 @@ export const Route = createFileRoute("/the-standard")({
             "@type": "BreadcrumbList",
             "@id": CANONICAL + "#breadcrumb",
             itemListElement: [
-              { "@type": "ListItem", position: 1, name: "PRSC", item: "https://prscstandards.com/" },
+              {
+                "@type": "ListItem",
+                position: 1,
+                name: "PRSC",
+                item: "https://prscstandards.com/",
+              },
               { "@type": "ListItem", position: 2, name: "PRSC Readiness Score™", item: CANONICAL },
             ],
           },
@@ -131,14 +191,37 @@ export const Route = createFileRoute("/the-standard")({
   component: TheStandardPage,
 });
 
-
 const DIMENSIONS = [
-  { icon: Radio, title: "Signal Strength™", body: "The clarity, consistency, and reach of an organization's public presence — the raw broadcast footprint on which every partnership is built." },
-  { icon: Users, title: "Audience Value™", body: "The quality, composition, and commercial relevance of the audience delivered — not just size, but purchasing power, loyalty, and cultural weight." },
-  { icon: Fingerprint, title: "Platform Identity™", body: "The distinctness of the brand an organization carries — how sharply it stands apart in a crowded, undifferentiated market." },
-  { icon: Zap, title: "Activation Capability™", body: "The organization's ability to execute — creative capacity, operational rigor, and speed from partnership idea to market." },
-  { icon: BarChart3, title: "Measurement Confidence™", body: "The reliability of the data, methodology, and reporting infrastructure a partner receives — the foundation of any credible ROI conversation." },
-  { icon: Handshake, title: "Relationship Strength™", body: "The trust, retention, and depth of partner relationships — the leading indicator of long-term commercial value." },
+  {
+    icon: Radio,
+    title: "Signal Strength™",
+    body: "The clarity, consistency, and reach of an organization's public presence — the raw broadcast footprint on which every partnership is built.",
+  },
+  {
+    icon: Users,
+    title: "Audience Value™",
+    body: "The quality, composition, and commercial relevance of the audience delivered — not just size, but purchasing power, loyalty, and cultural weight.",
+  },
+  {
+    icon: Fingerprint,
+    title: "Platform Identity™",
+    body: "The distinctness of the brand an organization carries — how sharply it stands apart in a crowded, undifferentiated market.",
+  },
+  {
+    icon: Zap,
+    title: "Activation Capability™",
+    body: "The organization's ability to execute — creative capacity, operational rigor, and speed from partnership idea to market.",
+  },
+  {
+    icon: BarChart3,
+    title: "Measurement Confidence™",
+    body: "The reliability of the data, methodology, and reporting infrastructure a partner receives — the foundation of any credible ROI conversation.",
+  },
+  {
+    icon: Handshake,
+    title: "Relationship Strength™",
+    body: "The trust, retention, and depth of partner relationships — the leading indicator of long-term commercial value.",
+  },
 ];
 
 function TheStandardPage() {
@@ -155,9 +238,19 @@ function TheStandardPage() {
           decoding="async"
           aria-hidden="true"
         />
-        <div className="absolute inset-0" style={{ backgroundColor: "rgba(10,19,34,0.7)" }} aria-hidden />
-        <div className="absolute inset-0 opacity-[0.06] pointer-events-none"
-          style={{ backgroundImage: "linear-gradient(rgba(212,175,55,0.6) 1px, transparent 1px), linear-gradient(90deg, rgba(212,175,55,0.6) 1px, transparent 1px)", backgroundSize: "60px 60px" }} />
+        <div
+          className="absolute inset-0"
+          style={{ backgroundColor: "rgba(10,19,34,0.7)" }}
+          aria-hidden
+        />
+        <div
+          className="absolute inset-0 opacity-[0.06] pointer-events-none"
+          style={{
+            backgroundImage:
+              "linear-gradient(rgba(212,175,55,0.6) 1px, transparent 1px), linear-gradient(90deg, rgba(212,175,55,0.6) 1px, transparent 1px)",
+            backgroundSize: "60px 60px",
+          }}
+        />
         <div className="relative mx-auto max-w-5xl px-6 text-center">
           <p className="label-caps text-gold mb-6">The Standard</p>
           <h1 className="font-display text-5xl md:text-7xl leading-[1.05]">
@@ -165,7 +258,8 @@ function TheStandardPage() {
           </h1>
           <div className="gold-rule my-8 mx-auto w-24" />
           <p className="mt-4 text-xl text-ivory/80 max-w-3xl mx-auto leading-relaxed">
-            A single, independent measure of an organization's commercial partnership readiness — built on six dimensions, governed by the market, evidence at every step.
+            A single, independent measure of an organization's commercial partnership readiness —
+            built on six dimensions, governed by the market, evidence at every step.
           </p>
           <div className="mt-10 flex justify-center">
             <Link
@@ -177,10 +271,8 @@ function TheStandardPage() {
               <ArrowRight size={14} className="transition-transform group-hover:translate-x-1" />
             </Link>
           </div>
-
         </div>
       </section>
-
 
       {/* INDEPENDENCE BY DESIGN */}
       <section className="bg-ivory text-navy py-24 md:py-32">
@@ -201,10 +293,13 @@ function TheStandardPage() {
             </h2>
             <div className="space-y-4 text-lg text-stone leading-relaxed">
               <p>
-                A standard is only as credible as the body that governs it. PRSC™ is structured to be non-commercial, methodologically transparent, and independent of any single organization, brand, or platform.
+                A standard is only as credible as the body that governs it. PRSC™ is structured to
+                be non-commercial, methodologically transparent, and independent of any single
+                organization, brand, or platform.
               </p>
               <p>
-                Methodology is set by a peer-reviewed committee. Scoring is auditable. Version history is published. The Standard belongs to the market it serves.
+                Methodology is set by a peer-reviewed committee. Scoring is auditable. Version
+                history is published. The Standard belongs to the market it serves.
               </p>
             </div>
           </div>
@@ -228,7 +323,9 @@ function TheStandardPage() {
         <div
           className="absolute inset-x-0 top-0 h-px pointer-events-none"
           aria-hidden
-          style={{ background: "linear-gradient(90deg, transparent, rgba(212,175,55,0.6), transparent)" }}
+          style={{
+            background: "linear-gradient(90deg, transparent, rgba(212,175,55,0.6), transparent)",
+          }}
         />
         <div className="relative mx-auto max-w-7xl px-6">
           <div className="text-center max-w-3xl mx-auto mb-16">
@@ -238,10 +335,13 @@ function TheStandardPage() {
             </h2>
             <div className="gold-rule my-6 mx-auto w-24" />
             <p className="text-lg text-ivory/80 leading-relaxed mb-4">
-              Commercial readiness cannot be measured by a single statistic — PRSC evaluates six independent dimensions that together reflect an organization's full capacity to attract, activate, and sustain successful partnerships.
+              Commercial readiness cannot be measured by a single statistic — PRSC evaluates six
+              independent dimensions that together reflect an organization's full capacity to
+              attract, activate, and sustain successful partnerships.
             </p>
             <p className="text-base text-pewter">
-              Every organization that carries a Readiness Score™ is evaluated across these six dimensions — no shortcuts, no self-assessment, no exceptions.
+              Every organization that carries a Readiness Score™ is evaluated across these six
+              dimensions — no shortcuts, no self-assessment, no exceptions.
             </p>
           </div>
           <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
@@ -254,7 +354,10 @@ function TheStandardPage() {
                 <div
                   className="absolute inset-x-0 top-0 h-px"
                   aria-hidden
-                  style={{ background: "linear-gradient(90deg, transparent, rgba(212,175,55,0.9), transparent)" }}
+                  style={{
+                    background:
+                      "linear-gradient(90deg, transparent, rgba(212,175,55,0.9), transparent)",
+                  }}
                 />
                 <div className="flex items-center justify-between mb-6">
                   <div className="flex h-14 w-14 items-center justify-center rounded-full bg-gradient-to-br from-gold to-bronze text-navy shadow-[0_8px_24px_-8px_rgba(212,175,55,0.6)]">
@@ -283,20 +386,19 @@ function TheStandardPage() {
         </div>
       </section>
 
-
-
       {/* READINESS MATURITY INDEX */}
       <section
         className="relative py-24 md:py-32 overflow-hidden"
         style={{
-          background:
-            "linear-gradient(180deg, #F2EFE6 0%, #EBE5D3 55%, #F2EFE6 100%)",
+          background: "linear-gradient(180deg, #F2EFE6 0%, #EBE5D3 55%, #F2EFE6 100%)",
         }}
       >
         <div
           className="absolute inset-x-0 top-0 h-24 pointer-events-none"
           aria-hidden
-          style={{ background: "radial-gradient(ellipse at top, rgba(212,175,55,0.10), transparent 70%)" }}
+          style={{
+            background: "radial-gradient(ellipse at top, rgba(212,175,55,0.10), transparent 70%)",
+          }}
         />
         <div className="relative mx-auto max-w-7xl px-6">
           <div className="max-w-3xl mb-14">
@@ -306,22 +408,28 @@ function TheStandardPage() {
             </h2>
             <div className="gold-rule my-6 w-24" />
             <p className="text-lg text-stone leading-relaxed">
-              Every Readiness Score™ maps to a maturity level — a consistent, market-wide reference point for evaluating commercial readiness.
+              Every Readiness Score™ maps to a maturity level — a consistent, market-wide reference
+              point for evaluating commercial readiness.
             </p>
           </div>
 
           <div
             className="relative rounded-sm bg-navy text-ivory overflow-hidden shadow-[0_40px_80px_-30px_rgba(10,19,34,0.45)]"
             style={{
-              backgroundImage:
-                "linear-gradient(180deg, #0F1A2E 0%, #0A1322 100%)",
+              backgroundImage: "linear-gradient(180deg, #0F1A2E 0%, #0A1322 100%)",
             }}
           >
-            <div className="absolute inset-0 pointer-events-none rounded-sm border border-gold/25" aria-hidden />
+            <div
+              className="absolute inset-0 pointer-events-none rounded-sm border border-gold/25"
+              aria-hidden
+            />
             <div
               className="absolute inset-x-0 top-0 h-px pointer-events-none"
               aria-hidden
-              style={{ background: "linear-gradient(90deg, transparent, rgba(212,175,55,0.9), transparent)" }}
+              style={{
+                background:
+                  "linear-gradient(90deg, transparent, rgba(212,175,55,0.9), transparent)",
+              }}
             />
 
             <div className="hidden md:grid grid-cols-[140px_minmax(220px,1fr)_minmax(0,2.4fr)] gap-8 px-8 md:px-12 py-5 border-b border-bronze/60">
@@ -336,19 +444,56 @@ function TheStandardPage() {
               </div>
             </div>
 
-
             <ul className="divide-y divide-bronze/25">
               {[
-                { range: "90–100", level: "Commercially Undeniable", start: 90, end: 100, tone: "from-gold-light via-gold to-antique", glow: "rgba(212,175,55,0.55)" },
-                { range: "80–89", level: "Commercially Ready", start: 80, end: 89, tone: "from-gold to-bronze", glow: "rgba(212,175,55,0.35)" },
-                { range: "70–79", level: "Developing", start: 70, end: 79, tone: "from-bronze to-sandstone", glow: "rgba(140,110,59,0.35)" },
-                { range: "60–69", level: "Emerging", start: 60, end: 69, tone: "from-bronze/70 to-pewter", glow: "rgba(122,127,135,0.25)" },
-                { range: "Below 60", level: "Commercially Invisible", start: 0, end: 59, tone: "from-pewter to-pewter/40", glow: "rgba(122,127,135,0.2)" },
+                {
+                  range: "90–100",
+                  level: "Commercially Undeniable",
+                  start: 90,
+                  end: 100,
+                  tone: "from-gold-light via-gold to-antique",
+                  glow: "rgba(212,175,55,0.55)",
+                },
+                {
+                  range: "80–89",
+                  level: "Commercially Ready",
+                  start: 80,
+                  end: 89,
+                  tone: "from-gold to-bronze",
+                  glow: "rgba(212,175,55,0.35)",
+                },
+                {
+                  range: "70–79",
+                  level: "Developing",
+                  start: 70,
+                  end: 79,
+                  tone: "from-bronze to-sandstone",
+                  glow: "rgba(140,110,59,0.35)",
+                },
+                {
+                  range: "60–69",
+                  level: "Emerging",
+                  start: 60,
+                  end: 69,
+                  tone: "from-bronze/70 to-pewter",
+                  glow: "rgba(122,127,135,0.25)",
+                },
+                {
+                  range: "Below 60",
+                  level: "Commercially Invisible",
+                  start: 0,
+                  end: 59,
+                  tone: "from-pewter to-pewter/40",
+                  glow: "rgba(122,127,135,0.2)",
+                },
               ].map((row) => {
                 const leftPct = row.start;
                 const widthPct = Math.max(row.end - row.start, 6);
                 return (
-                  <li key={row.range} className="group relative px-5 sm:px-8 md:px-12 py-6 md:py-7 transition-colors hover:bg-white/[0.03]">
+                  <li
+                    key={row.range}
+                    className="group relative px-5 sm:px-8 md:px-12 py-6 md:py-7 transition-colors hover:bg-white/[0.03]"
+                  >
                     <div className="grid grid-cols-1 md:grid-cols-[140px_minmax(220px,1fr)_minmax(0,2.4fr)] gap-4 md:gap-8 md:items-center">
                       <div className="flex items-center gap-4 min-w-0">
                         <span
@@ -362,12 +507,20 @@ function TheStandardPage() {
                       <p className="text-ivory text-base md:text-lg">{row.level}</p>
                       <div className="relative pt-2 md:pt-0">
                         <div className="relative h-2 rounded-full bg-ivory/[0.06] overflow-hidden">
-                          <div className="absolute inset-0 flex justify-between pointer-events-none" aria-hidden>
+                          <div
+                            className="absolute inset-0 flex justify-between pointer-events-none"
+                            aria-hidden
+                          >
                             {Array.from({ length: 11 }).map((_, i) => (
                               <span
                                 key={i}
                                 className="w-px h-full"
-                                style={{ background: i % 5 === 0 ? "rgba(242,239,230,0.18)" : "rgba(242,239,230,0.08)" }}
+                                style={{
+                                  background:
+                                    i % 5 === 0
+                                      ? "rgba(242,239,230,0.18)"
+                                      : "rgba(242,239,230,0.08)",
+                                }}
                               />
                             ))}
                           </div>
@@ -385,7 +538,8 @@ function TheStandardPage() {
                             style={{
                               left: `${leftPct}%`,
                               width: `${widthPct}%`,
-                              background: "linear-gradient(90deg, transparent, rgba(255,255,255,0.35), transparent)",
+                              background:
+                                "linear-gradient(90deg, transparent, rgba(255,255,255,0.35), transparent)",
                             }}
                           />
                         </div>
@@ -400,19 +554,17 @@ function TheStandardPage() {
                       </div>
                     </div>
                   </li>
-
                 );
               })}
             </ul>
           </div>
 
           <p className="mt-6 text-xs md:text-sm text-pewter">
-            Scores are calibrated by the PRSC Methodology Committee and reviewed on a defined annual cycle.
+            Scores are calibrated by the PRSC Methodology Committee and reviewed on a defined annual
+            cycle.
           </p>
         </div>
       </section>
-
-
 
       {/* THE SCORING PROCESS */}
       <section className="bg-navy text-ivory py-24 md:py-32">
@@ -423,7 +575,8 @@ function TheStandardPage() {
               Governed at every step.
             </h2>
             <p className="text-lg text-ivory/75 leading-relaxed">
-              The Readiness Score™ is not self-reported. Every score is produced through a structured, peer-reviewed process governed by the PRSC Methodology Committee.
+              The Readiness Score™ is not self-reported. Every score is produced through a
+              structured, peer-reviewed process governed by the PRSC Methodology Committee.
             </p>
           </div>
 
@@ -436,15 +589,24 @@ function TheStandardPage() {
               "Readiness Score™ Issued",
               "Certification (where applicable)",
             ].map((step, i, arr) => (
-              <li key={step} className="relative flex md:flex-col items-start md:items-center gap-4 md:gap-5">
-                <div aria-hidden="true" className="flex-shrink-0 flex h-12 w-12 items-center justify-center rounded-full border border-gold bg-gold/10 text-gold font-display text-xl tabular-nums">
+              <li
+                key={step}
+                className="relative flex md:flex-col items-start md:items-center gap-4 md:gap-5"
+              >
+                <div
+                  aria-hidden="true"
+                  className="flex-shrink-0 flex h-12 w-12 items-center justify-center rounded-full border border-gold bg-gold/10 text-gold font-display text-xl tabular-nums"
+                >
                   {i + 1}
                 </div>
                 {i < arr.length - 1 && (
                   <div
                     aria-hidden
                     className="hidden md:block absolute top-6 left-[calc(50%+1.75rem)] right-[calc(-50%+1.75rem)] h-px"
-                    style={{ background: "linear-gradient(90deg, rgba(212,175,55,0.6), rgba(212,175,55,0.15))" }}
+                    style={{
+                      background:
+                        "linear-gradient(90deg, rgba(212,175,55,0.6), rgba(212,175,55,0.15))",
+                    }}
                   />
                 )}
                 <div className="md:text-center md:px-2">
@@ -456,11 +618,11 @@ function TheStandardPage() {
           </ol>
 
           <p className="mt-14 text-sm text-center text-pewter">
-            The scoring methodology is versioned, published, and subject to annual review. Current release: Version 1.0, 2026.
+            The scoring methodology is versioned, published, and subject to annual review. Current
+            release: Version 1.0, 2026.
           </p>
         </div>
       </section>
-
 
       {/* ACTIONABLE INTELLIGENCE */}
       <section className="bg-midnight text-ivory py-24 md:py-32">
@@ -468,13 +630,19 @@ function TheStandardPage() {
           <div>
             <p className="label-caps text-gold mb-4">Actionable Intelligence</p>
             <h2 className="font-display text-4xl md:text-5xl leading-tight mb-6">
-              A score is not a verdict.<br />It's a map.
+              A score is not a verdict.
+              <br />
+              It's a map.
             </h2>
             <div className="space-y-4 text-lg text-ivory/75 leading-relaxed">
               <p>
-                The Readiness Score™ reveals not only where an organization stands, but where the highest-leverage investments lie. Every dimension is diagnostic. Every score is a plan.
+                The Readiness Score™ reveals not only where an organization stands, but where the
+                highest-leverage investments lie. Every dimension is diagnostic. Every score is a
+                plan.
               </p>
-              <p>Benchmarks are peer-relative. Guidance is specific. The next step is always visible.</p>
+              <p>
+                Benchmarks are peer-relative. Guidance is specific. The next step is always visible.
+              </p>
             </div>
           </div>
           <div className="relative">
@@ -497,9 +665,20 @@ function TheStandardPage() {
                   { label: "Category Median", value: 61 },
                 ].map((r) => (
                   <div key={r.label}>
-                    <div className="flex justify-between text-xs text-ivory/70 mb-1"><span>{r.label}</span><span className="tabular-nums">{r.value}</span></div>
+                    <div className="flex justify-between text-xs text-ivory/70 mb-1">
+                      <span>{r.label}</span>
+                      <span className="tabular-nums">{r.value}</span>
+                    </div>
                     <div className="h-1.5 rounded-full bg-ivory/10 overflow-hidden">
-                      <div className="h-full rounded-full" style={{ width: `${r.value}%`, background: r.gold ? "linear-gradient(90deg,#C0C0C0,#D4AF37)" : "rgba(255,255,255,0.35)" }} />
+                      <div
+                        className="h-full rounded-full"
+                        style={{
+                          width: `${r.value}%`,
+                          background: r.gold
+                            ? "linear-gradient(90deg,#C0C0C0,#D4AF37)"
+                            : "rgba(255,255,255,0.35)",
+                        }}
+                      />
                     </div>
                   </div>
                 ))}

@@ -1,7 +1,14 @@
 import { userFacingError } from "@/lib/user-facing-error";
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useRef, useState, type FormEvent } from "react";
-import { motion, useMotionValue, useTransform, animate, useReducedMotion, useInView } from "motion/react";
+import {
+  motion,
+  useMotionValue,
+  useTransform,
+  animate,
+  useReducedMotion,
+  useInView,
+} from "motion/react";
 import { useServerFn } from "@tanstack/react-start";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -34,7 +41,10 @@ export const Route = createFileRoute("/vanguard/home")({
       { name: "robots", content: "noindex, nofollow" },
       { name: "viewport", content: "width=device-width, initial-scale=1, viewport-fit=cover" },
       { property: "og:title", content: "Readiness Vanguard — An Invitation | PRSC" },
-      { property: "og:description", content: "An invitation to Trans Am drivers and teams to join the PRSC Readiness Vanguard." },
+      {
+        property: "og:description",
+        content: "An invitation to Trans Am drivers and teams to join the PRSC Readiness Vanguard.",
+      },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
     ],
@@ -97,7 +107,14 @@ function ScoreRing() {
               </feMerge>
             </filter>
           </defs>
-          <circle cx="100" cy="100" r="90" fill="none" stroke="rgba(212,175,55,0.18)" strokeWidth="6" />
+          <circle
+            cx="100"
+            cy="100"
+            r="90"
+            fill="none"
+            stroke="rgba(212,175,55,0.18)"
+            strokeWidth="6"
+          />
           <motion.circle
             cx="100"
             cy="100"
@@ -178,7 +195,14 @@ function ReserveForm() {
           className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full border"
           style={{ borderColor: GOLD, color: GOLD }}
         >
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6">
+          <svg
+            width="24"
+            height="24"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="1.6"
+          >
             <path d="M4 12l6 6L20 6" />
           </svg>
         </div>
@@ -186,8 +210,8 @@ function ReserveForm() {
           Request received.
         </h3>
         <p style={{ color: STONE }}>
-          The Council will review your consideration for the Readiness Vanguard. Selected organizations
-          will receive an invitation directly.
+          The Council will review your consideration for the Readiness Vanguard. Selected
+          organizations will receive an invitation directly.
         </p>
       </div>
     );
@@ -281,7 +305,9 @@ function ReserveForm() {
           aria-hidden
           className="pointer-events-none absolute inset-y-0 -left-1/2 w-1/2 -skew-x-12 bg-white/30 opacity-0 transition-all duration-500 ease-out group-hover:left-[120%] group-hover:opacity-100"
         />
-        {pending ? "Submitting…" : (
+        {pending ? (
+          "Submitting…"
+        ) : (
           <>
             Request Consideration
             <ArrowRight
@@ -366,7 +392,6 @@ function VanguardHome() {
             />
           </div>
 
-
           {/* Left content block */}
           <div className="mt-14 md:mt-20 max-w-[560px]">
             <p
@@ -382,17 +407,23 @@ function VanguardHome() {
               className="font-display leading-[1.05] text-[44px] sm:text-[52px] md:text-[58px]"
               style={{ color: IVORY, letterSpacing: "-0.01em" }}
             >
-              There&rsquo;s a reason why even the best race programs don&rsquo;t always get sponsored.
+              There&rsquo;s a reason why even the best race programs don&rsquo;t always get
+              sponsored.
             </h1>
             <p
               className="mt-8 max-w-[440px] text-[18px] leading-relaxed"
               style={{ color: IVORY, opacity: 0.9 }}
             >
-              We&rsquo;re building the first true standard designed to help teams prove their
-              value to sponsors — and we&rsquo;re inviting a select group to help shape it.
+              We&rsquo;re building the first true standard designed to help teams prove their value
+              to sponsors — and we&rsquo;re inviting a select group to help shape it.
             </p>
             <div className="mt-12">
-              <ArrowDown size={26} strokeWidth={1.5} style={{ color: GOLD }} className="animate-bounce" />
+              <ArrowDown
+                size={26}
+                strokeWidth={1.5}
+                style={{ color: GOLD }}
+                className="animate-bounce"
+              />
             </div>
           </div>
 
@@ -407,8 +438,9 @@ function VanguardHome() {
             className="font-display leading-snug text-[24px] md:text-[28px]"
             style={{ color: NAVY }}
           >
-            Sponsors don&rsquo;t buy space on race cars and drivers. They invest in organizations they believe can deliver
-            business results. Results they can measure using the performance metrics and tools they already trust.{" "}
+            Sponsors don&rsquo;t buy space on race cars and drivers. They invest in organizations
+            they believe can deliver business results. Results they can measure using the
+            performance metrics and tools they already trust.{" "}
             <span style={{ color: NAVY, opacity: 0.75 }}>
               Most teams have never been able to prove that.
             </span>
@@ -423,8 +455,12 @@ function VanguardHome() {
       {/* ==================== BLOCK 3 — WHY IT EXISTS ==================== */}
       <section style={{ background: IVORY }} className="px-6 pt-4 pb-16 md:pt-6 md:pb-20">
         <div className="mx-auto max-w-[640px] text-center">
-          <p className="font-display leading-snug text-[24px] md:text-[28px]" style={{ color: STONE }}>
-            Without a standard for commercial readiness, every sponsorship decision is an educated guess.
+          <p
+            className="font-display leading-snug text-[24px] md:text-[28px]"
+            style={{ color: STONE }}
+          >
+            Without a standard for commercial readiness, every sponsorship decision is an educated
+            guess.
             <br />
             Brands don&rsquo;t want to guess.
             <br />
@@ -483,14 +519,17 @@ function VanguardHome() {
               The Solution
             </p>
             <div className="mb-6 h-px w-12" style={{ background: GOLD }} />
-            <div className="space-y-4 text-[15px] leading-relaxed" style={{ color: IVORY, opacity: 0.9 }}>
+            <div
+              className="space-y-4 text-[15px] leading-relaxed"
+              style={{ color: IVORY, opacity: 0.9 }}
+            >
               <p>
-                Commercial readiness score reflects your organization&rsquo;s ability to attract, secure,
-                and retain sponsorship.
+                Commercial readiness score reflects your organization&rsquo;s ability to attract,
+                secure, and retain sponsorship.
               </p>
               <p>
-                The PRSC Readiness Score&trade; is the first independent commercial rating for teams and
-                drivers in motorsport.
+                The PRSC Readiness Score&trade; is the first independent commercial rating for teams
+                and drivers in motorsport.
               </p>
               <p>
                 A score that tells teams, drivers, sponsors, manufacturers and series — exactly what
@@ -517,7 +556,6 @@ function VanguardHome() {
           </div>
         </div>
       </section>
-
 
       {/* ==================== BLOCK 6 — COMPARISON ==================== */}
       <section style={{ background: NAVY }} className="px-6 pb-16 md:pb-20">
@@ -582,7 +620,11 @@ function VanguardHome() {
                   <li key={label} className="flex items-center gap-4">
                     <div
                       className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border"
-                      style={{ borderColor: "rgba(212,175,55,0.5)", color: GOLD, background: "rgba(212,175,55,0.08)" }}
+                      style={{
+                        borderColor: "rgba(212,175,55,0.5)",
+                        color: GOLD,
+                        background: "rgba(212,175,55,0.08)",
+                      }}
                     >
                       <Icon size={18} strokeWidth={1.6} />
                     </div>
@@ -607,10 +649,6 @@ function VanguardHome() {
             </h3>
             <div className="mt-3 h-[2px] w-16" style={{ background: GOLD }} />
 
-
-
-
-
             <p className="mt-6 text-[15px] leading-relaxed" style={{ color: STONE }}>
               The Readiness Vanguard is not a pilot program. It is part of the foundation of the
               Standard.
@@ -623,8 +661,8 @@ function VanguardHome() {
               industry will be measured against.
             </p>
             <p className="mt-4 text-[15px] leading-relaxed" style={{ color: STONE }}>
-              The score is always free. That is a design principle, not a promotion. The Vanguard
-              is the first expression of that principle in practice.
+              The score is always free. That is a design principle, not a promotion. The Vanguard is
+              the first expression of that principle in practice.
             </p>
 
             <div className="mt-8 border-l-2 pl-5" style={{ borderColor: GOLD }}>
@@ -665,7 +703,6 @@ function VanguardHome() {
             >
               The Readiness Vanguard program closes when the 25 team/driver slots are filled.
             </p>
-
           </div>
 
           {/* Right */}
@@ -706,7 +743,6 @@ function VanguardHome() {
                   </p>
                 </li>
               ))}
-
             </ul>
           </div>
 
@@ -719,7 +755,6 @@ function VanguardHome() {
           </p>
         </div>
       </section>
-
 
       {/* ==================== BLOCK 8 — WHAT WE PROMISE ==================== */}
       <section style={{ background: MIDNIGHT }} className="px-6 py-14 md:py-16">
@@ -735,7 +770,10 @@ function VanguardHome() {
           </div>
 
           {/* headline */}
-          <div className="text-center md:text-left md:pl-4 md:border-l" style={{ borderColor: "rgba(212,175,55,0.25)" }}>
+          <div
+            className="text-center md:text-left md:pl-4 md:border-l"
+            style={{ borderColor: "rgba(212,175,55,0.25)" }}
+          >
             <h3 className="font-display text-[28px]" style={{ color: IVORY }}>
               What We Promise
             </h3>
@@ -743,14 +781,18 @@ function VanguardHome() {
           </div>
 
           {/* body */}
-          <div className="space-y-3 text-[15px] leading-relaxed md:pl-4 md:border-l" style={{ color: IVORY, borderColor: "rgba(212,175,55,0.25)" }}>
+          <div
+            className="space-y-3 text-[15px] leading-relaxed md:pl-4 md:border-l"
+            style={{ color: IVORY, borderColor: "rgba(212,175,55,0.25)" }}
+          >
             <p>
               The Readiness Vanguard is the founding cohort of teams, drivers, series, venues, and
-              organizations helping establish the first independent standard for partnership readiness.
+              organizations helping establish the first independent standard for partnership
+              readiness.
             </p>
             <p>
-              Your participation helps calibrate the Standard, strengthen the benchmark, and shape how
-              commercial readiness will be measured across the industry.
+              Your participation helps calibrate the Standard, strengthen the benchmark, and shape
+              how commercial readiness will be measured across the industry.
             </p>
             <p>Your Readiness Score is free. The insight is yours to keep.</p>
           </div>
@@ -777,7 +819,9 @@ function VanguardHome() {
                 aria-hidden
                 className="inline-block h-2 w-2 rounded-full"
                 style={{ background: NAVY, boxShadow: `0 0 0 0 ${NAVY}` }}
-                animate={{ boxShadow: [`0 0 0 0 rgba(10,19,34,0.55)`, `0 0 0 8px rgba(10,19,34,0)`] }}
+                animate={{
+                  boxShadow: [`0 0 0 0 rgba(10,19,34,0.55)`, `0 0 0 8px rgba(10,19,34,0)`],
+                }}
                 transition={{ duration: 1.8, repeat: Infinity, ease: "easeOut" }}
               />
               {seatsRemaining} of {seatsTotal} invitations remaining
@@ -799,10 +843,7 @@ function VanguardHome() {
             />
           </div>
 
-          <p
-            className="mt-4 text-center font-display italic text-[14px]"
-            style={{ color: NAVY }}
-          >
+          <p className="mt-4 text-center font-display italic text-[14px]" style={{ color: NAVY }}>
             Applications close when all invitations have been accepted.
           </p>
         </div>
@@ -814,8 +855,8 @@ function VanguardHome() {
           className="mx-auto max-w-5xl text-center text-[13px] md:text-[14px]"
           style={{ color: IVORY, letterSpacing: "0.02em" }}
         >
-          Twenty-five organizations will become the founding benchmark against which future teams are
-          measured.
+          Twenty-five organizations will become the founding benchmark against which future teams
+          are measured.
         </p>
       </section>
 
@@ -837,7 +878,10 @@ function VanguardHome() {
               Request Consideration for the Readiness Vanguard.
             </span>
           </h2>
-          <p className="mx-auto mt-5 md:mt-6 max-w-2xl text-[14px] md:text-[15px] leading-relaxed text-balance" style={{ color: STONE }}>
+          <p
+            className="mx-auto mt-5 md:mt-6 max-w-2xl text-[14px] md:text-[15px] leading-relaxed text-balance"
+            style={{ color: STONE }}
+          >
             The Readiness Vanguard is limited to 25 Trans Am teams and drivers. Participation is
             complimentary. Selection is based on the Council&rsquo;s review and is not guaranteed.
           </p>
@@ -852,7 +896,8 @@ function VanguardHome() {
             Every submission is reviewed by the Partnership Readiness Standards Council.
           </p>
           <p className="text-[11px]">
-            Selected organizations will receive an invitation to participate in the Readiness Vanguard.
+            Selected organizations will receive an invitation to participate in the Readiness
+            Vanguard.
           </p>
         </div>
       </section>

@@ -3,7 +3,6 @@ import { motion, useMotionValue, useTransform, animate, useReducedMotion } from 
 import { Radio, Users, Fingerprint, Zap, BarChart3, Handshake } from "lucide-react";
 import heroState1 from "@/assets/prsc-hero-state1.jpg.asset.json";
 
-
 /**
  * The Living Score dashboard. Six dimensions animate silver→gold as bars fill,
  * composite gauge rises 82 → 84 and back on an 8.5s loop.
@@ -18,8 +17,18 @@ const DIMENSIONS = [
   { key: "relationship", label: "Relationship Strength™", icon: Handshake, start: 82, end: 86 },
 ] as const;
 
-function DimensionRow({ label, Icon, start, end, delay }: {
-  label: string; Icon: typeof Radio; start: number; end: number; delay: number;
+function DimensionRow({
+  label,
+  Icon,
+  start,
+  end,
+  delay,
+}: {
+  label: string;
+  Icon: typeof Radio;
+  start: number;
+  end: number;
+  delay: number;
 }) {
   const value = useMotionValue(start);
   const width = useTransform(value, (v) => `${v}%`);
@@ -34,7 +43,10 @@ function DimensionRow({ label, Icon, start, end, delay }: {
       delay,
     });
     const unsub = value.on("change", (v) => setDisplay(Math.round(v)));
-    return () => { controls.stop(); unsub(); };
+    return () => {
+      controls.stop();
+      unsub();
+    };
   }, [value, start, end, delay]);
 
   return (
@@ -65,9 +77,7 @@ function DimensionRow({ label, Icon, start, end, delay }: {
             }}
           />
         </div>
-        <div className="mt-2 tabular-nums text-ivory/90 text-xs font-medium">
-          {display}%
-        </div>
+        <div className="mt-2 tabular-nums text-ivory/90 text-xs font-medium">{display}%</div>
       </div>
     </div>
   );
@@ -86,7 +96,10 @@ function CompositeGauge() {
       ease: "easeInOut",
     });
     const unsub = value.on("change", (v) => setDisplay(Math.round(v)));
-    return () => { controls.stop(); unsub(); };
+    return () => {
+      controls.stop();
+      unsub();
+    };
   }, [value]);
 
   return (
@@ -101,12 +114,27 @@ function CompositeGauge() {
       />
       <div className="relative h-[160px] w-[160px] sm:h-[200px] sm:w-[200px] md:h-[240px] md:w-[240px] xl:h-[260px] xl:w-[260px]">
         <svg viewBox="0 0 200 200" className="h-full w-full -rotate-90">
-          <circle cx="100" cy="100" r="90" fill="none" stroke="rgba(255,255,255,0.06)" strokeWidth="1.5" />
+          <circle
+            cx="100"
+            cy="100"
+            r="90"
+            fill="none"
+            stroke="rgba(255,255,255,0.06)"
+            strokeWidth="1.5"
+          />
           <motion.circle
-            cx="100" cy="100" r="90" fill="none"
-            stroke="url(#goldGrad)" strokeWidth="3" strokeLinecap="round"
+            cx="100"
+            cy="100"
+            r="90"
+            fill="none"
+            stroke="url(#goldGrad)"
+            strokeWidth="3"
+            strokeLinecap="round"
             strokeDasharray="565.48"
-            style={{ strokeDashoffset: strokeOffset, filter: "drop-shadow(0 0 6px rgba(212,175,55,0.6))" }}
+            style={{
+              strokeDashoffset: strokeOffset,
+              filter: "drop-shadow(0 0 6px rgba(212,175,55,0.6))",
+            }}
           />
           <defs>
             <linearGradient id="goldGrad" x1="0" y1="0" x2="1" y2="1">
@@ -120,8 +148,13 @@ function CompositeGauge() {
           <div className="font-display text-[52px] sm:text-[64px] md:text-[80px] xl:text-[88px] leading-none text-ivory tabular-nums">
             {display}
           </div>
-          <div className="text-gold text-[9px] sm:text-[10px] md:text-[11px] mt-1 sm:mt-2 text-center leading-tight uppercase font-medium" style={{ letterSpacing: "0.12em" }}>
-            Commercially<br />Undeniable
+          <div
+            className="text-gold text-[9px] sm:text-[10px] md:text-[11px] mt-1 sm:mt-2 text-center leading-tight uppercase font-medium"
+            style={{ letterSpacing: "0.12em" }}
+          >
+            Commercially
+            <br />
+            Undeniable
           </div>
         </div>
       </div>
@@ -144,7 +177,11 @@ export function LivingScoreDashboard() {
   if (prefersReduced) {
     return (
       <div className="relative w-full">
-        <img src={heroState1.url} alt="PRSC Readiness Score™ dashboard showing six dimensions and a composite score of 82, Commercially Undeniable." className="w-full h-auto" />
+        <img
+          src={heroState1.url}
+          alt="PRSC Readiness Score™ dashboard showing six dimensions and a composite score of 82, Commercially Undeniable."
+          className="w-full h-auto"
+        />
       </div>
     );
   }

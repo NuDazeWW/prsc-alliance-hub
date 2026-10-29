@@ -9,7 +9,8 @@ export function PortalRecoveryEmail({ confirmationUrl }: { confirmationUrl: stri
         Reset your access.
       </Text>
       <Text style={{ color: "#3A4050", fontSize: 15, lineHeight: 1.6, margin: "0 0 24px" }}>
-        We received a request to reset the password for your PRSC private center account. The link below is valid for a short time and can be used once.
+        We received a request to reset the password for your PRSC private center account. The link
+        below is valid for a short time and can be used once.
       </Text>
       <Cta href={confirmationUrl}>Reset password</Cta>
       <Text style={{ color: "#8A8F99", fontSize: 12, lineHeight: 1.5, margin: "24px 0 0" }}>

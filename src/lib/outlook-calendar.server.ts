@@ -55,14 +55,22 @@ export async function getConnectedCalendar() {
       error: cal?.canEdit === false ? "The connected account cannot write to its calendar" : null,
     };
   } catch (e) {
-    return { connected: false as const, name: "", email: "", calendar: "", canEdit: false, error: e instanceof Error ? e.message : String(e) };
+    return {
+      connected: false as const,
+      name: "",
+      email: "",
+      calendar: "",
+      canEdit: false,
+      error: e instanceof Error ? e.message : String(e),
+    };
   }
 }
 
 function eventBody(poll: any, startsAt: string, kind: "hold" | "final") {
   const start = new Date(startsAt);
   const end = new Date(start.getTime() + poll.duration_minutes * 60000);
-  const where = poll.format === "virtual" ? poll.virtual_link || "Virtual" : poll.location || "In person";
+  const where =
+    poll.format === "virtual" ? poll.virtual_link || "Virtual" : poll.location || "In person";
   return {
     subject: kind === "final" ? poll.title : `HOLD: ${poll.title} — Proposed`,
     showAs: "busy",
@@ -90,7 +98,11 @@ export async function reconcilePollHolds(pollId: string) {
     db.from("meeting_poll_slots").select("id, starts_at").eq("poll_id", pollId),
     db.from("meeting_calendar_holds").select("*").eq("poll_id", pollId),
   ]);
-  const plan = planHoldChanges(poll, (slots ?? []).map((s: any) => s.id), (holds ?? []) as HoldRow[]);
+  const plan = planHoldChanges(
+    poll,
+    (slots ?? []).map((s: any) => s.id),
+    (holds ?? []) as HoldRow[],
+  );
   const errors: string[] = [];
   const now = new Date().toISOString();
 
@@ -107,16 +119,35 @@ export async function reconcilePollHolds(pollId: string) {
     const transaction_id = holdTransactionId(pollId, c.slot_id);
     try {
       // transactionId lets Outlook return the same event on retry instead of a duplicate.
-      const ev: any = await graph("/me/events", { method: "POST", body: { ...eventBody(poll, slot.starts_at, c.kind), transactionId: transaction_id } });
+      const ev: any = await graph("/me/events", {
+        method: "POST",
+        body: { ...eventBody(poll, slot.starts_at, c.kind), transactionId: transaction_id },
+      });
       await db.from("meeting_calendar_holds").upsert(
-        { poll_id: pollId, slot_id: c.slot_id, kind: c.kind, outlook_event_id: ev.id, transaction_id, status: "synced", last_error: null, last_synced_at: now },
+        {
+          poll_id: pollId,
+          slot_id: c.slot_id,
+          kind: c.kind,
+          outlook_event_id: ev.id,
+          transaction_id,
+          status: "synced",
+          last_error: null,
+          last_synced_at: now,
+        },
         { onConflict: "slot_id" },
       );
     } catch (e) {
       const msg = e instanceof Error ? e.message : String(e);
       errors.push(msg);
       await db.from("meeting_calendar_holds").upsert(
-        { poll_id: pollId, slot_id: c.slot_id, kind: c.kind, transaction_id, status: "error", last_error: msg },
+        {
+          poll_id: pollId,
+          slot_id: c.slot_id,
+          kind: c.kind,
+          transaction_id,
+          status: "error",
+          last_error: msg,
+        },
         { onConflict: "slot_id" },
       );
     }
@@ -126,12 +157,21 @@ export async function reconcilePollHolds(pollId: string) {
     const h = (holds ?? []).find((x: any) => x.slot_id === slotId);
     const slot = (slots ?? []).find((s: any) => s.id === slotId);
     try {
-      await graph(`/me/events/${encodeURIComponent(h.outlook_event_id)}`, { method: "PATCH", body: eventBody(poll, slot.starts_at, "final") });
-      await db.from("meeting_calendar_holds").update({ kind: "final", status: "synced", last_error: null, last_synced_at: now }).eq("slot_id", slotId);
+      await graph(`/me/events/${encodeURIComponent(h.outlook_event_id)}`, {
+        method: "PATCH",
+        body: eventBody(poll, slot.starts_at, "final"),
+      });
+      await db
+        .from("meeting_calendar_holds")
+        .update({ kind: "final", status: "synced", last_error: null, last_synced_at: now })
+        .eq("slot_id", slotId);
     } catch (e) {
       const msg = e instanceof Error ? e.message : String(e);
       errors.push(msg);
-      await db.from("meeting_calendar_holds").update({ status: "error", last_error: msg }).eq("slot_id", slotId);
+      await db
+        .from("meeting_calendar_holds")
+        .update({ status: "error", last_error: msg })
+        .eq("slot_id", slotId);
     }
   }
 
@@ -142,14 +182,21 @@ export async function reconcilePollHolds(pollId: string) {
     } catch (e) {
       const msg = e instanceof Error ? e.message : String(e);
       errors.push(msg);
-      await db.from("meeting_calendar_holds").update({ status: "error", last_error: msg }).eq("slot_id", h.slot_id);
+      await db
+        .from("meeting_calendar_holds")
+        .update({ status: "error", last_error: msg })
+        .eq("slot_id", h.slot_id);
     }
   }
 
   // Error stays visible until a later sync finishes cleanly.
   await db
     .from("meeting_polls")
-    .update(errors.length ? { calendar_sync_error: errors[0] } : { calendar_sync_error: null, calendar_synced_at: now })
+    .update(
+      errors.length
+        ? { calendar_sync_error: errors[0] }
+        : { calendar_sync_error: null, calendar_synced_at: now },
+    )
     .eq("id", pollId);
   return { ok: errors.length === 0, error: errors[0] ?? null };
 }

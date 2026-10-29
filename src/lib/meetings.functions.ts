@@ -6,7 +6,6 @@ import { formatSlot, meetingTypeLabel, zonedToUtc } from "@/lib/meeting-block";
 
 const PORTAL_URL = "https://access.prscstandards.org/portal";
 
-
 async function assertAdmin(context: { supabase: any; userId: string }) {
   const { data } = await context.supabase
     .from("user_roles")
@@ -39,8 +38,23 @@ const createPollSchema = z.object({
   location: z.string().trim().max(300).optional(),
   virtual_link: z.string().trim().max(500).optional(),
   duration_minutes: z.number().int().min(15).max(480),
-  respond_by: z.string().regex(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}/, "Invalid date").optional(),
-  timezone: z.string().trim().max(64).refine((tz) => { try { new Intl.DateTimeFormat("en-US", { timeZone: tz }); return true; } catch { return false; } }, "Unknown time zone").optional(),
+  respond_by: z
+    .string()
+    .regex(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}/, "Invalid date")
+    .optional(),
+  timezone: z
+    .string()
+    .trim()
+    .max(64)
+    .refine((tz) => {
+      try {
+        new Intl.DateTimeFormat("en-US", { timeZone: tz });
+        return true;
+      } catch {
+        return false;
+      }
+    }, "Unknown time zone")
+    .optional(),
   slots: z.array(slotSchema).min(1).max(12),
   invited_member_ids: z.array(z.string().uuid()),
 });
@@ -76,15 +90,18 @@ export const createMeetingPoll = createServerFn({ method: "POST" })
       .single();
     if (error) throw error;
 
-    const { error: slotsError } = await supabaseAdmin.from("meeting_poll_slots").insert(
-      slotIsos.map((starts_at) => ({ poll_id: poll.id, starts_at })),
-    );
+    const { error: slotsError } = await supabaseAdmin
+      .from("meeting_poll_slots")
+      .insert(slotIsos.map((starts_at) => ({ poll_id: poll.id, starts_at })));
     if (slotsError) throw slotsError;
     const { safeReconcile } = await import("@/lib/outlook-calendar.server");
     await safeReconcile(poll.id);
 
     const { data: members } = data.invited_member_ids.length
-      ? await supabaseAdmin.from("portal_members").select("id, email, first_name").in("id", data.invited_member_ids)
+      ? await supabaseAdmin
+          .from("portal_members")
+          .select("id, email, first_name")
+          .in("id", data.invited_member_ids)
       : { data: [] as { id: string; email: string; first_name: string | null }[] };
 
     const typeLabel = meetingTypeLabel(data.meeting_type);
@@ -100,7 +117,12 @@ export const createMeetingPoll = createServerFn({ method: "POST" })
     for (const m of members ?? []) {
       await sendPortalEmail(
         m.email,
-        build({ first_name: m.first_name?.trim() || "Hello", meeting_title: data.title, meeting_type: typeLabel, meeting_block: block }),
+        build({
+          first_name: m.first_name?.trim() || "Hello",
+          meeting_title: data.title,
+          meeting_type: typeLabel,
+          meeting_block: block,
+        }),
         "meeting-poll-invite",
       );
     }
@@ -127,14 +149,21 @@ export const listAdminPolls = createServerFn({ method: "GET" })
     if (!polls?.length) return { polls: [] };
 
     const pollIds = polls.map((p: any) => p.id);
-    const [{ data: slots }, { data: responses }, { data: notes }, { data: members }] = await Promise.all([
-      supabaseAdmin.from("meeting_poll_slots").select("*").in("poll_id", pollIds).order("starts_at"),
-      supabaseAdmin.from("meeting_poll_responses").select("*").in("poll_id", pollIds),
-      supabaseAdmin.from("meeting_poll_notes").select("*").in("poll_id", pollIds),
-      supabaseAdmin
-        .from("portal_members")
-        .select("id, first_name, last_name, email, organization, entity, role, is_methodology_committee"),
-    ]);
+    const [{ data: slots }, { data: responses }, { data: notes }, { data: members }] =
+      await Promise.all([
+        supabaseAdmin
+          .from("meeting_poll_slots")
+          .select("*")
+          .in("poll_id", pollIds)
+          .order("starts_at"),
+        supabaseAdmin.from("meeting_poll_responses").select("*").in("poll_id", pollIds),
+        supabaseAdmin.from("meeting_poll_notes").select("*").in("poll_id", pollIds),
+        supabaseAdmin
+          .from("portal_members")
+          .select(
+            "id, first_name, last_name, email, organization, entity, role, is_methodology_committee",
+          ),
+      ]);
 
     return {
       polls: polls.map((p: any) => ({
@@ -142,7 +171,9 @@ export const listAdminPolls = createServerFn({ method: "GET" })
         slots: (slots ?? []).filter((s: any) => s.poll_id === p.id),
         responses: (responses ?? []).filter((r: any) => r.poll_id === p.id),
         notes: (notes ?? []).filter((n: any) => n.poll_id === p.id),
-        invited: (members ?? []).filter((m: any) => (p.invited_member_ids as string[]).includes(m.id)),
+        invited: (members ?? []).filter((m: any) =>
+          (p.invited_member_ids as string[]).includes(m.id),
+        ),
       })),
     };
   });
@@ -154,7 +185,9 @@ export const listInvitableMembers = createServerFn({ method: "GET" })
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { data, error } = await supabaseAdmin
       .from("portal_members")
-      .select("id, first_name, last_name, email, organization, entity, role, status, is_methodology_committee")
+      .select(
+        "id, first_name, last_name, email, organization, entity, role, status, is_methodology_committee",
+      )
       .neq("status", "revoked")
       .order("last_name");
     if (error) throw error;
@@ -163,7 +196,9 @@ export const listInvitableMembers = createServerFn({ method: "GET" })
 
 export const confirmPollSlot = createServerFn({ method: "POST" })
   .middleware([requirePortalAccess])
-  .inputValidator((input) => z.object({ poll_id: z.string().uuid(), slot_id: z.string().uuid() }).parse(input))
+  .inputValidator((input) =>
+    z.object({ poll_id: z.string().uuid(), slot_id: z.string().uuid() }).parse(input),
+  )
   .handler(async ({ context, data }) => {
     await assertAdmin(context);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
@@ -200,19 +235,39 @@ export const confirmPollSlot = createServerFn({ method: "POST" })
     const { data: members } = await supabaseAdmin
       .from("portal_members")
       .select("id, email, first_name")
-      .in("id", poll.invited_member_ids as string[]).neq("status", "revoked");
+      .in("id", poll.invited_member_ids as string[])
+      .neq("status", "revoked");
 
     const { loadSystemEmail } = await import("@/lib/portal-notify.server");
     const build = await loadSystemEmail("meeting_confirmed");
     void founderSignature;
     // One confirmation per poll, confirmed slot and recipient; retries reuse the same delivery key.
     const { confirmationKey, recipientsToConfirm } = await import("@/lib/meeting-confirmations");
-    const { data: existing } = await supabaseAdmin.from("meeting_confirmation_sends").select("member_id, status, attempts").eq("poll_id", poll.id).eq("slot_id", data.slot_id);
-    const owed = new Set(recipientsToConfirm((members ?? []).map((m) => m.id), (existing ?? []) as any));
+    const { data: existing } = await supabaseAdmin
+      .from("meeting_confirmation_sends")
+      .select("member_id, status, attempts")
+      .eq("poll_id", poll.id)
+      .eq("slot_id", data.slot_id);
+    const owed = new Set(
+      recipientsToConfirm(
+        (members ?? []).map((m) => m.id),
+        (existing ?? []) as any,
+      ),
+    );
     for (const m of members ?? []) {
       if (!owed.has(m.id)) continue;
       const prior = (existing ?? []).find((r: any) => r.member_id === m.id) as any;
-      await supabaseAdmin.from("meeting_confirmation_sends").upsert({ poll_id: poll.id, slot_id: data.slot_id, member_id: m.id, status: "sending", attempts: (prior?.attempts ?? 0) + 1, updated_at: new Date().toISOString() }, { onConflict: "poll_id,slot_id,member_id" });
+      await supabaseAdmin.from("meeting_confirmation_sends").upsert(
+        {
+          poll_id: poll.id,
+          slot_id: data.slot_id,
+          member_id: m.id,
+          status: "sending",
+          attempts: (prior?.attempts ?? 0) + 1,
+          updated_at: new Date().toISOString(),
+        },
+        { onConflict: "poll_id,slot_id,member_id" },
+      );
       const ok = await sendPortalEmail(
         m.email,
         build({
@@ -227,7 +282,16 @@ export const confirmPollSlot = createServerFn({ method: "POST" })
         "meeting-confirmed",
         confirmationKey(poll.id, data.slot_id, m.id),
       );
-      await supabaseAdmin.from("meeting_confirmation_sends").update({ status: ok ? "sent" : "failed", last_error: ok ? null : "Delivery not accepted; retry reuses the same key", updated_at: new Date().toISOString() }).eq("poll_id", poll.id).eq("slot_id", data.slot_id).eq("member_id", m.id);
+      await supabaseAdmin
+        .from("meeting_confirmation_sends")
+        .update({
+          status: ok ? "sent" : "failed",
+          last_error: ok ? null : "Delivery not accepted; retry reuses the same key",
+          updated_at: new Date().toISOString(),
+        })
+        .eq("poll_id", poll.id)
+        .eq("slot_id", data.slot_id)
+        .eq("member_id", m.id);
     }
 
     await supabaseAdmin.from("portal_activity").insert({
@@ -274,16 +338,27 @@ export const getCalendarConnection = createServerFn({ method: "GET" })
 
 export const getMyMeetings = createServerFn({ method: "GET" })
   .middleware([requirePortalAccess])
-  .inputValidator((input?: { asMemberId?: string }) => z.object({ asMemberId: z.string().uuid().optional() }).parse(input ?? {}))
+  .inputValidator((input?: { asMemberId?: string }) =>
+    z.object({ asMemberId: z.string().uuid().optional() }).parse(input ?? {}),
+  )
   .handler(async ({ context: ctx, data: input }) => {
     let context: any = ctx;
     let member: any;
     if (input.asMemberId) {
-      const { data: isAdmin } = await ctx.supabase.from("user_roles").select("role").eq("user_id", ctx.userId).eq("role", "admin").maybeSingle();
+      const { data: isAdmin } = await ctx.supabase
+        .from("user_roles")
+        .select("role")
+        .eq("user_id", ctx.userId)
+        .eq("role", "admin")
+        .maybeSingle();
       if (!isAdmin) throw new Error("Unauthorized");
       const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
       context = { supabase: supabaseAdmin };
-      const { data } = await supabaseAdmin.from("portal_members").select("*").eq("id", input.asMemberId).maybeSingle();
+      const { data } = await supabaseAdmin
+        .from("portal_members")
+        .select("*")
+        .eq("id", input.asMemberId)
+        .maybeSingle();
       if (!data) throw new Error("Member not found");
       member = data;
     } else {
@@ -299,9 +374,21 @@ export const getMyMeetings = createServerFn({ method: "GET" })
 
     const pollIds = polls.map((p: any) => p.id);
     const [{ data: slots }, { data: responses }, { data: notes }] = await Promise.all([
-      context.supabase.from("meeting_poll_slots").select("*").in("poll_id", pollIds).order("starts_at"),
-      context.supabase.from("meeting_poll_responses").select("*").eq("member_id", member.id).in("poll_id", pollIds),
-      context.supabase.from("meeting_poll_notes").select("*").eq("member_id", member.id).in("poll_id", pollIds),
+      context.supabase
+        .from("meeting_poll_slots")
+        .select("*")
+        .in("poll_id", pollIds)
+        .order("starts_at"),
+      context.supabase
+        .from("meeting_poll_responses")
+        .select("*")
+        .eq("member_id", member.id)
+        .in("poll_id", pollIds),
+      context.supabase
+        .from("meeting_poll_notes")
+        .select("*")
+        .eq("member_id", member.id)
+        .in("poll_id", pollIds),
     ]);
 
     const withTokens = await Promise.all(
@@ -339,7 +426,8 @@ export const submitMyAvailability = createServerFn({ method: "POST" })
       .select("id, status, invited_member_ids")
       .eq("id", data.poll_id)
       .single();
-    if (!poll || !(poll.invited_member_ids as string[]).includes(member.id)) throw new Error("Meeting not found");
+    if (!poll || !(poll.invited_member_ids as string[]).includes(member.id))
+      throw new Error("Meeting not found");
     if (poll.status !== "open") throw new Error("This meeting time has already been confirmed");
 
     const { error: delError } = await context.supabase
@@ -362,7 +450,12 @@ export const submitMyAvailability = createServerFn({ method: "POST" })
     }
 
     const { error: noteError } = await context.supabase.from("meeting_poll_notes").upsert(
-      { poll_id: data.poll_id, member_id: member.id, note: data.note || null, responded_at: new Date().toISOString() },
+      {
+        poll_id: data.poll_id,
+        member_id: member.id,
+        note: data.note || null,
+        responded_at: new Date().toISOString(),
+      },
       { onConflict: "poll_id,member_id" },
     );
     if (noteError) throw noteError;

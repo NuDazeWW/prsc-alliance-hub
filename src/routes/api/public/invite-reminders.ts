@@ -11,7 +11,8 @@ export const Route = createFileRoute("/api/public/invite-reminders")({
           return new Response("Unauthorized", { status: 401 });
         }
         const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-        const { sendPortalEmail, founderSignature, loadSystemEmail } = await import("@/lib/portal-notify.server");
+        const { sendPortalEmail, founderSignature, loadSystemEmail } =
+          await import("@/lib/portal-notify.server");
         const cutoff = new Date(Date.now() - REMINDER_AFTER_DAYS * 86400000).toISOString();
         const { data: pending, error } = await supabaseAdmin
           .from("portal_members")
@@ -48,12 +49,16 @@ export const Route = createFileRoute("/api/public/invite-reminders")({
               body: `A few days ago we invited you into the private ${entityShort} Board & Advisor Welcome Center. We noticed you haven't had a chance to enter yet.\n\nIt only takes a few minutes: create your password, get reacquainted with where we are today, and share the few details we need to prepare your individualized package.`,
               ctaLabel: "Access Your Private Welcome Center →",
               ctaUrl: link.properties.action_link,
-              ctaSubtext: "This secure link lets you create your own password. No password is emailed.",
+              ctaSubtext:
+                "This secure link lets you create your own password. No password is emailed.",
               signatures: founderSignature(),
             },
             "invite-reminder",
           );
-          await supabaseAdmin.from("portal_members").update({ reminder_sent_at: new Date().toISOString() }).eq("id", m.id);
+          await supabaseAdmin
+            .from("portal_members")
+            .update({ reminder_sent_at: new Date().toISOString() })
+            .eq("id", m.id);
           sent++;
         }
         const { data: docPending } = await supabaseAdmin
@@ -79,7 +84,10 @@ export const Route = createFileRoute("/api/public/invite-reminders")({
             },
             "documents-reminder",
           );
-          await supabaseAdmin.from("portal_members").update({ documents_reminder_sent_at: new Date().toISOString() }).eq("id", m.id);
+          await supabaseAdmin
+            .from("portal_members")
+            .update({ documents_reminder_sent_at: new Date().toISOString() })
+            .eq("id", m.id);
           sent++;
         }
         const nudgeCutoff = new Date(Date.now() - 48 * 3600000).toISOString();
@@ -95,10 +103,17 @@ export const Route = createFileRoute("/api/public/invite-reminders")({
             .from("meeting_poll_responses")
             .select("member_id")
             .eq("poll_id", poll.id);
-          const answered = new Set((responses ?? []).map((r: { member_id: string }) => r.member_id));
-          const pendingIds = (poll.invited_member_ids as string[]).filter((id) => !answered.has(id));
+          const answered = new Set(
+            (responses ?? []).map((r: { member_id: string }) => r.member_id),
+          );
+          const pendingIds = (poll.invited_member_ids as string[]).filter(
+            (id) => !answered.has(id),
+          );
           if (!pendingIds.length) {
-            await supabaseAdmin.from("meeting_polls").update({ auto_nudge_sent_at: new Date().toISOString() }).eq("id", poll.id);
+            await supabaseAdmin
+              .from("meeting_polls")
+              .update({ auto_nudge_sent_at: new Date().toISOString() })
+              .eq("id", poll.id);
             continue;
           }
           const { data: pendingMembers } = await supabaseAdmin
@@ -108,10 +123,18 @@ export const Route = createFileRoute("/api/public/invite-reminders")({
             .in("id", pendingIds);
           for (const m of pendingMembers ?? []) {
             const build = await loadSystemEmail("meeting_poll_reminder");
-            await sendPortalEmail(m.email, build({ first_name: m.first_name?.trim() || "there", meeting_title: poll.title }), "meeting-poll-nudge", `meeting-poll-reminder-${poll.id}-${m.id}`);
+            await sendPortalEmail(
+              m.email,
+              build({ first_name: m.first_name?.trim() || "there", meeting_title: poll.title }),
+              "meeting-poll-nudge",
+              `meeting-poll-reminder-${poll.id}-${m.id}`,
+            );
             sent++;
           }
-          await supabaseAdmin.from("meeting_polls").update({ auto_nudge_sent_at: new Date().toISOString() }).eq("id", poll.id);
+          await supabaseAdmin
+            .from("meeting_polls")
+            .update({ auto_nudge_sent_at: new Date().toISOString() })
+            .eq("id", poll.id);
         }
         return Response.json({ ok: true, sent });
       },

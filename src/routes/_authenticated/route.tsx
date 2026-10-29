@@ -23,7 +23,16 @@ export const Route = createFileRoute("/_authenticated")({
       return { user: data.user };
     }
     const { data, error } = await supabase.auth.getUser();
-    if (error || !data.user) throw redirect({ to: "/auth", search: { redirect: location.href, mode: undefined, email: undefined, passwordCreated: undefined } });
+    if (error || !data.user)
+      throw redirect({
+        to: "/auth",
+        search: {
+          redirect: location.href,
+          mode: undefined,
+          email: undefined,
+          passwordCreated: undefined,
+        },
+      });
     return { user: data.user };
   },
   component: () => <Outlet />,

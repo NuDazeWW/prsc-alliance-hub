@@ -2,7 +2,8 @@
 // General scheduling copy only: no restricted briefing details belong here or in poll emails.
 
 export const FORUM_CALENDAR_WELCOME = "Welcome to Your Live Meeting Calendar!";
-export const FORUM_CALENDAR_PURPOSE = "This calendar is used to coordinate and confirm meetings among invited executives and advisors.";
+export const FORUM_CALENDAR_PURPOSE =
+  "This calendar is used to coordinate and confirm meetings among invited executives and advisors.";
 export const FORUM_INTRO_HEADING = "We're Planning the First United Strategic Coordination Forum";
 export const FORUM_INTRO_PARAGRAPHS = [
   "We are bringing together a select group of experienced executives and strategic advisors for an inaugural United Strategic Coordination Forum, a confidential, 90-minute working discussion focused on the next phase of growth for the Partnership Readiness Standards Council (PRSC) and Decision Intelligence Systems (DIS).",
@@ -11,11 +12,24 @@ export const FORUM_INTRO_PARAGRAPHS = [
 export const FORUM_NON_VOTING_NOTE =
   "This is a collaborative, non-voting strategic discussion—not a formal board meeting or decision-making session. Your experience, independent judgment, and perspective are the reasons you've been invited. Participation does not constitute an appointment to PRSC or DIS or a commitment to accept a future role.";
 
-const NUMBER_WORDS = ["zero", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine"];
+const NUMBER_WORDS = [
+  "zero",
+  "one",
+  "two",
+  "three",
+  "four",
+  "five",
+  "six",
+  "seven",
+  "eight",
+  "nine",
+];
 
 /** "three" for 3 (the approved wording), so the sentence stays true if a poll has a different number of slots. */
 export function slotCountWord(count: number) {
-  return Number.isInteger(count) && count >= 1 && count < NUMBER_WORDS.length ? NUMBER_WORDS[count] : String(count);
+  return Number.isInteger(count) && count >= 1 && count < NUMBER_WORDS.length
+    ? NUMBER_WORDS[count]
+    : String(count);
 }
 
 export function forumSlotsSentence(slotCount: number) {

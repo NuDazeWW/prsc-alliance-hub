@@ -8,12 +8,20 @@ export function usePrivateMedia(url: string | null | undefined) {
     let disposed = false;
     let objectUrl: string | null = null;
     setResolved(null);
-    if (privateUrl && url) void fetchPrivateFile(url).then(blob => {
-      if (disposed) return;
-      objectUrl = URL.createObjectURL(blob);
-      setResolved(objectUrl);
-    }).catch(() => { if (!disposed) setResolved(null); });
-    return () => { disposed = true; if (objectUrl) URL.revokeObjectURL(objectUrl); };
+    if (privateUrl && url)
+      void fetchPrivateFile(url)
+        .then((blob) => {
+          if (disposed) return;
+          objectUrl = URL.createObjectURL(blob);
+          setResolved(objectUrl);
+        })
+        .catch(() => {
+          if (!disposed) setResolved(null);
+        });
+    return () => {
+      disposed = true;
+      if (objectUrl) URL.revokeObjectURL(objectUrl);
+    };
   }, [url, privateUrl]);
   return privateUrl ? resolved : url;
 }

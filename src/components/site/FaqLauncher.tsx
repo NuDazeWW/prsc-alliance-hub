@@ -82,7 +82,9 @@ export function FaqLauncher() {
           >
             <div className="flex shrink-0 items-start justify-between gap-4 border-b border-navy/10 px-5 md:px-8 pt-6 pb-4">
               <div>
-                <p className="label-caps text-gold mb-2 text-[0.68rem]">Frequently Asked Questions</p>
+                <p className="label-caps text-gold mb-2 text-[0.68rem]">
+                  Frequently Asked Questions
+                </p>
                 <h2 className="font-display text-2xl md:text-3xl leading-tight">
                   Everything about the PRSC Readiness Score™
                 </h2>

@@ -5,7 +5,12 @@
 // id, title, description or file. Secretariat-only items, administrator-only roles and restricted
 // opportunity documents are never mentioned at all, so their existence is not disclosed.
 
-export type UnavailableReason = "awaiting_approved" | "not_released" | "confidentiality_signature" | "prior_action" | "admin_clearance";
+export type UnavailableReason =
+  | "awaiting_approved"
+  | "not_released"
+  | "confidentiality_signature"
+  | "prior_action"
+  | "admin_clearance";
 
 export const UNAVAILABLE_LABEL: Record<UnavailableReason, string> = {
   awaiting_approved: "Awaiting approved document",
@@ -16,11 +21,15 @@ export const UNAVAILABLE_LABEL: Record<UnavailableReason, string> = {
 };
 
 export const UNAVAILABLE_HELP: Record<UnavailableReason, string> = {
-  awaiting_approved: "The approved version has not been loaded yet. We will email you when it is available.",
+  awaiting_approved:
+    "The approved version has not been loaded yet. We will email you when it is available.",
   not_released: "This has not been assigned or released to you yet. We will email you when it is.",
-  confidentiality_signature: "Complete the confidentiality steps in your journey first. This opens after they are verified.",
-  prior_action: "Finish the document before it in your journey. This opens automatically afterward.",
-  admin_clearance: "The Secretariat reviews clearance before this opens. We will email you when it does.",
+  confidentiality_signature:
+    "Complete the confidentiality steps in your journey first. This opens after they are verified.",
+  prior_action:
+    "Finish the document before it in your journey. This opens automatically afterward.",
+  admin_clearance:
+    "The Secretariat reviews clearance before this opens. We will email you when it does.",
 };
 
 export type AvailabilityDoc = {
@@ -55,7 +64,12 @@ const GENERIC_ROLE_LABEL: Record<string, string> = {
 const GENERIC_CONFIDENTIAL_LABEL = "Confidential Forum document";
 
 /** Roles and classifications that must never produce any notice. */
-const NEVER_DISCLOSE_ROLES = ["secretariat_controls", "facilitator_run_of_show", "agenda", "restricted_brief"];
+const NEVER_DISCLOSE_ROLES = [
+  "secretariat_controls",
+  "facilitator_run_of_show",
+  "agenda",
+  "restricted_brief",
+];
 const NEVER_DISCLOSE_CLASSES = ["secretariat_only", "restricted_opportunity"];
 
 function cleared(status: string) {
@@ -63,21 +77,34 @@ function cleared(status: string) {
 }
 
 /** The reason one hidden confidential Forum document is hidden, or null when nothing safe can be said. */
-function hiddenReason(d: AvailabilityDoc, m: AvailabilityMember, addendumApproved: boolean): UnavailableReason | null {
+function hiddenReason(
+  d: AvailabilityDoc,
+  m: AvailabilityMember,
+  addendumApproved: boolean,
+): UnavailableReason | null {
   if (m.forum_clearance_status === "declined") return null;
   if (!m.nda_verified) return "confidentiality_signature";
   const protectedDoc = d.classification === "confidential_forum";
-  if (protectedDoc && d.forum_role !== "addendum" && !m.addendum_complete) return addendumApproved ? "confidentiality_signature" : "awaiting_approved";
+  if (protectedDoc && d.forum_role !== "addendum" && !m.addendum_complete)
+    return addendumApproved ? "confidentiality_signature" : "awaiting_approved";
   if (!d.is_forum_prep && !cleared(m.forum_clearance_status)) return "admin_clearance";
   return null;
 }
 
-export function unavailableNotices(docs: AvailabilityDoc[], m: AvailabilityMember): UnavailableNotice[] {
+export function unavailableNotices(
+  docs: AvailabilityDoc[],
+  m: AvailabilityMember,
+): UnavailableNotice[] {
   if (!m.participates_in_forum) return [];
   const active = docs.filter(
-    (d) => !d.superseded_at && !NEVER_DISCLOSE_CLASSES.includes(d.classification ?? "") && !NEVER_DISCLOSE_ROLES.includes(d.forum_role ?? ""),
+    (d) =>
+      !d.superseded_at &&
+      !NEVER_DISCLOSE_CLASSES.includes(d.classification ?? "") &&
+      !NEVER_DISCLOSE_ROLES.includes(d.forum_role ?? ""),
   );
-  const addendumApproved = docs.some((d) => d.forum_role === "addendum" && !d.superseded_at && !!d.signing_approved);
+  const addendumApproved = docs.some(
+    (d) => d.forum_role === "addendum" && !d.superseded_at && !!d.signing_approved,
+  );
   const notices: UnavailableNotice[] = [];
   const seen = new Set<string>();
   const add = (key: string, label: string, reason: UnavailableReason) => {
@@ -102,7 +129,12 @@ export function unavailableNotices(docs: AvailabilityDoc[], m: AvailabilityMembe
     if (d.visible || d.classification !== "confidential_forum") continue;
     if ((EXPECTED_FORUM_ROLES as readonly string[]).includes(d.forum_role ?? "")) continue;
     const reason = hiddenReason(d, m, addendumApproved);
-    if (reason) add(d.forum_role ?? "other", GENERIC_ROLE_LABEL[d.forum_role ?? ""] ?? GENERIC_CONFIDENTIAL_LABEL, reason);
+    if (reason)
+      add(
+        d.forum_role ?? "other",
+        GENERIC_ROLE_LABEL[d.forum_role ?? ""] ?? GENERIC_CONFIDENTIAL_LABEL,
+        reason,
+      );
   }
   return notices;
 }

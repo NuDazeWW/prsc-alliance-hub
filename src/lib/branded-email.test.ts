@@ -6,14 +6,22 @@ test("Forum-only email tokens do not expose the compatibility entity or role", (
   for (const entity of ["prsc", "dis", "both"]) {
     const member = { entity, role: "advisor", is_candidate: true, first_name: "Avery" };
     const tokens = buildMemberTokens(member);
-    strictEqual(applyTokens("{{entity}} | {{entity_full}} | {{role}} | {{package_label}}", tokens), "United Forum | United Strategic Coordination Forum | United Forum Invitee | United Forum");
+    strictEqual(
+      applyTokens("{{entity}} | {{entity_full}} | {{role}} | {{package_label}}", tokens),
+      "United Forum | United Strategic Coordination Forum | United Forum Invitee | United Forum",
+    );
     strictEqual(member.entity, entity);
     strictEqual(member.role, "advisor");
   }
 });
 
 test("cleared Forum-only members retain neutral entity tokens", () => {
-  const tokens = buildMemberTokens({ entity: "prsc", role: "advisor", is_candidate: true, forum_clearance_status: "cleared" });
+  const tokens = buildMemberTokens({
+    entity: "prsc",
+    role: "advisor",
+    is_candidate: true,
+    forum_clearance_status: "cleared",
+  });
   strictEqual(tokens.role, "Forum Participant");
   strictEqual(tokens.entity, "United Forum");
 });

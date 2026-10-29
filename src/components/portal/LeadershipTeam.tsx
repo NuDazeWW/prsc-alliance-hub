@@ -18,12 +18,20 @@ const DEMO: Pick<LeaderRow, "id" | "name" | "title" | "bio" | "photo_url" | "aff
   ["Victoria Chen", "Board Member", l4],
   ["Daniel Brooks", "Board Member", l5],
   ["Angela Kim", "Board Member", l6],
-].map(([name, title, photo], i) => ({ id: `demo-${i}`, name, title, bio: null, photo_url: photo, affiliation: null }));
+].map(([name, title, photo], i) => ({
+  id: `demo-${i}`,
+  name,
+  title,
+  bio: null,
+  photo_url: photo,
+  affiliation: null,
+}));
 
 const DEFAULT_SETTINGS = {
   eyebrow: "Our Leadership Team",
   heading: "Our Leadership Team",
-  subtext: "A distinguished group of advisors and executives guiding PRSC's mission and industry impact.",
+  subtext:
+    "A distinguished group of advisors and executives guiding PRSC's mission and industry impact.",
 };
 
 export function LeadershipTeam() {
@@ -48,13 +56,22 @@ export function LeadershipTeam() {
   return (
     <div className="h-full border border-gold/25 bg-[linear-gradient(135deg,var(--color-midnight),var(--color-navy))] p-6 sm:p-8">
       <p className="text-[10px] uppercase tracking-[0.24em] text-gold">{settings.eyebrow}</p>
-      <h2 className="mt-3 font-display text-[clamp(1.75rem,2.2vw,2.4rem)] leading-tight">{settings.heading}</h2>
-      {settings.subtext && <p className="mt-2 text-sm leading-6 text-ivory/60">{settings.subtext}</p>}
+      <h2 className="mt-3 font-display text-[clamp(1.75rem,2.2vw,2.4rem)] leading-tight">
+        {settings.heading}
+      </h2>
+      {settings.subtext && (
+        <p className="mt-2 text-sm leading-6 text-ivory/60">{settings.subtext}</p>
+      )}
       {q.isLoading && <p className="mt-6 text-sm text-ivory/50">Loading…</p>}
       <ul className="mt-6 space-y-3">
         {team.map((p) => {
           const isOpen = open === p.id;
-          const initials = p.name.split(/\s+/).filter((w: string) => !w.endsWith(".")).map((w: string) => w[0]).slice(0, 2).join("");
+          const initials = p.name
+            .split(/\s+/)
+            .filter((w: string) => !w.endsWith("."))
+            .map((w: string) => w[0])
+            .slice(0, 2)
+            .join("");
           return (
             <li key={p.id} className="border border-ivory/15 bg-navy-deep/40">
               <button
@@ -66,14 +83,22 @@ export function LeadershipTeam() {
                 {p.photo_url ? (
                   <LeaderPhoto url={p.photo_url} name={p.name} />
                 ) : (
-                  <span className="grid h-16 w-20 shrink-0 place-items-center bg-ivory/5 font-display text-lg text-gold">{initials}</span>
+                  <span className="grid h-16 w-20 shrink-0 place-items-center bg-ivory/5 font-display text-lg text-gold">
+                    {initials}
+                  </span>
                 )}
                 <span className="min-w-0 flex-1 py-2">
-                  <span className="block truncate font-display text-[17px] text-ivory">{p.name}</span>
+                  <span className="block truncate font-display text-[17px] text-ivory">
+                    {p.name}
+                  </span>
                   <span className="block truncate text-xs text-gold/85">{p.title}</span>
-                  {p.affiliation && <span className="block truncate text-xs text-ivory/55">{p.affiliation}</span>}
+                  {p.affiliation && (
+                    <span className="block truncate text-xs text-ivory/55">{p.affiliation}</span>
+                  )}
                 </span>
-                <ChevronDown className={`h-4 w-4 shrink-0 text-gold transition-transform ${isOpen ? "rotate-180" : ""}`} />
+                <ChevronDown
+                  className={`h-4 w-4 shrink-0 text-gold transition-transform ${isOpen ? "rotate-180" : ""}`}
+                />
               </button>
               {isOpen && (
                 <p className="whitespace-pre-wrap border-t border-ivory/10 px-5 py-4 text-sm leading-6 text-ivory/70">
@@ -90,5 +115,16 @@ export function LeadershipTeam() {
 
 function LeaderPhoto({ url, name }: { url: string; name: string }) {
   const src = usePrivateMedia(url);
-  return src ? <img src={src} alt={name} loading="lazy" width={80} height={64} className="h-16 w-20 shrink-0 object-cover" /> : <span className="h-16 w-20 shrink-0 bg-ivory/5" />;
+  return src ? (
+    <img
+      src={src}
+      alt={name}
+      loading="lazy"
+      width={80}
+      height={64}
+      className="h-16 w-20 shrink-0 object-cover"
+    />
+  ) : (
+    <span className="h-16 w-20 shrink-0 bg-ivory/5" />
+  );
 }

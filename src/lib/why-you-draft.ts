@@ -3,18 +3,32 @@ import { intendedDesignationSchema, intendedDesignationLabel } from "./intended-
 import { INVITE_ROLE_LABELS } from "./invite-email-config";
 import { linkedinSourceUrlSchema } from "./member-import-validation";
 
-export const whyYouDraftSchema = z.object({
-  first_name: z.string().trim().max(80), last_name: z.string().trim().max(80),
-  organization: z.string().trim().max(180), title: z.string().trim().max(160),
-  entity: z.enum(["prsc", "dis", "both"]),
-  role: z.enum(["board_member", "advisor", "prsc_board_dis_advisor", "prsc_advisor_dis_board", "methodology_committee"]),
-  is_candidate: z.boolean().optional(), intended_designation: intendedDesignationSchema.optional(),
-  linkedin_url: linkedinSourceUrlSchema,
-  background: z.string().trim().max(8000).default(""),
-}).strict();
+export const whyYouDraftSchema = z
+  .object({
+    first_name: z.string().trim().max(80),
+    last_name: z.string().trim().max(80),
+    organization: z.string().trim().max(180),
+    title: z.string().trim().max(160),
+    entity: z.enum(["prsc", "dis", "both"]),
+    role: z.enum([
+      "board_member",
+      "advisor",
+      "prsc_board_dis_advisor",
+      "prsc_advisor_dis_board",
+      "methodology_committee",
+    ]),
+    is_candidate: z.boolean().optional(),
+    intended_designation: intendedDesignationSchema.optional(),
+    linkedin_url: linkedinSourceUrlSchema,
+    background: z.string().trim().max(8000).default(""),
+  })
+  .strict();
 
 export type WhyYouDraftInput = z.infer<typeof whyYouDraftSchema>;
-export type WhyYouDraftSource = { kind: "administrator_background" | "supplied_fields"; url?: string };
+export type WhyYouDraftSource = {
+  kind: "administrator_background" | "supplied_fields";
+  url?: string;
+};
 
 const ENTITY = {
   prsc: "the Partnership Readiness Standards Council (PRSC), an independent body that governs the PRSC Readiness Standard™ and PRSC Readiness Score™ for sponsorship and partnership readiness",
@@ -29,9 +43,15 @@ export function prepareWhyYouDraft(data: WhyYouDraftInput) {
     kind: data.background ? "administrator_background" : "supplied_fields",
     ...(data.linkedin_url ? { url: data.linkedin_url } : {}),
   };
-  const forumOnly = data.intended_designation?.entity === "none" || Boolean(data.is_candidate && !data.intended_designation);
-  const role = data.intended_designation ? `${intendedDesignationLabel(data.intended_designation)} (under consideration only; no appointment or entity authority is conferred; never imply an activated seat)` : data.is_candidate ? "United Forum invitee (not appointed to any PRSC or DIS board, advisory, or committee seat; never imply a seat)" : INVITE_ROLE_LABELS[data.role];
-  const languageEntity = forumOnly ? "none" : data.intended_designation?.entity ?? data.entity;
+  const forumOnly =
+    data.intended_designation?.entity === "none" ||
+    Boolean(data.is_candidate && !data.intended_designation);
+  const role = data.intended_designation
+    ? `${intendedDesignationLabel(data.intended_designation)} (under consideration only; no appointment or entity authority is conferred; never imply an activated seat)`
+    : data.is_candidate
+      ? "United Forum invitee (not appointed to any PRSC or DIS board, advisory, or committee seat; never imply a seat)"
+      : INVITE_ROLE_LABELS[data.role];
+  const languageEntity = forumOnly ? "none" : (data.intended_designation?.entity ?? data.entity);
   const instructions = `Write a private, personal note from Shirley Johnson, Founder, on behalf of ${ENTITY[languageEntity]}, explaining directly to an invited ${role} why we chose them.
 
 Voice and point of view:
@@ -51,7 +71,11 @@ Content rules:
 - For a Forum-only invitation, discuss strategic coordination without assigning or implying a PRSC/DIS entity role or mandatory entity onboarding.
 - Do not call the candidate’s current position "our role."`;
   const input = JSON.stringify({
-    candidate: { name: `${data.first_name} ${data.last_name}`.trim(), title: data.title || null, organization: data.organization || null },
+    candidate: {
+      name: `${data.first_name} ${data.last_name}`.trim(),
+      title: data.title || null,
+      organization: data.organization || null,
+    },
     linkedin_reference_url: data.linkedin_url || null,
     administrator_background: data.background || null,
     source_kind: source.kind,
@@ -60,9 +84,12 @@ Content rules:
 }
 
 /** Shared orchestration for both single-row and batch server calls; tests inject the model callback. */
-export async function generateWhyYouWithSource(data: WhyYouDraftInput, options: {
-  generateDraft: (prompt: { instructions: string; input: string }) => Promise<{ draft: string }>;
-}) {
+export async function generateWhyYouWithSource(
+  data: WhyYouDraftInput,
+  options: {
+    generateDraft: (prompt: { instructions: string; input: string }) => Promise<{ draft: string }>;
+  },
+) {
   const { instructions, input, source } = prepareWhyYouDraft(data);
   const result = await options.generateDraft({ instructions, input });
   return { ...result, source };

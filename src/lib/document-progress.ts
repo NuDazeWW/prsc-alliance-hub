@@ -18,18 +18,25 @@ export type DocumentProgress = {
 
 const plural = (n: number, one: string, many: string) => `${n} ${n === 1 ? one : many}`;
 
-export function documentProgress(active: ProgressDoc[], history: { id: string }[], doneIds: ReadonlySet<string>): DocumentProgress {
+export function documentProgress(
+  active: ProgressDoc[],
+  history: { id: string }[],
+  doneIds: ReadonlySet<string>,
+): DocumentProgress {
   const required = active.filter(isOnboarding);
   const done = required.filter((d) => doneIds.has(d.id)).length;
   const otherCount = active.length - required.length;
   const parts: string[] = [];
-  if (otherCount > 0) parts.push(plural(otherCount, "reference or one-off file", "reference or one-off files"));
-  if (history.length > 0) parts.push(plural(history.length, "historical record", "historical records"));
+  if (otherCount > 0)
+    parts.push(plural(otherCount, "reference or one-off file", "reference or one-off files"));
+  if (history.length > 0)
+    parts.push(plural(history.length, "historical record", "historical records"));
   return {
     required: { done, total: required.length },
     otherCount,
     historyCount: history.length,
-    requiredLabel: required.length > 0 ? `Required actions: ${done} of ${required.length} complete` : null,
+    requiredLabel:
+      required.length > 0 ? `Required actions: ${done} of ${required.length} complete` : null,
     alsoShownLabel: parts.length > 0 ? `Also shown, not counted: ${parts.join(" · ")}` : null,
   };
 }

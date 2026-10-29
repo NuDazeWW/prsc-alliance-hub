@@ -1,4 +1,9 @@
-import { memberRoleLabel, memberDesignation, FORUM_ENTITY_LABEL, FORUM_ENTITY_FULL_NAME } from "./member-role-labels";
+import {
+  memberRoleLabel,
+  memberDesignation,
+  FORUM_ENTITY_LABEL,
+  FORUM_ENTITY_FULL_NAME,
+} from "./member-role-labels";
 
 export type EmailSignature = { name: string; title: string };
 
@@ -80,15 +85,22 @@ export function buildMemberTokens(member: {
     organization: member.organization ?? "",
     title: member.title ?? "",
     entity: member.is_candidate ? FORUM_ENTITY_LABEL : entity.toUpperCase(),
-    entity_full: member.is_candidate ? FORUM_ENTITY_FULL_NAME : ENTITY_FULL[entity] ?? entity.toUpperCase(),
+    entity_full: member.is_candidate
+      ? FORUM_ENTITY_FULL_NAME
+      : (ENTITY_FULL[entity] ?? entity.toUpperCase()),
     role: memberDesignation({ ...member, role, entity }),
     role_label: memberDesignation({ ...member, role, entity }),
-    package_label: member.is_candidate ? "United Forum" : PACKAGE_LABEL[role] ?? "Board / Advisor",
+    package_label: member.is_candidate
+      ? "United Forum"
+      : (PACKAGE_LABEL[role] ?? "Board / Advisor"),
     email: member.email ?? "",
   };
 }
 
-export function applyTokens(text: string, tokens: EmailTokens | Record<string, string | undefined>) {
+export function applyTokens(
+  text: string,
+  tokens: EmailTokens | Record<string, string | undefined>,
+) {
   return text.replace(/\{\{\s*([a-z_]+)\s*\}\}/gi, (match, key: string) => {
     const value = (tokens as Record<string, string | undefined>)[key.toLowerCase()];
     return value ?? match;

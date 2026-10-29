@@ -1,5 +1,15 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { Landmark, ScrollText, Users, ChevronDown, ShieldCheck, Eye, GitBranch, BookOpenCheck, Check } from "lucide-react";
+import {
+  Landmark,
+  ScrollText,
+  Users,
+  ChevronDown,
+  ShieldCheck,
+  Eye,
+  GitBranch,
+  BookOpenCheck,
+  Check,
+} from "lucide-react";
 import { BoardInterestForm } from "@/components/forms/PrscForms";
 import { ContinueReading } from "@/components/site/ContinueReading";
 import sealBadge from "@/assets/prsc-seal-badge.png.asset.json";
@@ -11,14 +21,26 @@ export const Route = createFileRoute("/governance")({
   head: () => ({
     meta: [
       { title: "Governance — Governed by the Market. Built for the Market." },
-      { name: "description", content: "PRSC is a market-governed standards body. Read our governance architecture and register interest in the founding board." },
+      {
+        name: "description",
+        content:
+          "PRSC is a market-governed standards body. Read our governance architecture and register interest in the founding board.",
+      },
       { property: "og:title", content: "Governance — Partnership Readiness Standards Council" },
-      { property: "og:description", content: "A neutral, non-commercial, market-governed standards body for the global partnership industry." },
+      {
+        property: "og:description",
+        content:
+          "A neutral, non-commercial, market-governed standards body for the global partnership industry.",
+      },
       { property: "og:type", content: "article" },
       { property: "og:url", content: CANONICAL },
       { name: "twitter:card", content: "summary_large_image" },
       { name: "twitter:title", content: "Governance — Partnership Readiness Standards Council" },
-      { name: "twitter:description", content: "A neutral, non-commercial, market-governed standards body for the global partnership industry." },
+      {
+        name: "twitter:description",
+        content:
+          "A neutral, non-commercial, market-governed standards body for the global partnership industry.",
+      },
     ],
     links: [{ rel: "canonical", href: CANONICAL }],
     scripts: [
@@ -43,7 +65,12 @@ export const Route = createFileRoute("/governance")({
             "@type": "BreadcrumbList",
             "@id": CANONICAL + "#breadcrumb",
             itemListElement: [
-              { "@type": "ListItem", position: 1, name: "PRSC", item: "https://prscstandards.com/" },
+              {
+                "@type": "ListItem",
+                position: 1,
+                name: "PRSC",
+                item: "https://prscstandards.com/",
+              },
               { "@type": "ListItem", position: 2, name: "Governance", item: CANONICAL },
             ],
           },
@@ -77,7 +104,6 @@ const MILESTONES = [
   { label: "First Readiness Scores Issued" },
   { label: "Continuous Governance" },
 ];
-
 
 const LAYERS = [
   {
@@ -127,7 +153,9 @@ function GovernancePage() {
         <div
           className="absolute inset-x-0 top-0 h-px pointer-events-none"
           aria-hidden
-          style={{ background: "linear-gradient(90deg, transparent, rgba(212,175,55,0.6), transparent)" }}
+          style={{
+            background: "linear-gradient(90deg, transparent, rgba(212,175,55,0.6), transparent)",
+          }}
         />
         <div className="relative mx-auto max-w-5xl px-6 text-center">
           <img
@@ -139,11 +167,15 @@ function GovernancePage() {
           />
           <p className="label-caps text-gold mb-6">Governance</p>
           <h1 className="font-display text-4xl sm:text-5xl md:text-6xl leading-[1.05]">
-            Governed by the Market.<br />Built for the Market.
+            Governed by the Market.
+            <br />
+            Built for the Market.
           </h1>
           <div className="gold-rule my-8 mx-auto w-24" />
           <p className="text-lg md:text-xl text-ivory/75 max-w-3xl mx-auto leading-relaxed">
-            PRSC™ is a neutral standards body — independent of any single organization, brand, agency, or platform. Its authority comes from the market it serves and the rigor of the Standard it maintains.
+            PRSC™ is a neutral standards body — independent of any single organization, brand,
+            agency, or platform. Its authority comes from the market it serves and the rigor of the
+            Standard it maintains.
           </p>
         </div>
       </section>
@@ -157,15 +189,20 @@ function GovernancePage() {
               A market that moves $100B+ deserves an institution.
             </h2>
             <div className="space-y-5 text-lg text-stone leading-relaxed">
-              <p>Every mature market has a standards body — for accounting, for credit, for security, for measurement. Partnership and sponsorship, uniquely, do not.</p>
-              <p>PRSC exists to fill that gap: to build the durable, non-commercial infrastructure the industry has always lacked, so capital can be deployed with the confidence that mature markets require.</p>
+              <p>
+                Every mature market has a standards body — for accounting, for credit, for security,
+                for measurement. Partnership and sponsorship, uniquely, do not.
+              </p>
+              <p>
+                PRSC exists to fill that gap: to build the durable, non-commercial infrastructure
+                the industry has always lacked, so capital can be deployed with the confidence that
+                mature markets require.
+              </p>
             </div>
           </div>
 
           <div className="relative">
-            <div
-              className="rounded-sm border border-navy/10 bg-white/70 backdrop-blur-sm overflow-hidden shadow-[0_30px_60px_-30px_rgba(10,19,34,0.25)]"
-            >
+            <div className="rounded-sm border border-navy/10 bg-white/70 backdrop-blur-sm overflow-hidden shadow-[0_30px_60px_-30px_rgba(10,19,34,0.25)]">
               <div className="flex items-center justify-between px-6 py-4 border-b border-navy/10 bg-navy/[0.03]">
                 <p className="label-caps text-navy/60 text-[0.65rem]">Market</p>
                 <p className="label-caps text-navy/60 text-[0.65rem]">Standards Body</p>
@@ -186,12 +223,16 @@ function GovernancePage() {
                         className="absolute left-0 top-0 bottom-0 w-[3px] bg-gradient-to-b from-gold via-antique to-gold/40"
                       />
                     )}
-                    <span className={`text-sm md:text-base ${p.ours ? "font-medium text-navy" : "text-stone"}`}>
+                    <span
+                      className={`text-sm md:text-base ${p.ours ? "font-medium text-navy" : "text-stone"}`}
+                    >
                       {p.market}
                     </span>
                     <span
                       className={`flex items-baseline gap-2 sm:gap-3 flex-wrap justify-end font-display tracking-wide ${
-                        p.ours ? "text-gold text-xl md:text-2xl" : "text-navy/80 text-lg md:text-xl tabular-nums"
+                        p.ours
+                          ? "text-gold text-xl md:text-2xl"
+                          : "text-navy/80 text-lg md:text-xl tabular-nums"
                       }`}
                     >
                       <span>{p.body}</span>
@@ -200,7 +241,9 @@ function GovernancePage() {
                 ))}
               </ul>
             </div>
-            <p className="mt-3 text-xs text-stone/70 text-right">Every mature market. One institution each.</p>
+            <p className="mt-3 text-xs text-stone/70 text-right">
+              Every mature market. One institution each.
+            </p>
           </div>
         </div>
       </section>
@@ -219,37 +262,43 @@ function GovernancePage() {
         <div
           className="absolute inset-x-0 top-0 h-px pointer-events-none"
           aria-hidden
-          style={{ background: "linear-gradient(90deg, transparent, rgba(212,175,55,0.6), transparent)" }}
+          style={{
+            background: "linear-gradient(90deg, transparent, rgba(212,175,55,0.6), transparent)",
+          }}
         />
 
         <div className="relative mx-auto max-w-7xl px-6">
           <div className="text-center max-w-2xl mx-auto mb-16">
             <p className="label-caps text-gold mb-4">The Architecture</p>
-            <h2 className="font-display text-4xl md:text-5xl leading-tight">Three layers. One institution.</h2>
+            <h2 className="font-display text-4xl md:text-5xl leading-tight">
+              Three layers. One institution.
+            </h2>
             <div className="gold-rule my-6 mx-auto w-24" />
             <p className="text-base md:text-lg text-ivory/70">
-              A layered structure that separates governance, methodology, and market perspective — each independent, each accountable.
+              A layered structure that separates governance, methodology, and market perspective —
+              each independent, each accountable.
             </p>
           </div>
 
           <div className="grid gap-8 md:gap-6 md:grid-cols-3 relative">
             {LAYERS.map((l, i) => (
               <div key={l.name} className="relative">
-                <div
-                  className="group relative h-full rounded-sm border border-gold/20 bg-white/[0.03] p-8 pt-10 backdrop-blur-sm transition-all hover:border-gold/60 hover:bg-white/[0.05] hover:-translate-y-1 hover:shadow-[0_30px_60px_-25px_rgba(0,0,0,0.6)]"
-                >
+                <div className="group relative h-full rounded-sm border border-gold/20 bg-white/[0.03] p-8 pt-10 backdrop-blur-sm transition-all hover:border-gold/60 hover:bg-white/[0.05] hover:-translate-y-1 hover:shadow-[0_30px_60px_-25px_rgba(0,0,0,0.6)]">
                   <div
                     className="absolute inset-x-0 top-0 h-px"
                     aria-hidden
-                    style={{ background: `linear-gradient(90deg, transparent, ${l.color}, transparent)` }}
+                    style={{
+                      background: `linear-gradient(90deg, transparent, ${l.color}, transparent)`,
+                    }}
                   />
                   <div className="flex items-center justify-between mb-6">
-                    <div
-                      className="flex h-14 w-14 items-center justify-center rounded-full bg-gradient-to-br from-gold to-bronze text-navy shadow-[0_8px_24px_-8px_rgba(212,175,55,0.6)]"
-                    >
+                    <div className="flex h-14 w-14 items-center justify-center rounded-full bg-gradient-to-br from-gold to-bronze text-navy shadow-[0_8px_24px_-8px_rgba(212,175,55,0.6)]">
                       <l.icon size={22} strokeWidth={1.75} aria-hidden="true" />
                     </div>
-                    <span className="font-display text-3xl tabular-nums leading-none" style={{ color: `${l.color}55` }}>
+                    <span
+                      className="font-display text-3xl tabular-nums leading-none"
+                      style={{ color: `${l.color}55` }}
+                    >
                       0{i + 1}
                     </span>
                   </div>
@@ -290,8 +339,8 @@ function GovernancePage() {
               <p>PRSC does not exist to represent any one organization.</p>
               <p>It exists to protect the integrity of the Standard.</p>
               <p>
-                Every governance layer exists for a single purpose: to ensure that a PRSC Readiness Score&trade;
-                means the same thing tomorrow as it does today.
+                Every governance layer exists for a single purpose: to ensure that a PRSC Readiness
+                Score&trade; means the same thing tomorrow as it does today.
               </p>
             </div>
           </div>
@@ -312,8 +361,8 @@ function GovernancePage() {
             </h2>
             <div className="gold-rule my-6 w-24" />
             <p className="text-lg text-stone leading-relaxed">
-              Independence is not a claim. It is a set of structural commitments — written into the constitution,
-              audited annually, and enforced by the Council.
+              Independence is not a claim. It is a set of structural commitments — written into the
+              constitution, audited annually, and enforced by the Council.
             </p>
           </div>
 
@@ -360,10 +409,16 @@ function GovernancePage() {
             <div
               aria-hidden
               className="hidden md:block absolute left-0 right-0 top-6 h-px"
-              style={{ background: "linear-gradient(90deg, transparent, rgba(212,175,55,0.5), rgba(212,175,55,0.5), transparent)" }}
+              style={{
+                background:
+                  "linear-gradient(90deg, transparent, rgba(212,175,55,0.5), rgba(212,175,55,0.5), transparent)",
+              }}
             />
             {MILESTONES.map((m, i) => (
-              <li key={m.label} className="relative flex md:flex-col items-start md:items-center gap-4 md:gap-5 md:text-center">
+              <li
+                key={m.label}
+                className="relative flex md:flex-col items-start md:items-center gap-4 md:gap-5 md:text-center"
+              >
                 <div className="relative flex h-12 w-12 shrink-0 items-center justify-center rounded-full border border-gold/50 bg-navy text-gold font-display text-lg tabular-nums">
                   {String(i + 1).padStart(2, "0")}
                 </div>
@@ -375,7 +430,6 @@ function GovernancePage() {
           </ol>
         </div>
       </section>
-
 
       {/* PRINCIPLES STRIP */}
       <section className="bg-midnight text-ivory py-14 border-y border-gold/20">
@@ -397,14 +451,15 @@ function GovernancePage() {
       <section
         className="relative py-24 md:py-32 overflow-hidden"
         style={{
-          background:
-            "linear-gradient(180deg, #F2EFE6 0%, #EBE5D3 55%, #F2EFE6 100%)",
+          background: "linear-gradient(180deg, #F2EFE6 0%, #EBE5D3 55%, #F2EFE6 100%)",
         }}
       >
         <div
           className="absolute inset-x-0 top-0 h-24 pointer-events-none"
           aria-hidden
-          style={{ background: "radial-gradient(ellipse at top, rgba(212,175,55,0.10), transparent 70%)" }}
+          style={{
+            background: "radial-gradient(ellipse at top, rgba(212,175,55,0.10), transparent 70%)",
+          }}
         />
         <div className="relative mx-auto max-w-6xl px-6 grid gap-14 lg:grid-cols-[1fr_1.15fr] lg:items-start">
           <div>
@@ -415,13 +470,23 @@ function GovernancePage() {
 
             <div className="gold-rule my-6 w-24" />
             <p className="text-lg text-stone leading-relaxed mb-8">
-              PRSC is seating its founding governing body. Senior industry leaders may submit a statement of interest for the Council's consideration.
+              PRSC is seating its founding governing body. Senior industry leaders may submit a
+              statement of interest for the Council's consideration.
             </p>
             <ul className="space-y-4 text-stone">
               {[
-                { t: "Senior industry standing", d: "Executive or peer-recognized authority in partnership, sponsorship, or adjacent markets." },
-                { t: "Fixed-term commitment", d: "Council seats serve defined terms with published rotation cadence." },
-                { t: "Peer-nominated selection", d: "Statements of interest are reviewed by the founding secretariat and existing Council members." },
+                {
+                  t: "Senior industry standing",
+                  d: "Executive or peer-recognized authority in partnership, sponsorship, or adjacent markets.",
+                },
+                {
+                  t: "Fixed-term commitment",
+                  d: "Council seats serve defined terms with published rotation cadence.",
+                },
+                {
+                  t: "Peer-nominated selection",
+                  d: "Statements of interest are reviewed by the founding secretariat and existing Council members.",
+                },
               ].map((it) => (
                 <li key={it.t} className="flex gap-4">
                   <span className="mt-2 h-1.5 w-1.5 rounded-full bg-gold shrink-0" aria-hidden />
@@ -458,7 +523,13 @@ function GovernancePage() {
             className="max-w-3xl mx-auto text-center leading-relaxed mb-12"
             style={{ color: "#D0D5DD", fontSize: "16px" }}
           >
-            The Partnership Readiness Standards Council and Decision Intelligence Systems, Inc. are affiliated organizations under common ownership. PRSC governs the PRSC Readiness Standard&trade; independently. DIS operates the Readiness Terminal&trade; and Evidence Portal&trade; under an arm&rsquo;s-length license agreement. The Council retains full authority to terminate that license for breach of independence requirements. The three Independence Safeguards that enforce this separation are published in the PRSC Governance &amp; Market-Trust Charter.
+            The Partnership Readiness Standards Council and Decision Intelligence Systems, Inc. are
+            affiliated organizations under common ownership. PRSC governs the PRSC Readiness
+            Standard&trade; independently. DIS operates the Readiness Terminal&trade; and Evidence
+            Portal&trade; under an arm&rsquo;s-length license agreement. The Council retains full
+            authority to terminate that license for breach of independence requirements. The three
+            Independence Safeguards that enforce this separation are published in the PRSC
+            Governance &amp; Market-Trust Charter.
           </p>
           <img
             src={governanceDiagram.url}
@@ -479,7 +550,6 @@ function GovernancePage() {
             >
               Written Standards Document &rarr;
             </Link>
-
           </div>
         </div>
       </section>

@@ -9,7 +9,8 @@ export function PortalEmailChangeEmail({ confirmationUrl }: { confirmationUrl: s
         Confirm your new email.
       </Text>
       <Text style={{ color: "#3A4050", fontSize: 15, lineHeight: 1.6, margin: "0 0 24px" }}>
-        A request was made to update the email address for your PRSC private center account. Click below to confirm this change.
+        A request was made to update the email address for your PRSC private center account. Click
+        below to confirm this change.
       </Text>
       <Cta href={confirmationUrl}>Confirm email</Cta>
       <Text style={{ color: "#8A8F99", fontSize: 12, lineHeight: 1.5, margin: "24px 0 0" }}>

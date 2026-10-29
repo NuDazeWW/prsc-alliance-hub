@@ -9,7 +9,8 @@ export function PortalSignupEmail({ confirmationUrl }: { confirmationUrl: string
         Confirm your email address.
       </Text>
       <Text style={{ color: "#3A4050", fontSize: 15, lineHeight: 1.6, margin: "0 0 24px" }}>
-        Thank you for registering for the PRSC private center. Please confirm your email to complete the setup of your account.
+        Thank you for registering for the PRSC private center. Please confirm your email to complete
+        the setup of your account.
       </Text>
       <Cta href={confirmationUrl}>Confirm email</Cta>
       <Text style={{ color: "#8A8F99", fontSize: 12, lineHeight: 1.5, margin: "24px 0 0" }}>
