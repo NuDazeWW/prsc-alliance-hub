@@ -2,12 +2,13 @@ import { meetingTypeLabel } from "@/lib/meeting-block";
 import { userFacingError } from "@/lib/user-facing-error";
 import { fetchPrivateFile } from "@/lib/private-file-client";
 import { DEFAULT_MEETING_TZ, timezoneLabel } from "@/lib/meeting-block";
-import { useEffect, useState } from "react";
+import { Fragment, useEffect, useState } from "react";
 import { CalendarDays, Check, Clock, Download, MapPin, Video } from "lucide-react";
 import { toast } from "sonner";
 import { getMyMeetings, submitMyAvailability } from "@/lib/meetings.functions";
 import { Button } from "@/components/ui/button";
 import { buildSlotHoldIcs } from "@/lib/ics";
+import { FORUM_CALENDAR_PURPOSE, FORUM_CALENDAR_WELCOME, FORUM_INTRO_HEADING, FORUM_INTRO_PARAGRAPHS, FORUM_NON_VOTING_NOTE, forumSlotsSentence, isForumPoll } from "@/lib/forum-meeting-intro";
 
 function downloadHold(p: any, s: any) {
   const ics = buildSlotHoldIcs({ slotId: s.id, title: p.title, startsAt: s.starts_at, durationMinutes: p.duration_minutes });
@@ -31,8 +32,8 @@ function demoPolls() {
     {
       id: "demo-poll",
       status: "open",
-      meeting_type: "board",
-      title: "Inaugural Board Meeting",
+      meeting_type: "forum",
+      title: "United Strategic Coordination Forum",
       description: "Sample meeting shown in preview only.",
       format: "virtual",
       location: null,
@@ -133,7 +134,10 @@ export function MemberMeetings({ hideWhenEmpty = false, hideIntro = false, asMem
 
   if (loading) return hideWhenEmpty ? null : <p className="text-sm text-ivory/50">Loading meetings…</p>;
 
-  const open = polls.filter((p) => p.status === "open");
+  // Forum polls come first so their explanation sits directly above the availability choices.
+  const openAll = polls.filter((p) => p.status === "open");
+  const forumOpen = openAll.filter(isForumPoll);
+  const open = [...forumOpen, ...openAll.filter((p) => !isForumPoll(p))];
   const confirmed = polls.filter((p) => p.status === "confirmed");
   if (hideWhenEmpty && open.length === 0 && confirmed.length === 0) return null;
 
@@ -156,8 +160,22 @@ export function MemberMeetings({ hideWhenEmpty = false, hideIntro = false, asMem
       {open.map((p) => {
         const answers = drafts[p.id] ?? {};
         const answeredCount = Object.keys(answers).length;
+        const isForum = isForumPoll(p);
+        const firstForum = isForum && forumOpen[0]?.id === p.id;
+        const lastForum = isForum && forumOpen[forumOpen.length - 1]?.id === p.id;
         return (
-          <div key={p.id} className="rounded-lg border border-gold/25 bg-navy-deep/40 p-5">
+          <Fragment key={p.id}>
+          {firstForum && (
+            <section aria-labelledby="forum-calendar-welcome" className="rounded-lg border border-gold/30 bg-gold/[.06] p-5 sm:p-6">
+              <h3 id="forum-calendar-welcome" className="font-display text-2xl leading-tight text-ivory">{FORUM_CALENDAR_WELCOME}</h3>
+              <p className="mt-2 text-[15px] leading-7 text-ivory/80">{FORUM_CALENDAR_PURPOSE}</p>
+              <h4 className="mt-5 font-display text-xl leading-tight text-gold">{FORUM_INTRO_HEADING}</h4>
+              {FORUM_INTRO_PARAGRAPHS.map((text) => <p key={text} className="mt-3 text-[15px] leading-7 text-ivory/80">{text}</p>)}
+              <p className="mt-4 border-l-2 border-gold pl-4 text-[15px] font-medium leading-7 text-ivory">{forumSlotsSentence(forumOpen[0].slots.length)}</p>
+            </section>
+          )}
+          <div className="space-y-3">
+          <div className="rounded-lg border border-gold/25 bg-navy-deep/40 p-5">
             <p className="text-[11px] uppercase tracking-[0.16em] text-gold">{meetingTypeLabel(p.meeting_type)}</p>
             <h4 className="mt-1 font-display text-lg text-ivory">{p.title}</h4>
             {p.description && <p className="mt-1 text-sm text-ivory/60">{p.description}</p>}
@@ -235,6 +253,9 @@ export function MemberMeetings({ hideWhenEmpty = false, hideIntro = false, asMem
               {(() => { const verb = p.my_responses.length > 0 ? "Update my availability" : "Send my availability"; return saving === p.id ? "Sending…" : answeredCount === p.slots.length ? verb : `${verb} (${answeredCount}/${p.slots.length} marked)`; })()}
             </Button>
           </div>
+          {lastForum && <p className="text-[13px] leading-6 text-ivory/70">{FORUM_NON_VOTING_NOTE}</p>}
+          </div>
+          </Fragment>
         );
       })}
 

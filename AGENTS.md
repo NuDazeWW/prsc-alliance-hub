@@ -13,6 +13,8 @@
 - Use the shared member-role presentation helper for member designations across portal, admin, and emails; stored role values and permissions remain independent of display wording.
 - Derive entity acceptance completion from applicable active Stage 2–3 documents in journey.ts, then apply governance.ts appointment review gates through memberDesignation; hydrate reads with withAppointmentProgress. Why: independent PRSC/DIS designations stay consistent without writes or automatic activation.
 - Orientation Hub locks body scrolling with cleanup and resets dialog scroll before painting. Why: background stays stable.
+- Orientation resume state (`orientation-progress.ts`) stores only the chapter reached and a closed-it-myself marker, never completion; completion is only the server-set `orientation_acknowledged_at`. The Welcome Center shows one "Your next step" from `next-step.ts` and closing a popup never completes anything. Why: a dismissed popup stays resumable without faking progress.
+- Forum calendar explanation copy lives only in `src/lib/forum-meeting-intro.ts` (general scheduling text, no restricted briefing details). Why: poll screens and emails stay minimal-disclosure.
 
 - AdminCenter's page prop serves thin /admin and /admin/send routes. Why: shared state and data.
 - Admin pages render inside PortalShell's `sidebar` slot (AdminSidebar: nav + admin account menu); admin role changes go through `admin-accounts.functions.ts`, which blocks removing yourself or the last admin. Why: one shared frame for both admin pages and safe admin management.

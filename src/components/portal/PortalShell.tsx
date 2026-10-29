@@ -1,5 +1,6 @@
 import { createContext, useContext, useState } from "react";
 import { useNavigate } from "@tanstack/react-router";
+import { useQueryClient } from "@tanstack/react-query";
 import { Bell, ChevronsLeft, ChevronsRight, LogOut, Menu, User } from "lucide-react";
 import { Sheet, SheetContent, SheetTitle } from "@/components/ui/sheet";
 import { supabase } from "@/integrations/supabase/client";
@@ -38,10 +39,12 @@ export function PortalShell({
 }) {
   const [menuOpen, setMenuOpen] = useState(false);
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const [alertsOpen, setAlertsOpen] = useState(false);
   const [navCollapsed, setNavCollapsed] = useStoredFlag("admin-sidebar-collapsed", false);
   async function signOut() {
     await supabase.auth.signOut();
+    queryClient.clear(); // the next account must never see this member's cached session
     await navigate({ to: "/auth", search: { redirect: "/portal", mode: undefined, email: undefined, passwordCreated: undefined }, replace: true });
   }
 

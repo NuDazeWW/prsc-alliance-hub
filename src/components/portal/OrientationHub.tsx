@@ -5,18 +5,29 @@ import scoreGauge from "@/assets/prsc-score-gauge.png.asset.json";
 import disLogo from "@/assets/dis-logo-hub.png";
 import { DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import {
-  ALL_TOPICS, AUDIENCES, AVAILABILITY, COMPETITIVE_CONCLUSION, COMPETITIVE_TEXT, DIMENSIONS, FLYWHEEL, GROUPS, GUIDED, HUB_INTRO, HUB_SCOPE, HUB_TITLE,
+  ALL_TOPICS, AUDIENCES, AVAILABILITY, COMPETITIVE_CONCLUSION, COMPETITIVE_TEXT, DIMENSIONS, FLYWHEEL, GROUPS, GUIDED, HUB_INTRO, HUB_TITLE,
   INTELLIGENCE, IP_STACK, QUICK_REFERENCE, RESOURCE_LIBRARY, SITE_LINKS, RELATIONSHIP, ROLE_CARDS, type Block, type Tone, type Topic,
 } from "@/data/orientation-hub";
+import { readOrientationStep, saveOrientationStep } from "@/lib/orientation-progress";
 
 type View = { kind: "hub" } | { kind: "guided"; step: number } | { kind: "explore" } | { kind: "topic"; id: string } | { kind: "materials" };
 
 const toneText: Record<Tone, string> = { prsc: "text-gold", dis: "text-dis-cyan", bridge: "text-gold-light" };
 const toneBorder: Record<Tone, string> = { prsc: "border-gold/40", dis: "border-dis-cyan/40", bridge: "border-dis-silver/30" };
 
-export function OrientationHub({ onClose, onOpenDocuments, onOpenRoleDetails, onAcknowledge, firstVisit = false }: { onClose: () => void; onOpenDocuments: () => void; onOpenRoleDetails: () => void; onAcknowledge?: () => Promise<void> | void; firstVisit?: boolean }) {
-  const [view, setView] = useState<View>({ kind: "hub" });
+export function OrientationHub({ onClose, onOpenDocuments, onOpenRoleDetails, onAcknowledge, memberId, initialView = "hub" }: { onClose: () => void; onOpenDocuments: () => void; onOpenRoleDetails: () => void; onAcknowledge?: () => Promise<void> | void; memberId?: string; initialView?: "hub" | "explore" }) {
+  // Progress is only remembered while the orientation is still open for this member (onAcknowledge present).
+  const trackProgress = Boolean(onAcknowledge) && Boolean(memberId);
+  const [savedStep, setSavedStep] = useState<number | null>(() => (trackProgress ? readOrientationStep(memberId) : null));
+  const [view, setView] = useState<View>(() => {
+    if (initialView === "explore") return { kind: "explore" };
+    return savedStep !== null ? { kind: "guided", step: savedStep } : { kind: "hub" };
+  });
   const top = useRef<HTMLDivElement>(null);
+  function goToStep(step: number) {
+    if (trackProgress) { saveOrientationStep(memberId, step); setSavedStep(step); }
+    setView({ kind: "guided", step });
+  }
   useLayoutEffect(() => {
     const body = document.body;
     const y = window.scrollY;
@@ -51,8 +62,6 @@ export function OrientationHub({ onClose, onOpenDocuments, onOpenRoleDetails, on
             <DialogTitle className="mt-4 font-display text-[clamp(2rem,2.6vw,2.9rem)] font-normal leading-[1.1]">{HUB_TITLE}</DialogTitle>
           </DialogHeader>
           <p className="mt-5 max-w-3xl text-[15px] leading-7 text-ivory/80">{HUB_INTRO}</p>
-          <p className="mt-3 text-xs text-ivory/50">{HUB_SCOPE}</p>
-          {firstVisit && <p className="mt-4 max-w-3xl border-l-2 border-gold pl-4 text-[14px] leading-6 text-ivory/85">Welcome. Before your executive profile, please begin with the 5-minute orientation. It gives everyone the same current picture of PRSC and DIS.</p>}
           <div className="mt-8 grid gap-4 md:grid-cols-3">
             {ROLE_CARDS.map((c) => (
               <div key={c.title} className={`${c.tone === "dis" ? "hub-card-dis" : "hub-card"} rounded-lg p-5`}>
@@ -62,16 +71,21 @@ export function OrientationHub({ onClose, onOpenDocuments, onOpenRoleDetails, on
               </div>
             ))}
           </div>
-          <div className="hub-cta-row mt-8 flex flex-col gap-3 sm:flex-row sm:flex-nowrap sm:justify-center sm:gap-2.5">
-            <button type="button" onClick={() => setView({ kind: "guided", step: 0 })} className={`${btn} cta-glow whitespace-nowrap sm:px-5`}><span>Take the 5-Minute Orientation</span></button>
-            <button type="button" onClick={() => setView({ kind: "explore" })} className={`${btn} cta-glow-outline whitespace-nowrap sm:px-5`}><span>Explore the System</span></button>
-            <button type="button" onClick={() => setView({ kind: "materials" })} className={`${btn} cta-glow-outline whitespace-nowrap sm:px-5`}><span>View Your Personal Documents</span></button>
+          <div className="hub-cta-row mt-8 flex flex-col items-center gap-3">
+            <button type="button" onClick={() => goToStep(savedStep ?? 0)} className={`${btn} cta-glow whitespace-nowrap sm:px-8`}>
+              <span>{savedStep !== null ? "Continue Orientation" : "Take the 5-Minute Orientation"}</span>
+            </button>
+            {savedStep !== null && (
+              <button type="button" onClick={() => goToStep(0)} className="text-[11px] uppercase tracking-[0.16em] text-ivory/55 hover:text-gold">
+                Start from the first chapter
+              </button>
+            )}
           </div>
         </>
       )}
 
       {view.kind === "guided" && (
-        <Guided onAcknowledge={onAcknowledge} step={view.step} setStep={(s) => setView({ kind: "guided", step: s })} onExplore={() => setView({ kind: "explore" })} onMaterials={onOpenDocuments} onRole={onOpenRoleDetails} btn={btn} onPick={(id) => setView({ kind: "topic", id })} />
+        <Guided onAcknowledge={onAcknowledge} step={view.step} setStep={goToStep} onExplore={() => setView({ kind: "explore" })} onMaterials={onOpenDocuments} onRole={onOpenRoleDetails} btn={btn} onPick={(id) => setView({ kind: "topic", id })} />
       )}
 
       {view.kind === "explore" && (
@@ -93,6 +107,9 @@ export function OrientationHub({ onClose, onOpenDocuments, onOpenRoleDetails, on
                 </ul>
               </div>
             ))}
+          </div>
+          <div className="mt-6">
+            <button type="button" onClick={() => setView({ kind: "materials" })} className={`${btn} cta-glow-outline whitespace-nowrap sm:px-5`}><span>Your Personal Documents &amp; Resource Library</span></button>
           </div>
         </>
       )}
@@ -126,6 +143,20 @@ function Guided({ step, setStep, onExplore, onMaterials, onRole, btn, onPick, on
   const ch = GUIDED[step];
   const last = step === GUIDED.length - 1;
   const [saving, setSaving] = useState(false);
+  const [ackError, setAckError] = useState<string | null>(null);
+  async function acknowledge() {
+    if (!onAcknowledge) return;
+    setSaving(true);
+    setAckError(null);
+    try {
+      await onAcknowledge();
+    } catch {
+      // The server did not record it, so nothing is marked complete; the member can simply try again.
+      setAckError("We couldn't save your review just now. Nothing was lost. Please try again.");
+    } finally {
+      setSaving(false);
+    }
+  }
   return (
     <div className="grid gap-8 lg:grid-cols-[200px_1fr]">
       <aside>
@@ -156,8 +187,9 @@ function Guided({ step, setStep, onExplore, onMaterials, onRole, btn, onPick, on
           {!last && <button type="button" onClick={() => setStep(step + 1)} className={`${btn} cta-glow whitespace-nowrap sm:px-5`}><span>Next chapter</span></button>}
           {last && onAcknowledge && <p className="basis-full text-xs leading-5 text-ivory/55 sm:order-last">This simply notes that you've seen the overview. It is not a signature and is separate from your formal orientation documents.</p>}
           {last && onAcknowledge && (
-            <button type="button" disabled={saving} onClick={async () => { setSaving(true); try { await onAcknowledge(); } finally { setSaving(false); } }} className={`${btn} cta-glow whitespace-nowrap sm:px-5`}><span>{saving ? "Saving…" : "I've reviewed this overview"}</span></button>
+            <button type="button" disabled={saving} onClick={() => void acknowledge()} className={`${btn} cta-glow whitespace-nowrap sm:px-5`}><span>{saving ? "Saving…" : "I've reviewed this overview"}</span></button>
           )}
+          {last && onAcknowledge && ackError && <p role="alert" className="basis-full text-sm leading-6 text-rose-300">{ackError}</p>}
           {last && !onAcknowledge && (
             <>
               <button type="button" onClick={onExplore} className={`${btn} cta-glow whitespace-nowrap sm:px-5`}><span>Explore the System</span></button>

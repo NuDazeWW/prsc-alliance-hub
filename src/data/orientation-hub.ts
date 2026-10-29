@@ -39,11 +39,9 @@ export const COMPETITIVE_CONTEXT = [
   { category: "Traditional sponsorship decks", does: "Tell a property’s story.", adds: "Comparable, evidence-led commercial-readiness context." },
 ];
 
-export const HUB_TITLE = "Welcome to the PRSC & DIS Orientation Hub";
+export const HUB_TITLE = "Welcome to the PRSC & DIS Orientation Hub!";
 export const HUB_INTRO =
-  "This hub is a shared reference point for individuals guiding PRSC and DIS. The hub explains the problem being solved, how the two organizations work together, what the PRSC Readiness Score™ and Readiness Terminal are designed to do, and why your role matters.";
-export const HUB_SCOPE =
-  "An internal orientation hub for the people responsible for guiding, governing, advising, and protecting the work of PRSC and DIS.";
+  "Before your Executive Profile, please begin with the 5-minute orientation. It gives you a current picture of the Partnership Readiness Standards Council (PRSC) and Decision Intelligence Systems (DIS), the problem being solved, how the two organizations work together, what the PRSC Readiness Score™ and DIS Readiness Terminal are designed to do, and why your role matters.";
 
 export const ROLE_CARDS: { tone: Tone; title: string; text: string; visual: "shield" | "ring" | "signal" }[] = [
   { tone: "prsc", title: "PRSC", text: "Standard and Governance", visual: "shield" },

@@ -4,6 +4,8 @@ import { useEffect, useRef, useState } from "react";
 import { Pencil, LogOut } from "lucide-react";
 import { usePrivateMedia } from "@/hooks/use-private-media";
 import { afterOrientation } from "@/lib/first-login";
+import { clearOrientationProgress, markOrientationDismissed, orientationDismissed, readOrientationStep, shouldAutoOpenOrientation } from "@/lib/orientation-progress";
+import { nextIncompleteStep } from "@/lib/next-step";
 import { shouldLoadMemberDocuments } from "@/lib/member-documents-access";
 import { useHeadshotUpload } from "@/hooks/use-headshot-upload";
 import { OrientationHub } from "@/components/portal/OrientationHub";
@@ -18,6 +20,7 @@ import {
   CalendarDays,
   Check,
   Cog,
+  Compass,
   Download,
   FileSignature,
   FileText,
@@ -133,19 +136,30 @@ function PortalHome() {
   const [demoReviewed, setDemoReviewed] = useState(false);
   const isDemo = !isLoading && !data?.member && isPreviewHost() && !asMember;
   const needsOrientation = isDemo ? !demoReviewed : Boolean(data?.member && !data?.viewingAs && !data?.isAdmin && !(data.member as any).orientation_acknowledged_at);
-  const autoOpened = useRef(false);
+  // Progress and "closed it myself" markers are kept per member, so a different account on the same browser never inherits them.
+  const memberKey: string | undefined = isDemo ? "demo" : (data?.member as { id?: string } | null | undefined)?.id;
+  const [hubView, setHubView] = useState<"hub" | "explore">("hub");
+  const autoOpenedFor = useRef<string | null>(null);
   useEffect(() => {
-    if (needsOrientation && !autoOpened.current) { autoOpened.current = true; setPanel("hub"); }
-  }, [needsOrientation]);
+    if (!shouldAutoOpenOrientation({ needsOrientation, memberId: memberKey, alreadyOpenedFor: autoOpenedFor.current, dismissed: orientationDismissed(memberKey) })) return;
+    autoOpenedFor.current = memberKey ?? null;
+    setHubView("hub");
+    setPanel("hub");
+  }, [needsOrientation, memberKey]);
   async function acknowledgeOrientationReview() {
+    // A failed save throws to the hub, which says so and lets the member try again; nothing is marked complete.
     if (isDemo) setDemoReviewed(true);
     else {
       await acknowledgeOrientation();
       await queryClient.invalidateQueries({ queryKey: ["portal-session"] });
     }
+    clearOrientationProgress(memberKey);
     setPanel(null);
-    const currentMeetings = isDemo ? meetings.data : await getMyMeetings();
-    const hasActivePoll = afterOrientation(currentMeetings?.polls ?? []) === "meetings";
+    let polls: { status: string }[] = meetings.data?.polls ?? [];
+    if (!isDemo) {
+      try { polls = (await getMyMeetings()).polls; } catch { /* the orientation is already recorded; fall through to the profile */ }
+    }
+    const hasActivePoll = afterOrientation(polls) === "meetings";
     if (hasActivePoll) {
       toast.success("Thank you. Next: mark your meeting availability.");
       setPanel("meetings");
@@ -206,8 +220,27 @@ function PortalHome() {
     { label: "Overview", href: "#overview", icon: Home, active: true, onSelect: undefined as (() => void) | undefined },
     { label: "Your Personal Documents", href: "#documents", icon: FileSignature, active: false, onSelect: () => setPanel("documents") },
     { label: "Meetings", href: "#meetings", icon: CalendarDays, active: false, onSelect: () => document.getElementById("meetings")?.scrollIntoView({ behavior: "smooth" }) },
-    { label: "The Orientation Hub", href: "#hub", icon: ScrollText, active: false, onSelect: () => setPanel("hub") },
+    { label: "The Orientation Hub", href: "#hub", icon: ScrollText, active: false, onSelect: () => { setHubView("hub"); setPanel("hub"); } },
+    { label: "Explore the System", href: "#explore", icon: Compass, active: false, onSelect: () => { setHubView("explore"); setPanel("hub"); } },
   ];
+
+  const pendingMeetings = (meetings.data?.polls ?? []).filter((p: any) => p.status === "open" && p.my_responses.length === 0).length;
+  const documentsRemaining = documentsReleased && !allDone ? signLeft + readLeft : 0;
+  const nextStep = nextIncompleteStep({
+    needsOrientation,
+    orientationStarted: needsOrientation && readOrientationStep(memberKey) !== null,
+    pendingMeetings,
+    documentsRemaining,
+    profileComplete,
+  });
+  function runNextStep() {
+    switch (nextStep?.key) {
+      case "orientation": setHubView("hub"); setPanel("hub"); break;
+      case "availability": document.getElementById("meetings")?.scrollIntoView({ behavior: "smooth" }); break;
+      case "documents": setPanel("documents"); break;
+      case "profile": navigate({ to: "/portal/profile" }); break;
+    }
+  }
 
 
 
@@ -322,6 +355,7 @@ function PortalHome() {
                 type="button"
                 onClick={async () => {
                   await supabase.auth.signOut();
+                  queryClient.clear(); // the next account must never see this member's cached session
                   await navigate({ to: "/auth", search: { redirect: "/portal", mode: undefined, email: undefined, passwordCreated: undefined } as never, replace: true });
                 }}
                 className="mt-1 flex min-h-10 items-center gap-3 text-[14px] text-ivory/60 hover:text-gold"
@@ -335,8 +369,19 @@ function PortalHome() {
 
         {/* Main */}
         <main className="order-1 flex min-w-0 flex-col justify-start pb-2 lg:order-none">
+          {nextStep && (
+            <section aria-labelledby="next-step-title" className="mx-7 mt-6 flex flex-col gap-4 border border-gold/50 bg-gold/[.09] px-5 py-5 sm:mx-10 sm:flex-row sm:items-center sm:justify-between lg:mx-[3.5%]">
+              <div className="min-w-0">
+                <p className="text-[11px] uppercase tracking-[0.2em] text-gold">Your next step</p>
+                <h2 id="next-step-title" className="mt-1 font-display text-2xl leading-tight">{nextStep.title}</h2>
+                <p className="mt-1 text-sm text-ivory/70">{nextStep.detail}</p>
+              </div>
+              <Button type="button" onClick={runNextStep} className="cta-glow h-auto min-h-12 shrink-0 whitespace-normal px-6 py-3 text-base font-semibold">
+                <span className="relative z-10 flex items-center gap-3">{nextStep.action}<ArrowRight className="h-4 w-4 shrink-0" /></span>
+              </Button>
+            </section>
+          )}
           {(() => {
-            const pendingMeetings = (meetings.data?.polls ?? []).filter((p: any) => p.status === "open" && p.my_responses.length === 0).length;
             const items: { label: string; onClick: () => void }[] = [];
             if (documentsReleased && !allDone) items.push({ label: `${signLeft + readLeft} document${signLeft + readLeft === 1 ? "" : "s"} need${signLeft + readLeft === 1 ? "s" : ""} your attention`, onClick: () => setPanel("documents") });
             if (pendingMeetings) items.push({ label: `${pendingMeetings} meeting${pendingMeetings === 1 ? "" : "s"} awaiting your availability`, onClick: () => document.getElementById("meetings")?.scrollIntoView({ behavior: "smooth" }) });
@@ -454,7 +499,16 @@ function PortalHome() {
         </section>
       </div>
 
-      <Dialog open={panel !== null} onOpenChange={(open) => !open && setPanel(null)}>
+      <Dialog
+        open={panel !== null}
+        onOpenChange={(open) => {
+          if (open) return;
+          // Closing is always allowed and never completes anything. If the orientation is still open for this
+          // member, remember that they closed it on purpose so it isn't forced back; Your Next Step offers Continue.
+          if (panel === "hub" && needsOrientation) markOrientationDismissed(memberKey);
+          setPanel(null);
+        }}
+      >
         <DialogContent className="max-h-[86vh] w-[min(94vw,980px)] max-w-none overflow-y-auto overscroll-contain scroll-auto border-gold/30 bg-[linear-gradient(145deg,var(--color-midnight),var(--color-navy))] p-5 text-ivory shadow-2xl sm:p-8 lg:p-[clamp(2rem,2.7vw,3.25rem)]">
           {panel === "meetings" && (
             <div>
@@ -526,7 +580,7 @@ function PortalHome() {
             </div>
           )}
 
-          {panel === "hub" && <OrientationHub firstVisit={needsOrientation} onAcknowledge={needsOrientation ? acknowledgeOrientationReview : undefined} onClose={() => setPanel(null)} onOpenDocuments={() => setPanel("documents")} onOpenRoleDetails={() => setPanel("role")} />}
+          {panel === "hub" && <OrientationHub key={hubView} memberId={memberKey} initialView={hubView} onAcknowledge={needsOrientation ? acknowledgeOrientationReview : undefined} onClose={() => setPanel(null)} onOpenDocuments={() => setPanel("documents")} onOpenRoleDetails={() => setPanel("role")} />}
 
           {panel === "documents" && (
             <>
