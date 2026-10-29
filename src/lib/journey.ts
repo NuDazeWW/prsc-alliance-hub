@@ -2,6 +2,8 @@
 // Stage 1 (Forum) is shared; stages 2–4 run per entity track; stage 5 / unstaged
 // documents are ongoing records that never affect onboarding progress.
 
+import { POST_CLEARANCE_FORUM_ROLES } from "./governance";
+
 export type JourneyTrack = "shared" | "prsc" | "dis";
 export type JourneyDoc = {
   id: string;
@@ -9,6 +11,8 @@ export type JourneyDoc = {
   journey_track: JourneyTrack | null;
   sort_order: number;
   created_at: string;
+  /** Optional Forum role; post-clearance materials (see POST_CLEARANCE_FORUM_ROLES) do not hold back Stage 1 review. */
+  forum_role?: string | null;
 };
 
 export const STAGES = [
@@ -109,7 +113,8 @@ export function journeyStatus(
   // documents and all are done — an unreleased stage must never count as
   // complete (empty every() would pass). Stage 4 is gated by activation records.
   const stageComplete = (n: number) => {
-    const stageDocs = onboarding.filter((d) => d.journey_stage === n);
+    // Materials released only after clearance (Agenda, restricted briefing) are not prerequisites to clearance.
+    const stageDocs = onboarding.filter((d) => d.journey_stage === n && !(n === 1 && POST_CLEARANCE_FORUM_ROLES.includes(d.forum_role ?? "")));
     return stageDocs.every((d) => done.has(d.id)) && (n >= 4 || stageDocs.length > 0);
   };
   const allActivated = tracks.every((t) => activated[t]);

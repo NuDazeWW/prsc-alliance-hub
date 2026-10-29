@@ -36,15 +36,18 @@ export async function notifyAdminOfCompletion(assignmentId: string) {
   if (!a || a.status !== "completed" || a.admin_notified_at) return false;
   const [{ data: m }, { data: d }] = await Promise.all([
     sb.from("portal_members").select("first_name, last_name").eq("id", a.member_id).maybeSingle(),
-    sb.from("portal_documents").select("title").eq("id", a.document_id).maybeSingle(),
+    sb.from("portal_documents").select("title, forum_role").eq("id", a.document_id).maybeSingle(),
   ]);
+  // A signed Conflict / Recusal Confirmation is what puts the member into administrative review, so say so in the
+  // existing admin notice instead of adding another email. The review and clearance decisions stay manual.
+  const reviewNote = d?.forum_role === "conflict" ? "\n\nThis member is now ready for administrative conflict review. Open the member's governance controls to record your decision. Nothing is cleared automatically." : "";
   const { sendPortalEmail } = await import("./portal-notify.server");
   const { SIGNING_NOTICE_ADMIN, signingNoticeKey } = await import("./signed-copy-policy");
   const ok = await sendPortalEmail(SIGNING_NOTICE_ADMIN, {
     subject: `Signed: ${d?.title ?? "Document"} · ${[m?.first_name, m?.last_name].filter(Boolean).join(" ")}`.trim(),
     eyebrow: "Signing complete",
     heading: "A BoldSign document was executed.",
-    body: `Document: ${d?.title ?? ""} (${a.version_label})\nMember: ${[m?.first_name, m?.last_name].filter(Boolean).join(" ")}\n\nThe executed PDF and audit trail are retained privately. Sign in as the administrator to review them in the member's documents.`,
+    body: `Document: ${d?.title ?? ""} (${a.version_label})\nMember: ${[m?.first_name, m?.last_name].filter(Boolean).join(" ")}\n\nThe executed PDF and audit trail are retained privately. Sign in as the administrator to review them in the member's documents.${reviewNote}`,
     ctaLabel: "Open Administrator Center", ctaUrl: "https://access.prscstandards.org/admin",
   }, "boldsign-completed-admin", signingNoticeKey(a.id));
   if (ok) await sb.from("boldsign_assignments").update({ admin_notified_at: new Date().toISOString() }).eq("id", a.id).is("admin_notified_at", null);

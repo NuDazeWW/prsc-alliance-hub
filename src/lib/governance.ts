@@ -160,6 +160,68 @@ export function stage1ClearanceProblems(c: ClearanceCheck): string[] {
   return p;
 }
 
+/**
+ * Forum documents that are released or controlled only AFTER clearance (or never shown to members). They never count
+ * toward the clearance prerequisites, and must not hold the Stage 1 "pending review" state back either.
+ */
+export const POST_CLEARANCE_FORUM_ROLES = ["agenda", "restricted_brief", "secretariat_controls", "facilitator_run_of_show"];
+
+export type ReviewItemStatus = "done" | "pending" | "unavailable";
+export type ReviewItem = { key: string; label: string; status: ReviewItemStatus; detail: string };
+export type DocCount = { assigned: number; done: number };
+
+export const APPROVED_DOCUMENT_BLOCK = "BLOCKED — APPROVED DOCUMENT NOT AVAILABLE";
+
+export type ForumReviewInput = {
+  ndaVerified: boolean;
+  /** Approved (signing_approved), current Addendum documents assigned to the member. */
+  addendum: { approved: number; complete: boolean };
+  protocol: DocCount;
+  preRead: DocCount;
+  conflict: { assigned: number; signed: boolean };
+  conflictReviewDecision: string | null;
+  clearanceStatus: string | null | undefined;
+  restrictions: string | null | undefined;
+};
+
+function docItem(key: string, label: string, c: DocCount, verb: string): ReviewItem {
+  if (c.assigned === 0) return { key, label, status: "unavailable", detail: APPROVED_DOCUMENT_BLOCK };
+  return c.done >= c.assigned
+    ? { key, label, status: "done", detail: `${verb} (${c.done} of ${c.assigned})` }
+    : { key, label, status: "pending", detail: `${c.done} of ${c.assigned} ${verb.toLowerCase()}` };
+}
+
+/**
+ * One consolidated read-only view of everything an administrator reviews before Forum clearance. It only reports
+ * recorded facts: it never records a decision, and `readyForDecision` never implies clearance.
+ */
+export function forumReviewChecklist(c: ForumReviewInput): { items: ReviewItem[]; readyForDecision: boolean } {
+  const items: ReviewItem[] = [
+    { key: "nda", label: "NDA verification", status: c.ndaVerified ? "done" : "pending", detail: c.ndaVerified ? "Verified" : "Not verified" },
+    c.addendum.approved === 0
+      ? { key: "addendum", label: "Confidentiality Addendum execution", status: "unavailable", detail: APPROVED_DOCUMENT_BLOCK }
+      : { key: "addendum", label: "Confidentiality Addendum execution", status: c.addendum.complete ? "done" : "pending", detail: c.addendum.complete ? "Executed through BoldSign" : "Not yet executed" },
+    docItem("protocol", "Protocol acknowledgment", c.protocol, "Acknowledged"),
+    docItem("pre_read", "Pre-Read acknowledgment", c.preRead, "Acknowledged"),
+    c.conflict.assigned === 0
+      ? { key: "conflict_signed", label: "Signed Conflict / Recusal Confirmation", status: "unavailable", detail: APPROVED_DOCUMENT_BLOCK }
+      : { key: "conflict_signed", label: "Signed Conflict / Recusal Confirmation", status: c.conflict.signed ? "done" : "pending", detail: c.conflict.signed ? "Signed" : "Not yet signed" },
+    {
+      key: "conflict_review", label: "Administrative conflict review",
+      status: c.conflictReviewDecision === "approved" ? "done" : "pending",
+      detail: c.conflictReviewDecision === "approved" ? "Approved" : c.conflictReviewDecision ? `Decision on record: ${c.conflictReviewDecision}` : "Awaiting administrator decision",
+    },
+    {
+      key: "restrictions", label: "Restrictions and clearance",
+      status: forumCleared(c.clearanceStatus) ? "done" : "pending",
+      detail: forumCleared(c.clearanceStatus) ? (c.restrictions?.trim() ? `Restrictions: ${c.restrictions.trim()}` : "Cleared; no restrictions recorded") : "Recorded with the clearance decision",
+    },
+  ];
+  // Ready for the administrator's decision once every member-side prerequisite is done; the decisions themselves stay manual.
+  const memberSide = items.filter((i) => ["nda", "addendum", "protocol", "pre_read", "conflict_signed"].includes(i.key));
+  return { items, readyForDecision: memberSide.every((i) => i.status === "done") && !forumCleared(c.clearanceStatus) };
+}
+
 /** Superseded documents never sit in active onboarding or acknowledgement queues. */
 export function isActive(doc: { superseded_at?: string | null }) {
   return !doc.superseded_at;

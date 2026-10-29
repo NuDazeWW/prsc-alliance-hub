@@ -1,7 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requirePortalAccess } from "@/lib/portal-access";
-import { roleCombinationTier, stage1ClearanceProblems } from "@/lib/governance";
+import { forumReviewChecklist, POST_CLEARANCE_FORUM_ROLES, roleCombinationTier, stage1ClearanceProblems } from "@/lib/governance";
 
 async function assertAdmin(context: { supabase: any; userId: string }) {
   const { data } = await context.supabase.from("user_roles").select("role").eq("user_id", context.userId).eq("role", "admin").maybeSingle();
@@ -142,8 +142,8 @@ export const updateDocumentGovernance = createServerFn({ method: "POST" })
     return { ok: true };
   });
 
-/** Prerequisites for ordinary Forum clearance, computed from records only. */
-export async function clearanceProblemsFor(memberId: string) {
+/** Records an administrator reviews before Forum clearance, read once and shared by the checks below. */
+async function clearanceRecords(memberId: string) {
   const { supabaseAdmin: sb } = await import("@/integrations/supabase/client.server");
   const { memberVisibilityFlags, appliesTo } = await import("@/lib/portal.functions");
   const [{ data: m }, { data: docs }, { data: acks }, { data: assignments }, { data: reviews }] = await Promise.all([
@@ -156,14 +156,40 @@ export async function clearanceProblemsFor(memberId: string) {
   if (!m) throw new Error("Member not found");
   const flags = await memberVisibilityFlags(memberId);
   const done = new Set((acks ?? []).map((a) => a.document_id));
-  const applicable = (docs ?? []).filter((d: any) => appliesTo(d, m as any) && !["agenda", "restricted_brief", "secretariat_controls", "facilitator_run_of_show"].includes(d.forum_role ?? ""));
+  const applicable = (docs ?? []).filter((d: any) => appliesTo(d, m as any) && !POST_CLEARANCE_FORUM_ROLES.includes(d.forum_role ?? ""));
   const conflictDocs = applicable.filter((d: any) => d.forum_role === "conflict");
+  const conflictSigned = conflictDocs.length > 0 && conflictDocs.every((d) => (assignments ?? []).some((a) => a.document_id === d.id && a.status === "completed"));
+  return { m, flags, done, applicable, conflictDocs, conflictSigned, conflictReviewDecision: reviews?.[0]?.decision ?? null };
+}
+
+/** Prerequisites for ordinary Forum clearance, computed from records only. */
+export async function clearanceProblemsFor(memberId: string) {
+  const r = await clearanceRecords(memberId);
   return stage1ClearanceProblems({
-    ndaVerified: !!m.nda_verified_at,
-    addendumComplete: flags.addendum_complete,
-    incompleteStage1: applicable.filter((d) => !done.has(d.id)).map((d) => d.title),
-    conflictSigned: conflictDocs.length > 0 && conflictDocs.every((d) => (assignments ?? []).some((a) => a.document_id === d.id && a.status === "completed")),
-    conflictReviewDecision: reviews?.[0]?.decision ?? null,
+    ndaVerified: !!r.m.nda_verified_at,
+    addendumComplete: r.flags.addendum_complete,
+    incompleteStage1: r.applicable.filter((d) => !r.done.has(d.id)).map((d) => d.title),
+    conflictSigned: r.conflictSigned,
+    conflictReviewDecision: r.conflictReviewDecision,
+  });
+}
+
+/** One consolidated, read-only review of the recorded prerequisites. It never records or implies a decision. */
+export async function clearanceChecklistFor(memberId: string) {
+  const r = await clearanceRecords(memberId);
+  const count = (role: string) => {
+    const ds = r.applicable.filter((d: any) => d.forum_role === role);
+    return { assigned: ds.length, done: ds.filter((d) => r.done.has(d.id)).length };
+  };
+  return forumReviewChecklist({
+    ndaVerified: !!r.m.nda_verified_at,
+    addendum: { approved: r.applicable.filter((d: any) => d.forum_role === "addendum" && d.signing_approved).length, complete: r.flags.addendum_complete },
+    protocol: count("protocol"),
+    preRead: count("pre_read"),
+    conflict: { assigned: r.conflictDocs.length, signed: r.conflictSigned },
+    conflictReviewDecision: r.conflictReviewDecision,
+    clearanceStatus: (r.m as any).forum_clearance_status,
+    restrictions: (r.m as any).forum_restrictions,
   });
 }
 
@@ -172,7 +198,7 @@ export const getClearancePrerequisites = createServerFn({ method: "GET" })
   .inputValidator((i) => memberId.parse(i))
   .handler(async ({ context, data }) => {
     await assertAdmin(context);
-    return { problems: await clearanceProblemsFor(data.member_id) };
+    return { problems: await clearanceProblemsFor(data.member_id), review: await clearanceChecklistFor(data.member_id) };
   });
 
 /** Independent administrative conflict-review decision. It never grants clearance by itself. */

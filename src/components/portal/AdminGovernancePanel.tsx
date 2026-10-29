@@ -87,6 +87,19 @@ export function AdminGovernancePanel({ memberId, preview, onChange }: { memberId
             <p className="text-sm uppercase tracking-[0.15em] text-gold">Clearance prerequisites</p>
             {pre.data?.problems.length ? pre.data.problems.map((p) => <p key={p} className="mt-1 text-base text-destructive">{p}</p>) : <p className="mt-1 text-base text-ivory/80">{pre.data ? "All prerequisites complete" : "Checking…"}</p>}
           </div>
+          {pre.data?.review && (
+            <div className="mt-3 border-l-2 border-gold/40 pl-3">
+              <p className="text-sm uppercase tracking-[0.15em] text-gold">Consolidated Forum review</p>
+              <p className="mt-1 text-sm text-ivory/55">{pre.data.review.readyForDecision ? "Everything the member must complete is recorded. Your conflict review and clearance decisions are still required." : "Recorded status only. No decision is made automatically."}</p>
+              <ul className="mt-2 space-y-1">
+                {pre.data.review.items.map((i) => (
+                  <li key={i.key} className="text-base text-ivory/80">
+                    <span className={i.status === "done" ? "text-gold" : i.status === "unavailable" ? "text-destructive" : "text-ivory/60"}>{i.status === "done" ? "Done" : i.status === "unavailable" ? "Blocked" : "Pending"}</span> · {i.label}: {i.detail}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
           <div className="mt-3 grid gap-3 sm:grid-cols-2">
             <label className="text-base text-ivory/70">Conflict review decision<select className={sel} value={cr.decision} onChange={(e) => setCr({ ...cr, decision: e.target.value as any })}><option value="approved">Approve</option><option value="hold">Hold</option><option value="declined">Decline</option></select></label>
             <label className="text-base text-ivory/70">Conflict review notes<Input className="mt-1" value={cr.notes} onChange={(e) => setCr({ ...cr, notes: e.target.value })} /></label>

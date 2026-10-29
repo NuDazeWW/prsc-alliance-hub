@@ -637,6 +637,7 @@ export type PortalDocumentRecord = {
   audience_role: "board_member" | "advisor" | null;
   journey_stage: number | null;
   journey_track: "shared" | "prsc" | "dis" | null;
+  forum_role?: string | null;
 };
 
 export type PortalCompletion = {
