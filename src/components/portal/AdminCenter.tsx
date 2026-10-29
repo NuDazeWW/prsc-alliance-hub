@@ -1039,6 +1039,31 @@ export function AdminCenter({ page }: { page: "overview" | "send" }) {
     { label: "Recent events", value: d.activity.length, icon: CalendarDays, note: "Recent activity", href: "/admin#activity-log" },
   ];
 
+  const importConfirmBar = importRows.length > 0 ? (
+    <div className="mt-6 border border-gold/40 bg-gold/5 p-4">
+      <p className="text-base text-ivory">
+        {importRows.length} member{importRows.length === 1 ? "" : "s"} staged in this browser. <span className="text-gold">Nothing is saved until you click {sendOnImport ? "Add & invite" : "Add"}.</span>
+      </p>
+      <div className="mt-3 flex flex-wrap items-center gap-4">
+                  <label className="flex items-center gap-2.5 text-base text-ivory/75">
+                    <input
+                      type="checkbox"
+                      checked={sendOnImport}
+                      onChange={(e) => setSendOnImport(e.target.checked)}
+                      className="h-4 w-4 accent-[hsl(var(--gold))]"
+                    />
+                    Send welcome invitations now
+                  </label>
+                  <Button type="button" disabled={importing || batchDrafting || (sendOnImport && importRows.some((r) => r.why_you.trim().length < 20))} className="rounded-none bg-gold text-base text-navy hover:bg-gold-light hover:text-navy" onClick={runImport}>
+                    {importing ? "Uploading…" : `${sendOnImport ? "Add & invite" : "Add"} ${importRows.length} member${importRows.length === 1 ? "" : "s"}`}
+                  </Button>
+                  <Button type="button" variant="ghost" disabled={importing} className="rounded-none text-base text-ivory/60" onClick={clearImport}>
+                    <Trash2 className="mr-2 h-4 w-4" /> Discard
+                  </Button>
+                </div>
+    </div>
+  ) : null;
+
   return (
     <>
     <PortalShell
@@ -1286,6 +1311,8 @@ export function AdminCenter({ page }: { page: "overview" | "send" }) {
                 </div>
               )}
 
+              {importConfirmBar}
+
               {importRows.length > 0 && (
                 <div className="mt-6 space-y-4">
                   {importRows.map((r, i) => (
@@ -1320,25 +1347,7 @@ export function AdminCenter({ page }: { page: "overview" | "send" }) {
                 </ul>
               )}
 
-              {importRows.length > 0 && (
-                <div className="mt-6 flex flex-wrap items-center gap-4">
-                  <label className="flex items-center gap-2.5 text-base text-ivory/75">
-                    <input
-                      type="checkbox"
-                      checked={sendOnImport}
-                      onChange={(e) => setSendOnImport(e.target.checked)}
-                      className="h-4 w-4 accent-[hsl(var(--gold))]"
-                    />
-                    Send welcome invitations now
-                  </label>
-                  <Button type="button" disabled={importing || batchDrafting || (sendOnImport && importRows.some((r) => r.why_you.trim().length < 20))} className="rounded-none bg-gold text-base text-navy hover:bg-gold-light hover:text-navy" onClick={runImport}>
-                    {importing ? "Uploading…" : `${sendOnImport ? "Add & invite" : "Add"} ${importRows.length} member${importRows.length === 1 ? "" : "s"}`}
-                  </Button>
-                  <Button type="button" variant="ghost" disabled={importing} className="rounded-none text-base text-ivory/60" onClick={clearImport}>
-                    <Trash2 className="mr-2 h-4 w-4" /> Discard
-                  </Button>
-                </div>
-              )}
+              {importConfirmBar}
 
               {importStatus && <p className="mt-5 text-base text-ivory/60">{importStatus}</p>}
 
