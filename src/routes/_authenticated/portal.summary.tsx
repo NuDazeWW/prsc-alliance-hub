@@ -43,6 +43,10 @@ function SummaryPage() {
         <p className="mt-3 text-base text-ivory/65 print:text-foreground">
           A record of every document you completed in your private Welcome Center. Generated {new Date().toLocaleString()}.
         </p>
+        <p className="mt-3 text-base text-ivory/65 print:hidden">
+          This page is a printable record only. To read, sign or continue a document, open{" "}
+          <Link to="/portal" hash="documents" className="text-gold underline underline-offset-4 hover:text-ivory">Your Personal Documents</Link>.
+        </p>
         {docs.isLoading && <p className="mt-8 text-base text-gold">Loading…</p>}
         {!docs.isLoading && list.length === 0 && <p className="mt-8 text-base text-ivory/60">No documents have been released to you yet.</p>}
         <ul className="mt-8 divide-y divide-gold/15 border border-gold/25">

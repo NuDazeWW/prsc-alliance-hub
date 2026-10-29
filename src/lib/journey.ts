@@ -37,6 +37,16 @@ function trackOf(d: JourneyDoc, entity: string): JourneyTrack {
   return d.journey_track && d.journey_track !== "shared" ? d.journey_track : memberTracks(entity)[0];
 }
 
+/**
+ * Why a locked onboarding document is locked, so the member sees an accurate reason:
+ * an entity track that has not been released is "not_released"; anything else is the sequence.
+ */
+export function lockReasonFor(d: JourneyDoc, entity: string, released: { prsc: boolean; dis: boolean }): "not_released" | "prior_action" {
+  const track = trackOf(d, entity);
+  if (track === "shared") return "prior_action";
+  return released[track] ? "prior_action" : "not_released";
+}
+
 export type LockOptions = {
   forum?: boolean;
   /** Explicit admin Stage 2 release per entity. Forum status never opens entity tracks. */

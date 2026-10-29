@@ -6,6 +6,8 @@ import { usePrivateMedia } from "@/hooks/use-private-media";
 import { afterOrientation } from "@/lib/first-login";
 import { clearOrientationProgress, markOrientationDismissed, orientationDismissed, readOrientationStep, shouldAutoOpenOrientation } from "@/lib/orientation-progress";
 import { nextIncompleteStep } from "@/lib/next-step";
+import { panelFromHash } from "@/lib/portal-panel-hash";
+import { DOCUMENTS_NOT_RELEASED_BODY, DOCUMENTS_NOT_RELEASED_TITLE, PROFILE_ENCOURAGEMENT, profileLinkLabel } from "@/lib/profile-encouragement";
 import { shouldLoadMemberDocuments } from "@/lib/member-documents-access";
 import { useHeadshotUpload } from "@/hooks/use-headshot-upload";
 import { OrientationHub } from "@/components/portal/OrientationHub";
@@ -146,6 +148,14 @@ function PortalHome() {
     setHubView("hub");
     setPanel("hub");
   }, [needsOrientation, memberKey]);
+  // Deep links such as /portal#documents (emails, bookmarks) open the same Personal Documents panel as every
+  // in-app entry point. There is no separate documents page.
+  useEffect(() => {
+    const openFromHash = () => { if (panelFromHash(window.location.hash) === "documents") setPanel("documents"); };
+    openFromHash();
+    window.addEventListener("hashchange", openFromHash);
+    return () => window.removeEventListener("hashchange", openFromHash);
+  }, []);
   async function acknowledgeOrientationReview() {
     // A failed save throws to the hub, which says so and lets the member try again; nothing is marked complete.
     if (isDemo) setDemoReviewed(true);
@@ -266,7 +276,7 @@ function PortalHome() {
               <p className="truncate text-[11px] text-ivory/55">
                 {documentsReleased
                   ? docSummary
-                  : "We will email you when your assigned documents are released. Your executive profile is optional for Forum participation."}
+                  : `${DOCUMENTS_NOT_RELEASED_TITLE}. ${DOCUMENTS_NOT_RELEASED_BODY}`}
               </p>
             </div>
             {documentsReleased && (allDone ? (
@@ -596,9 +606,9 @@ function PortalHome() {
               ) : (
                 <>
                   {documentsReleased ? (
-                    <MemberDocuments documents={myDocs as any} completions={documents.data?.completions ?? []} entity={docEntity} forum={(documents.data as any)?.forum !== false} forumOnly={forumOnly} forumCleared={(documents.data as any)?.forumCleared === true} entityReleased={(documents.data as any)?.entityReleased} />
+                    <MemberDocuments documents={myDocs as any} completions={documents.data?.completions ?? []} entity={docEntity} forum={(documents.data as any)?.forum !== false} forumOnly={forumOnly} forumCleared={(documents.data as any)?.forumCleared === true} entityReleased={(documents.data as any)?.entityReleased} unavailable={(documents.data as any)?.unavailable ?? []} signing={(documents.data as any)?.signing ?? []} profileComplete={profileComplete} />
                   ) : (
-                    <div className="mt-8 border border-gold/25 bg-ivory/[.03] p-8 text-center"><FileText className="mx-auto h-7 w-7 text-gold"/><h3 className="mt-5 font-display text-[24px] leading-snug">Your documents are being prepared.</h3><p className="mx-auto mt-4 max-w-[34rem] text-[15px] leading-7 text-ivory/65">We will email you when your assigned documents are released. Your executive profile is optional for Forum participation.</p></div>
+                    <div className="mt-8 border border-gold/25 bg-ivory/[.03] p-8 text-center"><FileText className="mx-auto h-7 w-7 text-gold"/><h3 className="mt-5 font-display text-[24px] leading-snug">{DOCUMENTS_NOT_RELEASED_TITLE}</h3><p className="mx-auto mt-4 max-w-[34rem] text-[15px] leading-7 text-ivory/65">{DOCUMENTS_NOT_RELEASED_BODY}</p><p className="mx-auto mt-4 max-w-[34rem] text-[14px] leading-6 text-ivory/55">{PROFILE_ENCOURAGEMENT}</p><Link to="/portal/profile" onClick={() => setPanel(null)} className="mt-4 inline-block text-[14px] text-gold underline underline-offset-4 hover:text-ivory">{profileLinkLabel(profileComplete)} →</Link></div>
                   )}
                 </>
               )}

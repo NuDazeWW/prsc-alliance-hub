@@ -41,6 +41,16 @@ export const openBoldSign = createServerFn({ method: "POST" }).middleware([requi
     let id: string;
     if (action.kind === "resume") {
       id = existing!.boldsign_document_id;
+      // A document that is already signed cannot be opened for signing again: BoldSign refuses the sign link with
+      // HTTP 400. Refresh the verified state from BoldSign instead and tell the member where it stands.
+      if (existing!.status === "completed") return { url: null, state: "completed" as const };
+      const { verifiedSigningState } = await import("./boldsign-records");
+      const props = await (await boldSignGet(`properties?documentId=${encodeURIComponent(id)}`)).json();
+      if (verifiedSigningState(props, member.email) !== "pending") {
+        const { refreshMemberSigning } = await import("./boldsign.server");
+        const refreshed = await refreshMemberSigning(member.id, doc.id);
+        return { url: null, state: refreshed.status === "completed" ? ("completed" as const) : ("signed_awaiting" as const) };
+      }
     } else if (action.kind === "start") {
       // Claim the single assignment first so concurrent clicks cannot create duplicate requests.
       const claim = `preparing:${crypto.randomUUID()}`;
@@ -86,5 +96,20 @@ export const openBoldSign = createServerFn({ method: "POST" }).middleware([requi
     }
     const result = await (await boldSignGet(`getEmbeddedSignLink?documentId=${encodeURIComponent(id)}&signerEmail=${encodeURIComponent(member.email)}&redirectUrl=${encodeURIComponent("https://access.prscstandards.org/portal")}`)).json() as { signLink?: string };
     if (!result.signLink || !/^https:\/\/([a-z0-9-]+\.)*boldsign\.com\//i.test(result.signLink)) throw new Error("BoldSign did not provide an authorized signing link");
-    return { url: result.signLink };
+    return { url: result.signLink, state: "ready" as const };
+  });
+
+/**
+ * Refreshes the member's own signing status from BoldSign (never from the browser) so a completed signature
+ * shows up without waiting for the webhook. Creates nothing and only advances what BoldSign confirms.
+ */
+export const refreshBoldSignStatus = createServerFn({ method: "POST" }).middleware([requirePortalAccess])
+  .inputValidator(input => z.object({ document_id: z.string().uuid() }).parse(input))
+  .handler(async ({ context, data }) => {
+    const { data: member } = await context.supabase.from("portal_members").select("id, status").eq("user_id", context.userId).single();
+    if (!member || member.status === "revoked") throw new Error("Portal access unavailable");
+    const { refreshMemberSigning } = await import("./boldsign.server");
+    const { signingUiState } = await import("./boldsign-records");
+    const result = await refreshMemberSigning(member.id, data.document_id);
+    return { state: signingUiState(result.status) };
   });

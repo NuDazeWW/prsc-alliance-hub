@@ -13,6 +13,8 @@ import { renderBrandedEmail, renderBrandedEmailText } from "@/lib/branded-email"
 import { memberRoleLabel } from "@/lib/member-role-labels";
 import { entityAcceptanceComplete, journeyStatus, type JourneyStatus } from "@/lib/journey";
 import type { DesignationMember } from "@/lib/member-role-labels";
+import { unavailableNotices } from "@/lib/document-availability";
+import { signingReady, signingUiState } from "@/lib/boldsign-records";
 import { addendumSatisfied, type RestrictedGrant, documentVisible, forumCleared, isActive, ndaProblem, roleCombinationTier, initialRoleReviewStatus, roleReviewBlocks, appointmentProblems, memberTracksFor } from "@/lib/governance";
 
 type PortalMember = {
@@ -457,7 +459,7 @@ export const nudgeMember = createServerFn({ method: "POST" })
         subject: "A reminder: your documents are waiting", eyebrow: "Gentle reminder",
         heading: `${first}, a few documents are still open.`,
         body: "Your individualized documents are ready in your private Welcome Center.\n\nSign in, open Your Documents, and read, initial, or sign each one right in the portal.",
-        ctaLabel: "Review & Sign Your Documents", ctaUrl: "https://access.prscstandards.org/portal",
+        ctaLabel: "Review & Sign Your Documents", ctaUrl: "https://access.prscstandards.org/portal#documents",
         signatures: founderSignature(),
       }, "nudge-documents");
       kind = "documents";
@@ -665,8 +667,8 @@ export async function memberVisibilityFlags(memberId: string) {
 }
 
 /** What the member may actually open: mirrors the database read policy. */
-async function memberVisible(docs: PortalDocumentRecord[], m: DocMember, done: Set<string>) {
-  const flags = await memberVisibilityFlags(m.id);
+async function memberVisible(docs: PortalDocumentRecord[], m: DocMember, done: Set<string>, knownFlags?: Awaited<ReturnType<typeof memberVisibilityFlags>>) {
+  const flags = knownFlags ?? await memberVisibilityFlags(m.id);
   const vm = { nda_verified_at: m.nda_verified_at ?? null, forum_clearance_status: m.forum_clearance_status ?? "not_reviewed", is_candidate: !!m.is_candidate, participates_in_forum: m.participates_in_forum ?? true, ...flags };
   return docs.filter((d: any) => documentVisible({ id: d.id, classification: d.classification ?? "entity_confidential", superseded_at: d.superseded_at ?? null, is_forum_prep: !!d.is_forum_prep, journey_stage: d.journey_stage ?? null, member_specific: !!d.member_id, forum_role: d.forum_role ?? null, version_label: d.version_label ?? null }, vm, done.has(d.id)));
 }
@@ -716,8 +718,10 @@ async function entityReleases(client: any, memberId: string) {
   return { rows, released: { prsc: rows.some((r) => r.entity === "prsc"), dis: rows.some((r) => r.entity === "dis") } };
 }
 
-async function signDocumentUrls(documents: PortalDocumentRecord[]) {
+async function signDocumentUrls(documents: PortalDocumentRecord[], memberId: string) {
+  // signing_ready is computed before member_id is withheld from the browser.
   return documents.map(doc => ({ ...doc, member_id: null, file_path: null,
+    signing_ready: signingReady(doc as any, memberId),
     url: doc.file_path ? `/api/public/portal-file?kind=document&id=${doc.id}` : doc.external_url }));
 }
 
@@ -744,7 +748,16 @@ export const getMyDocuments = createServerFn({ method: "GET" })
       .select("document_id, kind, initials, signed_name, acknowledged_at")
       .eq("member_id", member.id);
     const completions = (acks ?? []) as PortalCompletion[];
-    const docs = await memberVisible(all, member as DocMember, new Set(completions.map((c) => c.document_id)));
+    const flags = await memberVisibilityFlags(member.id as string);
+    const docs = await memberVisible(all, member as DocMember, new Set(completions.map((c) => c.document_id)), flags);
+    // Safe reasons for what is not available yet: reason and generic label only, never an id, title or file.
+    const visibleIds = new Set(docs.map((d) => d.id));
+    const unavailable = unavailableNotices(
+      all.map((d: any) => ({ id: d.id, visible: visibleIds.has(d.id), classification: d.classification ?? null, forum_role: d.forum_role ?? null, is_forum_prep: d.is_forum_prep ?? null, signing_approved: d.signing_approved ?? null, superseded_at: d.superseded_at ?? null })),
+      { participates_in_forum: member.participates_in_forum !== false, nda_verified: !!member.nda_verified_at, forum_clearance_status: (member.forum_clearance_status as string) ?? "not_reviewed", addendum_complete: flags.addendum_complete },
+    );
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { data: assignments } = await supabaseAdmin.from("boldsign_assignments").select("document_id, status").eq("member_id", member.id as string);
     return {
       memberId: member.id as string,
       entity: member.entity as string,
@@ -754,7 +767,9 @@ export const getMyDocuments = createServerFn({ method: "GET" })
       activation,
       entityReleased: (await entityReleases(context.supabase, member.id as string)).released,
       released: true,
-      documents: await signDocumentUrls(docs),
+      documents: await signDocumentUrls(docs, member.id as string),
+      unavailable,
+      signing: (assignments ?? []).map((a: { document_id: string; status: string }) => ({ document_id: a.document_id, state: signingUiState(a.status) })),
       acknowledged: completions.map((a) => a.document_id),
       completions,
     };
