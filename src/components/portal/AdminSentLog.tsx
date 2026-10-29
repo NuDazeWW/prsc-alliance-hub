@@ -63,7 +63,7 @@ export function AdminSentLog({ sends, members, open, onOpenChange }: Props) {
       {open && (
         <div className="mt-5">
           <p className="text-sm leading-6 text-ivory/55">
-            Every invitation, reminder and message the portal sent from this page, newest first (most recent 500). Adding a member without inviting them records nothing here, because nothing was sent.
+            Every email the portal sends to a member, newest first (most recent 500): invitations, reminders, composed messages, Forum emails, meeting notices and document notices. Notices to administrators are not listed. Adding a member without inviting them records nothing here, because nothing was sent. Emails sent before this log was extended are not listed.
           </p>
           <div className="mt-4 grid gap-3 sm:grid-cols-[1fr_auto_auto]">
             <Input value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Search name, email address or subject" aria-label="Search the sent log" className="min-w-0 text-base" />

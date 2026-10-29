@@ -52,6 +52,8 @@ export function AdminForumCommunications() {
   }
 
   async function send() {
+    const chosen = rows.filter((r) => picked.has(r.id)).map((r) => `${r.name} <${r.email}>`);
+    if (!confirm(`Send "${def.label}" to ${chosen.length} member${chosen.length === 1 ? "" : "s"}?\n\n${chosen.slice(0, 8).join("\n")}${chosen.length > 8 ? `\n…and ${chosen.length - 8} more` : ""}`)) return;
     setBusy(true);
     try {
       const res = await sendForumEmail({ data: { email_key: key, forum_key: forumKey, version, document_id: docId, round_id: roundId, tokens, member_ids: [...picked] } });

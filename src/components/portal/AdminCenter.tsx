@@ -8,6 +8,8 @@ import { parseMemberList, MEMBER_LIST_TEMPLATE, type MemberImportRow } from "@/l
 import { intendedDesignationSchema, readIntendedDesignation, intendedDesignationLabel, projectIntendedDesignation } from "@/lib/intended-designation";
 import { IntendedDesignationFields } from "@/components/portal/IntendedDesignationFields";
 import { useStoredFlag } from "@/hooks/use-stored-flag";
+import { INVITE_EMAIL_SUBJECT } from "@/lib/invite-email-config";
+import { isInvitationEmailName } from "@/lib/email-log-name";
 import { AdminSentLog } from "@/components/portal/AdminSentLog";
 import { invitationWasSent, NOT_INVITED_DETAIL, NOT_INVITED_LABEL } from "@/lib/invitation-state";
 import { ChevronDown, ChevronUp } from "lucide-react";
@@ -888,6 +890,8 @@ export function AdminCenter({ page }: { page: "overview" | "send" }) {
       setEmailStatus("Preview mode: sending is available once you are signed in.");
       return;
     }
+    const names = members.filter((m) => recipients.includes(m.id)).map((m) => `${m.first_name} ${m.last_name} <${m.email}>`);
+    if (!confirm(`Send "${draft.subject}" to ${names.length} member${names.length === 1 ? "" : "s"}?\n\n${names.slice(0, 8).join("\n")}${names.length > 8 ? `\n…and ${names.length - 8} more` : ""}`)) return;
     setSending(true);
     try {
       const res = await sendMemberEmail({
@@ -983,7 +987,7 @@ export function AdminCenter({ page }: { page: "overview" | "send" }) {
     if (m.status === "revoked") return { key: "revoked", label: "Access revoked", detail: "", tone: "border-red-400/35 text-red-300/85", nudge: false, progress: 0 };
     if (!m.first_access_at && !p) {
       // A saved roster entry is stored as "invited" before anything is sent; only show "Invited" once an invitation really went out.
-      const sentCount = (sendsByMember.get(m.id) ?? []).filter((s) => s.status === "sent").length;
+      const sentCount = (sendsByMember.get(m.id) ?? []).filter((s) => s.status === "sent" && isInvitationEmailName(s.template_name)).length;
       if (m.invitation_known && !invitationWasSent({ auth_invited_at: m.auth_invited_at, emails_sent: sentCount })) {
         return { key: "not_invited", label: NOT_INVITED_LABEL, detail: NOT_INVITED_DETAIL, tone: "border-gold/30 text-gold/80", nudge: false, progress: 0 };
       }
@@ -1612,6 +1616,7 @@ export function AdminCenter({ page }: { page: "overview" | "send" }) {
                   placeholder="Subject line"
                   className="text-base sm:col-span-2"
                 />
+                {editingInvite && <p className="text-sm text-gold sm:col-span-2">The real invitation email always uses the subject “{INVITE_EMAIL_SUBJECT}”. Your wording, button and signature below are used; this subject line is not.</p>}
                 <Input value={draft.eyebrow} onChange={(e) => setDraft({ ...draft, eyebrow: e.target.value })} placeholder="Eyebrow label" className="text-base" />
                 <Input value={draft.heading} onChange={(e) => setDraft({ ...draft, heading: e.target.value })} placeholder="Headline" className="text-base" />
                 <Textarea

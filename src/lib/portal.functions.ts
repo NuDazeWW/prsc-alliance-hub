@@ -15,6 +15,7 @@ import { entityAcceptanceComplete, journeyStatus, type JourneyStatus } from "@/l
 import type { DesignationMember } from "@/lib/member-role-labels";
 import { unavailableNotices } from "@/lib/document-availability";
 import { signingReady, signingUiState } from "@/lib/boldsign-records";
+import { INVITATION_EMAIL_NAME } from "@/lib/email-log-name";
 import { addendumSatisfied, type RestrictedGrant, documentVisible, forumCleared, isActive, ndaProblem, roleCombinationTier, initialRoleReviewStatus, roleReviewBlocks, appointmentProblems, memberTracksFor } from "@/lib/governance";
 
 type PortalMember = {
@@ -267,7 +268,7 @@ function portalInviteRedirect(member: { first_name: string; entity: string; role
 async function logInvitationEmail(admin: any, memberId: string, email: string, adminId: string) {
   try {
     await admin.from("portal_email_sends").insert({
-      member_id: memberId, template_id: null, template_name: "Portal invitation",
+      member_id: memberId, template_id: null, template_name: INVITATION_EMAIL_NAME,
       subject: "Invitation to the private portal", recipient_email: email, status: "sent", sent_by: adminId,
     });
   } catch { /* the invitation itself was already requested */ }
