@@ -27,3 +27,14 @@ select a.id, a.status, k.kind, k.acknowledged_at
 from boldsign_assignments a
 left join acknowledgements k on k.member_id = a.member_id and k.document_id = a.document_id
 where a.status <> 'completed' and k.id is not null;
+
+-- 5) Members who already signed in before first-access tracking existed (READ-ONLY check).
+select m.id, m.email, m.status, m.first_access_at, u.last_sign_in_at
+from portal_members m join auth.users u on u.id = m.user_id
+where m.status = 'invited' and m.first_access_at is null and u.last_sign_in_at is not null;
+
+-- OPTIONAL BACKFILL — WRITES. Do not run without explicit approval; review query 5 first and exclude real candidates.
+-- update portal_members m set status = 'active', first_access_at = u.last_sign_in_at, last_access_at = u.last_sign_in_at
+-- from auth.users u
+-- where u.id = m.user_id and m.status = 'invited' and m.first_access_at is null and u.last_sign_in_at is not null
+--   and m.email ilike '%test%';  -- fictional Test 1-4 accounts only

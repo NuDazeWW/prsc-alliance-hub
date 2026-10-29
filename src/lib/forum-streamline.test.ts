@@ -4,6 +4,7 @@ import { APPROVED_DOCUMENT_BLOCK, documentVisible, forumReviewChecklist, stage1C
 import { journeyStatus, lockedDocumentIds, type JourneyDoc } from "./journey";
 import { signingAction } from "./signing-preparation";
 import { confirmationKey, recipientsToConfirm } from "./meeting-confirmations";
+import { activationProblem, activationRecord } from "./invitation-activation";
 
 // Fictional accounts only.
 const jd = (id: string, order: number, role: string | null = null, stage = 1): JourneyDoc => ({ id, journey_stage: stage, journey_track: "shared", sort_order: order, created_at: "2026-01-01", forum_role: role });
@@ -138,27 +139,26 @@ describe("consolidated administrator review", () => {
 
 describe("BoldSign preparation: manual Test 2 staging vs the unverified template workflow", () => {
   const addendum = { action: "boldsign", signing_approved: true, boldsign_template_id: null, superseded_at: null, version_label: "DRAFT-v0.9" };
-  const testEmail = "shirley.johnsontest2@prscstandards.com";
 
   it("with no template id, signing falls back to the manually staged assignment path, exactly like Test 2", () => {
-    assert.deepEqual(signingAction(addendum, null, testEmail, null), { kind: "manual" });
+    assert.deepEqual(signingAction(addendum, null, null), { kind: "manual" });
   });
 
   it("with an approved template, a fictional test identity starts exactly one request", () => {
-    assert.deepEqual(signingAction({ ...addendum, boldsign_template_id: "tpl_fictional" }, null, testEmail, null), { kind: "start" });
+    assert.deepEqual(signingAction({ ...addendum, boldsign_template_id: "tpl_fictional" }, null, null), { kind: "start" });
   });
 
   it("an existing assignment is always reused, never duplicated", () => {
     const existing = { status: "pending", version_label: "DRAFT-v0.9", boldsign_document_id: "bs_1" };
-    assert.deepEqual(signingAction({ ...addendum, boldsign_template_id: "tpl_fictional" }, existing, testEmail, null), { kind: "resume" });
+    assert.deepEqual(signingAction({ ...addendum, boldsign_template_id: "tpl_fictional" }, existing, null), { kind: "resume" });
   });
 
-  it("a real executive is never auto-sent a request before Gate B is authorized", () => {
-    assert.equal(signingAction({ ...addendum, boldsign_template_id: "tpl" }, null, "real.executive@example.com", null).kind, "block");
+  it("the approved template is the only authorization needed: no email-based restriction applies", () => {
+    assert.deepEqual(signingAction({ ...addendum, boldsign_template_id: "tpl" }, null, null), { kind: "start" });
   });
 
   it("an unapproved draft with a template id is not started automatically", () => {
-    assert.deepEqual(signingAction({ ...addendum, signing_approved: false, boldsign_template_id: "tpl" }, null, testEmail, null), { kind: "manual" });
+    assert.deepEqual(signingAction({ ...addendum, signing_approved: false, boldsign_template_id: "tpl" }, null, null), { kind: "manual" });
   });
 });
 
@@ -175,5 +175,25 @@ describe("meeting confirmation stays independent and deduplicated (already works
       { member_id: "m2", status: "failed", attempts: 1 },
     ] as any);
     assert.deepEqual([...owed].sort(), ["m2", "m3"]);
+  });
+});
+
+describe("first sign-in is recorded when the password is set", () => {
+  const now = 1_800_000_000;
+  const amr = [{ method: "magiclink", timestamp: now - 60 }];
+  const invited = { user_id: "u1", email: "fictional.test1@example.com", status: "invited", first_access_at: null };
+
+  it("writes active status and first/last access times", () => {
+    assert.deepEqual(activationRecord("2026-10-28T12:00:00.000Z"), { status: "active", first_access_at: "2026-10-28T12:00:00.000Z", last_access_at: "2026-10-28T12:00:00.000Z" });
+  });
+
+  it("an unused invitation can be activated, and once recorded the same invitation is refused", () => {
+    assert.equal(activationProblem({ userId: "u1", sessionEmail: invited.email, amr, nowSeconds: now, member: invited }), null);
+    const after = { ...invited, ...activationRecord("2026-10-28T12:00:00.000Z") };
+    assert.equal(activationProblem({ userId: "u1", sessionEmail: invited.email, amr, nowSeconds: now, member: after }), "This invitation has already been used");
+  });
+
+  it("another account's invitation is still refused", () => {
+    assert.equal(activationProblem({ userId: "u2", sessionEmail: invited.email, amr, nowSeconds: now, member: invited }), "This invitation belongs to a different account");
   });
 });

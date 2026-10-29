@@ -3,7 +3,7 @@ import { strictEqual, deepStrictEqual, ok } from "node:assert";
 import { addendumSatisfied, documentVisible, grantCovers, stage1ClearanceProblems } from "./governance";
 import { activationProblem } from "./invitation-activation";
 import { confirmationKey, pollWordingWarning, recipientsToConfirm } from "./meeting-confirmations";
-import { disclosureHash, isFictionalTestIdentity, signingAction } from "./signing-preparation";
+import { disclosureHash, signingAction } from "./signing-preparation";
 import { questionAccessBlock } from "./executive-questions";
 import { SIGNING_NOTICE_ADMIN, signingNoticeKey } from "./signed-copy-policy";
 
@@ -101,23 +101,22 @@ describe("Fix 4: clearance needs prerequisites plus a separate review", () => {
 describe("Fix 5/8: signing preparation", () => {
   const doc = { action: "boldsign", signing_approved: true, boldsign_template_id: "tpl", superseded_at: null, version_label: "v1" };
   it("starts once, then resumes the same session", () => {
-    deepStrictEqual(signingAction(doc, null, "shirley.johnsontest2@prscstandards.com", null), { kind: "start" });
-    deepStrictEqual(signingAction(doc, { status: "pending", version_label: "v1", boldsign_document_id: "bs1" }, "shirley.johnsontest2@prscstandards.com", null), { kind: "resume" });
-    strictEqual(signingAction(doc, { status: "preparing", version_label: "v1", boldsign_document_id: "preparing:x" }, "t@x.com", null).kind, "block");
+    deepStrictEqual(signingAction(doc, null, null), { kind: "start" });
+    deepStrictEqual(signingAction(doc, { status: "pending", version_label: "v1", boldsign_document_id: "bs1" }, null), { kind: "resume" });
+    strictEqual(signingAction(doc, { status: "preparing", version_label: "v1", boldsign_document_id: "preparing:x" }, null).kind, "block");
   });
-  it("never auto-creates for real executives before Gate B", () => {
-    strictEqual(isFictionalTestIdentity("jane.doe@company.com"), false);
-    strictEqual(signingAction(doc, null, "jane.doe@company.com", null).kind, "block");
+  it("starts from the administrator-approved template for any authorized member, with no separate launch gate", () => {
+    strictEqual(signingAction(doc, null, null).kind, "start");
   });
   it("never auto-creates from an unapproved template", () => {
-    strictEqual(signingAction({ ...doc, signing_approved: false }, null, "test@x.com", null).kind, "manual");
+    strictEqual(signingAction({ ...doc, signing_approved: false }, null, null).kind, "manual");
   });
   it("freezes disclosures: changed answers cannot reuse the signed version", async () => {
     const h1 = await disclosureHash({ conflict_answer: "changed", conflict_details: "Board seat at X" });
     const h2 = await disclosureHash({ conflict_answer: "changed", conflict_details: "Board seat at Y" });
     strictEqual(h1, await disclosureHash({ conflict_answer: "changed", conflict_details: " Board seat at X " }));
     ok(h1 !== h2);
-    strictEqual(signingAction(doc, { status: "pending", version_label: "v1", boldsign_document_id: "bs1", disclosure_hash: h1 }, "test@x.com", h2).kind, "block");
+    strictEqual(signingAction(doc, { status: "pending", version_label: "v1", boldsign_document_id: "bs1", disclosure_hash: h1 }, h2).kind, "block");
   });
   it("notifies only the designated administrator, once per assignment", () => {
     strictEqual(SIGNING_NOTICE_ADMIN, "admin@readinessterminal.com");

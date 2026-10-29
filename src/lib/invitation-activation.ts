@@ -24,3 +24,12 @@ export function activationProblem(input: {
   if (m.status !== "invited" || m.first_access_at) return "This invitation has already been used";
   return null;
 }
+
+/**
+ * Recorded once, when the recipient sets their own password through their own invitation link. Before this was
+ * written, members who had signed in and finished steps still showed "Invited / Hasn't signed in yet", received
+ * invitation reminders and nudges, and their invitation never counted as used.
+ */
+export function activationRecord(nowIso: string) {
+  return { status: "active" as const, first_access_at: nowIso, last_access_at: nowIso };
+}

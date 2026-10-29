@@ -1,7 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
-import { activationProblem } from "@/lib/invitation-activation";
+import { activationProblem, activationRecord } from "@/lib/invitation-activation";
 
 async function check(context: { userId: string; claims: Record<string, unknown> }) {
   const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
@@ -36,6 +36,10 @@ export const activateInvitation = createServerFn({ method: "POST" })
     if (error) throw error;
     const email = typeof context.claims.email === "string" ? context.claims.email.trim().toLowerCase() : "";
     if (email) await supabaseAdmin.from("portal_login_security").upsert({ normalized_email: email, failed_attempts: 0, reset_required: false, last_success_at: new Date().toISOString() }, { onConflict: "normalized_email" });
+    // Forward-only and bound to this member's own invitation: only an unused invitation (status invited, never accessed) changes.
+    const { error: recordError } = await supabaseAdmin.from("portal_members").update(activationRecord(new Date().toISOString()))
+      .eq("user_id", context.userId).eq("status", "invited").is("first_access_at", null);
+    if (recordError) throw recordError;
     await supabaseAdmin.from("portal_activity").insert({ actor_user_id: context.userId, event_type: "invitation_activated", metadata: {} });
     return { ok: true };
   });

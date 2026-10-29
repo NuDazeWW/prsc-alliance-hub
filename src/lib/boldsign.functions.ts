@@ -34,7 +34,7 @@ export const openBoldSign = createServerFn({ method: "POST" }).middleware([requi
 
     const { supabaseAdmin: sb } = await import("@/integrations/supabase/client.server");
     const { data: existing } = await sb.from("boldsign_assignments").select("*").eq("member_id", member.id).eq("document_id", doc.id).maybeSingle();
-    const action = signingAction(doc, existing, member.email, hash);
+    const action = signingAction(doc, existing, hash);
     if (action.kind === "block") throw new Error(action.reason);
 
     const { boldSignGet, boldSignPost } = await import("./boldsign.server");

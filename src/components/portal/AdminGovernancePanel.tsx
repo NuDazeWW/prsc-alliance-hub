@@ -115,6 +115,16 @@ export function AdminGovernancePanel({ memberId, preview, onChange }: { memberId
           <label className="mt-3 flex items-center gap-2 text-base text-ivory/80"><input type="checkbox" className="h-4 w-4" checked={cl.disclosures} onChange={(e) => setCl({ ...cl, disclosures: e.target.checked })} />I reviewed current disclosures</label>
           <label className="mt-1 flex items-center gap-2 text-base text-ivory/80"><input type="checkbox" className="h-4 w-4" checked={cl.restrictionsChecked} onChange={(e) => setCl({ ...cl, restrictionsChecked: e.target.checked })} />I reviewed existing restrictions and NDA status</label>
           <Button type="button" className="mt-3" disabled={!cl.disclosures || !cl.restrictionsChecked} onClick={() => run(() => recordForumClearance({ data: { member_id: memberId, decision: cl.decision, disclosures_reviewed: true, restrictions_reviewed: true, meeting_eligibility: cl.meeting_eligibility, restrictions: cl.restrictions, notes: cl.notes } }), "Clearance decision recorded.")}>Record clearance decision</Button>
+          {pre.data?.review?.readyForDecision && (cl.decision === "cleared" || cl.decision === "cleared_restricted") && (
+            <div className="mt-3 border-t border-gold/20 pt-3">
+              <p className="text-sm text-ivory/55">Every item above is recorded as done. This one action records your conflict-review approval and the clearance decision above, each as its own audit entry. Add notes (at least 5 characters) to use it.</p>
+              <Button type="button" className="mt-2" disabled={!cl.disclosures || !cl.restrictionsChecked || cl.notes.trim().length < 5}
+                onClick={() => run(async () => {
+                  await recordConflictReview({ data: { member_id: memberId, decision: "approved", notes: cl.notes.trim() } });
+                  await recordForumClearance({ data: { member_id: memberId, decision: cl.decision, disclosures_reviewed: true, restrictions_reviewed: true, meeting_eligibility: cl.meeting_eligibility, restrictions: cl.restrictions, notes: cl.notes } });
+                }, "Conflict review approved and clearance recorded.")}>Approve conflict review and record clearance</Button>
+            </div>
+          )}
         </div>
       )}
 
