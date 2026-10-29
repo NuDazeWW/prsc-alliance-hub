@@ -8,13 +8,15 @@ import { parseMemberList, MEMBER_LIST_TEMPLATE, type MemberImportRow } from "@/l
 import { intendedDesignationSchema, readIntendedDesignation, intendedDesignationLabel, projectIntendedDesignation } from "@/lib/intended-designation";
 import { IntendedDesignationFields } from "@/components/portal/IntendedDesignationFields";
 import { useStoredFlag } from "@/hooks/use-stored-flag";
+import { AdminSentLog } from "@/components/portal/AdminSentLog";
+import { invitationWasSent, NOT_INVITED_DETAIL, NOT_INVITED_LABEL } from "@/lib/invitation-state";
 import { ChevronDown, ChevronUp } from "lucide-react";
 import { AdminLeadership } from "@/components/portal/AdminLeadership";
 import { AdminSidebar } from "@/components/portal/AdminSidebar";
 import heroRoad from "@/assets/portal-hero-road.jpg";
 import { Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { Fragment, useEffect, useMemo, useRef, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { render } from "@react-email/render";
 import { AdminForumCommunications } from "@/components/portal/AdminForumCommunications";
@@ -31,6 +33,7 @@ import {
   Clock3,
   Eye,
   FileText,
+  History,
   Info,
   MailPlus,
   MessageSquare,
@@ -300,6 +303,13 @@ export function AdminCenter({ page }: { page: "overview" | "send" }) {
   const [inviteNdaMessage, setInviteNdaMessage] = useState("");
   const inviteNdaGeneration = useRef(0);
   const [inviteCollapsed, setInviteCollapsed] = useStoredFlag("admin.inviteCollapsed");
+  const [sentLogOpen, setSentLogOpen] = useStoredFlag("admin.sentLogOpen");
+  const [membersCollapsed, setMembersCollapsed] = useStoredFlag("admin.membersCollapsed");
+  const [expandedRows, setExpandedRows] = useState<string[]>([]);
+  useEffect(() => {
+    if (page === "send" && window.location.hash === "#sent-log") setSentLogOpen(true);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [page]);
   const PLACE: Record<"overview" | "send", Record<number, string>> = {
     overview: {
       1: "order-1 lg:col-start-1 lg:row-start-1 lg:row-span-2",
@@ -970,7 +980,14 @@ export function AdminCenter({ page }: { page: "overview" | "send" }) {
     const p = profilesById.get(m.id);
     const prog = docProgress[m.id];
     if (m.status === "revoked") return { key: "revoked", label: "Access revoked", detail: "", tone: "border-red-400/35 text-red-300/85", nudge: false, progress: 0 };
-    if (!m.first_access_at && !p) return { key: "invited", label: "Invited", detail: "Hasn't signed in yet", tone: "border-ivory/25 text-ivory/70", nudge: true, progress: 0 };
+    if (!m.first_access_at && !p) {
+      // A saved roster entry is stored as "invited" before anything is sent; only show "Invited" once an invitation really went out.
+      const sentCount = (sendsByMember.get(m.id) ?? []).filter((s) => s.status === "sent").length;
+      if (m.invitation_known && !invitationWasSent({ auth_invited_at: m.auth_invited_at, emails_sent: sentCount })) {
+        return { key: "not_invited", label: NOT_INVITED_LABEL, detail: NOT_INVITED_DETAIL, tone: "border-gold/30 text-gold/80", nudge: false, progress: 0 };
+      }
+      return { key: "invited", label: "Invited", detail: "Hasn't signed in yet", tone: "border-ivory/25 text-ivory/70", nudge: true, progress: 0 };
+    }
     if (!p?.submitted_at) return { key: "in_progress", label: "Profile in progress", detail: p ? `Step ${Math.min(p.current_stage ?? 1, 4)} of 4` : "Not started", tone: "border-gold/40 text-gold", nudge: true, progress: p ? Math.round((Math.min(p.current_stage ?? 1, 4) / 4) * 100) : 0 };
     if (!m.documents_released_at) return { key: "submitted", label: "Profile submitted", detail: "Ready for documents", tone: "border-gold/60 text-gold", nudge: false, progress: 0 };
     if (m.documents_completed_at) return { key: "complete", label: "Complete", detail: prog ? `${prog.done} of ${prog.total} documents` : "", tone: "border-gold bg-gold/15 text-gold", nudge: false, progress: 100 };
@@ -1088,6 +1105,9 @@ export function AdminCenter({ page }: { page: "overview" | "send" }) {
                     {label}
                   </Link>
                 ))}
+                <Link to="/admin/send" hash="sent-log" onClick={() => setSentLogOpen(true)} className="inline-flex shrink-0 items-center gap-2 rounded-full border-2 border-ivory/25 bg-navy-deep/60 px-6 py-2 text-sm font-medium text-ivory/85 transition-colors hover:border-gold hover:text-gold">
+                  <History className="h-4 w-4" /> Sent log
+                </Link>
               </nav>
             </div>
             <div className="hidden text-right md:block">
@@ -1111,6 +1131,7 @@ export function AdminCenter({ page }: { page: "overview" | "send" }) {
           </div>
         )}
         {page === "send" && <AdminForumInvitationBatch members={members} preview={preview} onSaved={() => { void overview.refetch(); void email.refetch(); }} />}
+        {page === "send" && <div className="mt-6"><AdminSentLog sends={sends} members={members} open={sentLogOpen} onOpenChange={setSentLogOpen} /></div>}
         <div className={`mt-6 grid gap-5 ${page === "overview" ? "lg:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)]" : "lg:grid-cols-2 2xl:grid-cols-[minmax(0,1fr)_minmax(0,1.3fr)_minmax(0,0.8fr)]"}`}>
           <div className="contents">
             <section className={`${S("send",1)} admin-card p-6 sm:p-8 ${inviteCollapsed ? "[&>*:not(:first-child)]:hidden" : ""}`}>
@@ -1702,10 +1723,14 @@ export function AdminCenter({ page }: { page: "overview" | "send" }) {
           </div>
 
           <div className="contents">
-            <section className={`${page === "send" ? PLACE.send[4] : PLACE.overview[1]} admin-card p-6 sm:p-8`}>
+            <section className={`${page === "send" ? PLACE.send[4] : PLACE.overview[1]} admin-card p-6 sm:p-8 ${membersCollapsed ? "[&>*:not(:first-child)]:hidden" : ""}`}>
               <div className="flex flex-wrap items-center justify-between gap-3">
                 <h2 id="tracker" className="flex scroll-mt-28 items-center gap-3 font-display text-3xl">
-                  <Users className="h-7 w-7 text-gold" /> Members
+                  <button type="button" onClick={() => setMembersCollapsed(!membersCollapsed)} aria-expanded={!membersCollapsed} className="flex items-center gap-3 text-left">
+                    <Users className="h-7 w-7 text-gold" /> Members
+                    <span className="text-base font-normal text-ivory/55">({members.length})</span>
+                    {membersCollapsed ? <ChevronDown className="h-5 w-5 text-gold" /> : <ChevronUp className="h-5 w-5 text-gold" />}
+                  </button>
                 </h2>
                 <div className="flex flex-wrap items-center justify-end gap-2">
                   <Button
@@ -1735,7 +1760,7 @@ export function AdminCenter({ page }: { page: "overview" | "send" }) {
                 </div>
               </div>
 
-              <div className="mt-5 border border-gold/25 bg-ivory/[.03] p-4 sm:p-5">
+              <details className="mt-4 border border-gold/25 bg-ivory/[.03] p-4 sm:p-5"><summary className="cursor-pointer text-base text-ivory/80"><strong className="font-medium text-gold">Start by clicking a member&rsquo;s name</strong> — tap for what you can do here</summary><div className="mt-4">
                 <p className="flex items-start gap-2.5 text-base leading-relaxed text-ivory/80">
                   <Info className="mt-1 h-4 w-4 shrink-0 text-gold" />
                   <span>
@@ -1761,7 +1786,7 @@ export function AdminCenter({ page }: { page: "overview" | "send" }) {
                     </li>
                   ))}
                 </ul>
-              </div>
+              </div></details>
 
               <div className="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-[2fr_1fr_1fr_1fr_auto]">
                 <Input value={memberSearch} onChange={(e) => setMemberSearch(e.target.value)} placeholder="Search name, email or organization" className="min-w-0 text-base" aria-label="Search members" />
@@ -1773,6 +1798,7 @@ export function AdminCenter({ page }: { page: "overview" | "send" }) {
                 </select>
                 <select aria-label="Filter by stage" value={filterStage} onChange={(e) => setFilterStage(e.target.value)} className="h-10 w-full min-w-0 border border-input bg-navy px-2 text-base">
                   <option value="">All stages</option>
+                  <option value="not_invited">Added — not invited yet</option>
                   <option value="invited">Invited — not signed in</option>
                   <option value="in_progress">Profile in progress</option>
                   <option value="submitted">Profile submitted</option>
@@ -1821,11 +1847,13 @@ export function AdminCenter({ page }: { page: "overview" | "send" }) {
                     const list = all.filter((s) => s.status === "sent");
                     const failed = all.filter((s) => s.status !== "sent");
                     const revoked = m.status === "revoked";
+                    const expanded = expandedRows.includes(m.id);
                     return (
-                      <tr key={m.id} className="border-t border-ivory/10 align-top">
-                        <td className="p-4">
-                          <div className="flex items-start gap-3">
-                            <label className="flex cursor-pointer items-start pt-1">
+                      <Fragment key={m.id}>
+                      <tr className="border-t border-ivory/10 align-middle">
+                        <td className="p-3">
+                          <div className="flex items-center gap-3">
+                            <label className="flex cursor-pointer items-center">
                               <input
                                 type="checkbox"
                                 aria-label={`Select ${m.first_name} ${m.last_name}`}
@@ -1843,31 +1871,21 @@ export function AdminCenter({ page }: { page: "overview" | "send" }) {
                                 {m.first_name} {m.last_name}
                               </strong>
                               <span className="block text-sm text-ivory/40">{m.email}</span>
-                              <span className={`mt-1 inline-block text-xs uppercase tracking-[0.14em] ${revoked ? "text-red-300/80" : "text-ivory/40"}`}>
-                                Access: {m.status}
-                              </span>
                             </button>
                           </div>
                         </td>
-                        <td>{memberDesignation(m as any)}{m.intended_designation && <p className="mt-1 text-xs text-ivory/55">{intendedDesignationLabel(m as any)}</p>}{(m as { participates_in_forum?: boolean }).participates_in_forum === false && <span className="ml-2 whitespace-nowrap border border-gold/30 px-1.5 py-0.5 text-[10px] uppercase tracking-[0.12em] text-gold/80">No Forum</span>}</td>
-                        <td className="py-4 pr-3">
+                        <td className="py-3 pr-3 text-sm">{memberDesignation(m as any)}{(m as { participates_in_forum?: boolean }).participates_in_forum === false && <span className="ml-2 whitespace-nowrap border border-gold/30 px-1.5 py-0.5 text-[10px] uppercase tracking-[0.12em] text-gold/80">No Forum</span>}</td>
+                        <td className="py-3 pr-3">
                           <span className={`inline-block border px-2 py-1 text-xs uppercase tracking-[0.12em] ${st.tone}`}>{st.label}</span>
                           {journey && (
-                            <div className="mt-2" aria-label="Recipient journey stage">
-                              <span className="inline-block border border-gold/30 px-2 py-1 text-xs text-gold">
-                                Stage {journey.currentStage - (forum ? 0 : 1)} of {forum ? 5 : 4} · {STAGES[journey.currentStage - 1]?.label}
-                              </span>
-                              <span className="mt-1 block text-xs text-ivory/55">{journey.label}</span>
-                            </div>
-                          )}
-                          {st.detail && <span className="mt-1 block text-sm text-ivory/55">{st.detail}</span>}
-                          <span className="mt-1 block text-xs text-ivory/45">Orientation reviewed: {(m as { orientation_acknowledged_at?: string | null }).orientation_acknowledged_at ? new Date((m as { orientation_acknowledged_at: string }).orientation_acknowledged_at).toLocaleDateString() : "Not yet"}</span>
-                          {st.progress > 0 && (
-                            <span className="mt-2 block h-1.5 w-28 bg-ivory/10"><span className="block h-full bg-gold" style={{ width: `${st.progress}%` }} /></span>
+                            <span className="ml-1.5 inline-block border border-gold/30 px-2 py-1 text-xs text-gold" aria-label="Recipient journey stage">
+                              Stage {journey.currentStage - (forum ? 0 : 1)} of {forum ? 5 : 4}
+                            </span>
                           )}
                         </td>
-                        <td className="py-4 pr-3">
+                        <td className="py-3 pr-3">
                           <select
+                            aria-label={`Package status for ${m.first_name} ${m.last_name}`}
                             value={m.package_status}
                             onChange={(e) => void changePackage(m.id, e.target.value)}
                             className="h-9 w-full min-w-[150px] rounded-md border border-input bg-navy px-2 text-sm"
@@ -1878,44 +1896,24 @@ export function AdminCenter({ page }: { page: "overview" | "send" }) {
                             <option value="package_ready">Package ready</option>
                           </select>
                         </td>
-                        <td className="py-4 pr-4">
+                        <td className="py-3 pr-3 text-sm">
                           {all.length === 0 ? (
                             <span className="text-ivory/40">None yet</span>
                           ) : (
-                            <span className="flex flex-col gap-2">
-                              {all.map((sendRecord) => (
-                                <label key={sendRecord.id} className="flex cursor-pointer items-start gap-2 border border-gold/20 px-2 py-1.5 text-xs text-ivory/75">
-                                  <input
-                                    type="checkbox"
-                                    aria-label={`Select email ${sendRecord.template_name} to ${m.first_name} ${m.last_name}`}
-                                    checked={selectedEmailIds.includes(sendRecord.id)}
-                                    onChange={(e) => setSelectedEmailIds((current) => e.target.checked ? [...current, sendRecord.id] : current.filter((id) => id !== sendRecord.id))}
-                                    className="mt-0.5 h-3.5 w-3.5 shrink-0 accent-[var(--color-gold)]"
-                                  />
-                                  {sendRecord.status === "sent" ? <CheckCircle2 className="mt-0.5 h-3 w-3 shrink-0 text-gold" /> : <AlertTriangle className="mt-0.5 h-3 w-3 shrink-0 text-red-300/85" />}
-                                  <span>
-                                    <span className="block">{sendRecord.template_name}</span>
-                                    <span className="block text-ivory/40">{new Date(sendRecord.created_at).toLocaleDateString()}</span>
-                                  </span>
-                                </label>
-                              ))}
-                            </span>
+                            <span className="text-ivory/75">{list.length} sent{list[0] ? ` · ${new Date(list[0].created_at).toLocaleDateString()}` : ""}</span>
                           )}
                           {failed.length > 0 && (
-                            <span className="mt-1.5 flex items-center gap-1.5 text-xs text-red-300/85">
-                              <AlertTriangle className="h-3 w-3" /> {failed.length} failed send{failed.length > 1 ? "s" : ""}
+                            <span className="mt-0.5 flex items-center gap-1.5 text-xs text-red-300/85">
+                              <AlertTriangle className="h-3 w-3" /> {failed.length} failed
                             </span>
                           )}
-                          <span className="mt-1 block text-xs text-ivory/35">
-                            Last sent: {list[0] ? new Date(list[0].created_at).toLocaleDateString() : "—"}
-                          </span>
                         </td>
-                        <td className="py-4 pr-4">
-                          <div className="flex flex-col gap-2">
+                        <td className="py-3 pr-3">
+                          <div className="flex flex-wrap items-center gap-1.5">
                             <button
                               type="button"
                               onClick={() => setDetailId(m.id)}
-                              className="flex items-center gap-1.5 border border-gold/40 px-2.5 py-1.5 text-sm text-gold transition-colors hover:bg-gold/10"
+                              className="flex items-center gap-1.5 border border-gold/40 px-2 py-1 text-xs text-gold transition-colors hover:bg-gold/10"
                             >
                               <Eye className="h-3.5 w-3.5" /> View profile
                             </button>
@@ -1924,26 +1922,79 @@ export function AdminCenter({ page }: { page: "overview" | "send" }) {
                                 type="button"
                                 disabled={nudging === m.id}
                                 onClick={() => void nudge(m)}
-                                className="flex items-center gap-1.5 border border-gold/40 px-2.5 py-1.5 text-sm text-gold transition-colors hover:bg-gold/10 disabled:opacity-50"
+                                className="flex items-center gap-1.5 border border-gold/40 px-2 py-1 text-xs text-gold transition-colors hover:bg-gold/10 disabled:opacity-50"
                               >
-                                <Send className="h-3.5 w-3.5" /> {nudging === m.id ? "Sending…" : "Nudge now"}
+                                <Send className="h-3.5 w-3.5" /> {nudging === m.id ? "Sending…" : "Nudge"}
                               </button>
                             )}
                             <button
                               type="button"
                               onClick={() => void changeAccess(m.id, revoked ? "active" : "revoked")}
-                              className={`flex items-center gap-1.5 border px-2.5 py-1.5 text-sm transition-colors ${
+                              className={`flex items-center gap-1.5 border px-2 py-1 text-xs transition-colors ${
                                 revoked
                                   ? "border-ivory/25 text-ivory/70 hover:border-gold/40 hover:text-gold"
                                   : "border-red-400/35 text-red-300/85 hover:bg-red-400/10"
                               }`}
                             >
                               {revoked ? <ShieldCheck className="h-3.5 w-3.5" /> : <ShieldOff className="h-3.5 w-3.5" />}
-                              {revoked ? "Reactivate" : "Revoke access"}
+                              {revoked ? "Reactivate" : "Revoke"}
+                            </button>
+                            <button
+                              type="button"
+                              aria-expanded={expanded}
+                              aria-label={`${expanded ? "Hide" : "Show"} details for ${m.first_name} ${m.last_name}`}
+                              onClick={() => setExpandedRows((cur) => cur.includes(m.id) ? cur.filter((id) => id !== m.id) : [...cur, m.id])}
+                              className="flex items-center gap-1 border border-ivory/20 px-2 py-1 text-xs text-ivory/70 transition-colors hover:border-gold/40 hover:text-gold"
+                            >
+                              {expanded ? <ChevronUp className="h-3.5 w-3.5" /> : <ChevronDown className="h-3.5 w-3.5" />} Details
                             </button>
                           </div>
                         </td>
                       </tr>
+                      {expanded && (
+                        <tr className="bg-ivory/[.02]">
+                          <td colSpan={6} className="px-4 pb-4 pt-1">
+                            <div className="grid gap-4 text-sm text-ivory/65 md:grid-cols-2">
+                              <div className="space-y-1">
+                                <p className="text-xs uppercase tracking-[0.14em] text-ivory/40">Where they are</p>
+                                {journey && <p>Stage {journey.currentStage - (forum ? 0 : 1)} of {forum ? 5 : 4} · {STAGES[journey.currentStage - 1]?.label} — {journey.label}</p>}
+                                {st.detail && <p>{st.detail}</p>}
+                                <p className="text-xs text-ivory/45">Access: {st.key === "not_invited" ? "added, not invited yet" : m.status} · Orientation reviewed: {(m as { orientation_acknowledged_at?: string | null }).orientation_acknowledged_at ? new Date((m as { orientation_acknowledged_at: string }).orientation_acknowledged_at).toLocaleDateString() : "Not yet"}</p>
+                                {m.intended_designation && <p className="text-xs text-ivory/55">{intendedDesignationLabel(m as any)}</p>}
+                                {st.progress > 0 && (
+                                  <span className="mt-2 block h-1.5 w-28 bg-ivory/10"><span className="block h-full bg-gold" style={{ width: `${st.progress}%` }} /></span>
+                                )}
+                              </div>
+                              <div>
+                                <p className="text-xs uppercase tracking-[0.14em] text-ivory/40">Emails received</p>
+                                {all.length === 0 ? (
+                                  <p className="mt-1 text-ivory/40">None yet</p>
+                                ) : (
+                                  <span className="mt-1 flex flex-col gap-2">
+                                    {all.map((sendRecord) => (
+                                      <label key={sendRecord.id} className="flex cursor-pointer items-start gap-2 border border-gold/20 px-2 py-1.5 text-xs text-ivory/75">
+                                        <input
+                                          type="checkbox"
+                                          aria-label={`Select email ${sendRecord.template_name} to ${m.first_name} ${m.last_name}`}
+                                          checked={selectedEmailIds.includes(sendRecord.id)}
+                                          onChange={(e) => setSelectedEmailIds((current) => e.target.checked ? [...current, sendRecord.id] : current.filter((id) => id !== sendRecord.id))}
+                                          className="mt-0.5 h-3.5 w-3.5 shrink-0 accent-[var(--color-gold)]"
+                                        />
+                                        {sendRecord.status === "sent" ? <CheckCircle2 className="mt-0.5 h-3 w-3 shrink-0 text-gold" /> : <AlertTriangle className="mt-0.5 h-3 w-3 shrink-0 text-red-300/85" />}
+                                        <span>
+                                          <span className="block">{sendRecord.template_name}</span>
+                                          <span className="block text-ivory/40">{new Date(sendRecord.created_at).toLocaleDateString()}</span>
+                                        </span>
+                                      </label>
+                                    ))}
+                                  </span>
+                                )}
+                              </div>
+                            </div>
+                          </td>
+                        </tr>
+                      )}
+                      </Fragment>
                     );
                   })}
                 </tbody>
@@ -1980,7 +2031,7 @@ export function AdminCenter({ page }: { page: "overview" | "send" }) {
                           </strong>
                           <span className="block break-all text-sm text-ivory/40">{m.email}</span>
                           <span className={`mt-1 inline-block text-xs uppercase tracking-[0.14em] ${revoked ? "text-red-300/80" : "text-ivory/40"}`}>
-                            Access: {m.status}
+                            Access: {st.key === "not_invited" ? "added, not invited yet" : m.status}
                           </span>
                         </button>
                         <span className="max-w-[45%] text-right text-xs text-ivory/70">{memberDesignation(m as any)}</span>

@@ -10,6 +10,8 @@ import { invitePortalMember, saveMemberInvitationNotes } from "@/lib/portal.func
 import { invitationNoteReady, saveMemberInvitationNotesSchema } from "@/lib/member-import-validation";
 import { eligibleForumInvitee, forumBatchAsyncToken, forumBatchInvitationPayload, forumBatchNotesSaved, forumBatchReadyProblem, forumBatchRow, type ForumBatchRow, type ForumInviteMember } from "@/lib/forum-invitation-batch";
 import { userFacingError } from "@/lib/user-facing-error";
+import { useStoredFlag } from "@/hooks/use-stored-flag";
+import { ChevronDown, ChevronUp } from "lucide-react";
 
 type Props = { members: unknown[]; preview: boolean; onSaved: () => void };
 type DraftSource = { kind: string; url?: string };
@@ -22,6 +24,7 @@ export function AdminForumInvitationBatch({ members, preview, onSaved }: Props) 
   const epoch = useRef(0);
   const mounted = useRef(true);
   const busyRef = useRef(false);
+  const [open, setOpen] = useStoredFlag("admin.forumBatchOpen");
   const [busy, setBusy] = useState("");
   const [message, setMessage] = useState("");
   useEffect(() => { mounted.current = true; return () => { mounted.current = false; epoch.current += 1; }; }, []);
@@ -189,10 +192,18 @@ export function AdminForumInvitationBatch({ members, preview, onSaved }: Props) 
   const selected = Object.values(rows).filter((row) => row.selected);
   const ready = selected.filter((row) => !forumBatchReadyProblem(row));
   const missingNotes = selected.filter((row) => row.loaded && !row.deliveryAttempted && !invitationNoteReady(row.why_you));
-  return <section className="space-y-5 border border-gold/25 bg-navy-light/20 p-5 md:p-7" aria-labelledby="forum-batch-title">
+  const summary = !candidates.length ? "No saved Forum-only invitees yet." : `${candidates.length} saved invitee${candidates.length === 1 ? "" : "s"} · ${selected.length} selected · ${ready.length} ready to send`;
+  return <section className="border border-gold/25 bg-navy-light/20 p-5 md:p-7" aria-labelledby="forum-batch-title">
+    <button type="button" onClick={() => setOpen(!open)} aria-expanded={open} className="flex w-full items-center justify-between gap-3 text-left">
+      <span>
+        <h2 id="forum-batch-title" className="font-heading text-2xl text-ivory">Prepare saved United Forum invitations</h2>
+        <span className="mt-1 block text-sm text-ivory/60">{summary}</span>
+      </span>
+      {open ? <ChevronUp className="h-5 w-5 shrink-0 text-gold" /> : <ChevronDown className="h-5 w-5 shrink-0 text-gold" />}
+    </button>
+    <div className={`${open ? "mt-5 space-y-5" : "hidden"}`}>
     <div>
-      <h2 id="forum-batch-title" className="font-heading text-2xl text-ivory">Prepare saved United Forum invitations</h2>
-      <p className="mt-2 text-base leading-7 text-ivory/65">Select saved Forum-only invitees with Entity None. Draft and save each personal note, then review and save each recipient’s own NDA. Only the final send button delivers invitations.</p>
+      <p className="text-base leading-7 text-ivory/65">Select saved Forum-only invitees with Entity None. Draft and save each personal note, then review and save each recipient’s own NDA. Only the final send button delivers invitations.</p>
       {preview && <p className="mt-2 text-sm text-gold">Preview: sign in to save records, verify NDAs, and send invitations.</p>}
     </div>
     {!candidates.length && <p className="text-base text-ivory/65">No saved Forum-only invitees are available. Save the roster first, with invitations turned off.</p>}
@@ -274,6 +285,7 @@ export function AdminForumInvitationBatch({ members, preview, onSaved }: Props) 
       <p className="text-sm text-ivory/65">This sends only the {ready.length} selected recipients whose saved notes and individual NDA reviews are ready. {selected.length - ready.length > 0 ? `${selected.length - ready.length} selected recipients still need attention and will be skipped.` : ""}</p>
       <Button type="button" disabled={preview || !!busy || !ready.length} onClick={() => void sendReviewed()} className="rounded-none bg-gold text-navy hover:bg-gold-light">{busy === "send-batch" ? "Sending reviewed invitations…" : `Send ${ready.length} reviewed Forum invitation${ready.length === 1 ? "" : "s"}`}</Button>
       {message && <p role="status" className="text-sm text-gold">{message}</p>}
+    </div>
     </div>
   </section>;
 }

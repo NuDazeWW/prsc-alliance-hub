@@ -263,6 +263,16 @@ function portalInviteRedirect(member: { first_name: string; entity: string; role
   if (member.is_candidate) url.searchParams.set("candidate", "1");
   return url.toString();
 }
+/** Puts the invitation in the Sent log. Best effort: a logging problem must never undo an invitation already sent. */
+async function logInvitationEmail(admin: any, memberId: string, email: string, adminId: string) {
+  try {
+    await admin.from("portal_email_sends").insert({
+      member_id: memberId, template_id: null, template_name: "Portal invitation",
+      subject: "Invitation to the private portal", recipient_email: email, status: "sent", sent_by: adminId,
+    });
+  } catch { /* the invitation itself was already requested */ }
+}
+
 export const invitePortalMember = createServerFn({ method: "POST" })
   .middleware([requirePortalAccess])
   .inputValidator((input) => inviteSchema.parse(input))
@@ -317,6 +327,7 @@ export const invitePortalMember = createServerFn({ method: "POST" })
     }, { onConflict: "email" }).select("id").single();
     if (memberError) throw memberError;
     if (saved) await recordInviteReviews(supabaseAdmin, saved.id, context.userId, gates);
+    if (saved) await logInvitationEmail(supabaseAdmin, saved.id, member.email.toLowerCase(), context.userId);
     if (pollId && saved) {
       const { addMembersToPoll } = await import("@/lib/meeting-poll.server");
       await addMembersToPoll(pollId, [saved.id]);
@@ -380,6 +391,7 @@ export const importPortalMembers = createServerFn({ method: "POST" })
         if (gates) {
           const { data: saved } = await supabaseAdmin.from("portal_members").select("id").eq("email", email).single();
           if (saved) await recordInviteReviews(supabaseAdmin, saved.id, context.userId, gates);
+          if (saved) await logInvitationEmail(supabaseAdmin, saved.id, email, context.userId);
         }
 
         const { error: roleError } = await supabaseAdmin
@@ -421,7 +433,28 @@ export const getAdminOverview = createServerFn({ method: "GET" })
       journeys[m.id] = journeyStatus(active, done, m.entity, { prsc: m.prsc_activated_at ?? null, dis: m.dis_activated_at ?? null }, m.participates_in_forum !== false, forumCleared((m as any).forum_clearance_status));
       if (m.documents_released_at) docProgress[m.id] = { total: active.length, done: active.filter((d) => done.has(d.id)).length };
     }));
-    return { members: list, inquiries: inquiries ?? [], activity: activity ?? [], profiles: profiles ?? [], docProgress, journeys };
+    // `invited_at` on the sign-in account is set only when an invitation email was requested; a staged member has none.
+    // If this lookup fails the roster shows the stored status rather than guessing either way.
+    let authInvitedAt: Record<string, string | null> | null = null;
+    try {
+      const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+      const found: Record<string, string | null> = {};
+      for (let page = 1; page <= 20; page++) {
+        const { data: batch, error } = await supabaseAdmin.auth.admin.listUsers({ page, perPage: 1000 });
+        if (error) throw error;
+        for (const u of batch?.users ?? []) found[u.id] = (u as { invited_at?: string | null }).invited_at ?? null;
+        if (!batch?.users || batch.users.length < 1000) break;
+      }
+      authInvitedAt = found;
+    } catch {
+      authInvitedAt = null;
+    }
+    const withInvitation = list.map((m) => ({
+      ...m,
+      invitation_known: authInvitedAt !== null,
+      auth_invited_at: authInvitedAt ? authInvitedAt[m.user_id] ?? null : null,
+    }));
+    return { members: withInvitation as typeof list, inquiries: inquiries ?? [], activity: activity ?? [], profiles: profiles ?? [], docProgress, journeys };
   });
 
 export const nudgeMember = createServerFn({ method: "POST" })
