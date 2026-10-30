@@ -120,14 +120,16 @@ export const updateDocumentGovernance = createServerFn({ method: "POST" })
     boldsign_template_id: z.string().trim().max(200).nullable().optional(),
     countersignature_required: z.boolean().optional(),
     title: z.string().trim().min(3).max(200).optional(),
+    sort_order: z.number().int().min(0).max(999).optional(),
     version_label: z.string().trim().max(60).nullable().optional(),
   }).parse(i))
   .handler(async ({ context, data }) => {
     await assertAdmin(context);
     if (data.classification === "restricted_opportunity" && !data.third_party_permission)
       throw new Error("Record the source's permission before classifying material as Restricted Opportunity");
-    const patch: { classification?: string; classification_reviewed_at?: string; is_forum_prep?: boolean; superseded_at?: string | null; forum_role?: string | null; signing_approved?: boolean; boldsign_template_id?: string | null; countersignature_required?: boolean; title?: string; version_label?: string | null } = {};
+    const patch: { classification?: string; classification_reviewed_at?: string; is_forum_prep?: boolean; superseded_at?: string | null; forum_role?: string | null; signing_approved?: boolean; boldsign_template_id?: string | null; countersignature_required?: boolean; title?: string; sort_order?: number; version_label?: string | null } = {};
     if (data.title !== undefined) patch.title = data.title;
+    if (data.sort_order !== undefined) patch.sort_order = data.sort_order;
     if (data.version_label !== undefined) patch.version_label = data.version_label;
     if (data.forum_role !== undefined) patch.forum_role = data.forum_role;
     if (data.forum_role === "secretariat_controls" || data.forum_role === "facilitator_run_of_show") { patch.classification = "secretariat_only"; patch.classification_reviewed_at = new Date().toISOString(); }
