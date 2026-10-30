@@ -74,7 +74,7 @@ export const Route = createFileRoute("/_authenticated/portal/")({
 
 /** BoldSign returns the signer to /portal?signed=1 inside the signing frame: tell the page that opened it, then stay blank. */
 function PortalEntry() {
-  const inSigningFrame = typeof window !== "undefined" && window.self !== window.top && new URLSearchParams(window.location.search).get("signed") === "1";
+  const inSigningFrame = typeof window !== "undefined" && window.self !== window.top;
   useEffect(() => {
     if (inSigningFrame) window.parent.postMessage({ type: "prsc-boldsign-done" }, window.location.origin);
   }, [inSigningFrame]);
@@ -615,7 +615,7 @@ function PortalHome() {
               ) : (
                 <>
                   {documentsReleased ? (
-                    <MemberDocuments documents={myDocs as any} completions={documents.data?.completions ?? []} entity={docEntity} forum={(documents.data as any)?.forum !== false} forumOnly={forumOnly} forumCleared={(documents.data as any)?.forumCleared === true} entityReleased={(documents.data as any)?.entityReleased} unavailable={(documents.data as any)?.unavailable ?? []} signing={(documents.data as any)?.signing ?? []} profileComplete={profileComplete} />
+                    <MemberDocuments onAllRequiredDone={() => { setPanel(null); toast.success("Your Forum preparation is complete. Your clearance is now with the Secretariat for review."); }} documents={myDocs as any} completions={documents.data?.completions ?? []} entity={docEntity} forum={(documents.data as any)?.forum !== false} forumOnly={forumOnly} forumCleared={(documents.data as any)?.forumCleared === true} entityReleased={(documents.data as any)?.entityReleased} unavailable={(documents.data as any)?.unavailable ?? []} signing={(documents.data as any)?.signing ?? []} profileComplete={profileComplete} />
                   ) : (
                     <div className="mt-8 border border-gold/25 bg-ivory/[.03] p-8 text-center"><FileText className="mx-auto h-7 w-7 text-gold"/><h3 className="mt-5 font-display text-[24px] leading-snug">{DOCUMENTS_NOT_RELEASED_TITLE}</h3><p className="mx-auto mt-4 max-w-[34rem] text-[15px] leading-7 text-ivory/65">{DOCUMENTS_NOT_RELEASED_BODY}</p><p className="mx-auto mt-4 max-w-[34rem] text-[14px] leading-6 text-ivory/55">{PROFILE_ENCOURAGEMENT}</p><Link to="/portal/profile" onClick={() => setPanel(null)} className="mt-4 inline-block text-[14px] text-gold underline underline-offset-4 hover:text-ivory">{profileLinkLabel(profileComplete)} →</Link></div>
                   )}

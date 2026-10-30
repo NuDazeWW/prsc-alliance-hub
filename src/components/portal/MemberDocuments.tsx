@@ -38,6 +38,8 @@ type Props = {
   unavailable?: UnavailableNotice[];
   signing?: { document_id: string; state: SigningUiState }[];
   profileComplete?: boolean;
+  /** Called once, right after the member completes their last required action in this sitting. */
+  onAllRequiredDone?: () => void;
 };
 
 const TRACK_LABEL = { shared: "Shared Forum", prsc: "PRSC", dis: "DIS" } as const;
@@ -52,7 +54,7 @@ function Unavailable({ reason, label }: { reason: UnavailableReason; label?: str
   );
 }
 
-export function MemberDocuments({ documents: all, completions, entity, forum = true, forumOnly = false, forumCleared = true, entityReleased = { prsc: false, dis: false }, unavailable = [], signing = [], profileComplete = false }: Props) {
+export function MemberDocuments({ documents: all, completions, entity, forum = true, forumOnly = false, forumCleared = true, entityReleased = { prsc: false, dis: false }, unavailable = [], signing = [], profileComplete = false, onAllRequiredDone }: Props) {
   const documents = all.filter((d: any) => !d.superseded_at && (forum || d.journey_stage !== 1));
   const history = all.filter((d: any) => d.superseded_at);
   const [openId, setOpenId] = useState<string | null>(null);
@@ -68,7 +70,33 @@ export function MemberDocuments({ documents: all, completions, entity, forum = t
   // records are listed separately below and never change it.
   const progress = documentProgress(documents, history, new Set(doneMap.keys()));
 
-  if (open) return <DocumentReader doc={open} completion={doneMap.get(open.id) ?? null} onBack={() => setOpenId(null)} />;
+  // After the member finishes something, tell them plainly what just opened and make those cards stand out.
+  const [fresh, setFresh] = useState<Set<string>>(new Set());
+  const [notice, setNotice] = useState("");
+  const prev = useRef<{ locked: Set<string>; done: Set<string>; doneCount: number } | null>(null);
+  const doneKey = [...doneMap.keys()].sort().join(",");
+  const lockedKey = [...locked].sort().join(",");
+  useEffect(() => {
+    const now = { locked: new Set(locked), done: new Set(doneMap.keys()), doneCount: progress.required.done };
+    const before = prev.current;
+    prev.current = now;
+    if (!before || now.doneCount <= before.doneCount) return;
+    if (progress.required.total > 0 && now.doneCount >= progress.required.total) {
+      setFresh(new Set()); setNotice(""); setOpenId(null);
+      onAllRequiredDone?.();
+      return;
+    }
+    const opened = documents.filter((d) => isOnboarding(d) && before.locked.has(d.id) && !now.locked.has(d.id) && !now.done.has(d.id));
+    const finished = documents.filter((d) => now.done.has(d.id) && !before.done.has(d.id));
+    const next = opened.length ? opened : documents.filter((d) => isOnboarding(d) && !now.locked.has(d.id) && !now.done.has(d.id)).slice(0, 1);
+    setFresh(new Set(next.map((d) => d.id)));
+    setNotice(next.length
+      ? `${finished[0] ? `${finished[0].title} is complete. ` : ""}${next.length === 1 ? "Your next document is now open" : `${next.length} new documents are now open`}: ${next.map((d) => d.title).join(" and ")}.`
+      : "");
+    if (next.length) window.setTimeout(() => document.getElementById(`doc-card-${next[0].id}`)?.scrollIntoView({ behavior: "smooth", block: "center" }), 250);
+  }, [doneKey, lockedKey]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  if (open) return <DocumentReader doc={open} completion={doneMap.get(open.id) ?? null} onBack={() => setOpenId(null)} onDone={() => setOpenId(null)} />;
 
   return (
     <div className="mt-6">
@@ -81,6 +109,7 @@ export function MemberDocuments({ documents: all, completions, entity, forum = t
           {progress.alsoShownLabel && <p className="mt-1 text-[12px] text-ivory/55">{progress.alsoShownLabel}</p>}
         </div>
       </div>
+      {notice && <p role="status" className="prsc-flash mt-4 border border-gold bg-gold/10 px-5 py-3 text-[15px] text-ivory">{notice}</p>}
       <p className="mt-4 text-[14px] leading-6 text-ivory/65">
         {PROFILE_ENCOURAGEMENT}{" "}
         <Link to="/portal/profile" className="whitespace-nowrap text-gold underline underline-offset-4 hover:text-ivory">{profileLinkLabel(profileComplete)} →</Link>
@@ -95,7 +124,7 @@ export function MemberDocuments({ documents: all, completions, entity, forum = t
           <div key={stage.n} className="mt-8">
             <p className="text-[11px] uppercase tracking-[0.24em] text-gold">Stage {forum ? stage.n : stage.n - 1} · {stage.label}</p>
             <div className="mt-4 grid gap-4 lg:grid-cols-2">
-              {docs.map((d) => <DocCard key={d.id} d={d} done={doneMap.get(d.id)} lockReason={locked.has(d.id) ? lockReasonFor(d, entity, entityReleased) : undefined} signingState={signingByDoc.get(d.id)} onOpen={setOpenId} />)}
+              {docs.map((d) => <DocCard key={d.id} d={d} done={doneMap.get(d.id)} lockReason={locked.has(d.id) ? lockReasonFor(d, entity, entityReleased) : undefined} signingState={signingByDoc.get(d.id)} fresh={fresh.has(d.id)} onOpen={setOpenId} />)}
             </div>
           </div>
         );
@@ -137,10 +166,12 @@ export function MemberDocuments({ documents: all, completions, entity, forum = t
   );
 }
 
-function DocCard({ d, done, lockReason, signingState, onOpen }: { d: Doc; done?: Completion; lockReason?: "not_released" | "prior_action"; signingState?: SigningUiState; onOpen: (id: string) => void }) {
+function DocCard({ d, done, lockReason, signingState, fresh = false, onOpen }: { d: Doc; done?: Completion; lockReason?: "not_released" | "prior_action"; signingState?: SigningUiState; fresh?: boolean; onOpen: (id: string) => void }) {
   const locked = Boolean(lockReason);
+  const needsAction = !locked && !done;
   return (
-    <div className={`border border-gold/20 bg-ivory/[.03] p-5 ${locked ? "opacity-55" : ""}`}>
+    <div id={`doc-card-${d.id}`} className={`relative border p-5 ${locked ? "border-gold/20 bg-ivory/[.03] opacity-55" : done ? "border-gold/15 bg-ivory/[.02] opacity-80" : "border-gold bg-gold/[.06]"} ${fresh ? "prsc-flash" : ""}`}>
+      {needsAction && <p className="mb-2 inline-block bg-gold px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.2em] text-navy-deep">{fresh ? "New · your next step" : "Action needed"}</p>}
       {d.journey_track && <p className="text-[10px] uppercase tracking-[0.2em] text-ivory/45">{TRACK_LABEL[d.journey_track]}</p>}
       <h3 className="mt-1 font-display text-[19px] leading-snug">{d.title}</h3>
       {d.description && <p className="mt-2 text-[14px] leading-6 text-ivory/60">{d.description}</p>}
@@ -226,7 +257,7 @@ function BoldSignReader({ documentId, title, completed, signingState = "none", i
   </>;
 }
 
-function DocumentReader({ doc, completion, onBack }: { doc: Doc; completion: Completion | null; onBack: () => void }) {
+function DocumentReader({ doc, completion, onBack, onDone }: { doc: Doc; completion: Completion | null; onBack: () => void; onDone: () => void }) {
   const queryClient = useQueryClient();
   const documentUrl = usePrivateMedia(doc.url);
   const [readConfirmed, setReadConfirmed] = useState(false);
@@ -253,6 +284,7 @@ function DocumentReader({ doc, completion, onBack }: { doc: Doc; completion: Com
         queryClient.invalidateQueries({ queryKey: ["my-documents"] }),
         queryClient.invalidateQueries({ queryKey: ["portal-session"] }),
       ]);
+      onDone();
     },
   });
 

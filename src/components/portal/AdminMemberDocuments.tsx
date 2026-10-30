@@ -195,7 +195,7 @@ export function AdminMemberDocuments({ memberId, memberName, preview }: Props) {
   const releases: any[] = (docs.data as any)?.entityReleases ?? [];
   const active = list.filter((d: any) => !d.superseded_at);
   const journey = journeyStatus(active as any, doneIds, entity, activation, forum, cleared);
-  async function setDocGov(id: string, patch: { classification?: Classification; superseded?: boolean; forum_role?: string | null; signing_approved?: boolean; boldsign_template_id?: string | null; countersignature_required?: boolean; is_forum_prep?: boolean; sort_order?: number; title?: string; version_label?: string | null }) {
+  async function setDocGov(id: string, patch: { classification?: Classification; superseded?: boolean; forum_role?: string | null; signing_approved?: boolean; boldsign_template_id?: string | null; countersignature_required?: boolean; is_forum_prep?: boolean; sort_order?: number; title?: string; version_label?: string | null; file_path?: string }) {
     if (preview) return setStatus("Preview mode: classification is saved on the live admin page.");
     let third_party_permission: string | undefined;
     if (patch.classification === "restricted_opportunity") {
@@ -205,6 +205,20 @@ export function AdminMemberDocuments({ memberId, memberName, preview }: Props) {
     if (patch.superseded && !confirm("Mark as superseded? It leaves active queues; signed copies and history are kept.")) return;
     try { await updateDocumentGovernance({ data: { document_id: id, ...patch, third_party_permission } }); await docs.refetch(); }
     catch (e) { setStatus(userFacingError(e, "Could not update")); }
+  }
+  async function replacePdf(d: any, file: File | undefined) {
+    if (!file || preview) return;
+    if (!/\.pdf$/i.test(file.name)) return setStatus("Choose a PDF file.");
+    if (!confirm(`Replace the PDF for "${d.title}"? Members will see the new file straight away. Anything already acknowledged stays recorded against the old text.`)) return;
+    try {
+      const safe = file.name.replace(/[^a-zA-Z0-9._-]/g, "-");
+      const path = `${d.member_id ? d.member_id : "shared"}/${crypto.randomUUID()}-${safe}`;
+      const { error } = await supabase.storage.from(DOCUMENT_BUCKET).upload(path, file, { upsert: false });
+      if (error) throw error;
+      await updateDocumentGovernance({ data: { document_id: d.id, file_path: path } });
+      setStatus(`PDF replaced for ${d.title}.`);
+      await docs.refetch();
+    } catch (e) { setStatus(userFacingError(e, "The PDF could not be replaced.")); }
   }
   async function toggleForum(on: boolean) {
     if (preview) return setStatus("Preview mode: Forum participation is changed on the live admin page.");
@@ -485,6 +499,7 @@ export function AdminMemberDocuments({ memberId, memberName, preview }: Props) {
                   </select>
                     <Button type="button" variant="outline" size="sm" onClick={() => { const t = prompt("Document title:", d.title); if (t === null || !t.trim()) return; const v = prompt("Version label (leave blank for none):", (d as any).version_label ?? ""); if (v === null) return; void setDocGov(d.id, { title: t.trim(), version_label: v.trim() || null }); }}>Rename</Button>
                     <Button type="button" variant="outline" size="sm" onClick={() => { const v = prompt("Order within its stage (lower comes first):", String((d as any).sort_order ?? 0)); if (v === null) return; const n = Number(v); if (!Number.isInteger(n) || n < 0 || n > 999) return setStatus("Enter a whole number from 0 to 999."); void setDocGov(d.id, { sort_order: n }); }}>Order {(d as any).sort_order ?? 0}</Button>
+                    {(d as any).file_path && !(d as any).superseded_at && <label className="inline-flex cursor-pointer items-center rounded-md border border-input px-3 py-1 text-sm text-ivory/85 hover:bg-ivory/5">Replace PDF<input type="file" accept=".pdf" className="sr-only" onChange={(e) => { const f = e.target.files?.[0]; e.target.value = ""; void replacePdf(d, f); }} /></label>}
                   {(d as any).journey_stage === 1 && (
                     <label className="flex items-center gap-1 text-sm text-ivory/75" title="Stage 1 Forum documents the member can open before Forum clearance"><input type="checkbox" checked={!!(d as any).is_forum_prep} onChange={(e) => setDocGov(d.id, { is_forum_prep: e.target.checked })} /> Visible before clearance</label>
                   )}

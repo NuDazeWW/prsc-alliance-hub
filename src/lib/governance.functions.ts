@@ -122,12 +122,14 @@ export const updateDocumentGovernance = createServerFn({ method: "POST" })
     title: z.string().trim().min(3).max(200).optional(),
     sort_order: z.number().int().min(0).max(999).optional(),
     version_label: z.string().trim().max(60).nullable().optional(),
+    file_path: z.string().trim().min(5).max(400).regex(/^[A-Za-z0-9/_.\-]+\.pdf$/i).refine(v => !v.includes(".."), "Invalid file path").optional(),
   }).parse(i))
   .handler(async ({ context, data }) => {
     await assertAdmin(context);
     if (data.classification === "restricted_opportunity" && !data.third_party_permission)
       throw new Error("Record the source's permission before classifying material as Restricted Opportunity");
-    const patch: { classification?: string; classification_reviewed_at?: string; is_forum_prep?: boolean; superseded_at?: string | null; forum_role?: string | null; signing_approved?: boolean; boldsign_template_id?: string | null; countersignature_required?: boolean; title?: string; sort_order?: number; version_label?: string | null } = {};
+    const patch: { classification?: string; classification_reviewed_at?: string; is_forum_prep?: boolean; superseded_at?: string | null; forum_role?: string | null; signing_approved?: boolean; boldsign_template_id?: string | null; countersignature_required?: boolean; title?: string; sort_order?: number; version_label?: string | null; file_path?: string } = {};
+    if (data.file_path !== undefined) patch.file_path = data.file_path;
     if (data.title !== undefined) patch.title = data.title;
     if (data.sort_order !== undefined) patch.sort_order = data.sort_order;
     if (data.version_label !== undefined) patch.version_label = data.version_label;
