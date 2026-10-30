@@ -1,5 +1,10 @@
 # Portal build roadmap
 
+## Admin access and recovery (Oct 30)
+- [ ] Grant admin access to Bobbie and the confirmed Shirley address; retain the existing admin account
+- [ ] Check password recovery eligibility and request fresh instructions for the three accounts
+- [ ] Verify account roles and report email/address or recovery blockers
+
 ## Six-finding correction plan (Oct 27)
 - [x] Fix 1 Addendum gate on reads, list and file endpoint
 - [x] Fix 2 Exact-version restricted grants (and Executive Questions)
