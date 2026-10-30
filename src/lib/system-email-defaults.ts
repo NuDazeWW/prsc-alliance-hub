@@ -110,7 +110,7 @@ export const SYSTEM_EMAIL_DEFAULTS: Record<string, SystemEmailCopy> = {
     heading: "{{first_name}}, your Forum materials are ready.",
     body: "Your Forum participation materials are now available in your private Welcome Center: {{document_summary}}.\n\nEach item shows you what is needed — some ask you to review and acknowledge, others ask for a disclosure or a signature. Everything is completed inside the portal, and each step takes only a few minutes.",
     cta_label: "Review My Forum Requirements",
-    cta_url: PORTAL,
+    cta_url: `${PORTAL}#documents`,
     cta_subtext: "Sign in with your email and the password you created.",
     signatures: FOUNDER,
   },
