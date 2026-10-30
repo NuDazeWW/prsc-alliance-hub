@@ -11,6 +11,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSepara
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { addAdmin, listAdmins, removeAdmin, type AdminAccount } from "@/lib/admin-accounts.functions";
+import { passwordChangeAttributes } from "@/lib/password-change";
 
 type Item = { label: string; to: "/admin" | "/admin/send"; hash?: string; icon: React.ComponentType<{ className?: string }>; page?: "overview" | "send" };
 const ITEMS: Item[] = [
@@ -124,18 +125,18 @@ function PasswordInput({ value, onChange, label, auto }: { value: string; onChan
 }
 
 function ChangePasswordDialog({ open, onClose }: { open: boolean; onClose: () => void }) {
-  const [current, setCurrent] = useState("");
   const [next, setNext] = useState("");
   const [confirm, setConfirm] = useState("");
   const [busy, setBusy] = useState(false);
-  const reset = () => { setCurrent(""); setNext(""); setConfirm(""); };
+  const reset = () => { setNext(""); setConfirm(""); };
 
   async function submit(e: React.FormEvent) {
     e.preventDefault();
-    if (next.length < 12) return toast.error("Use at least 12 characters for the new password");
-    if (next !== confirm) return toast.error("The new passwords don't match");
+    let attributes: { password: string };
+    try { attributes = passwordChangeAttributes(next, confirm); }
+    catch (error) { return toast.error(userFacingError(error, "Check the new password")); }
     setBusy(true);
-    const { error } = await supabase.auth.updateUser({ password: next, current_password: current } as any);
+    const { error } = await supabase.auth.updateUser(attributes);
     setBusy(false);
     if (error) return toast.error(userFacingError(error, "Could not update your password. Please try again."));
     toast.success("Password updated");
@@ -148,10 +149,9 @@ function ChangePasswordDialog({ open, onClose }: { open: boolean; onClose: () =>
       <DialogContent className="border-gold/30 bg-navy-deep text-ivory">
         <DialogHeader>
           <DialogTitle className="font-display text-2xl">Change password</DialogTitle>
-          <DialogDescription className="text-ivory/60">Enter your current password, then choose a new one (at least 12 characters).</DialogDescription>
+          <DialogDescription className="text-ivory/60">Choose a new password (at least 12 characters).</DialogDescription>
         </DialogHeader>
         <form onSubmit={submit} className="space-y-4">
-          <PasswordInput label="Current password" value={current} onChange={setCurrent} auto="current-password" />
           <PasswordInput label="New password" value={next} onChange={setNext} auto="new-password" />
           <PasswordInput label="Confirm new password" value={confirm} onChange={setConfirm} auto="new-password" />
           <Button disabled={busy} className="w-full rounded-none bg-gold text-navy hover:bg-gold/90">{busy ? "Saving…" : "Update password"}</Button>
