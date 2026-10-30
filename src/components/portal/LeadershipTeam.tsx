@@ -10,7 +10,7 @@ import l3 from "@/assets/leaders/leader3.jpg";
 import l4 from "@/assets/leaders/leader4.jpg";
 import l5 from "@/assets/leaders/leader5.jpg";
 import l6 from "@/assets/leaders/leader6.jpg";
-import placeholder from "@/assets/leaders/placeholder.svg";
+import placeholder from "@/assets/leaders/placeholder.png";
 
 const DEMO: Pick<LeaderRow, "id" | "name" | "title" | "bio" | "photo_url" | "affiliation">[] = [
   ["Jonathan Reeves", "Chairman", l1],
@@ -66,7 +66,7 @@ export function LeadershipTeam() {
                 {p.photo_url ? (
                   <LeaderPhoto url={p.photo_url} name={p.name} />
                 ) : (
-                  <img src={placeholder} alt="" aria-hidden="true" width={80} height={64} className="h-16 w-20 shrink-0 object-cover" />
+                  <img src={placeholder} alt="" aria-hidden="true" width={80} height={64} className="h-16 w-20 shrink-0 bg-navy-deep object-contain p-1" />
                 )}
                 <span className="min-w-0 flex-1 py-2">
                   <span className="block truncate font-display text-[17px] text-ivory">{p.name}</span>
