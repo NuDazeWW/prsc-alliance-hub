@@ -1,9 +1,10 @@
 # Portal build roadmap
 
 ## Admin access and recovery (Oct 30)
-- [ ] Grant admin access to Bobbie and the confirmed Shirley address; retain the existing admin account
-- [ ] Check password recovery eligibility and request fresh instructions for the three accounts
-- [ ] Verify account roles and report email/address or recovery blockers
+- [x] Grant admin access to Bobbie and the confirmed Shirley address; retain the existing admin account
+- [x] Disable current-password requirement and request fresh instructions for all three; sent events verified
+- [x] Verify all three roles in signed-in admin controls and database; flag Shirley’s separate prscstandards.com member record
+- [ ] Complete inbox-link password replacement (waiting on each inbox owner; links cannot be read here)
 
 ## Six-finding correction plan (Oct 27)
 - [x] Fix 1 Addendum gate on reads, list and file endpoint
