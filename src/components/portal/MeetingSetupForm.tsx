@@ -97,7 +97,7 @@ export function MeetingSetupForm({
   defaultType = "board",
   allowNoInvitees = false,
   onCreated,
-  submitLabel = "Send availability request",
+  submitLabel = "Create availability request",
 }: {
   defaultType?: MeetingType;
   allowNoInvitees?: boolean;
@@ -118,6 +118,8 @@ export function MeetingSetupForm({
   const [respondBy, setRespondBy] = useState("");
   const [slots, setSlots] = useState<string[]>([]);
   const [invited, setInvited] = useState<string[]>([]);
+  // No separate email by default: the request appears in the member's portal (and after orientation) and rides with their invitation email.
+  const [sendEmailNow, setSendEmailNow] = useState(false);
 
   useEffect(() => {
     listInvitableMembers().then((m) => setMembers(m.members)).catch((e) => { console.error("listInvitableMembers failed", e); toast.error(userFacingError(e, "Could not load members to invite")); setMembers([]); });
@@ -149,9 +151,10 @@ export function MeetingSetupForm({
           respond_by: respondBy || undefined,
           slots: sortedSlots.map((s) => ({ starts_at: s })),
           invited_member_ids: invited,
+          send_email: sendEmailNow,
         },
       });
-      toast.success(invited.length ? `Meeting created — availability request sent to ${invited.length} member${invited.length === 1 ? "" : "s"}` : "Meeting created");
+      toast.success(invited.length ? (sendEmailNow ? `Meeting created — availability request emailed to ${invited.length} member${invited.length === 1 ? "" : "s"}` : `Meeting created — ${invited.length} member${invited.length === 1 ? "" : "s"} will see the request in their portal. No separate email was sent.`) : "Meeting created");
       setTitle("");
       setDescription("");
       setLocation("");
@@ -259,6 +262,16 @@ export function MeetingSetupForm({
           ))}
         </div>
       </div>
+
+      {!allowNoInvitees && (
+        <label className="mt-4 flex cursor-pointer items-start gap-2 text-sm text-ivory/80">
+          <input type="checkbox" checked={sendEmailNow} onChange={(e) => setSendEmailNow(e.target.checked)} className="mt-1 accent-gold" />
+          <span>
+            Also send a separate availability email now
+            <span className="block text-xs text-ivory/50">Leave unchecked and invited members simply see the request in their portal: as the banner on their Welcome Center and, for new members, right after they finish orientation. Attach it to a new invitation email from the Invitations screen to include the dates in that email.</span>
+          </span>
+        </label>
+      )}
 
       <Button type="button" disabled={saving} onClick={() => void submit()} className="mt-5 bg-gold text-navy hover:bg-gold/90">
         <CalendarDays className="mr-2 h-4 w-4" />

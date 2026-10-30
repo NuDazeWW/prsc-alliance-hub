@@ -43,6 +43,8 @@ const createPollSchema = z.object({
   timezone: z.string().trim().max(64).refine((tz) => { try { new Intl.DateTimeFormat("en-US", { timeZone: tz }); return true; } catch { return false; } }, "Unknown time zone").optional(),
   slots: z.array(slotSchema).min(1).max(12),
   invited_member_ids: z.array(z.string().uuid()),
+  /** false = no separate email: members see the request in their portal (and the invitation email, if attached to one). */
+  send_email: z.boolean().optional(),
 });
 
 export const createMeetingPoll = createServerFn({ method: "POST" })
@@ -97,7 +99,7 @@ export const createMeetingPoll = createServerFn({ method: "POST" })
     const build = await loadSystemEmail("meeting_poll");
     void founderSignature;
 
-    for (const m of members ?? []) {
+    for (const m of data.send_email === false ? [] : members ?? []) {
       await sendPortalEmail(
         m.email,
         build({ first_name: m.first_name?.trim() || "Hello", meeting_title: data.title, meeting_type: typeLabel, meeting_block: block }),
