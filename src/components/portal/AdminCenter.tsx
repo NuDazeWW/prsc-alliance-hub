@@ -777,8 +777,8 @@ export function AdminCenter({ page }: { page: "overview" | "send" }) {
   }
 
   async function saveWithoutInviting() {
-    const form = inviteFormRef.current;
-    if (!form?.reportValidity()) return;
+    const d0 = inviteDraft as any;
+    if (!d0.first_name?.trim() || !d0.last_name?.trim() || !/^\S+@\S+\.\S+$/.test(d0.email?.trim() ?? "")) return setStatus("Enter a first name, last name and valid email to save to the member list.");
     if (preview) return setStatus("Preview mode: saving to the roster works on the live admin page.");
     try {
       intendedDesignationSchema.parse(inviteIntended);
