@@ -165,6 +165,17 @@ function PortalHome() {
     window.addEventListener("hashchange", openFromHash);
     return () => window.removeEventListener("hashchange", openFromHash);
   }, []);
+  // A member with an open availability request they have not answered sees the availability panel once per sign-in,
+  // so a request added after orientation is not missed. Orientation, deep links and an already-open panel take priority.
+  useEffect(() => {
+    if (asMember || needsOrientation || panel !== null || !memberKey || !meetings.data) return;
+    if (panelFromHash(window.location.hash)) return;
+    const waiting = (meetings.data.polls ?? []).filter((p: any) => p.status === "open" && p.my_responses.length === 0);
+    if (!waiting.length) return;
+    const key = `prsc-availability-shown:${memberKey}:${waiting.map((p: any) => p.id).sort().join(",")}`;
+    try { if (window.sessionStorage.getItem(key)) return; window.sessionStorage.setItem(key, "1"); } catch { /* shown at most once per page load if storage is unavailable */ }
+    setPanel("meetings");
+  }, [meetings.data, needsOrientation, panel, memberKey, asMember]);
   async function acknowledgeOrientationReview() {
     // A failed save throws to the hub, which says so and lets the member try again; nothing is marked complete.
     if (isDemo) setDemoReviewed(true);
