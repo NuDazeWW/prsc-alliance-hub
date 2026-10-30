@@ -1639,6 +1639,36 @@ export type Database = {
           },
         ]
       }
+      test_archive: {
+        Row: {
+          archived_at: string
+          id: string
+          member_id: string | null
+          reason: string
+          row_data: Json
+          source_id: string
+          source_table: string
+        }
+        Insert: {
+          archived_at?: string
+          id?: string
+          member_id?: string | null
+          reason: string
+          row_data: Json
+          source_id: string
+          source_table: string
+        }
+        Update: {
+          archived_at?: string
+          id?: string
+          member_id?: string | null
+          reason?: string
+          row_data?: Json
+          source_id?: string
+          source_table?: string
+        }
+        Relationships: []
+      }
       user_roles: {
         Row: {
           created_at: string
