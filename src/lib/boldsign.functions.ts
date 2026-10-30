@@ -67,7 +67,7 @@ export const openBoldSign = createServerFn({ method: "POST" }).middleware([requi
         const prefill = isConflict && data.disclosures ? [
           { id: "conflict_answer", value: CONFLICT_LABELS[data.disclosures.conflict_answer] },
           { id: "conflict_details", value: data.disclosures.conflict_details || "None" },
-          { id: "disclosure_reference", value: hash! },
+          { id: "disclosure_reference", value: hash!.slice(0, 16) },
         ] : [];
         const sent = await (await boldSignPost(`template/send?templateId=${encodeURIComponent(doc.boldsign_template_id!)}`, {
           title: `${doc.title} (${doc.version_label})`,
@@ -97,7 +97,7 @@ export const openBoldSign = createServerFn({ method: "POST" }).middleware([requi
       if (error && error.code !== "23505") throw error;
       id = manualId;
     }
-    const result = await (await boldSignGet(`getEmbeddedSignLink?documentId=${encodeURIComponent(id)}&signerEmail=${encodeURIComponent(member.email)}&redirectUrl=${encodeURIComponent("https://access.prscstandards.org/portal#signed")}`)).json() as { signLink?: string };
+    const result = await (await boldSignGet(`getEmbeddedSignLink?documentId=${encodeURIComponent(id)}&signerEmail=${encodeURIComponent(member.email)}&redirectUrl=${encodeURIComponent("https://access.prscstandards.org/portal?signed=1")}`)).json() as { signLink?: string };
     if (!result.signLink || !/^https:\/\/([a-z0-9-]+\.)*boldsign\.com\//i.test(result.signLink)) throw new Error("BoldSign did not provide an authorized signing link");
     return { url: result.signLink, state: "ready" as const };
   });

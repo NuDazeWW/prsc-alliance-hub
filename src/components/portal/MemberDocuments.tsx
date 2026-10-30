@@ -189,7 +189,7 @@ function BoldSignReader({ documentId, title, completed, signingState = "none", i
     const objectUrl = URL.createObjectURL(file); setUrl(objectUrl);
   } });
   useEffect(() => () => { if (url.startsWith("blob:")) URL.revokeObjectURL(url); }, [url]);
-  // The signing frame reports back when BoldSign sends the signer to /portal#signed: close it and re-check the signature with BoldSign.
+  // The signing frame reports back when BoldSign sends the signer to /portal?signed=1: close it and re-check the signature with BoldSign.
   useEffect(() => {
     if (!url || url.startsWith("blob:")) return;
     const onMessage = (e: MessageEvent) => {

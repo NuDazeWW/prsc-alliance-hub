@@ -72,9 +72,9 @@ export const Route = createFileRoute("/_authenticated/portal/")({
   component: PortalEntry,
 });
 
-/** BoldSign returns the signer to /portal#signed inside the signing frame: tell the page that opened it, then stay blank. */
+/** BoldSign returns the signer to /portal?signed=1 inside the signing frame: tell the page that opened it, then stay blank. */
 function PortalEntry() {
-  const inSigningFrame = typeof window !== "undefined" && window.self !== window.top && window.location.hash === "#signed";
+  const inSigningFrame = typeof window !== "undefined" && window.self !== window.top && new URLSearchParams(window.location.search).get("signed") === "1";
   useEffect(() => {
     if (inSigningFrame) window.parent.postMessage({ type: "prsc-boldsign-done" }, window.location.origin);
   }, [inSigningFrame]);
