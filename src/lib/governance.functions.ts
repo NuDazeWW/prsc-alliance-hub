@@ -44,7 +44,8 @@ export const recordNdaVerification = createServerFn({ method: "POST" })
   .handler(async ({ context, data }) => {
     await assertAdmin(context);
     const now = new Date().toISOString();
-    const { error } = await context.supabase.from("portal_members").update({
+    const { supabaseAdmin: sbAdmin } = await import("@/integrations/supabase/client.server");
+    const { error } = await sbAdmin.from("portal_members").update({
       nda_verified_at: now, nda_verified_by: context.userId, nda_reference: data.reference, nda_entities: data.entities, nda_scope: data.scope,
     }).eq("id", data.member_id);
     if (error) throw error;
@@ -70,7 +71,8 @@ export const recordRoleReview = createServerFn({ method: "POST" })
     if (combo.tier === "none") throw new Error("This member's role needs no combination review");
     if (data.decision === "approved" && (data.prsc_scope.length < 3 || data.dis_scope.length < 3 || data.conflict_controls.length < 3))
       throw new Error("Approval needs a separate engagement scope for each entity and the conflict controls applied");
-    const { error } = await context.supabase.from("portal_members").update({ role_review_status: data.decision }).eq("id", data.member_id);
+    const { supabaseAdmin: sbAdmin } = await import("@/integrations/supabase/client.server");
+    const { error } = await sbAdmin.from("portal_members").update({ role_review_status: data.decision }).eq("id", data.member_id);
     if (error) throw error;
     await log(context, data.member_id, "role_combination", data.decision, data.notes, { prsc_scope: data.prsc_scope, dis_scope: data.dis_scope, conflict_controls: data.conflict_controls });
     return { ok: true };
@@ -88,7 +90,8 @@ export const recordForumClearance = createServerFn({ method: "POST" })
   }).parse(i))
   .handler(async ({ context, data }) => {
     await assertAdmin(context);
-    const { data: m } = await context.supabase.from("portal_members").select("nda_verified_at").eq("id", data.member_id).single();
+    const { supabaseAdmin: sbRead } = await import("@/integrations/supabase/client.server");
+    const { data: m } = await sbRead.from("portal_members").select("nda_verified_at").eq("id", data.member_id).single();
     if ((data.decision === "cleared" || data.decision === "cleared_restricted") && !m?.nda_verified_at) throw new Error("Verify the NDA before clearing for the Forum");
     if (data.decision === "cleared" || data.decision === "cleared_restricted") {
       const problems = await clearanceProblemsFor(data.member_id);
@@ -96,7 +99,10 @@ export const recordForumClearance = createServerFn({ method: "POST" })
     }
     if (data.decision === "cleared_restricted" && data.restrictions.length < 3) throw new Error("List the restrictions that apply");
     const cleared = data.decision === "cleared" || data.decision === "cleared_restricted";
-    const { error } = await context.supabase.from("portal_members").update({
+    // The clearance columns are not writable by a signed-in browser session (column permissions), so the write goes through the
+    // server after assertAdmin has verified the caller is an administrator.
+    const { supabaseAdmin: sbAdmin } = await import("@/integrations/supabase/client.server");
+    const { error } = await sbAdmin.from("portal_members").update({
       forum_clearance_status: data.decision,
       forum_cleared_at: cleared ? new Date().toISOString() : null,
       forum_cleared_by: cleared ? context.userId : null,
