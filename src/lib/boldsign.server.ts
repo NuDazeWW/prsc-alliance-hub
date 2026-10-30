@@ -10,7 +10,8 @@ async function boldSignFailure(path: string, response: Response): Promise<Error>
   let detail = "";
   try { detail = (await response.text()).replace(/\s+/g, " ").slice(0, 300); } catch { /* body unavailable */ }
   console.error("boldsign.api_error", JSON.stringify({ stage, status: response.status, detail }));
-  return Object.assign(new Error(`BoldSign request failed (${response.status})`), { boldsignStage: stage, boldsignStatus: response.status });
+  const brief = detail.replace(/[^\w .,:;'"()/-]/g, "").slice(0, 140);
+  return Object.assign(new Error(`BoldSign request failed (${response.status}) at ${stage.split("/").pop()}${brief ? `: ${brief}` : ""}`), { boldsignStage: stage, boldsignStatus: response.status });
 }
 
 export async function boldSignGet(path: string): Promise<Response> {
