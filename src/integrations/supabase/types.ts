@@ -1171,8 +1171,8 @@ export type Database = {
           forum_cleared_by: string | null
           forum_restrictions: string | null
           id: string
-          invited_at: string
           intended_designation: Json | null
+          invited_at: string
           is_candidate: boolean
           is_methodology_committee: boolean
           last_access_at: string | null
@@ -1215,8 +1215,8 @@ export type Database = {
           forum_cleared_by?: string | null
           forum_restrictions?: string | null
           id?: string
-          invited_at?: string
           intended_designation?: Json | null
+          invited_at?: string
           is_candidate?: boolean
           is_methodology_committee?: boolean
           last_access_at?: string | null
@@ -1259,8 +1259,8 @@ export type Database = {
           forum_cleared_by?: string | null
           forum_restrictions?: string | null
           id?: string
-          invited_at?: string
           intended_designation?: Json | null
+          invited_at?: string
           is_candidate?: boolean
           is_methodology_committee?: boolean
           last_access_at?: string | null
@@ -1713,14 +1713,6 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      save_member_invitation_notes: {
-        Args: { p_member_id: string; p_expected_updated_at: string; p_why_you: string; p_linkedin_url: string | null; p_admin_id: string }
-        Returns: Json
-      }
-      save_member_intended_designation: {
-        Args: { p_member_id: string; p_expected_updated_at: string; p_designation: Json; p_admin_id: string }
-        Returns: Json
-      }
       bind_invitation_nda: {
         Args: {
           p_email: string
@@ -1749,6 +1741,25 @@ export type Database = {
         Returns: boolean
       }
       portal_access_current: { Args: never; Returns: boolean }
+      save_member_intended_designation: {
+        Args: {
+          p_admin_id: string
+          p_designation: Json
+          p_expected_updated_at: string
+          p_member_id: string
+        }
+        Returns: Json
+      }
+      save_member_invitation_notes: {
+        Args: {
+          p_admin_id: string
+          p_expected_updated_at: string
+          p_linkedin_url: string
+          p_member_id: string
+          p_why_you: string
+        }
+        Returns: Json
+      }
     }
     Enums: {
       app_role:

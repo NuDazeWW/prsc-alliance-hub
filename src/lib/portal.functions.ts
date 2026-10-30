@@ -1349,7 +1349,7 @@ export const saveMemberInvitationNotes = createServerFn({ method: "POST" })
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { data: saved, error } = await supabaseAdmin.rpc("save_member_invitation_notes", {
       p_member_id: data.member_id, p_expected_updated_at: data.expected_updated_at,
-      p_why_you: data.why_you, p_linkedin_url: data.linkedin_url, p_admin_id: context.userId,
+      p_why_you: data.why_you, p_linkedin_url: data.linkedin_url ?? "", p_admin_id: context.userId,
     });
     if (error) {
       if (error.code === "40001") throw new Error("This member’s record changed. Reload their details before saving the invitation note again.");
