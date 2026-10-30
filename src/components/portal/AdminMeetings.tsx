@@ -1,11 +1,12 @@
 import { meetingTypeLabel } from "@/lib/meeting-block";
 import { userFacingError } from "@/lib/user-facing-error";
 import { useEffect, useState } from "react";
-import { CalendarDays, Check, Clock, MapPin, Plus, RefreshCw, Video, X } from "lucide-react";
+import { CalendarDays, Check, Clock, MapPin, Plus, RefreshCw, Trash2, Video, X } from "lucide-react";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { toast } from "sonner";
 import {
   cancelPoll,
+  deletePoll,
   confirmPollSlot,
   createMeetingPoll,
   listAdminPolls,
@@ -85,6 +86,18 @@ export function AdminMeetings() {
     }
   }
 
+  async function remove(p: any) {
+    const sure = window.confirm(`Delete "${p.title}" permanently?\n\nThis removes the meeting, its time options and every member's answers, and releases any Outlook holds. This cannot be undone.`);
+    if (!sure) return;
+    try {
+      const res = await deletePoll({ data: { poll_id: p.id } });
+      toast.success(res.calendarWarning ? "Meeting deleted. Check Outlook for a leftover hold." : "Meeting deleted");
+      await refresh();
+    } catch (e) {
+      toast.error(userFacingError(e, "Could not delete the meeting"));
+    }
+  }
+
   const inputCls =
     "w-full min-w-0 rounded-md border border-gold/25 bg-navy-deep/60 px-3 py-2 text-sm text-ivory placeholder:text-ivory/30 focus:border-gold focus:outline-none";
 
@@ -156,6 +169,9 @@ export function AdminMeetings() {
                     </span>
                   </div>
                   <div className="mt-2 flex flex-wrap items-center gap-2 text-[11px]">
+                    <button type="button" onClick={() => void remove(p)} className="inline-flex items-center gap-1 text-rose-300/80 hover:text-rose-300">
+                      <Trash2 className="h-3 w-3" /> Delete meeting
+                    </button>
                     {p.calendar_sync_error ? (
                       <span className="rounded-full border border-amber-400/40 px-2 py-0.5 text-amber-300" title={p.calendar_sync_error}>Calendar not synced</span>
                     ) : p.calendar_synced_at ? (

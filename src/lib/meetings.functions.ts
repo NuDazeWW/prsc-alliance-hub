@@ -255,6 +255,33 @@ export const cancelPoll = createServerFn({ method: "POST" })
     return { ok: true };
   });
 
+/** Permanently removes one meeting (any status) with its time options, answers and send records. Outlook holds are released first. */
+export const deletePoll = createServerFn({ method: "POST" })
+  .middleware([requirePortalAccess])
+  .inputValidator((input) => z.object({ poll_id: z.string().uuid() }).parse(input))
+  .handler(async ({ context, data }) => {
+    await assertAdmin(context);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { data: poll } = await supabaseAdmin.from("meeting_polls").select("id, title, status").eq("id", data.poll_id).maybeSingle();
+    if (!poll) throw new Error("Meeting not found");
+    // Cancelling first lets the calendar sync remove any Outlook holds before the records disappear.
+    let calendarWarning: string | null = null;
+    if (poll.status !== "cancelled") {
+      await supabaseAdmin.from("meeting_polls").update({ status: "cancelled" }).eq("id", data.poll_id);
+    }
+    const { safeReconcile } = await import("@/lib/outlook-calendar.server");
+    const rec: any = await safeReconcile(data.poll_id);
+    if (rec && rec.ok === false && rec.error) calendarWarning = String(rec.error).slice(0, 200);
+    for (const table of ["meeting_calendar_holds", "meeting_confirmation_sends", "meeting_poll_responses", "meeting_poll_notes", "meeting_poll_slots"]) {
+      const { error } = await supabaseAdmin.from(table as any).delete().eq("poll_id", data.poll_id);
+      if (error) throw new Error(`Could not clear ${table.replace(/_/g, " ")}`);
+    }
+    const { error } = await supabaseAdmin.from("meeting_polls").delete().eq("id", data.poll_id);
+    if (error) throw error;
+    await supabaseAdmin.from("portal_activity").insert({ member_id: null, actor_user_id: context.userId, event_type: "meeting_deleted" as any, metadata: { poll_id: data.poll_id, title: poll.title, status: poll.status } }).then(() => undefined, () => undefined);
+    return { ok: true, calendarWarning };
+  });
+
 export const resyncPollCalendar = createServerFn({ method: "POST" })
   .middleware([requirePortalAccess])
   .inputValidator((input) => z.object({ poll_id: z.string().uuid() }).parse(input))

@@ -53,6 +53,7 @@ import {
   importPortalMembers,
   invitePortalMember,
   deletePortalMember,
+  purgePortalMember,
   nudgeMember,
   setMemberAccess,
   setMemberPackageStatus,
@@ -640,6 +641,32 @@ export function AdminCenter({ page }: { page: "overview" | "send" }) {
       await overview.refetch();
     } catch (error) {
       setMemberBusy(userFacingError(error, "Could not update the package status."));
+    }
+  }
+
+  async function purgeMember(m: { id: string; email: string; first_name?: string; last_name?: string }) {
+    if (preview) return setMemberBusy("Preview mode: permanent deletion is available once you are signed in.");
+    const typed = window.prompt(`Permanently delete ${[m.first_name, m.last_name].filter(Boolean).join(" ")} (${m.email})?\n\nTheir account, profile, documents, answers and email history are erased. A private snapshot is kept. This cannot be undone.\n\nType their email address to confirm:`);
+    if (typed === null) return;
+    try {
+      let acknowledge = false;
+      try {
+        await purgePortalMember({ data: { member_id: m.id, confirm_email: typed } });
+      } catch (error) {
+        const msg = error instanceof Error ? error.message : String(error);
+        const found = /SIGNED_RECORDS:(\d+)/.exec(msg);
+        if (!found) throw error;
+        if (!window.confirm(`This member has ${found[1]} completed signed record${found[1] === "1" ? "" : "s"}. Deleting them removes those records from the portal (the signed PDF files stay in storage, and a snapshot is kept). Delete anyway?`)) return;
+        acknowledge = true;
+        await purgePortalMember({ data: { member_id: m.id, confirm_email: typed, acknowledge_signed_records: true } });
+      }
+      void acknowledge;
+      if (detailId === m.id) setDetailId(null);
+      setSelectedMemberIds((c) => c.filter((x) => x !== m.id));
+      setMemberBusy("Member permanently deleted. A private snapshot was kept.");
+      await Promise.all([overview.refetch(), email.refetch()]);
+    } catch (error) {
+      setMemberBusy(userFacingError(error, "Could not delete the member."));
     }
   }
 
@@ -1783,7 +1810,7 @@ export function AdminCenter({ page }: { page: "overview" | "send" }) {
                     className="rounded-none border-red-400/35 text-red-800 hover:bg-red-400/10 hover:text-red-900"
                     onClick={() => void removeSelectedMembers()}
                   >
-                    <Trash2 className="h-3.5 w-3.5" /> Delete selected members ({selectedMemberIds.length})
+                    <Trash2 className="h-3.5 w-3.5" /> Remove selected members ({selectedMemberIds.length})
                   </Button>
                   <InfoTip
                     title="Members"
@@ -1957,6 +1984,11 @@ export function AdminCenter({ page }: { page: "overview" | "send" }) {
                                 className="flex items-center gap-1.5 border border-gold/40 px-2 py-1 text-xs text-gold transition-colors hover:bg-gold/10 disabled:opacity-50"
                               >
                                 <Send className="h-3.5 w-3.5" /> {nudging === m.id ? "Sending…" : "Nudge"}
+                              </button>
+                            )}
+                            {revoked && (
+                              <button type="button" onClick={() => void purgeMember(m as any)} className="flex items-center gap-1.5 border border-red-400/60 px-2 py-1 text-xs text-red-300 transition-colors hover:bg-red-400/15">
+                                <Trash2 className="h-3.5 w-3.5" /> Delete permanently
                               </button>
                             )}
                             <button
@@ -2141,6 +2173,11 @@ export function AdminCenter({ page }: { page: "overview" | "send" }) {
                             className="flex items-center justify-center gap-1.5 border border-gold/40 px-2.5 py-2 text-sm text-gold transition-colors hover:bg-gold/10 disabled:opacity-50"
                           >
                             <Send className="h-3.5 w-3.5" /> {nudging === m.id ? "Sending…" : "Nudge now"}
+                          </button>
+                        )}
+                        {revoked && (
+                          <button type="button" onClick={() => void purgeMember(m as any)} className="flex items-center justify-center gap-1.5 border border-red-400/60 px-2.5 py-2 text-sm text-red-300 transition-colors hover:bg-red-400/15">
+                            <Trash2 className="h-3.5 w-3.5" /> Delete permanently
                           </button>
                         )}
                         <button
@@ -2573,6 +2610,8 @@ function activityLabel(eventType: string) {
     profile_submitted: "Profile submitted",
     inquiry_submitted: "Private question sent",
     access_revoked: "Access revoked",
+    member_deleted: "Member permanently deleted",
+    meeting_deleted: "Meeting deleted",
     access_restored: "Access restored",
     package_status_changed: "Package status updated",
     document_added: "Document added",

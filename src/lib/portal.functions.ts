@@ -594,6 +594,67 @@ export const deletePortalMember = createServerFn({ method: "POST" })
     return { ok: true };
   });
 
+/**
+ * Permanently deletes a member who has ALREADY been removed (access revoked). Guardrails: admin only, never yourself or another
+ * administrator, the exact email must be typed, and members with completed signatures need a second explicit acknowledgement.
+ * A JSON snapshot of the member's records is stored privately before anything is deleted. Files in storage are never deleted.
+ */
+export const purgePortalMember = createServerFn({ method: "POST" })
+  .middleware([requirePortalAccess])
+  .inputValidator((input) => z.object({ member_id: z.string().uuid(), confirm_email: z.string().trim().min(3).max(320), acknowledge_signed_records: z.boolean().optional() }).parse(input))
+  .handler(async ({ context, data }) => {
+    await assertAdmin(context);
+    const { supabaseAdmin: sb } = await import("@/integrations/supabase/client.server");
+    const { data: member, error: mErr } = await sb.from("portal_members").select("*").eq("id", data.member_id).maybeSingle();
+    if (mErr || !member) throw new Error("Member not found");
+    if (member.status !== "revoked") throw new Error("Remove this member first (Revoke access), then delete permanently.");
+    if (member.user_id && member.user_id === context.userId) throw new Error("You cannot delete your own account.");
+    if (String(member.email).toLowerCase() !== data.confirm_email.toLowerCase()) throw new Error("The email you typed does not match this member.");
+    let isAdminUser = false;
+    if (member.user_id) {
+      const { data: r } = await sb.from("user_roles").select("role").eq("user_id", member.user_id).eq("role", "admin").maybeSingle();
+      isAdminUser = Boolean(r);
+    }
+    if (isAdminUser) throw new Error("Administrator accounts cannot be deleted here.");
+
+    const [{ count: completedSignings }, { count: signedAcks }] = await Promise.all([
+      sb.from("boldsign_assignments").select("id", { count: "exact", head: true }).eq("member_id", member.id).eq("status", "completed"),
+      sb.from("portal_document_acknowledgements").select("id", { count: "exact", head: true }).eq("member_id", member.id).eq("kind", "signed"),
+    ]);
+    const signedTotal = (completedSignings ?? 0) + (signedAcks ?? 0);
+    if (signedTotal > 0 && !data.acknowledge_signed_records) throw new Error(`SIGNED_RECORDS:${signedTotal}`);
+
+    const TABLES = ["portal_profiles", "portal_document_acknowledgements", "boldsign_assignments", "governance_reviews", "entity_onboarding_releases", "meeting_poll_responses", "meeting_poll_notes", "meeting_confirmation_sends", "executive_questions", "restricted_document_grants", "question_round_responses", "portal_inquiries", "invitation_nda_evidence", "forum_communication_sends", "portal_email_sends", "leadership_team", "portal_documents"];
+    const snapshot: Record<string, unknown> = { deleted_at: new Date().toISOString(), deleted_by: context.userId, member };
+    for (const t of TABLES) {
+      const { data: rows, error } = await sb.from(t as any).select("*").eq("member_id", member.id);
+      if (!error) snapshot[t] = rows;
+    }
+    const path = `deleted-members/${member.id}-${Date.now()}.json`;
+    const { error: upErr } = await sb.storage.from("member-documents").upload(path, new Blob([JSON.stringify(snapshot, null, 2)], { type: "application/json" }), { upsert: false });
+    if (upErr) throw new Error("Could not store the safety snapshot, so nothing was deleted.");
+
+    for (const t of TABLES) {
+      if (t === "portal_documents") continue; // private documents are removed with the member by the database
+      await sb.from(t as any).delete().eq("member_id", member.id);
+    }
+    // Remove any other table that still points at this member, following the database's own report.
+    let lastError: any = null;
+    for (let i = 0; i < 25; i++) {
+      const { error } = await sb.from("portal_members").delete().eq("id", member.id);
+      if (!error) { lastError = null; break; }
+      lastError = error;
+      const table = /on table "([a-z_0-9]+)"\s*$/i.exec(String(error.message))?.[1] ?? /on table "([a-z_0-9]+)"/i.exec(String(error.message))?.[1];
+      if (!table || table === "portal_members") break;
+      const { error: delErr } = await sb.from(table as any).delete().eq("member_id", member.id);
+      if (delErr) break;
+    }
+    if (lastError) throw new Error("The member could not be fully deleted. Their access stays revoked and nothing else changed. " + String(lastError.message).slice(0, 160));
+    if (member.user_id) await sb.auth.admin.deleteUser(member.user_id).catch(() => undefined);
+    await sb.from("portal_activity").insert({ member_id: null, actor_user_id: context.userId, event_type: "member_deleted" as any, metadata: { email_hash_hint: String(member.email).slice(0, 2) + "***", snapshot: path, signed_records: signedTotal } }).then(() => undefined, () => undefined);
+    return { ok: true, snapshot: path, signedRecords: signedTotal };
+  });
+
 export const setMemberPackageStatus = createServerFn({ method: "POST" })
   .middleware([requirePortalAccess])
   .inputValidator((input) =>
