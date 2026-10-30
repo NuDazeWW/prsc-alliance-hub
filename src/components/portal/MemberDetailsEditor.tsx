@@ -10,7 +10,7 @@ import { IntendedDesignationFields, INTENDED_ROLE_OPTIONS } from "./IntendedDesi
 type Entity = "prsc" | "dis" | "both";
 type Role = "board_member" | "advisor" | "prsc_board_dis_advisor" | "prsc_advisor_dis_board" | "methodology_committee";
 type Member = {
-  id: string; first_name: string; last_name: string; organization: string; title: string | null;
+  id: string; email?: string; first_name: string; last_name: string; organization: string; title: string | null;
   entity: Entity; role: Role | string; is_candidate?: boolean; is_methodology_committee?: boolean;
   updated_at?: string; intended_designation?: IntendedDesignation | null;
 };
@@ -18,7 +18,7 @@ type Member = {
 /** Admin edit of current employment and PRSC/DIS designation, including Forum candidate → appointed promotion. */
 export function MemberDetailsEditor({ member, preview, onSaved }: { member: Member; preview: boolean; onSaved: () => void }) {
   const initial = () => ({
-    first_name: member.first_name, last_name: member.last_name, organization: member.organization, title: member.title ?? "",
+    email: member.email ?? "", first_name: member.first_name, last_name: member.last_name, organization: member.organization, title: member.title ?? "",
     is_candidate: !!member.is_candidate, entity: member.entity, role: (member.role as Role) ?? "board_member",
     is_methodology_committee: !!member.is_methodology_committee,
   });
@@ -56,7 +56,8 @@ export function MemberDetailsEditor({ member, preview, onSaved }: { member: Memb
     if (preview) return setMessage("Preview mode: edits are available once you are signed in.");
     setBusy(true); setMessage("");
     try {
-      await updateMemberDetails({ data: { member_id: member.id, ...form } });
+      const { email, ...rest } = form;
+      await updateMemberDetails({ data: { member_id: member.id, ...rest, ...(email.trim() ? { email: email.trim() } : {}) } });
       setMessage("Member details saved.");
       setOpen(false);
       onSaved();
@@ -100,6 +101,10 @@ export function MemberDetailsEditor({ member, preview, onSaved }: { member: Memb
         <form onSubmit={save} className="mt-5 grid gap-3 sm:grid-cols-2">
           <Input value={form.first_name} onChange={(e) => setForm({ ...form, first_name: e.target.value })} placeholder="First name" aria-label="First name" required className="text-base" />
           <Input value={form.last_name} onChange={(e) => setForm({ ...form, last_name: e.target.value })} placeholder="Last name" aria-label="Last name" required className="text-base" />
+          <label className="text-sm text-ivory/70 sm:col-span-2">Email address (sign-in and all portal emails)
+            <Input type="email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} aria-label="Email address" required className="mt-1 text-base" />
+            {form.email.trim().toLowerCase() !== (member.email ?? "").toLowerCase() && <span className="mt-1 block text-xs text-gold">Saving moves their sign-in to this address. No email is sent; their NDA verification must be re-reviewed for the new address.</span>}
+          </label>
           <p className="text-sm uppercase tracking-[0.16em] text-gold/80 sm:col-span-2">Current position</p>
           <Input value={form.organization} onChange={(e) => setForm({ ...form, organization: e.target.value })} placeholder="Current company / organization (optional)" aria-label="Current company or organization (optional)" className="text-base" />
           <Input value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} placeholder="Current professional title (optional)" aria-label="Current professional title" className="text-base" />

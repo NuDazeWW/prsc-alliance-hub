@@ -776,6 +776,29 @@ export function AdminCenter({ page }: { page: "overview" | "send" }) {
     }
   }
 
+  async function saveWithoutInviting() {
+    const d0 = inviteDraft as any;
+    if (!d0.first_name?.trim() || !d0.last_name?.trim() || !/^\S+@\S+\.\S+$/.test(d0.email?.trim() ?? "")) return setStatus("Enter a first name, last name and valid email to save to the member list.");
+    if (preview) return setStatus("Preview mode: saving to the roster works on the live admin page.");
+    try {
+      intendedDesignationSchema.parse(inviteIntended);
+      const d = inviteDraft as any;
+      const res = await importPortalMembers({ data: { send_invitations: false, rows: [{
+        email: d.email, first_name: d.first_name, last_name: d.last_name, organization: d.organization ?? "", title: d.title ?? "",
+        entity: d.entity, role: d.role, why_you: d.why_you ?? "", linkedin_url: aiLinkedin || null,
+        is_methodology_committee: d.is_methodology_committee, participates_in_forum: d.participates_in_forum, is_candidate: d.is_candidate,
+        intended_designation: d.intended_designation ?? inviteIntended,
+      }] } });
+      const r = res.results[0];
+      if (!r?.ok) throw new Error(r?.message ?? "Could not be saved");
+      setStatus("Saved to the member list. No invitation was sent.");
+      resetInvitation();
+      await overview.refetch();
+    } catch (error) {
+      setStatus(userFacingError(error, "The member could not be saved."));
+    }
+  }
+
   async function openInvitePreview() {
     const form = inviteFormRef.current;
     if (!form?.reportValidity()) return;
@@ -1283,6 +1306,7 @@ export function AdminCenter({ page }: { page: "overview" | "send" }) {
                 <Button type="button" variant="outline" className="rounded-none text-base" onClick={() => void openInvitePreview()}>
                   <Eye className="mr-2 h-4 w-4" /> Preview invitation
                 </Button>
+                {!inviteCandidateId && <Button type="button" variant="outline" className="rounded-none text-base" onClick={() => void saveWithoutInviting()}>Save without inviting</Button>}
                 <Button type="submit" disabled={Boolean(inviteCandidateId && (!inviteNdaReviewId || !inviteGov.nda_confirmed || inviteNda?.eligibilityProblem || inviteNdaLoading || inviteNdaSaving))} className="rounded-none bg-gold text-base font-semibold text-navy opacity-100 hover:bg-gold/85 hover:text-navy focus-visible:bg-gold/85 active:bg-gold/75">Send invitation</Button>
                 {status && <p className="text-base text-ivory/60 sm:col-span-2">{status}</p>}
               </form>
