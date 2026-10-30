@@ -1360,6 +1360,7 @@ export const saveMemberInvitationNotes = createServerFn({ method: "POST" })
 
 const memberDetailsSchema = z.object({
   member_id: z.string().uuid(),
+  email: z.string().trim().email().max(200).optional(),
   first_name: z.string().trim().min(1).max(80), last_name: z.string().trim().min(1).max(80),
   organization: z.string().trim().max(180).default(""), title: z.string().trim().max(160).default(""),
   is_candidate: z.boolean(),
@@ -1374,8 +1375,17 @@ export const updateMemberDetails = createServerFn({ method: "POST" })
   .handler(async ({ context, data }) => {
     await assertAdmin(context);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const { data: m } = await supabaseAdmin.from("portal_members").select("id, user_id, entity, role, is_candidate, is_methodology_committee, nda_entities, prsc_activated_at, dis_activated_at").eq("id", data.member_id).maybeSingle();
+    const { data: m } = await supabaseAdmin.from("portal_members").select("id, user_id, email, entity, role, is_candidate, is_methodology_committee, nda_entities, prsc_activated_at, dis_activated_at").eq("id", data.member_id).maybeSingle();
     if (!m) throw new Error("Member not found");
+    const newEmail = data.email?.toLowerCase();
+    const emailChanged = Boolean(newEmail && newEmail !== m.email.toLowerCase());
+    if (emailChanged) {
+      const { data: taken } = await supabaseAdmin.from("portal_members").select("id").eq("email", newEmail!).neq("id", m.id).maybeSingle();
+      if (taken) throw new Error("Another member already uses that email address.");
+      // The sign-in account moves with the record; no email is sent to either address.
+      const { error: authError } = await supabaseAdmin.auth.admin.updateUserById(m.user_id, { email: newEmail!, email_confirm: true });
+      if (authError) throw new Error(authError.message.includes("already") ? "That email address already belongs to another sign-in account." : "The sign-in email could not be changed. Nothing was saved.");
+    }
     const entity = data.is_candidate ? (m.nda_entities === "dis" ? "dis" : "prsc") : data.entity;
     const role = data.is_candidate ? "advisor" : data.role;
     const committee = data.is_candidate ? false : data.is_methodology_committee ?? false;
@@ -1388,8 +1398,11 @@ export const updateMemberDetails = createServerFn({ method: "POST" })
       first_name: data.first_name, last_name: data.last_name, organization: data.organization, title: data.title || null,
       is_candidate: data.is_candidate, entity, role, is_methodology_committee: committee,
       ...(designationChanged ? { role_review_status: initialRoleReviewStatus(entity, role, committee) } : {}),
+      // NDA verification is bound to the recipient's email, so it must be re-reviewed for the new address.
+      ...(emailChanged ? { email: newEmail, nda_verified_at: null, nda_verified_by: null } : {}),
     }).eq("id", m.id);
     if (error) throw error;
+    if (emailChanged) await supabaseAdmin.from("portal_activity").insert({ member_id: m.id, actor_user_id: context.userId, event_type: "member_email_changed", metadata: { previous_email: m.email, new_email: newEmail } });
     if (role !== m.role) {
       await supabaseAdmin.from("user_roles").delete().eq("user_id", m.user_id).neq("role", "admin");
       const { error: roleError } = await supabaseAdmin.from("user_roles").upsert({ user_id: m.user_id, role }, { onConflict: "user_id,role" });
