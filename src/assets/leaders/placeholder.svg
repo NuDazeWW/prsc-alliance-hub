@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 80 64" role="img" aria-label="Photo to come">
+  <rect width="80" height="64" fill="#0d1a2e"/>
+  <circle cx="40" cy="32" r="25" fill="none" stroke="#e9e4d6" stroke-opacity=".85" stroke-width="2"/>
+  <ellipse cx="40" cy="25" rx="8" ry="10" fill="#e9e4d6" fill-opacity=".9"/>
+  <path d="M19.5 49c3-9 10-12.5 20.5-12.5S57.500 40 60.500 49A25 25 0 0 1 19.500 49Z" fill="#e9e4d6" fill-opacity=".9"/>
+</svg>

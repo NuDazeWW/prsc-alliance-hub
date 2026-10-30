@@ -10,6 +10,7 @@ import l3 from "@/assets/leaders/leader3.jpg";
 import l4 from "@/assets/leaders/leader4.jpg";
 import l5 from "@/assets/leaders/leader5.jpg";
 import l6 from "@/assets/leaders/leader6.jpg";
+import placeholder from "@/assets/leaders/placeholder.svg";
 
 const DEMO: Pick<LeaderRow, "id" | "name" | "title" | "bio" | "photo_url" | "affiliation">[] = [
   ["Jonathan Reeves", "Chairman", l1],
@@ -54,7 +55,6 @@ export function LeadershipTeam() {
       <ul className="mt-6 space-y-3">
         {team.map((p) => {
           const isOpen = open === p.id;
-          const initials = p.name.split(/\s+/).filter((w: string) => !w.endsWith(".")).map((w: string) => w[0]).slice(0, 2).join("");
           return (
             <li key={p.id} className="border border-ivory/15 bg-navy-deep/40">
               <button
@@ -66,7 +66,7 @@ export function LeadershipTeam() {
                 {p.photo_url ? (
                   <LeaderPhoto url={p.photo_url} name={p.name} />
                 ) : (
-                  <span className="grid h-16 w-20 shrink-0 place-items-center bg-ivory/5 font-display text-lg text-gold">{initials}</span>
+                  <img src={placeholder} alt="" aria-hidden="true" width={80} height={64} className="h-16 w-20 shrink-0 object-cover" />
                 )}
                 <span className="min-w-0 flex-1 py-2">
                   <span className="block truncate font-display text-[17px] text-ivory">{p.name}</span>
