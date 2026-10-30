@@ -47,7 +47,7 @@ function AuthPage() {
     event.preventDefault(); setBusy(true); setMessage("");
     try {
       if (mode === "reset") {
-        const { error } = await supabase.auth.resetPasswordForEmail(email, { redirectTo: `${window.location.origin}/auth?mode=setup` });
+        const { error } = await supabase.auth.resetPasswordForEmail(email.trim().toLowerCase(), { redirectTo: `${window.location.origin}/auth?mode=setup` });
         if (error) throw error; setMessage("If this address has access, password instructions are on the way."); return;
       }
       if (mode === "setup") {
