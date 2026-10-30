@@ -1,5 +1,5 @@
 import { userFacingError } from "@/lib/user-facing-error";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { getClearancePrerequisites, getMemberGovernance, listRestrictedDocuments, grantRestrictedDocument, listRestrictedGrants, recordConflictReview, recordForumClearance, recordNdaVerification, recordRoleReview, revokeRestrictedDocument } from "@/lib/governance.functions";
 import { Button } from "@/components/ui/button";
@@ -26,6 +26,23 @@ export function AdminGovernancePanel({ memberId, preview, onChange }: { memberId
   const [rv, setRv] = useState({ notes: "", prsc_scope: "", dis_scope: "", conflict_controls: "" });
   const [cl, setCl] = useState({ decision: "cleared" as "cleared" | "cleared_restricted" | "escalated" | "declined", meeting_eligibility: "", restrictions: "", notes: "", disclosures: false, restrictionsChecked: false });
 
+  const [quick, setQuick] = useState({ notes: "", restrictions: "", reviewed: false, showRestrictions: false });
+  useEffect(() => {
+    const mm: any = q.data?.member;
+    if (mm?.nda_reference) setNda((cur) => cur.reference ? cur : { reference: mm.nda_reference, entities: (mm.nda_entities ?? "prsc") as any, scope: mm.nda_scope ?? "" });
+  }, [q.data]);
+  async function decide(kind: "cleared" | "cleared_restricted" | "escalated" | "declined") {
+    const notes = quick.notes.trim();
+    if (notes.length < 5) return setMsg("Add a short note (at least 5 characters) first.");
+    if (!quick.reviewed) return setMsg("Tick the box to confirm you reviewed the disclosures, restrictions and NDA.");
+    if (kind === "cleared_restricted" && quick.restrictions.trim().length < 3) return setMsg("List the restrictions that apply.");
+    const done = { cleared: "Approved and cleared for the Forum.", cleared_restricted: "Cleared with restrictions.", escalated: "Escalated. Not cleared.", declined: "Declined. Not cleared." }[kind];
+    await run(async () => {
+      await recordConflictReview({ data: { member_id: memberId, decision: kind === "cleared" || kind === "cleared_restricted" ? "approved" : kind === "declined" ? "declined" : "hold", notes } });
+      await recordForumClearance({ data: { member_id: memberId, decision: kind, disclosures_reviewed: true, restrictions_reviewed: true, meeting_eligibility: "Inaugural Forum", restrictions: quick.restrictions.trim(), notes } });
+    }, done);
+  }
+
   async function run(fn: () => Promise<unknown>, ok: string) {
     if (preview) return setMsg("Preview mode: governance records are saved on the live admin page.");
     setMsg("");
@@ -41,17 +58,59 @@ export function AdminGovernancePanel({ memberId, preview, onChange }: { memberId
     <div className="mt-5">
       <p className="text-xs uppercase tracking-[0.2em] text-gold">Governance controls</p>
 
+      {m.participates_in_forum !== false && (() => {
+        const status = m.forum_clearance_status as string;
+        const cleared = status === "cleared" || status === "cleared_restricted";
+        const items = pre.data?.review?.items ?? [];
+        return (
+          <div className="mt-5 border-2 border-gold/50 bg-gold/[.05] p-5">
+            <p className="text-xs uppercase tracking-[0.2em] text-gold">Forum clearance</p>
+            <p className="mt-2 font-display text-2xl text-ivory">{cleared ? <>Cleared<span className="text-gold"> ✓</span></> : status === "declined" ? "Declined" : status === "escalated" ? "Escalated" : "Not cleared yet"}</p>
+            {cleared && <p className="mt-1 text-sm text-ivory/60">{CLEARANCE_LABEL[status]}{m.forum_cleared_at ? ` on ${new Date(m.forum_cleared_at).toLocaleDateString()}` : ""}. The member can now see the Agenda and other cleared Forum materials.</p>}
+            {items.length > 0 && (
+              <ul className="mt-3 grid gap-1 sm:grid-cols-2">
+                {items.map((i) => <li key={i.key} className="text-sm text-ivory/80"><span className={i.status === "done" ? "text-gold" : i.status === "unavailable" ? "text-destructive" : "text-ivory/55"}>{i.status === "done" ? "✓" : i.status === "unavailable" ? "✕" : "○"}</span> {i.label}</li>)}
+              </ul>
+            )}
+            {pre.data?.problems.length ? <div className="mt-3">{pre.data.problems.filter((p) => !/conflict review not approved/i.test(p)).map((p) => <p key={p} className="text-sm text-destructive">{p}</p>)}</div> : null}
+            {q.data.conflicts.length > 0 && q.data.conflicts.slice(0, 1).map((c: any) => (
+              <p key={c.document_id + c.acknowledged_at} className="mt-3 text-base text-ivory/85">Their conflict answer: <span className="text-gold">{CONFLICT_LABEL[c.conflict_answer]}</span>{c.conflict_details ? `: ${c.conflict_details}` : ""}</p>
+            ))}
+            {!cleared && (
+              <div className="mt-4 border-t border-gold/25 pt-4">
+                <label className="block text-base text-ivory/75">Your note for the record (required)
+                  <Textarea rows={2} className="mt-1" placeholder="e.g. Reviewed disclosures; no conflict; cleared." value={quick.notes} onChange={(e) => setQuick({ ...quick, notes: e.target.value })} />
+                </label>
+                <label className="mt-3 flex items-start gap-2 text-base text-ivory/80"><input type="checkbox" className="mt-1 h-4 w-4" checked={quick.reviewed} onChange={(e) => setQuick({ ...quick, reviewed: e.target.checked })} />I reviewed their disclosures, any restrictions and their NDA status</label>
+                {quick.showRestrictions && <label className="mt-3 block text-base text-ivory/75">Restrictions<Textarea rows={2} className="mt-1" value={quick.restrictions} onChange={(e) => setQuick({ ...quick, restrictions: e.target.value })} /></label>}
+                <div className="mt-4 flex flex-wrap items-center gap-3">
+                  <Button type="button" onClick={() => void decide("cleared")}>Approve and clear for the Forum</Button>
+                  <Button type="button" variant="outline" onClick={() => { if (!quick.showRestrictions) return setQuick({ ...quick, showRestrictions: true }); void decide("cleared_restricted"); }}>{quick.showRestrictions ? "Clear with these restrictions" : "Clear with restrictions…"}</Button>
+                  <Button type="button" variant="ghost" onClick={() => void decide("escalated")}>Escalate</Button>
+                  <Button type="button" variant="ghost" onClick={() => void decide("declined")}>Decline</Button>
+                </div>
+                <p className="mt-2 text-sm text-ivory/50">One click records your conflict review and the clearance decision, each as its own audit entry. Nothing is cleared until you press a button here.</p>
+              </div>
+            )}
+            {msg && <p className="mt-3 text-base text-gold">{msg}</p>}
+          </div>
+        );
+      })()}
+
       <div className={box}>
         <p className="text-base text-ivory">NDA verification: {m.nda_verified_at
           ? <span className="text-gold">Verified {new Date(m.nda_verified_at).toLocaleDateString()} · covers {String(m.nda_entities).toUpperCase()} · {m.nda_reference}</span>
           : <span className="text-destructive">Not verified. Forum materials are locked and invitations are blocked</span>}</p>
         {m.nda_scope && <p className="mt-1 text-sm text-ivory/55">Scope: {m.nda_scope}</p>}
+        <details className="mt-3" open={!m.nda_verified_at}>
+          <summary className="cursor-pointer text-sm text-gold">{m.nda_verified_at ? "Edit NDA record (not needed: already verified)" : "Record NDA verification"}</summary>
         <div className="mt-3 grid gap-3 sm:grid-cols-3">
           <label className="text-base text-ivory/70">Document reference / storage location<Input className="mt-1" value={nda.reference} onChange={(e) => setNda({ ...nda, reference: e.target.value })} /></label>
           <label className="text-base text-ivory/70">Entities covered<select className={sel} value={nda.entities} onChange={(e) => setNda({ ...nda, entities: e.target.value as any })}><option value="prsc">PRSC</option><option value="dis">DIS</option><option value="both">PRSC and DIS</option></select></label>
           <label className="text-base text-ivory/70">Information-sharing scope<Input className="mt-1" value={nda.scope} onChange={(e) => setNda({ ...nda, scope: e.target.value })} /></label>
         </div>
         <Button type="button" className="mt-3" onClick={() => run(() => recordNdaVerification({ data: { member_id: memberId, ...nda } }), "NDA verification recorded.")}>Record NDA verification</Button>
+        </details>
       </div>
 
       {q.data.combination.tier !== "none" && (
@@ -77,8 +136,9 @@ export function AdminGovernancePanel({ memberId, preview, onChange }: { memberId
       )}
 
       {m.participates_in_forum !== false && (
-        <div className={box}>
-          <p className="text-base text-ivory">Forum clearance: <span className="text-gold">{CLEARANCE_LABEL[m.forum_clearance_status]}</span>{m.forum_restrictions ? ` · Restrictions: ${m.forum_restrictions}` : ""}</p>
+        <details className={box}>
+          <summary className="cursor-pointer text-base text-gold">Advanced: record the conflict review and clearance as separate steps</summary>
+          <p className="mt-3 text-base text-ivory">Forum clearance: <span className="text-gold">{CLEARANCE_LABEL[m.forum_clearance_status]}</span>{m.forum_restrictions ? ` · Restrictions: ${m.forum_restrictions}` : ""}</p>
           <p className="mt-1 text-sm text-ivory/55">A signed confirmation does not resolve a conflict by itself. Stage 1 clears only after you record a decision here.</p>
           {q.data.conflicts.length > 0 ? q.data.conflicts.map((c: any) => (
             <p key={c.document_id + c.acknowledged_at} className="mt-2 text-base text-ivory/80">Disclosure {new Date(c.acknowledged_at).toLocaleDateString()}: <span className="text-gold">{CONFLICT_LABEL[c.conflict_answer]}</span>{c.conflict_details ? `: ${c.conflict_details}` : ""}</p>
@@ -125,7 +185,7 @@ export function AdminGovernancePanel({ memberId, preview, onChange }: { memberId
                 }, "Conflict review approved and clearance recorded.")}>Approve conflict review and record clearance</Button>
             </div>
           )}
-        </div>
+        </details>
       )}
 
       {m.participates_in_forum !== false && (restricted.data?.length ?? 0) > 0 && (

@@ -313,7 +313,9 @@ export function AdminMemberDocuments({ memberId, memberName, preview }: Props) {
 
       <AdminGovernancePanel memberId={memberId} preview={preview} onChange={() => docs.refetch()} />
 
-      <div className="mt-5 grid gap-3 sm:grid-cols-2">
+      <details className="mt-5 border border-gold/20 p-4">
+        <summary className="cursor-pointer text-base text-gold">Add a document to this member</summary>
+      <div className="mt-4 grid gap-3 sm:grid-cols-2">
         <label className="text-base text-ivory/70 sm:col-span-2">
           Start from a journey document (optional)
           <select defaultValue="" onChange={(e) => applyPreset(e.target.value)} className={`mt-1 ${selectCls}`}>
@@ -458,6 +460,8 @@ export function AdminMemberDocuments({ memberId, memberName, preview }: Props) {
         {status && <span className="text-base text-gold">{status}</span>}
       </div>
 
+      </details>
+
       <div className="mt-6 flex flex-wrap items-center gap-3 border border-gold/25 p-4">
         <p className="flex-1 text-base text-ivory/70">
           {docs.data?.completedAt
@@ -471,7 +475,9 @@ export function AdminMemberDocuments({ memberId, memberName, preview }: Props) {
         </Button>
       </div>
 
-      <div className="mt-6 space-y-3">
+      <details className="mt-6 border border-gold/20 p-4">
+        <summary className="cursor-pointer text-base text-gold">Documents ({list.filter((d: any) => acks.some((a: any) => a.document_id === d.id && a.member_id === memberId)).length} of {list.length} completed) · open to review or change</summary>
+      <div className="mt-4 space-y-3">
         {docs.isLoading && <p className="text-base text-gold">Loading documents…</p>}
         {!docs.isLoading && list.length === 0 && (
           <p className="text-base text-ivory/50">No documents have been posted yet.</p>
@@ -553,6 +559,7 @@ export function AdminMemberDocuments({ memberId, memberName, preview }: Props) {
           );
         })}
       </div>
+      </details>
       {composer && (
         <div className="mt-6 border border-gold/30 bg-navy-deep/60 p-5">
           <p className="text-base uppercase tracking-widest text-gold">Email signed copy</p>
