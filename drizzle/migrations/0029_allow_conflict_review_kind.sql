@@ -1,0 +1,2 @@
+ALTER TABLE public.governance_reviews DROP CONSTRAINT governance_reviews_kind_check;
+ALTER TABLE public.governance_reviews ADD CONSTRAINT governance_reviews_kind_check CHECK (kind = ANY (ARRAY['nda'::text, 'role_combination'::text, 'forum_clearance'::text, 'appointment'::text, 'third_party_permission'::text, 'conflict_review'::text]));
