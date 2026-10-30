@@ -1,5 +1,6 @@
 import { userFacingError } from "@/lib/user-facing-error";
 import { useEffect, useState } from "react";
+import { toast } from "sonner";
 import { useQuery } from "@tanstack/react-query";
 import { getClearancePrerequisites, getMemberGovernance, listRestrictedDocuments, grantRestrictedDocument, listRestrictedGrants, recordConflictReview, recordForumClearance, recordNdaVerification, recordRoleReview, revokeRestrictedDocument } from "@/lib/governance.functions";
 import { Button } from "@/components/ui/button";
@@ -33,7 +34,6 @@ export function AdminGovernancePanel({ memberId, preview, onChange }: { memberId
   }, [q.data]);
   async function decide(kind: "cleared" | "cleared_restricted" | "escalated" | "declined") {
     const notes = quick.notes.trim();
-    if (notes.length < 5) return setMsg("Add a short note (at least 5 characters) first.");
     if (!quick.reviewed) return setMsg("Tick the box to confirm you reviewed the disclosures, restrictions and NDA.");
     if (kind === "cleared_restricted" && quick.restrictions.trim().length < 3) return setMsg("List the restrictions that apply.");
     const done = { cleared: "Approved and cleared for the Forum.", cleared_restricted: "Cleared with restrictions.", escalated: "Escalated. Not cleared.", declined: "Declined. Not cleared." }[kind];
@@ -43,10 +43,23 @@ export function AdminGovernancePanel({ memberId, preview, onChange }: { memberId
     }, done);
   }
 
+  const [saving, setSaving] = useState(false);
   async function run(fn: () => Promise<unknown>, ok: string) {
     if (preview) return setMsg("Preview mode: governance records are saved on the live admin page.");
-    setMsg("");
-    try { await fn(); setMsg(ok); await Promise.all([q.refetch(), pre.refetch(), grants.refetch()]); onChange?.(); } catch (e) { setMsg(userFacingError(e, "Could not save")); }
+    setMsg(""); setSaving(true);
+    try {
+      await fn();
+      setMsg(ok);
+      toast.success(ok);
+      await Promise.all([q.refetch(), pre.refetch(), grants.refetch()]);
+      onChange?.();
+    } catch (e) {
+      const raw = e instanceof Error ? e.message : String(e);
+      setMsg(`Could not save. ${userFacingError(e, "").trim() || raw.slice(0, 280)}`);
+      console.error("Governance save failed", e);
+    } finally {
+      setSaving(false);
+    }
   }
   if (preview) return <p className="mt-5 text-base text-ivory/55">Governance controls (NDA, role review, Forum clearance) appear here on the live admin page.</p>;
   if (!q.data) return <p className="mt-5 text-base text-gold">Loading governance record…</p>;
@@ -65,7 +78,7 @@ export function AdminGovernancePanel({ memberId, preview, onChange }: { memberId
         return (
           <div className="mt-5 border-2 border-gold/50 bg-gold/[.05] p-5">
             <p className="text-xs uppercase tracking-[0.2em] text-gold">Forum clearance</p>
-            <p className="mt-2 font-display text-2xl text-ivory">{cleared ? <>Cleared<span className="text-gold"> ✓</span></> : status === "declined" ? "Declined" : status === "escalated" ? "Escalated" : "Not cleared yet"}</p>
+            <p className={`mt-2 inline-block px-3 py-1.5 font-display text-2xl ${cleared ? "border border-emerald-400/60 bg-emerald-400/10 text-emerald-300" : "text-ivory"}`}>{cleared ? (status === "cleared_restricted" ? "✓ APPROVED · cleared with restrictions" : "✓ APPROVED · cleared for the Forum") : status === "declined" ? "Declined" : status === "escalated" ? "Escalated" : "Not cleared yet"}</p>
             {cleared && <p className="mt-1 text-sm text-ivory/60">{CLEARANCE_LABEL[status]}{m.forum_cleared_at ? ` on ${new Date(m.forum_cleared_at).toLocaleDateString()}` : ""}. The member can now see the Agenda and other cleared Forum materials.</p>}
             {items.length > 0 && (
               <ul className="mt-3 grid gap-1 sm:grid-cols-2">
@@ -78,13 +91,13 @@ export function AdminGovernancePanel({ memberId, preview, onChange }: { memberId
             ))}
             {!cleared && (
               <div className="mt-4 border-t border-gold/25 pt-4">
-                <label className="block text-base text-ivory/75">Your note for the record (required)
-                  <Textarea rows={2} className="mt-1" placeholder="e.g. Reviewed disclosures; no conflict; cleared." value={quick.notes} onChange={(e) => setQuick({ ...quick, notes: e.target.value })} />
+                <label className="block text-base text-ivory/75">Note for the record (optional)
+                  <Textarea rows={2} className="mt-1" placeholder="Optional. Add context only if you want it kept with the decision." value={quick.notes} onChange={(e) => setQuick({ ...quick, notes: e.target.value })} />
                 </label>
                 <label className="mt-3 flex items-start gap-2 text-base text-ivory/80"><input type="checkbox" className="mt-1 h-4 w-4" checked={quick.reviewed} onChange={(e) => setQuick({ ...quick, reviewed: e.target.checked })} />I reviewed their disclosures, any restrictions and their NDA status</label>
                 {quick.showRestrictions && <label className="mt-3 block text-base text-ivory/75">Restrictions<Textarea rows={2} className="mt-1" value={quick.restrictions} onChange={(e) => setQuick({ ...quick, restrictions: e.target.value })} /></label>}
                 <div className="mt-4 flex flex-wrap items-center gap-3">
-                  <Button type="button" onClick={() => void decide("cleared")}>Approve and clear for the Forum</Button>
+                  <Button type="button" disabled={saving} onClick={() => void decide("cleared")}>{saving ? "Saving…" : "Approve and clear for the Forum"}</Button>
                   <Button type="button" variant="outline" onClick={() => { if (!quick.showRestrictions) return setQuick({ ...quick, showRestrictions: true }); void decide("cleared_restricted"); }}>{quick.showRestrictions ? "Clear with these restrictions" : "Clear with restrictions…"}</Button>
                   <Button type="button" variant="ghost" onClick={() => void decide("escalated")}>Escalate</Button>
                   <Button type="button" variant="ghost" onClick={() => void decide("declined")}>Decline</Button>
@@ -92,7 +105,7 @@ export function AdminGovernancePanel({ memberId, preview, onChange }: { memberId
                 <p className="mt-2 text-sm text-ivory/50">One click records your conflict review and the clearance decision, each as its own audit entry. Nothing is cleared until you press a button here.</p>
               </div>
             )}
-            {msg && <p className="mt-3 text-base text-gold">{msg}</p>}
+            {msg && <p role="status" className={`mt-3 text-base ${msg.startsWith("Could not") ? "text-destructive" : "text-gold"}`}>{msg}</p>}
           </div>
         );
       })()}

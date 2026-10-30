@@ -212,10 +212,10 @@ export const getClearancePrerequisites = createServerFn({ method: "GET" })
 /** Independent administrative conflict-review decision. It never grants clearance by itself. */
 export const recordConflictReview = createServerFn({ method: "POST" })
   .middleware([requirePortalAccess])
-  .inputValidator((i) => memberId.extend({ decision: z.enum(["approved", "declined", "hold"]), notes: z.string().trim().min(5).max(2000) }).parse(i))
+  .inputValidator((i) => memberId.extend({ decision: z.enum(["approved", "declined", "hold"]), notes: z.string().trim().max(2000).default("") }).parse(i))
   .handler(async ({ context, data }) => {
     await assertAdmin(context);
-    await log(context, data.member_id, "conflict_review", data.decision, data.notes, {});
+    await log(context, data.member_id, "conflict_review", data.decision, data.notes || null, {});
     return { ok: true };
   });
 
