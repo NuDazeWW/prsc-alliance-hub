@@ -19,7 +19,7 @@ export function slotCountWord(count: number) {
 }
 
 export function forumSlotsSentence(slotCount: number) {
-  return `We want to meet as soon as possible. We know your time is valuable and calendars are busy, so we've started with ${slotCountWord(slotCount)} initial meeting ${slotCount === 1 ? "slot" : "slots"}. Please select every option that works for you.`;
+  return `We want to meet as soon as possible. We know your time is valuable and calendars are busy, so we've started with ${slotCountWord(slotCount)} initial meeting ${slotCount === 1 ? "slot" : "slots"}. Please select every option below that works for you.`;
 }
 
 /** Forum polls are stored with meeting_type "forum"; tolerate a custom type or title that names the Forum. */

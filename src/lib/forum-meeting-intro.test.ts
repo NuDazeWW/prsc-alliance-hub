@@ -6,7 +6,7 @@ describe("Forum meeting calendar introduction", () => {
   it("uses the approved wording for the standard three slots", () => {
     assert.equal(
       forumSlotsSentence(3),
-      "We want to meet as soon as possible. We know your time is valuable and calendars are busy, so we've started with three initial meeting slots. Please select every option that works for you.",
+      "We want to meet as soon as possible. We know your time is valuable and calendars are busy, so we've started with three initial meeting slots. Please select every option below that works for you.",
     );
   });
 
