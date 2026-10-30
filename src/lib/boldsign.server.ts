@@ -29,6 +29,14 @@ export async function boldSignPost(path: string, body: unknown): Promise<Respons
   return response;
 }
 
+export async function boldSignPatch(path: string, body: unknown): Promise<Response> {
+  const key = process.env["BOLDSIGN_API_KEY"];
+  if (!key) throw new Error("BoldSign is not configured");
+  const response = await fetch(`https://api.boldsign.com/v1/${path}`, { method: "PATCH", headers: { "X-API-KEY": key, "Content-Type": "application/json" }, body: JSON.stringify(body), signal: AbortSignal.timeout(8000) });
+  if (!response.ok) throw await boldSignFailure(path, response);
+  return response;
+}
+
 /** One sign-in-required notice per completed assignment to the designated administrator. No attachments. */
 export async function notifyAdminOfCompletion(assignmentId: string) {
   const { supabaseAdmin: sb } = await import("@/integrations/supabase/client.server");

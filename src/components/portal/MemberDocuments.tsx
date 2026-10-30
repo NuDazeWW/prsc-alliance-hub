@@ -189,6 +189,17 @@ function BoldSignReader({ documentId, title, completed, signingState = "none", i
     const objectUrl = URL.createObjectURL(file); setUrl(objectUrl);
   } });
   useEffect(() => () => { if (url.startsWith("blob:")) URL.revokeObjectURL(url); }, [url]);
+  // The signing frame reports back when BoldSign sends the signer to /portal#signed: close it and re-check the signature with BoldSign.
+  useEffect(() => {
+    if (!url || url.startsWith("blob:")) return;
+    const onMessage = (e: MessageEvent) => {
+      if (e.origin !== window.location.origin || (e.data as { type?: string } | null)?.type !== "prsc-boldsign-done") return;
+      setUrl("");
+      refresh.mutate();
+    };
+    window.addEventListener("message", onMessage);
+    return () => window.removeEventListener("message", onMessage);
+  }, [url]); // eslint-disable-line react-hooks/exhaustive-deps
   return <>
     {isConflict && !completed && <div className="mb-4 space-y-2">
       <p className="text-sm text-ivory/70">Your answers are placed into the document you sign and kept with the signed record.</p>

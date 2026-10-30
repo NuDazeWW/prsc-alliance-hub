@@ -37,7 +37,7 @@ export const openBoldSign = createServerFn({ method: "POST" }).middleware([requi
     const action = signingAction(doc, existing, hash);
     if (action.kind === "block") throw new Error(action.reason);
 
-    const { boldSignGet, boldSignPost } = await import("./boldsign.server");
+    const { boldSignGet, boldSignPost, boldSignPatch } = await import("./boldsign.server");
     let id: string;
     if (action.kind === "resume") {
       id = existing!.boldsign_document_id;
@@ -72,10 +72,13 @@ export const openBoldSign = createServerFn({ method: "POST" }).middleware([requi
         const sent = await (await boldSignPost(`template/send?templateId=${encodeURIComponent(doc.boldsign_template_id!)}`, {
           title: `${doc.title} (${doc.version_label})`,
           disableEmails: true,
-          roles: [{ roleIndex: 1, signerName, signerEmail: member.email, ...(prefill.length ? { existingFormFields: prefill } : {}) }],
+          roles: [{ roleIndex: 1, signerName, signerEmail: member.email }],
         })).json() as { documentId?: string };
         if (!sent.documentId) throw new Error("BoldSign did not return a document");
         id = sent.documentId;
+        // Read-only template fields cannot be set in the send request, so the frozen answers are placed into the
+        // new document through BoldSign's prefill call before the member can open it.
+        if (prefill.length) await boldSignPatch(`document/prefillFields?documentId=${encodeURIComponent(id)}`, { fields: prefill.map(f => ({ id: f.id, value: f.value })) });
         const { error: upd } = await sb.from("boldsign_assignments").update({ boldsign_document_id: id, status: "pending" }).eq("id", row.id).eq("status", "preparing");
         if (upd) throw upd;
       } catch (e) {
@@ -94,7 +97,7 @@ export const openBoldSign = createServerFn({ method: "POST" }).middleware([requi
       if (error && error.code !== "23505") throw error;
       id = manualId;
     }
-    const result = await (await boldSignGet(`getEmbeddedSignLink?documentId=${encodeURIComponent(id)}&signerEmail=${encodeURIComponent(member.email)}&redirectUrl=${encodeURIComponent("https://access.prscstandards.org/portal")}`)).json() as { signLink?: string };
+    const result = await (await boldSignGet(`getEmbeddedSignLink?documentId=${encodeURIComponent(id)}&signerEmail=${encodeURIComponent(member.email)}&redirectUrl=${encodeURIComponent("https://access.prscstandards.org/portal#signed")}`)).json() as { signLink?: string };
     if (!result.signLink || !/^https:\/\/([a-z0-9-]+\.)*boldsign\.com\//i.test(result.signLink)) throw new Error("BoldSign did not provide an authorized signing link");
     return { url: result.signLink, state: "ready" as const };
   });

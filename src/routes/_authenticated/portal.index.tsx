@@ -69,8 +69,17 @@ export const Route = createFileRoute("/_authenticated/portal/")({
   }),
   validateSearch: (search: Record<string, unknown>): { asMember?: string } =>
     typeof search.asMember === "string" ? { asMember: search.asMember } : {},
-  component: PortalHome,
+  component: PortalEntry,
 });
+
+/** BoldSign returns the signer to /portal#signed inside the signing frame: tell the page that opened it, then stay blank. */
+function PortalEntry() {
+  const inSigningFrame = typeof window !== "undefined" && window.self !== window.top && window.location.hash === "#signed";
+  useEffect(() => {
+    if (inSigningFrame) window.parent.postMessage({ type: "prsc-boldsign-done" }, window.location.origin);
+  }, [inSigningFrame]);
+  return inSigningFrame ? null : <PortalHome />;
+}
 
 const demoMember = {
   id: "demo",
