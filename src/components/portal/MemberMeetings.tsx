@@ -5,6 +5,7 @@ import { DEFAULT_MEETING_TZ, timezoneLabel } from "@/lib/meeting-block";
 import { Fragment, useEffect, useState } from "react";
 import { CalendarDays, Check, Clock, Download, MapPin, Video } from "lucide-react";
 import { toast } from "sonner";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { getMyMeetings, submitMyAvailability } from "@/lib/meetings.functions";
 import { Button } from "@/components/ui/button";
 import { buildSlotHoldIcs } from "@/lib/ics";
@@ -70,43 +71,42 @@ function fmt(iso: string, tz?: string | null) {
 }
 
 export function MemberMeetings({ hideWhenEmpty = false, hideIntro = false, asMemberId }: { hideWhenEmpty?: boolean; hideIntro?: boolean; asMemberId?: string } = {}) {
-  const [polls, setPolls] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState<string | null>(null);
   const [drafts, setDrafts] = useState<Record<string, Record<string, string>>>({});
   const [notes, setNotes] = useState<Record<string, string>>({});
-
-  async function refresh() {
-    setLoading(true);
-    try {
-      let res: { polls: any[] };
+  const queryClient = useQueryClient();
+  // One shared query with the Welcome Center banner, so the banner and this calendar can never disagree
+  // (a separate one-time fetch used to come back empty when the page was opened straight from an email link).
+  const meetingsQuery = useQuery({
+    queryKey: ["my-meetings", asMemberId ?? null],
+    queryFn: async () => {
       try {
-        res = await getMyMeetings({ data: { asMemberId } });
-        if (isPreviewHost() && res.polls.length === 0) res = { polls: demoPolls() };
+        const res = await getMyMeetings({ data: { asMemberId } });
+        return isPreviewHost() && res.polls.length === 0 ? { polls: demoPolls() } : res;
       } catch (err) {
         if (!isPreviewHost()) throw err;
-        res = { polls: demoPolls() };
+        return { polls: demoPolls() };
       }
-      setPolls(res.polls);
-      const d: Record<string, Record<string, string>> = {};
-      const n: Record<string, string> = {};
-      for (const p of res.polls) {
-        d[p.id] = {};
-        for (const r of p.my_responses) d[p.id][r.slot_id] = r.availability;
-        n[p.id] = p.my_note ?? "";
-      }
-      setDrafts(d);
-      setNotes(n);
-    } catch (e) {
-      toast.error(userFacingError(e, "Could not load meetings"));
-    } finally {
-      setLoading(false);
-    }
-  }
-
+    },
+    retry: 2,
+  });
+  const polls: any[] = meetingsQuery.data?.polls ?? [];
+  const loading = meetingsQuery.isPending;
   useEffect(() => {
-    void refresh();
-  }, []);
+    if (meetingsQuery.error) toast.error(userFacingError(meetingsQuery.error, "Could not load meetings"));
+  }, [meetingsQuery.error]);
+  useEffect(() => {
+    const d: Record<string, Record<string, string>> = {};
+    const n: Record<string, string> = {};
+    for (const p of polls) {
+      d[p.id] = {};
+      for (const r of p.my_responses) d[p.id][r.slot_id] = r.availability;
+      n[p.id] = p.my_note ?? "";
+    }
+    setDrafts(d);
+    setNotes(n);
+  }, [meetingsQuery.data]); // eslint-disable-line react-hooks/exhaustive-deps
+  const refresh = () => queryClient.invalidateQueries({ queryKey: ["my-meetings"] });
 
   async function submit(poll: any) {
     const answers = drafts[poll.id] ?? {};
