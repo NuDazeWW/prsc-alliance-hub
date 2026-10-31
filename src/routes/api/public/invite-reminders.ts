@@ -11,7 +11,7 @@ export const Route = createFileRoute("/api/public/invite-reminders")({
           return new Response("Unauthorized", { status: 401 });
         }
         const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-        const { sendPortalEmail, founderSignature, loadSystemEmail } = await import("@/lib/portal-notify.server");
+        const { sendPortalEmail, teamSignature, loadSystemEmail } = await import("@/lib/portal-notify.server");
         const cutoff = new Date(Date.now() - REMINDER_AFTER_DAYS * 86400000).toISOString();
         const { data: pending, error } = await supabaseAdmin
           .from("portal_members")
@@ -49,7 +49,7 @@ export const Route = createFileRoute("/api/public/invite-reminders")({
               ctaLabel: "Access Your Private Welcome Center →",
               ctaUrl: link.properties.action_link,
               ctaSubtext: "This secure link lets you create your own password. No password is emailed.",
-              signatures: founderSignature(),
+              signatures: teamSignature(),
             },
             "invite-reminder",
           );
@@ -75,7 +75,7 @@ export const Route = createFileRoute("/api/public/invite-reminders")({
               body: "A few days ago we released your individualized documents in your private Welcome Center. A few are still open.\n\nSign in, open Your Documents, and read, initial, or sign each one right in the portal.",
               ctaLabel: "Review & Sign Your Documents",
               ctaUrl: "https://access.prscstandards.org/portal",
-              signatures: founderSignature(),
+              signatures: teamSignature(),
             },
             "documents-reminder",
           );

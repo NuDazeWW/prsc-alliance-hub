@@ -15,6 +15,8 @@ export type SystemEmailCopy = {
 };
 
 const FOUNDER = "Shirley Johnson, Founder, PRSC / DIS";
+// Only the first email of a journey (the invitation, and entity onboarding) comes from the founder; everything after is from the team.
+const TEAM = "The PRSC Leadership Team";
 const PORTAL = "https://access.prscstandards.org/portal";
 
 export const SYSTEM_EMAIL_DEFAULTS: Record<string, SystemEmailCopy> = {
@@ -40,7 +42,7 @@ export const SYSTEM_EMAIL_DEFAULTS: Record<string, SystemEmailCopy> = {
     cta_label: "Share Your Availability",
     cta_url: `${PORTAL}#meetings`,
     cta_subtext: "",
-    signatures: FOUNDER,
+    signatures: TEAM,
   },
   meeting_poll_reminder: {
     name: "Meeting availability reminder (automatic)",
@@ -52,7 +54,7 @@ export const SYSTEM_EMAIL_DEFAULTS: Record<string, SystemEmailCopy> = {
     cta_label: "Share Your Availability",
     cta_url: `${PORTAL}#meetings`,
     cta_subtext: "",
-    signatures: FOUNDER,
+    signatures: TEAM,
   },
   meeting_confirmed: {
     name: "Meeting confirmed (automatic)",
@@ -64,7 +66,7 @@ export const SYSTEM_EMAIL_DEFAULTS: Record<string, SystemEmailCopy> = {
     cta_label: "Add to My Calendar",
     cta_url: "{{calendar_url}}",
     cta_subtext: "Downloads a calendar file you can open with one click.",
-    signatures: FOUNDER,
+    signatures: TEAM,
   },
   profile_received: {
     name: "Profile received (automatic)",
@@ -76,7 +78,7 @@ export const SYSTEM_EMAIL_DEFAULTS: Record<string, SystemEmailCopy> = {
     cta_label: "Return to Your Welcome Center",
     cta_url: PORTAL,
     cta_subtext: "Your Welcome Center shows your current status and any documents released to you.",
-    signatures: FOUNDER,
+    signatures: TEAM,
   },
   entity_documents_ready: {
     name: "Entity onboarding materials available (automatic)",
@@ -112,7 +114,7 @@ export const SYSTEM_EMAIL_DEFAULTS: Record<string, SystemEmailCopy> = {
     cta_label: "Review My Forum Requirements",
     cta_url: `${PORTAL}#documents`,
     cta_subtext: "Sign in with your email and the password you created.",
-    signatures: FOUNDER,
+    signatures: TEAM,
   },
   forum_agenda_ready: {
     name: "Forum agenda available (automatic)",
@@ -124,7 +126,7 @@ export const SYSTEM_EMAIL_DEFAULTS: Record<string, SystemEmailCopy> = {
     cta_label: "Open the Forum Agenda",
     cta_url: `${PORTAL}#documents`,
     cta_subtext: "Sign in with your email and the password you created.",
-    signatures: FOUNDER,
+    signatures: TEAM,
   },
   forum_agenda_updated: {
     name: "Forum agenda updated (sent by an administrator)",
@@ -136,11 +138,11 @@ export const SYSTEM_EMAIL_DEFAULTS: Record<string, SystemEmailCopy> = {
     cta_label: "Open the Forum Agenda",
     cta_url: `${PORTAL}#documents`,
     cta_subtext: "",
-    signatures: FOUNDER,
+    signatures: TEAM,
   },
 };
 
-const SHIRLEY = "Shirley";
+const SHIRLEY = TEAM;
 const FORUM_PORTAL = `${PORTAL}#meetings`;
 
 function forum(name: string, description: string, subject: string, eyebrow: string, body: string, cta_label: string, cta_url = PORTAL): SystemEmailCopy {

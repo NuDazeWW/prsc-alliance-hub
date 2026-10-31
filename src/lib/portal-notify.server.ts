@@ -51,6 +51,10 @@ export async function sendPortalEmail(to: string, email: BrandedEmail, label: st
   }
 }
 
+export function teamSignature() {
+  return [{ name: "The PRSC Leadership Team", title: "" }];
+}
+
 export function founderSignature() {
   return [{ name: "Shirley Johnson", title: "Founder, PRSC / DIS" }];
 }

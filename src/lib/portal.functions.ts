@@ -184,7 +184,7 @@ export const submitPortalInquiry = createServerFn({ method: "POST" })
     const { error } = await context.supabase.from("portal_inquiries").insert({ member_id: member.id, subject: data.subject, message: data.message });
     if (error) throw error;
     await context.supabase.from("portal_activity").insert({ member_id: member.id, actor_user_id: context.userId, event_type: "inquiry_submitted" });
-    const { sendPortalEmail, founderSignature } = await import("@/lib/portal-notify.server");
+    const { sendPortalEmail, teamSignature } = await import("@/lib/portal-notify.server");
     const firstName = member.first_name?.trim() || "there";
     await sendPortalEmail(
       member.email,
@@ -196,7 +196,7 @@ export const submitPortalInquiry = createServerFn({ method: "POST" })
         ctaLabel: "Return to Your Welcome Center",
         ctaUrl: "https://access.prscstandards.org/portal",
         ctaSubtext: "Your Welcome Center shows your current status and any documents released to you.",
-        signatures: founderSignature(),
+        signatures: teamSignature(),
       },
       "inquiry-member-autoreply",
     );
@@ -464,7 +464,7 @@ export const nudgeMember = createServerFn({ method: "POST" })
   .handler(async ({ context, data }) => {
     await assertAdmin(context);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const { sendPortalEmail, founderSignature } = await import("@/lib/portal-notify.server");
+    const { sendPortalEmail, teamSignature } = await import("@/lib/portal-notify.server");
     const { data: m } = await supabaseAdmin.from("portal_members")
       .select("id, email, first_name, entity, role, status, first_access_at, documents_released_at, documents_completed_at")
       .eq("id", data.member_id).single();
@@ -485,7 +485,7 @@ export const nudgeMember = createServerFn({ method: "POST" })
         body: "We invited you into the private Board & Advisor Welcome Center and wanted to make sure the note reached you.\n\nIt only takes a few minutes: create your password, get reacquainted with where we are today, and share the few details we need to prepare your individualized package.",
         ctaLabel: "Access Your Private Welcome Center →", ctaUrl: link.properties.action_link,
         ctaSubtext: "This secure link lets you create your own password. No password is emailed.",
-        signatures: founderSignature(),
+        signatures: teamSignature(),
       }, "nudge-invite");
       kind = "invitation";
     } else if (m.documents_released_at && !m.documents_completed_at) {
@@ -494,7 +494,7 @@ export const nudgeMember = createServerFn({ method: "POST" })
         heading: `${first}, a few documents are still open.`,
         body: "Your individualized documents are ready in your private Welcome Center.\n\nSign in, open Your Documents, and read, initial, or sign each one right in the portal.",
         ctaLabel: "Review & Sign Your Documents", ctaUrl: "https://access.prscstandards.org/portal#documents",
-        signatures: founderSignature(),
+        signatures: teamSignature(),
       }, "nudge-documents");
       kind = "documents";
     } else {
@@ -505,7 +505,7 @@ export const nudgeMember = createServerFn({ method: "POST" })
         heading: `${first}, your profile is almost there.`,
         body: "Your progress is saved. When you have a few minutes, sign in and finish your private profile so we can prepare your individualized package.",
         ctaLabel: "Complete Your Profile", ctaUrl: "https://access.prscstandards.org/portal/profile",
-        signatures: founderSignature(),
+        signatures: teamSignature(),
       }, "nudge-profile");
       kind = "profile";
     }
@@ -889,7 +889,7 @@ export async function maybeCompletePackage(member: { id: string; email: string; 
     .from("portal_members")
     .update({ documents_completed_at: new Date().toISOString(), package_status: "package_ready" })
     .eq("id", member.id);
-  const { sendPortalEmail, founderSignature } = await import("@/lib/portal-notify.server");
+  const { sendPortalEmail, teamSignature } = await import("@/lib/portal-notify.server");
   const fullName = `${member.first_name ?? ""} ${member.last_name ?? ""}`.trim() || member.email;
   const list = required.map((d) => `• ${d.title} — ${d.category === "sign" ? "signed" : "acknowledged"}`).join("\n");
   await sendPortalEmail(
@@ -913,7 +913,7 @@ export async function maybeCompletePackage(member: { id: string; email: string; 
       body: "We've received every document in your package. There's nothing more you need to do right now.\n\nYour signed and acknowledged documents remain available inside your private Welcome Center. If you'd like a hard copy, use the Request a hard copy button on any document.",
       ctaLabel: "Return to Your Welcome Center",
       ctaUrl: "https://access.prscstandards.org/portal",
-      signatures: founderSignature(),
+      signatures: teamSignature(),
     },
     "documents-complete-member",
   );
@@ -1364,11 +1364,11 @@ export const sendSignedCopy = createServerFn({ method: "POST" })
     if (!ack?.signed_copy_path) throw new Error("Prepare the signed copy first");
     const { data: signed } = await supabaseAdmin.storage.from(DOCUMENT_BUCKET).createSignedUrl(ack.signed_copy_path, 60 * 60 * 24 * 7, { download: true });
     if (!signed?.signedUrl) throw new Error("Could not create the download link");
-    const { sendPortalEmail, founderSignature } = await import("@/lib/portal-notify.server");
+    const { sendPortalEmail, teamSignature } = await import("@/lib/portal-notify.server");
     await sendPortalEmail(data.to, {
       subject: data.subject, eyebrow: "Your signed copy", heading: data.subject, body: data.body,
       ctaLabel: "Download Your Signed Copy", ctaUrl: signed.signedUrl,
-      ctaSubtext: "This secure link expires in 7 days.", signatures: founderSignature(),
+      ctaSubtext: "This secure link expires in 7 days.", signatures: teamSignature(),
     }, "signed-copy-member");
     await supabaseAdmin.from("portal_document_acknowledgements").update({ signed_copy_sent_at: new Date().toISOString() }).eq("id", ack.id);
     await supabaseAdmin.from("portal_activity").insert({ member_id: ack.member_id, actor_user_id: context.userId, event_type: "signed_copy_sent", metadata: { ack_id: ack.id } });
