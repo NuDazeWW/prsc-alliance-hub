@@ -266,6 +266,20 @@ function popOutEmail(html: string) {
   setTimeout(() => URL.revokeObjectURL(url), 120000);
 }
 
+/** An admin card that starts folded (caret at the top right) and remembers what you opened. */
+function CollapseCard({ id, className, title, children }: { id: string; className: string; title?: string; children: React.ReactNode }) {
+  const [collapsed, setCollapsed] = useStoredFlag(`admin.card.${id}`, true);
+  return (
+    <section className={`${className} relative pr-14 sm:pr-16 ${collapsed ? "[&>*:not(:first-child):not([data-collapse-toggle])]:hidden" : ""}`}>
+      {title && <h2 className="font-display text-3xl">{title}</h2>}
+      {children}
+      <button type="button" data-collapse-toggle onClick={() => setCollapsed(!collapsed)} aria-expanded={!collapsed} aria-label={collapsed ? "Expand section" : "Collapse section"} className="absolute right-3 top-6 z-10 grid h-9 w-9 place-items-center rounded-full border border-gold/30 text-gold hover:bg-gold/10 sm:right-4 sm:top-8">
+        {collapsed ? <ChevronDown className="h-5 w-5" /> : <ChevronUp className="h-5 w-5" />}
+      </button>
+    </section>
+  );
+}
+
 function downloadListTemplate() {
   const url = URL.createObjectURL(new Blob([MEMBER_LIST_TEMPLATE], { type: "text/csv" }));
   const a = document.createElement("a");
@@ -314,10 +328,10 @@ export function AdminCenter({ page }: { page: "overview" | "send" }) {
   const [inviteNdaSaving, setInviteNdaSaving] = useState(false);
   const [inviteNdaMessage, setInviteNdaMessage] = useState("");
   const inviteNdaGeneration = useRef(0);
-  const [inviteCollapsed, setInviteCollapsed] = useStoredFlag("admin.inviteCollapsed");
+  const [inviteCollapsed, setInviteCollapsed] = useStoredFlag("admin.inviteCollapsed.v2", true);
   const [sentLogOpen, setSentLogOpen] = useStoredFlag("admin.sentLogOpen");
-  const [recipientsOpen, setRecipientsOpen] = useStoredFlag("admin.recipientsOpen.v2", true);
-  const [membersCollapsed, setMembersCollapsed] = useStoredFlag("admin.membersCollapsed");
+  const [recipientsOpen, setRecipientsOpen] = useStoredFlag("admin.recipientsOpen.v3", false);
+  const [membersCollapsed, setMembersCollapsed] = useStoredFlag("admin.membersCollapsed.v2", true);
   const [expandedRows, setExpandedRows] = useState<string[]>([]);
   useEffect(() => {
     if (page === "send" && window.location.hash === "#sent-log") setSentLogOpen(true);
@@ -325,12 +339,12 @@ export function AdminCenter({ page }: { page: "overview" | "send" }) {
   }, [page]);
   const PLACE: Record<"overview" | "send", Record<number, string>> = {
     overview: {
-      1: "order-1 lg:col-start-1 lg:row-start-1 lg:row-span-2",
-      2: "order-2 lg:col-start-1 lg:row-start-3 lg:row-span-2",
-      5: "order-3 lg:col-start-2 lg:row-start-1",
-      6: "order-4 lg:col-start-2 lg:row-start-2",
-      3: "order-5 lg:col-start-2 lg:row-start-3",
-      4: "order-6 lg:col-start-2 lg:row-start-4",
+      1: "self-start order-1 lg:col-start-1 lg:row-start-1 lg:row-span-2",
+      2: "self-start order-2 lg:col-start-1 lg:row-start-3 lg:row-span-2",
+      5: "self-start order-3 lg:col-start-2 lg:row-start-1",
+      6: "self-start order-4 lg:col-start-2 lg:row-start-2",
+      3: "self-start order-5 lg:col-start-2 lg:row-start-3",
+      4: "self-start order-6 lg:col-start-2 lg:row-start-4",
     },
     send: { 1: "lg:row-start-1", 2: "lg:col-start-2 lg:row-start-1", 3: "lg:col-span-2 2xl:col-span-1 2xl:col-start-3 2xl:row-start-1", 4: "lg:col-span-2 2xl:col-span-3" },
   };
@@ -1399,7 +1413,7 @@ export function AdminCenter({ page }: { page: "overview" | "send" }) {
               </form>
             </section>
 
-            <section className={`${S("overview",6)} admin-card p-6 sm:p-8`}>
+            <CollapseCard id="upload" className={`${S("overview",6)} admin-card p-6 sm:p-8`}>
               <div className="flex items-start justify-between gap-3">
                 <div className="flex items-center gap-3">
                   <Upload className="h-7 w-7 text-gold" />
@@ -1496,7 +1510,7 @@ export function AdminCenter({ page }: { page: "overview" | "send" }) {
                   ))}
                 </ul>
               )}
-            </section>
+            </CollapseCard>
 
 
             {/* Template sidebar — constrained to the same column width as the invite panel */}
@@ -1577,12 +1591,12 @@ export function AdminCenter({ page }: { page: "overview" | "send" }) {
           </div>
 
           <div className="contents">
-            <div className={`${S("overview",5)} [&>section]:h-full`}><AdminLeadership /></div>
+            <div className={`${S("overview",5)}`}><AdminLeadership /></div>
             {page === "overview" && !preview && (
-              <section id="release-review" className="order-last lg:col-span-2 2xl:col-span-3 admin-card p-6 sm:p-8"><AdminReleaseReview /></section>
+              <CollapseCard id="release-review" title="Release review" className="order-last lg:col-span-2 2xl:col-span-3 admin-card p-6 sm:p-8"><AdminReleaseReview /></CollapseCard>
             )}
             {page === "send" && !preview && (
-              <section id="question-register" className="order-last lg:col-span-2 2xl:col-span-3 admin-card p-6 sm:p-8"><AdminQuestionRegister /></section>
+              <CollapseCard id="question-register" title="Executive questions register" className="order-last lg:col-span-2 2xl:col-span-3 admin-card p-6 sm:p-8"><AdminQuestionRegister /></CollapseCard>
             )}
             <section id="forum-communications" className={`${page === "send" ? "order-last lg:col-span-2 2xl:col-span-3" : "hidden"} admin-card p-6 sm:p-8`}>
               {page === "send" && <AdminForumCommunications />}
@@ -2273,7 +2287,7 @@ export function AdminCenter({ page }: { page: "overview" | "send" }) {
               {memberBusy && <p className="mt-3 text-base text-ivory/60">{memberBusy}</p>}
             </section>
 
-            <section className={`${S("overview",3)} admin-card p-6 sm:p-8`}>
+            <CollapseCard id="inquiries" className={`${S("overview",3)} admin-card p-6 sm:p-8`}>
               <div className="flex items-start justify-between gap-3">
                 <h2 id="inquiries" className="flex scroll-mt-28 items-center gap-3 font-display text-3xl">
                   <MessageSquare className="h-7 w-7 text-gold" /> Recent inquiries
@@ -2331,9 +2345,9 @@ export function AdminCenter({ page }: { page: "overview" | "send" }) {
                 })
               )}
               </div>
-            </section>
+            </CollapseCard>
 
-            <section className={`${S("overview",2)} admin-card p-6 sm:p-8`}>
+            <CollapseCard id="meetings" className={`${S("overview",2)} admin-card p-6 sm:p-8`}>
               <div className="flex items-start justify-between gap-3">
                 <h2 id="meetings" className="flex scroll-mt-28 items-center gap-3 font-display text-3xl"><CalendarDays className="h-7 w-7 text-gold" /> Meetings &amp; calendar</h2>
                 <InfoTip
@@ -2344,7 +2358,7 @@ export function AdminCenter({ page }: { page: "overview" | "send" }) {
               <div className="mt-7">
                 <AdminMeetings />
               </div>
-            </section>
+            </CollapseCard>
             <section className={`${page === "overview" ? "order-7 lg:col-span-2 lg:row-start-5" : "hidden"} admin-card p-6 sm:p-8`}>
               <div className="flex flex-wrap items-center justify-between gap-3">
                 <h2 id="documents" className="flex scroll-mt-28 items-center gap-3 font-display text-3xl"><FileText className="h-7 w-7 text-gold" /> Documents</h2>
@@ -2375,7 +2389,7 @@ export function AdminCenter({ page }: { page: "overview" | "send" }) {
                 )}
               </div>
             </section>
-            <section className={`${S("overview",4)} admin-card p-6 sm:p-8`}>
+            <CollapseCard id="activity" className={`${S("overview",4)} admin-card p-6 sm:p-8`}>
               <div className="flex items-start justify-between gap-3">
                 <h2 id="activity-log" className="flex scroll-mt-28 items-center gap-3 font-display text-3xl"><Activity className="h-7 w-7 text-gold" /> Activity log</h2>
                 <InfoTip title="Activity log" body="A dated record of key steps: invitations, profile submissions, documents released, signatures, BoldSign check-offs, signed copies sent, and reminders you sent. Kept for your records in case anything is ever questioned." />
@@ -2407,7 +2421,7 @@ export function AdminCenter({ page }: { page: "overview" | "send" }) {
                   {showAllActivity ? "Show recent only" : "View full activity log"} <ChevronRight className="h-4 w-4" />
                 </button>
               )}
-            </section>
+            </CollapseCard>
           </div>
         </div>
       </main>

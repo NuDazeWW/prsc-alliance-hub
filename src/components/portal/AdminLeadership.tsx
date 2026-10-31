@@ -37,7 +37,7 @@ export function AdminLeadership() {
   const [settings, setSettings] = useState({ eyebrow: "", heading: "", subtext: "" });
   const [editing, setEditing] = useState<Draft | null>(null);
   const [busy, setBusy] = useState(false);
-  const [collapsed, setCollapsed] = useStoredFlag("admin.leadershipCollapsed");
+  const [collapsed, setCollapsed] = useStoredFlag("admin.leadershipCollapsed.v2", true);
   const [showAll, setShowAll] = useState(false);
 
   useEffect(() => {
