@@ -117,7 +117,7 @@ function InviteLayout({ inviteeName, short, forumOnly, disOnly, confirmationUrl,
         <tbody><tr><td align="center" style={{ padding: '24px 12px 32px' }}>
           <table role="presentation" cellPadding={0} cellSpacing={0} border={0} width={760} className="email-shell" {...bg('bg-navy', '#0A1322')} style={{ width: '760px', maxWidth: '760px', ...bgCss('bg-navy', '#0A1322') }}>
             <tbody>
-              <tr><td><Img className="mobile-fluid" src={`${EMAIL_ASSET_BASE}/${disOnly ? 'prsc-header-1200.jpg' : 'prsc-hero-compact-1200.jpg'}`} width="760" height={disOnly ? '253' : '279'} alt={disOnly ? '' : 'PRSC — Partnership Readiness Standards Council'} style={{ display: 'block', width: '760px', maxWidth: '100%', height: 'auto' }} /></td></tr>
+              <tr><td><Img className="mobile-fluid" src={`${EMAIL_ASSET_BASE}/${disOnly ? 'prsc-header-1200.jpg' : 'prsc-hero-fade-1200.jpg'}`} width="760" height={disOnly ? '253' : '279'} alt={disOnly ? '' : 'PRSC — Partnership Readiness Standards Council'} style={{ display: 'block', width: '760px', maxWidth: '100%', height: 'auto' }} /></td></tr>
               <tr><td align="center" className="mobile-pad" {...bg('bg-navy', '#0A1322')} style={{ padding: disOnly ? '12px 34px 36px' : '0 34px 36px', ...bgCss('bg-navy', '#0A1322') }}>
                 {disOnly &&
                   <Img src={`${APP_ORIGIN}${disLogo.url}`} width="196" alt="Decision Intelligence Systems" style={{ display: 'block', width: '196px', maxWidth: '196px', height: 'auto', margin: '0 auto 17px' }} />}
