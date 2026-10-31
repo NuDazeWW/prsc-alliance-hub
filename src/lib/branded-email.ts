@@ -117,8 +117,9 @@ export function parseSignatures(text: string | null | undefined): EmailSignature
     .filter(Boolean)
     .map((line) => {
       const idx = line.indexOf(",");
-      if (idx === -1) return { name: line, title: "" };
-      return { name: line.slice(0, idx).trim(), title: line.slice(idx + 1).trim() };
+      const sig = idx === -1 ? { name: line, title: "" } : { name: line.slice(0, idx).trim(), title: line.slice(idx + 1).trim() };
+      // Shirley's name is shown without a public title.
+      return /^Shirley Johnson$/i.test(sig.name) ? { ...sig, title: "" } : sig;
     })
     .filter((s) => s.name);
 }

@@ -14,10 +14,16 @@ export type SystemEmailCopy = {
   signatures: string;
 };
 
-const FOUNDER = "Shirley Johnson, Founder, PRSC / DIS";
+const FOUNDER = "Shirley Johnson";
 // Only the first email of a journey (the invitation, and entity onboarding) comes from the founder; everything after is from the team.
 const TEAM = "The PRSC Leadership Team";
 const PORTAL = "https://access.prscstandards.org/portal";
+
+/** Older saved versions of the invitation that should be replaced by the current default copy. */
+export function isOutdatedSavedInvite(key: string | null | undefined, body: string | null | undefined) {
+  if (key !== "invite" || !body) return false;
+  return /next phase of our work|It's been a while since we spoke|It’s been a while since we spoke|Hello \{\{first_name\}\}/i.test(body) && !/Readiness Vanguard Coordination Forum/.test(body);
+}
 
 export const SYSTEM_EMAIL_DEFAULTS: Record<string, SystemEmailCopy> = {
   invite: {
@@ -30,7 +36,7 @@ export const SYSTEM_EMAIL_DEFAULTS: Record<string, SystemEmailCopy> = {
     cta_label: "Accept Your Private Invitation",
     cta_url: "",
     cta_subtext: "You'll create your own private password on the secure invitation page. No password is ever sent by email.",
-    signatures: "Shirley Johnson|Founder, PRSC & DIS",
+    signatures: "Shirley Johnson",
   },
   meeting_poll: {
     name: "Meeting availability request (automatic)",

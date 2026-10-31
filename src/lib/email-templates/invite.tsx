@@ -225,7 +225,7 @@ export const InviteEmail = ({
     const isFooter = (b: string[]) => /^\[footer\]/i.test(b[0])
     const blocks = allBlocks.filter((b) => !isFooter(b))
     const footers = allBlocks.filter(isFooter).map((b) => [b[0].replace(/^\[footer\]\s*/i, ''), ...b.slice(1)].filter(Boolean))
-    const [sigName, ...sigTitle] = (copy.signatures?.trim() || 'Shirley Johnson|Founder').split('|')
+    const sigName = (copy.signatures?.trim() || 'Shirley Johnson').split('|')[0].split(',')[0]
     // The letter below the button already carries the "Why You're Here" note when the saved copy uses that token.
     const letter = <>
       <Text style={eyebrow}>{fill(copy.eyebrow, 'Private invitation')}</Text>
@@ -237,7 +237,6 @@ export const InviteEmail = ({
       })}
       <Text style={signoff}>Warmly,</Text>
       <Text style={signature}>{sigName.trim()}</Text>
-      <Text style={signatureTitle}><Lines lines={sigTitle.join('|').split(',').map((part) => part.trim())} /></Text>
     </>
     const footnoteNode = footers.length ? <>{footers.map((lines, fi) => <Text key={fi} style={{ ...footnote, margin: 0 }}>{lines.map((l, li) => <React.Fragment key={li}>{li > 0 && <br />}{renderInline(l)}</React.Fragment>)}</Text>)}</> : null
     return <InviteLayout {...layout} footnote={footnoteNode} ctaLabel={fill(copy.cta_label, 'Accept Your Private Invitation')} ctaSubtext={copy.cta_subtext?.trim() ? fill(copy.cta_subtext) : null} whyYou={null} letter={letter} />
@@ -259,7 +258,6 @@ export const InviteEmail = ({
     <Text style={text}>We’re excited to reconnect and officially welcome you into this next chapter.</Text>
     <Text style={signoff}>Warmly,</Text>
     <Text style={signature}>Shirley Johnson</Text>
-    <Text style={signatureTitle}>Founder<br />Partnership Readiness Standards Council / Decision Intelligence Systems</Text>
   </>
   return <InviteLayout {...layout} ctaLabel="Access Your Private Welcome Center" ctaSubtext="After you click the button, you’ll create your own private password on the secure invitation page. No password will be sent by email." whyYou={whyYou} letter={letter} />
 }
@@ -286,7 +284,6 @@ const listItem = { ...text, margin: '0 0 8px' }
 const questionLink = { color: '#8C6E3B', fontWeight: 'bold' as const, textDecoration: 'underline' }
 const signoff = { ...text, margin: '26px 0 2px' }
 const signature = { color: '#8C6E3B', fontFamily: "'Brush Script MT', 'Segoe Script', cursive", fontSize: '28px', lineHeight: '1.2', margin: '0 0 4px' }
-const signatureTitle = { color: '#25303F', fontSize: '12px', lineHeight: '1.55', margin: 0 }
 const footerLink = { color: '#D9BD82', textDecoration: 'underline' }
 const meetingBox = { border: '1px solid #D4AF37', backgroundColor: '#FBF8F1', padding: '18px 20px', margin: '8px 0 10px' }
 const meetingEyebrow = { color: '#8C6E3B', fontSize: '10px', letterSpacing: '0.16em', textTransform: 'uppercase' as const, margin: '0 0 10px' }

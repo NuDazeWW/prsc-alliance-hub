@@ -57,7 +57,7 @@ export function teamSignature() {
 }
 
 export function founderSignature() {
-  return [{ name: "Shirley Johnson", title: "Founder, PRSC / DIS" }];
+  return [{ name: "Shirley Johnson", title: "" }];
 }
 
 /** Loads the admin-edited copy of an automatic email (falling back to the original wording) and fills in tokens. */

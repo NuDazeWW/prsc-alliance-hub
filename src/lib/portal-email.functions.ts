@@ -2,7 +2,7 @@ import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requirePortalAccess } from "@/lib/portal-access";
 import { applyTokens, buildMemberTokens, parseSignatures, renderBrandedEmail, renderBrandedEmailText } from "@/lib/branded-email";
-import { SYSTEM_EMAIL_DEFAULTS } from "@/lib/system-email-defaults";
+import { SYSTEM_EMAIL_DEFAULTS, isOutdatedSavedInvite } from "@/lib/system-email-defaults";
 import { withAppointmentProgress } from "@/lib/portal.functions";
 
 export type EmailTemplate = {
@@ -56,6 +56,13 @@ export const getEmailCenter = createServerFn({ method: "GET" })
         missing.map(([system_key, c]) => ({ system_key, ...c, created_by: context.userId })),
         { onConflict: "system_key", ignoreDuplicates: true },
       );
+    }
+    // Replace an older saved invitation with the current copy so the editor and the sent email agree.
+    {
+      const { data: inv } = await context.supabase.from("portal_email_templates").select("id, body").eq("system_key", "invite").maybeSingle();
+      if (inv && isOutdatedSavedInvite("invite", inv.body)) {
+        await context.supabase.from("portal_email_templates").update(SYSTEM_EMAIL_DEFAULTS.invite).eq("id", inv.id);
+      }
     }
     const [{ data: templates }, { data: sends }] = await Promise.all([
       context.supabase.from("portal_email_templates").select("*").order("created_at", { ascending: true }),

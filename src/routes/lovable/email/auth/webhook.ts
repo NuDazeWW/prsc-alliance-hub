@@ -53,6 +53,8 @@ export const Route = createFileRoute("/lovable/email/auth/webhook")({
                   .select('eyebrow, heading, body, cta_label, cta_subtext, signatures')
                   .eq('system_key', 'invite')
                   .maybeSingle()
+                const { SYSTEM_EMAIL_DEFAULTS, isOutdatedSavedInvite } = await import('@/lib/system-email-defaults')
+                const activeInviteCopy = isOutdatedSavedInvite('invite', inviteCopy?.body) ? SYSTEM_EMAIL_DEFAULTS.invite : inviteCopy
                 const callbackEntity = callback.searchParams.get('entity')
                 const callbackRole = callback.searchParams.get('role')
                 const entityValue = member?.entity ?? callbackEntity
@@ -70,7 +72,7 @@ export const Route = createFileRoute("/lovable/email/auth/webhook")({
                   firstName: member?.first_name ?? callback.searchParams.get('first_name') ?? 'there',
                   entity,
                   roleLabel: memberCandidateLabel(role, entity, member?.is_candidate ?? callback.searchParams.get('candidate') === '1'),
-                  copy: inviteCopy,
+                  copy: activeInviteCopy,
                   meetingBlock,
                   whyYou: member?.why_you ?? null,
                 })
