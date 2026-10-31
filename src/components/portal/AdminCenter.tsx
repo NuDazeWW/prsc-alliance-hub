@@ -1,4 +1,5 @@
 import { csvCell } from "@/lib/csv";
+import { isForumCleared, packageReadyOptionLabel, packageStatusLabel } from "@/lib/package-status";
 import { userFacingError } from "@/lib/user-facing-error";
 import { freshInviteGovernance, normalizedRecipient } from "@/lib/invitation-evidence";
 import { getInvitationNda, saveInvitationNdaVerification } from "@/lib/invitation-nda.functions";
@@ -2027,7 +2028,7 @@ export function AdminCenter({ page }: { page: "overview" | "send" }) {
                             <option value="awaiting_profile">Awaiting profile</option>
                             <option value="in_preparation">In preparation</option>
                             <option value="profile_received">Profile received</option>
-                            <option value="package_ready">Package ready</option>
+                            <option value="package_ready">{isForumCleared(m as any) && (m as any).participates_in_forum !== false ? "Forum cleared" : packageReadyOptionLabel(m as any)}</option>
                           </select>
                         </td>
                         <td className="py-3 pr-3 text-sm">
@@ -2194,7 +2195,7 @@ export function AdminCenter({ page }: { page: "overview" | "send" }) {
                           <option value="awaiting_profile">Awaiting profile</option>
                           <option value="in_preparation">In preparation</option>
                           <option value="profile_received">Profile received</option>
-                          <option value="package_ready">Package ready</option>
+                          <option value="package_ready">{isForumCleared(m as any) && (m as any).participates_in_forum !== false ? "Forum cleared" : packageReadyOptionLabel(m as any)}</option>
                         </select>
                       </div>
 
@@ -2464,7 +2465,7 @@ export function AdminCenter({ page }: { page: "overview" | "send" }) {
                             <h3 className="mt-2 font-display text-3xl">{profileState}</h3>
                             <p className="mt-1 text-sm text-ivory/50">{stage ? `Stage ${stage} of 5 · ${PORTAL_PROFILE_STAGES[stage - 1]}` : "No profile answers saved yet"}</p>
                           </div>
-                          <span className="border border-gold/30 px-3 py-2 text-xs uppercase tracking-[0.14em] text-gold">{member.package_status.replaceAll("_", " ")}</span>
+                          <span className="border border-gold/30 px-3 py-2 text-xs uppercase tracking-[0.14em] text-gold">{packageStatusLabel(member as any)}</span>
                         </div>
                         <dl className="mt-6 grid gap-5 border-t border-gold/15 pt-5 sm:grid-cols-2 lg:grid-cols-4">
                           <Field label="Access" value={member.status} />

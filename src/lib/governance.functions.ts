@@ -107,6 +107,8 @@ export const recordForumClearance = createServerFn({ method: "POST" })
       forum_cleared_at: cleared ? new Date().toISOString() : null,
       forum_cleared_by: cleared ? context.userId : null,
       forum_restrictions: data.restrictions || null,
+      // For Forum members the journey ends at clearance (shown as "Forum cleared"), not at "package ready".
+      ...(cleared ? { package_status: "package_ready" as const } : {}),
     }).eq("id", data.member_id);
     if (error) throw error;
     await log(context, data.member_id, "forum_clearance", data.decision, data.notes || null, { meeting_eligibility: data.meeting_eligibility, restrictions: data.restrictions, nda_verified: true, disclosures_reviewed: true });
