@@ -951,6 +951,21 @@ export function AdminCenter({ page }: { page: "overview" | "send" }) {
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(to)) return setEmailStatus("Enter a valid email address for the test.");
     if (!draft.subject.trim() || !draft.body.trim()) return setEmailStatus("Add a subject line and content before sending a test.");
     if (preview) return setEmailStatus("Preview mode: sending is available once you are signed in.");
+    if (editingInvite) {
+      // The invitation is its own full-design email, not the plain layout: send exactly what the preview shows.
+      if (!inviteComposeHtml) return setEmailStatus("The invitation preview is still loading. Try again in a moment.");
+      if (!confirm(`Send a test of the full invitation to ${to} only? It shows the preview member's details, the button is inactive, and the subject is “${INVITE_EMAIL_SUBJECT}” with [TEST] in front.`)) return;
+      setSending(true);
+      try {
+        await sendTestInvitation({ data: { to, subject: INVITE_EMAIL_SUBJECT, html: inviteComposeHtml } });
+        setEmailStatus(`Test invitation sent to ${to}.`);
+      } catch (error) {
+        setEmailStatus(userFacingError(error, "The test could not be sent."));
+      } finally {
+        setSending(false);
+      }
+      return;
+    }
     if (!confirm(`Send a test of "${draft.subject}" to ${to} only? Merge fields use sample values and the subject starts with [TEST].`)) return;
     setSending(true);
     try {
@@ -1792,10 +1807,10 @@ export function AdminCenter({ page }: { page: "overview" | "send" }) {
               )}
 
 
-              {!isTemplateMode && (
+              {(!isTemplateMode || editingInvite) && (
                 <div className="mt-6 border-t border-gold/15 pt-5">
                   <p className="text-xs uppercase tracking-[0.18em] text-gold">Send a test to any address</p>
-                  <p className="mt-1 text-sm text-ivory/55">Sends this draft to one email address you type (not a member), with sample merge values. Nothing goes to members.</p>
+                  <p className="mt-1 text-sm text-ivory/55">{editingInvite ? "Sends the full-design invitation exactly as the preview above shows it, to one address you type. The button is inactive. Nothing goes to members." : "Sends this draft to one email address you type (not a member), with sample merge values. Nothing goes to members."}</p>
                   <div className="mt-3 flex flex-wrap gap-3">
                     <Input type="email" value={testTo} onChange={(e) => setTestTo(e.target.value)} placeholder="name@example.com" aria-label="Test email address" className="max-w-sm text-base" />
                     <Button type="button" disabled={sending} variant="outline" className="rounded-none text-base" onClick={sendTest}>{sending ? "Sending…" : "Send test"}</Button>
