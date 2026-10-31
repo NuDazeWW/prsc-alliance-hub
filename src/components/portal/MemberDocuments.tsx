@@ -68,7 +68,7 @@ export function MemberDocuments({ documents: all, completions, entity, forum = t
   const s1 = documents.filter((d) => d.journey_stage === 1);
   const awaitingClearance = !forumCleared && s1.length > 0 && s1.every((d) => doneMap.has(d.id));
   const onboarding = documents.filter(isOnboarding);
-  const ongoing = documents.filter((d) => !isOnboarding(d));
+  const ongoing = documents.filter((d) => !isOnboarding(d) && d.forum_role !== "agenda" && d.forum_role !== "restricted_brief");
   const signingByDoc = new Map(signing.map((s) => [s.document_id, s.state]));
   // The count covers required journey actions only. Reference files, one-off records and historical
   // records are listed separately below and never change it.
@@ -126,12 +126,22 @@ export function MemberDocuments({ documents: all, completions, entity, forum = t
         // and documents that are not open yet wait below.
         const stageOf = (d: Doc) => (STAGES.slice(0, 4).some((s) => s.n === d.journey_stage) ? (d.journey_stage as number) : 99);
         const byStage = (a: Doc, b: Doc) => stageOf(a) - stageOf(b) || a.sort_order - b.sort_order;
-        const needs = onboarding.filter((d) => !locked.has(d.id) && !doneMap.has(d.id)).sort(byStage);
-        const finished = onboarding.filter((d) => doneMap.has(d.id)).sort(byStage);
-        const waiting = onboarding.filter((d) => locked.has(d.id) && !doneMap.has(d.id)).sort(byStage);
+        // The agenda and the strategy brief are reference material: always shown in full, never folded into a pill.
+        const isRef = (d: Doc) => d.forum_role === "agenda" || d.forum_role === "restricted_brief";
+        const refs = documents.filter((d) => isRef(d) && !locked.has(d.id)).sort((a, b) => (a.forum_role === "agenda" ? -1 : 1) - (b.forum_role === "agenda" ? -1 : 1));
+        const flow = onboarding.filter((d) => !isRef(d));
+        const needs = flow.filter((d) => !locked.has(d.id) && !doneMap.has(d.id)).sort(byStage);
+        const finished = flow.filter((d) => doneMap.has(d.id)).sort(byStage);
+        const waiting = flow.filter((d) => locked.has(d.id) && !doneMap.has(d.id)).sort(byStage);
         const card = (d: Doc) => <DocCard key={d.id} d={d} done={doneMap.get(d.id)} lockReason={locked.has(d.id) ? lockReasonFor(d, entity, entityReleased) : undefined} signingState={signingByDoc.get(d.id)} fresh={fresh.has(d.id)} onOpen={setOpenId} />;
         return (
           <>
+            {refs.length > 0 && (
+              <div className="mt-8">
+                <p className="text-[11px] uppercase tracking-[0.24em] text-gold">Forum materials</p>
+                <div className="mt-4 grid gap-4 lg:grid-cols-2">{refs.map(card)}</div>
+              </div>
+            )}
             {needs.length > 0 && (
               <div className="mt-8">
                 <p className="text-[11px] uppercase tracking-[0.24em] text-gold">Needs your attention</p>
