@@ -25,6 +25,7 @@ export type EmailTokens = {
   role_label?: string;
   package_label?: string;
   email?: string;
+  why_you?: string;
 };
 
 export const EMAIL_TOKENS = [
@@ -39,6 +40,7 @@ export const EMAIL_TOKENS = [
   "role_label",
   "package_label",
   "email",
+  "why_you",
 ] as const;
 
 const ENTITY_FULL: Record<string, string> = {
@@ -63,6 +65,7 @@ export function buildMemberTokens(member: {
   entity?: string | null;
   role?: string | null;
   email?: string | null;
+  why_you?: string | null;
   is_candidate?: boolean | null;
   forum_clearance_status?: string | null;
   prsc_activated_at?: string | null;
@@ -85,6 +88,7 @@ export function buildMemberTokens(member: {
     role_label: memberDesignation({ ...member, role, entity }),
     package_label: member.is_candidate ? "United Forum" : PACKAGE_LABEL[role] ?? "Board / Advisor",
     email: member.email ?? "",
+    why_you: member.why_you?.trim() || "",
   };
 }
 

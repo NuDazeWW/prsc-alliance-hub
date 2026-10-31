@@ -234,7 +234,7 @@ export const sendTestEmail = createServerFn({ method: "POST" })
   .handler(async ({ context, data }) => {
     await assertAdmin(context);
     // Sample values so merge fields are visibly filled instead of showing raw {{tokens}}.
-    const tokens = buildMemberTokens({ first_name: "Alex", last_name: "Morgan", organization: "Sample Organization", title: "Sample Title", entity: "prsc", role: "advisor", email: data.to });
+    const tokens = buildMemberTokens({ first_name: "Alex", last_name: "Morgan", organization: "Sample Organization", title: "Sample Title", entity: "prsc", role: "advisor", email: data.to, why_you: "Your experience and perspective will help us challenge assumptions and shape our next steps. (Sample personal note.)" });
     const subject = `[TEST] ${applyTokens(data.subject, tokens)}`;
     const composed = {
       subject,

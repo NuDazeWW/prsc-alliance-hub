@@ -1742,7 +1742,7 @@ export function AdminCenter({ page }: { page: "overview" | "send" }) {
               </div>
 
               <p className="mt-3 text-sm text-ivory/40">
-                Personalize with {"{{first_name}}"}, {"{{last_name}}"}, {"{{full_name}}"}, {"{{organization}}"}, {"{{title}}"}, {"{{entity}}"}, {"{{entity_full}}"}, {"{{role}}"}, {"{{role_label}}"}, {"{{package_label}}"}.
+                Personalize with {"{{first_name}}"}, {"{{last_name}}"}, {"{{full_name}}"}, {"{{organization}}"}, {"{{title}}"}, {"{{entity}}"}, {"{{entity_full}}"}, {"{{role}}"}, {"{{role_label}}"}, {"{{package_label}}"}, {"{{why_you}}"}.
               </p>
 
               {!isTemplateMode && (
