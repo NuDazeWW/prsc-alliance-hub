@@ -68,6 +68,7 @@ import {
   resetEmailTemplate,
   saveEmailTemplate,
   sendMemberEmail,
+  sendTestEmail,
   type EmailSend,
   type EmailTemplate,
 } from "@/lib/portal-email.functions";
@@ -306,7 +307,7 @@ export function AdminCenter({ page }: { page: "overview" | "send" }) {
   const inviteNdaGeneration = useRef(0);
   const [inviteCollapsed, setInviteCollapsed] = useStoredFlag("admin.inviteCollapsed");
   const [sentLogOpen, setSentLogOpen] = useStoredFlag("admin.sentLogOpen");
-  const [recipientsOpen, setRecipientsOpen] = useStoredFlag("admin.recipientsOpen");
+  const [recipientsOpen, setRecipientsOpen] = useStoredFlag("admin.recipientsOpen.v2", true);
   const [membersCollapsed, setMembersCollapsed] = useStoredFlag("admin.membersCollapsed");
   const [expandedRows, setExpandedRows] = useState<string[]>([]);
   useEffect(() => {
@@ -923,6 +924,25 @@ export function AdminCenter({ page }: { page: "overview" | "send" }) {
       await email.refetch();
     } catch (error) {
       setEmailStatus(userFacingError(error, "Could not remove the template."));
+    }
+  }
+
+  const [testTo, setTestTo] = useState("");
+  const [recipientFilter, setRecipientFilter] = useState("");
+  async function sendTest() {
+    const to = testTo.trim();
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(to)) return setEmailStatus("Enter a valid email address for the test.");
+    if (!draft.subject.trim() || !draft.body.trim()) return setEmailStatus("Add a subject line and content before sending a test.");
+    if (preview) return setEmailStatus("Preview mode: sending is available once you are signed in.");
+    if (!confirm(`Send a test of "${draft.subject}" to ${to} only? Merge fields use sample values and the subject starts with [TEST].`)) return;
+    setSending(true);
+    try {
+      await sendTestEmail({ data: { to, subject: draft.subject, eyebrow: draft.eyebrow, heading: draft.heading, body: draft.body, cta_label: draft.cta_label, cta_url: draft.cta_url, cta_subtext: draft.cta_subtext, signatures: draft.signatures } });
+      setEmailStatus(`Test sent to ${to}.`);
+    } catch (error) {
+      setEmailStatus(userFacingError(error, "The test could not be sent."));
+    } finally {
+      setSending(false);
     }
   }
 
@@ -1714,8 +1734,9 @@ export function AdminCenter({ page }: { page: "overview" | "send" }) {
                   <span className="text-xs uppercase tracking-[0.18em] text-gold">Recipients <span className="ml-2 normal-case tracking-normal text-ivory/55">{recipients.length} selected of {members.length}</span></span>
                   {recipientsOpen ? <ChevronUp className="h-5 w-5 shrink-0 text-gold" /> : <ChevronDown className="h-5 w-5 shrink-0 text-gold" />}
                 </button>
+                {recipientsOpen && <Input value={recipientFilter} onChange={(e) => setRecipientFilter(e.target.value)} placeholder="Search by name or email" aria-label="Search recipients" className="mt-3 text-base" />}
                 <div className={`mt-3 grid gap-2 sm:grid-cols-2 ${recipientsOpen ? "" : "hidden"}`}>
-                  {members.map((m) => {
+                  {members.filter((m) => !recipientFilter.trim() || `${m.first_name} ${m.last_name} ${m.email}`.toLowerCase().includes(recipientFilter.trim().toLowerCase())).map((m) => {
                     const already = composeFromId
                       ? (sendsByMember.get(m.id) ?? []).some((s) => s.template_id === composeFromId && s.status === "sent")
                       : false;
@@ -1753,6 +1774,17 @@ export function AdminCenter({ page }: { page: "overview" | "send" }) {
               </div>
               )}
 
+
+              {!isTemplateMode && (
+                <div className="mt-6 border-t border-gold/15 pt-5">
+                  <p className="text-xs uppercase tracking-[0.18em] text-gold">Send a test to any address</p>
+                  <p className="mt-1 text-sm text-ivory/55">Sends this draft to one email address you type (not a member), with sample merge values. Nothing goes to members.</p>
+                  <div className="mt-3 flex flex-wrap gap-3">
+                    <Input type="email" value={testTo} onChange={(e) => setTestTo(e.target.value)} placeholder="name@example.com" aria-label="Test email address" className="max-w-sm text-base" />
+                    <Button type="button" disabled={sending} variant="outline" className="rounded-none text-base" onClick={sendTest}>{sending ? "Sending…" : "Send test"}</Button>
+                  </div>
+                </div>
+              )}
 
               <div className="mt-6 flex flex-wrap items-center gap-3">
                 <Button

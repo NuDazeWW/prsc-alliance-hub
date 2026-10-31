@@ -234,3 +234,54 @@ export const sendMemberEmail = createServerFn({ method: "POST" })
 
     return { ok: true, results };
   });
+
+
+const testSchema = z.object({
+  to: z.string().trim().email().max(254),
+  subject: z.string().trim().min(1).max(200),
+  eyebrow: z.string().trim().max(80).optional().default("Private Communication"),
+  heading: z.string().trim().max(200).optional().default(""),
+  body: z.string().trim().min(1).max(20000),
+  cta_label: z.string().trim().max(80).optional().default(""),
+  cta_url: z.string().trim().max(400).optional().default(""),
+  cta_subtext: z.string().trim().max(200).optional().default(""),
+  signatures: z.string().trim().max(600).optional().default(""),
+});
+
+/** Admin only: send the current draft to one address the administrator types, to see the real layout in a real inbox. */
+export const sendTestEmail = createServerFn({ method: "POST" })
+  .middleware([requirePortalAccess])
+  .inputValidator((input) => testSchema.parse(input))
+  .handler(async ({ context, data }) => {
+    await assertAdmin(context);
+    const apiKey = process.env["SENDGRID_API_KEY"];
+    if (!apiKey) throw new Error("Email sending is not configured");
+    // Sample values so merge fields are visibly filled instead of showing raw {{tokens}}.
+    const tokens = buildMemberTokens({ first_name: "Alex", last_name: "Morgan", organization: "Sample Organization", title: "Sample Title", entity: "prsc", role: "advisor", email: data.to });
+    const subject = `[TEST] ${applyTokens(data.subject, tokens)}`;
+    const composed = {
+      subject,
+      eyebrow: applyTokens(data.eyebrow || "", tokens),
+      heading: applyTokens(data.heading || "", tokens),
+      body: applyTokens(data.body, tokens),
+      ctaLabel: data.cta_label || null,
+      ctaUrl: data.cta_url || null,
+      ctaSubtext: applyTokens(data.cta_subtext || "", tokens) || null,
+      signatures: parseSignatures(data.signatures),
+    };
+    const res = await fetch("https://api.sendgrid.com/v3/mail/send", {
+      method: "POST",
+      headers: { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json" },
+      body: JSON.stringify({
+        personalizations: [{ to: [{ email: data.to }], subject }],
+        from: { email: "no-reply@readinessterminal.com", name: "PRSC Private Center" },
+        reply_to: { email: "info@readinessterminal.com" },
+        content: [
+          { type: "text/plain", value: renderBrandedEmailText(composed) },
+          { type: "text/html", value: renderBrandedEmail(composed) },
+        ],
+      }),
+    });
+    if (!res.ok) throw new Error(`Delivery failed (${res.status})`);
+    return { ok: true };
+  });
