@@ -1113,6 +1113,14 @@ export function AdminCenter({ page }: { page: "overview" | "send" }) {
     signatures: parseSignatures(draft.signatures),
   });
 
+  // Hooks must run on every render, so these sit above the loading/error returns below.
+  useAdminTarget(["tracker"], () => setMembersCollapsed(false));
+  useAdminTarget(["invite"], () => setInviteCollapsed(false));
+  useAdminTarget(["sent-log"], () => setSentLogOpen(true));
+  useAdminTarget(["email-compose"], () => { setEmailMode("compose"); setDraft(emptyDraft); setComposeFromId(""); setEmailStatus(""); });
+  useAdminTarget(["email-templates"], () => { setEmailMode("template"); setDraft(emptyDraft); setComposeFromId(""); setEmailStatus("Open Saved email templates to pick one, upload one, or start a new one."); });
+  useAdminTarget(["new-template"], () => { setEmailMode("template"); setDraft(emptyDraft); setComposeFromId(""); setEmailStatus("Starting a new template. Give it a name, subject and wording below."); });
+
   if (overview.isLoading)
     return (
       <PortalShell admin>
@@ -1213,12 +1221,6 @@ export function AdminCenter({ page }: { page: "overview" | "send" }) {
   ];
 
   // Left-bar links open the matching card (or email mode) and scroll to it.
-  useAdminTarget(["tracker"], () => setMembersCollapsed(false));
-  useAdminTarget(["invite"], () => setInviteCollapsed(false));
-  useAdminTarget(["sent-log"], () => setSentLogOpen(true));
-  useAdminTarget(["email-compose"], () => { setEmailMode("compose"); setDraft(emptyDraft); setComposeFromId(""); setEmailStatus(""); });
-  useAdminTarget(["email-templates"], () => { setEmailMode("template"); setDraft(emptyDraft); setComposeFromId(""); setEmailStatus("Open Saved email templates to pick one, upload one, or start a new one."); });
-  useAdminTarget(["new-template"], () => { setEmailMode("template"); setDraft(emptyDraft); setComposeFromId(""); setEmailStatus("Starting a new template. Give it a name, subject and wording below."); });
 
   const importConfirmBar = importRows.length > 0 ? (
     <div className="mt-6 border border-gold/40 bg-gold/5 p-4">
