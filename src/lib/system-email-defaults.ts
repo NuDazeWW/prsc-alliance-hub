@@ -22,7 +22,8 @@ const PORTAL = "https://access.prscstandards.org/portal";
 /** Older saved versions of the invitation that should be replaced by the current default copy. */
 export function isOutdatedSavedInvite(key: string | null | undefined, body: string | null | undefined) {
   if (key !== "invite" || !body) return false;
-  return /next phase of our work|It's been a while since we spoke|It’s been a while since we spoke|Hello \{\{first_name\}\}/i.test(body) && !/Readiness Vanguard Coordination Forum/.test(body);
+  // Any earlier version of our own copy (old wording, or the first Forum draft with the bullet list) is replaced by the current default.
+  return !/\[steps\]/i.test(body) && /next phase of our work|been a while since we spoke|Hello \{\{first_name\}\}|Here['’]s how to begin/i.test(body);
 }
 
 export const SYSTEM_EMAIL_DEFAULTS: Record<string, SystemEmailCopy> = {
