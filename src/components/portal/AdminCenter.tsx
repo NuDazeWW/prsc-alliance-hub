@@ -23,6 +23,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { render } from "@react-email/render";
 import { AdminForumCommunications } from "@/components/portal/AdminForumCommunications";
 import { AdminQuestionRegister } from "@/components/portal/AdminQuestionRegister";
+import { AdminDocumentLibrary } from "@/components/portal/AdminDocumentLibrary";
 import { AdminReleaseReview } from "@/components/portal/AdminReleaseReview";
 import {
   Activity,
@@ -2346,6 +2347,11 @@ export function AdminCenter({ page }: { page: "overview" | "send" }) {
                 <AdminMeetings />
               </div>
             </CollapseCard>
+            {page === "overview" && (
+              <CollapseCard id="library" title="All documents" className="order-8 lg:col-span-2 lg:row-start-6 admin-card p-6 sm:p-8">
+                <AdminDocumentLibrary members={members as any} preview={preview} />
+              </CollapseCard>
+            )}
             <CollapseCard id="documents-card" hashes={["documents"]} domId={false} className={`${page === "overview" ? "order-7 lg:col-span-2 lg:row-start-5" : "hidden"} admin-card p-6 sm:p-8`}>
               <div className="flex flex-wrap items-center justify-between gap-3">
                 <h2 id="documents" className="flex scroll-mt-28 items-center gap-3 font-display text-3xl"><FileText className="h-7 w-7 text-gold" /> Documents</h2>

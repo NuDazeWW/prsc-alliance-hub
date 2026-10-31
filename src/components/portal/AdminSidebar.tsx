@@ -36,7 +36,8 @@ const GROUPS: Group[] = [
     { label: "Executive questions", to: "/admin/send", hash: "question-register", icon: ClipboardList },
   ] },
   { heading: "Documents & releases", items: [
-    { label: "Documents", to: "/admin", hash: "documents", icon: FileText },
+    { label: "All documents", to: "/admin", hash: "library", icon: FileText },
+    { label: "Member documents", to: "/admin", hash: "documents", icon: FilePlus },
     { label: "Release review", to: "/admin", hash: "release-review", icon: ShieldCheck },
   ] },
   { heading: "Everything else", items: [

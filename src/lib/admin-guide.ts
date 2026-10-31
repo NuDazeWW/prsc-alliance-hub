@@ -136,7 +136,7 @@ export const ADMIN_GUIDE: GuideEntry[] = [
     id: "agenda", group: "Documents & releases", title: "Publish or change the Forum agenda",
     summary: "Release the agenda and tell people when it changes.",
     steps: [
-      "Left bar: Documents & releases > Documents. Upload the agenda and mark it as the Forum agenda.",
+      "Left bar: Documents & releases > Member documents. Choose a member, then add the agenda and mark it as the Forum agenda (choose the scope for all members). Use All documents to see everything that is loaded.",
       "To change it, replace the PDF. Members always see the newest version.",
       "On the agenda row, click Email cleared members: agenda updated. A confirmation shows how many people will be emailed.",
     ],
