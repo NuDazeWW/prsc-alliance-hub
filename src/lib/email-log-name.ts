@@ -10,6 +10,8 @@ const NAMES: Record<string, string> = {
   "documents-complete-member": "Documents complete",
   "entity-documents-ready": "Entity documents are ready",
   "journey-next-document": "Next document ready",
+  "forum-agenda-ready-member": "Forum agenda available",
+  "forum-agenda-updated-member": "Forum agenda updated",
   "signed-copy-member": "Signed copy",
   "inquiry-member-autoreply": "Question received",
 };

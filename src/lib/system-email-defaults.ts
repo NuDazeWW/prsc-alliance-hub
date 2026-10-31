@@ -114,6 +114,30 @@ export const SYSTEM_EMAIL_DEFAULTS: Record<string, SystemEmailCopy> = {
     cta_subtext: "Sign in with your email and the password you created.",
     signatures: FOUNDER,
   },
+  forum_agenda_ready: {
+    name: "Forum agenda available (automatic)",
+    description: "Sent once to a member when you clear them for the Forum and an Agenda is published. Tokens: {{first_name}}.",
+    subject: "You're cleared: the Forum agenda is now available",
+    eyebrow: "Forum agenda",
+    heading: "{{first_name}}, you're cleared for the Forum.",
+    body: "Thank you for completing your preparation. The inaugural Forum agenda is now available in your private Welcome Center.\n\nIt opens at the top of your Documents page. There is nothing to sign. We will email you if the agenda changes.",
+    cta_label: "Open the Forum Agenda",
+    cta_url: `${PORTAL}#documents`,
+    cta_subtext: "Sign in with your email and the password you created.",
+    signatures: FOUNDER,
+  },
+  forum_agenda_updated: {
+    name: "Forum agenda updated (sent by an administrator)",
+    description: "Sent to cleared Forum members when an administrator chooses to announce a change to the agenda. Tokens: {{first_name}}.",
+    subject: "The Forum agenda has been updated",
+    eyebrow: "Forum agenda",
+    heading: "{{first_name}}, the Forum agenda has changed.",
+    body: "We have updated the Forum agenda. The latest version is now in your private Welcome Center under Documents.\n\nNothing is needed from you beyond reviewing the changes.",
+    cta_label: "Open the Forum Agenda",
+    cta_url: `${PORTAL}#documents`,
+    cta_subtext: "",
+    signatures: FOUNDER,
+  },
 };
 
 const SHIRLEY = "Shirley";

@@ -58,6 +58,7 @@ export function MemberDocuments({ documents: all, completions, entity, forum = t
   const documents = all.filter((d: any) => !d.superseded_at && (forum || d.journey_stage !== 1));
   const history = all.filter((d: any) => d.superseded_at);
   const [openId, setOpenId] = useState<string | null>(null);
+  const [shown, setShown] = useState<Set<string>>(new Set());
   const open = all.find((d) => d.id === openId) ?? null;
   const doneMap = new Map(completions.map((c) => [c.document_id, c]));
   const locked = lockedDocumentIds(documents, new Set(doneMap.keys()), entity, { released: entityReleased, forum });
@@ -117,18 +118,46 @@ export function MemberDocuments({ documents: all, completions, entity, forum = t
       {awaitingClearance && (
         <p className="mt-4 border border-gold/30 px-5 py-3 text-[14px] text-gold">Your Forum preparation is complete. Your clearance is now with the Secretariat for review{forumOnly ? "." : ", and we'll email you when the next stage opens"}</p>
       )}
-      {STAGES.slice(0, 4).map((stage) => {
-        const docs = onboarding.filter((d) => d.journey_stage === stage.n);
-        if (!docs.length) return null;
+      {(() => {
+        // What needs the member now comes first. Finished documents shrink to small pills (tap one to open it again),
+        // and documents that are not open yet wait below.
+        const stageOf = (d: Doc) => (STAGES.slice(0, 4).some((s) => s.n === d.journey_stage) ? (d.journey_stage as number) : 99);
+        const byStage = (a: Doc, b: Doc) => stageOf(a) - stageOf(b) || a.sort_order - b.sort_order;
+        const needs = onboarding.filter((d) => !locked.has(d.id) && !doneMap.has(d.id)).sort(byStage);
+        const finished = onboarding.filter((d) => doneMap.has(d.id)).sort(byStage);
+        const waiting = onboarding.filter((d) => locked.has(d.id) && !doneMap.has(d.id)).sort(byStage);
+        const card = (d: Doc) => <DocCard key={d.id} d={d} done={doneMap.get(d.id)} lockReason={locked.has(d.id) ? lockReasonFor(d, entity, entityReleased) : undefined} signingState={signingByDoc.get(d.id)} fresh={fresh.has(d.id)} onOpen={setOpenId} />;
         return (
-          <div key={stage.n} className="mt-8">
-            <p className="text-[11px] uppercase tracking-[0.24em] text-gold">Stage {forum ? stage.n : stage.n - 1} · {stage.label}</p>
-            <div className="mt-4 grid gap-4 lg:grid-cols-2">
-              {docs.map((d) => <DocCard key={d.id} d={d} done={doneMap.get(d.id)} lockReason={locked.has(d.id) ? lockReasonFor(d, entity, entityReleased) : undefined} signingState={signingByDoc.get(d.id)} fresh={fresh.has(d.id)} onOpen={setOpenId} />)}
-            </div>
-          </div>
+          <>
+            {needs.length > 0 && (
+              <div className="mt-8">
+                <p className="text-[11px] uppercase tracking-[0.24em] text-gold">Needs your attention</p>
+                <div className="mt-4 grid gap-4 lg:grid-cols-2">{needs.map(card)}</div>
+              </div>
+            )}
+            {finished.length > 0 && (
+              <div className="mt-8">
+                <p className="text-[11px] uppercase tracking-[0.24em] text-gold">Completed · {finished.length}</p>
+                <div className="mt-3 flex flex-wrap gap-2">
+                  {finished.map((d) => (
+                    <button key={d.id} type="button" aria-expanded={shown.has(d.id)} onClick={() => setShown((s) => { const n = new Set(s); if (n.has(d.id)) n.delete(d.id); else n.add(d.id); return n; })}
+                      className={`inline-flex items-center gap-2 rounded-full border px-4 py-1.5 text-[13px] transition-colors ${shown.has(d.id) ? "border-gold bg-gold/10 text-ivory" : "border-gold/30 text-ivory/75 hover:border-gold hover:text-ivory"}`}>
+                      <Check className="h-3.5 w-3.5 text-gold" /> {d.title}
+                    </button>
+                  ))}
+                </div>
+                {finished.some((d) => shown.has(d.id)) && <div className="mt-4 grid gap-4 lg:grid-cols-2">{finished.filter((d) => shown.has(d.id)).map(card)}</div>}
+              </div>
+            )}
+            {waiting.length > 0 && (
+              <div className="mt-8">
+                <p className="text-[11px] uppercase tracking-[0.24em] text-gold">Coming up</p>
+                <div className="mt-4 grid gap-4 lg:grid-cols-2">{waiting.map(card)}</div>
+              </div>
+            )}
+          </>
         );
-      })}
+      })()}
       {unavailable.length > 0 && (
         <div className="mt-10 border-t border-gold/20 pt-8">
           <div className="flex items-center gap-3">
@@ -169,15 +198,16 @@ export function MemberDocuments({ documents: all, completions, entity, forum = t
 function DocCard({ d, done, lockReason, signingState, fresh = false, onOpen }: { d: Doc; done?: Completion; lockReason?: "not_released" | "prior_action"; signingState?: SigningUiState; fresh?: boolean; onOpen: (id: string) => void }) {
   const locked = Boolean(lockReason);
   const needsAction = !locked && !done;
+  const isAgenda = d.forum_role === "agenda";
   return (
     <div id={`doc-card-${d.id}`} className={`relative border p-5 ${locked ? "border-gold/20 bg-ivory/[.03] opacity-55" : done ? "border-gold/15 bg-ivory/[.02] opacity-80" : "border-gold bg-gold/[.06]"} ${fresh ? "prsc-flash" : ""}`}>
-      {needsAction && <p className="mb-2 inline-block bg-gold px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.2em] text-navy-deep">{fresh ? "New · your next step" : "Action needed"}</p>}
+      {needsAction && <p className="mb-2 inline-block bg-gold px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.2em] text-navy-deep">{isAgenda ? "New" : fresh ? "New · your next step" : "Action needed"}</p>}
       {d.journey_track && <p className="text-[10px] uppercase tracking-[0.2em] text-ivory/45">{TRACK_LABEL[d.journey_track]}</p>}
       <h3 className="mt-1 font-display text-[19px] leading-snug">{d.title}</h3>
       {d.description && <p className="mt-2 text-[14px] leading-6 text-ivory/60">{d.description}</p>}
       {done && (
         <p className="mt-4 inline-flex items-center gap-2 text-[13px] text-gold">
-          <Check className="h-4 w-4" /> {done.kind === "signed" ? "Signed" : done.kind === "external_confirmed" ? "Confirmed" : "Acknowledged"} on {new Date(done.acknowledged_at).toLocaleDateString()}
+          <Check className="h-4 w-4" /> {isAgenda ? "Received" : done.kind === "signed" ? "Signed" : done.kind === "external_confirmed" ? "Confirmed" : "Acknowledged"} on {new Date(done.acknowledged_at).toLocaleDateString()}
         </p>
       )}
       <div className="mt-4">
@@ -190,7 +220,7 @@ function DocCard({ d, done, lockReason, signingState, fresh = false, onOpen }: {
         ) : (
           <button type="button" onClick={() => onOpen(d.id)} className="cta-glow-outline inline-flex items-center gap-3 rounded-full px-5 py-2.5 text-[13px] transition-all">
             <span className="relative z-10 flex items-center gap-3">
-              {done ? "View document" : d.category === "sign" ? "Read & sign" : "Read & acknowledge"} <ArrowRight className="h-4 w-4" />
+              {isAgenda ? "Open the agenda" : done ? "View document" : d.category === "sign" ? "Read & sign" : "Read & acknowledge"} <ArrowRight className="h-4 w-4" />
             </span>
           </button>
         )}
@@ -298,6 +328,18 @@ function DocumentReader({ doc, completion, onBack, onDone }: { doc: Doc; complet
     }
   }
 
+  // The agenda is information, not an agreement: no initials or "read in full" attestation, just a quiet "Got it".
+  const isAgenda = doc.forum_role === "agenda";
+  const gotIt = useMutation({
+    mutationFn: () => acknowledgeDocument({ data: { document_id: doc.id, initials: "OK", kind: "acknowledged", consent: true } }),
+    onSuccess: async () => {
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: ["my-documents"] }),
+        queryClient.invalidateQueries({ queryKey: ["portal-session"] }),
+      ]);
+      onDone();
+    },
+  });
   const canSubmit = readConfirmed && initials.trim().length > 0 && (!isSign || (name.trim().length > 1 && signature && consent)) && (!isConflict || (conflict !== "" && (conflict === "none" || conflictDetails.trim().length > 0)));
 
   return (
@@ -324,7 +366,16 @@ function DocumentReader({ doc, completion, onBack, onDone }: { doc: Doc; complet
         {hardCopy === "error" && <span className="text-[13px] text-gold">The request could not be sent. Please try again.</span>}
       </div>
 
-      {completion ? (
+      {isAgenda ? (
+        <div className="mt-6 border border-gold/20 bg-ivory/[.03] p-5">
+          <label className="flex items-center gap-3 text-[15px] text-ivory/85">
+            <input type="checkbox" checked={!!completion || gotIt.isPending || gotIt.isSuccess} disabled={!!completion || gotIt.isPending} onChange={(e) => { if (e.target.checked) gotIt.mutate(); }} className="h-4 w-4 accent-[var(--color-gold)]" />
+            Got it
+          </label>
+          <p className="mt-2 text-[13px] leading-6 text-ivory/60">We'll notify you if there are any changes to the meeting agenda.</p>
+          {gotIt.error && <p className="mt-2 text-[14px] text-gold">{userFacingError(gotIt.error, "Something went wrong. Please try again.")}</p>}
+        </div>
+      ) : completion ? (
         <p className="mt-6 inline-flex items-center gap-2 border border-gold/30 px-5 py-3 text-[14px] text-gold">
           <Check className="h-4 w-4" />
           {completion.kind === "signed" ? `Signed by ${completion.signed_name ?? "you"}` : "Acknowledged"} on {new Date(completion.acknowledged_at).toLocaleString()}

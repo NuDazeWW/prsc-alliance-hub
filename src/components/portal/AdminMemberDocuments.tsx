@@ -20,7 +20,7 @@ import {
 import { STAGES, journeyStatus, lockedDocumentIds, memberTracks } from "@/lib/journey";
 import { JOURNEY_PRESETS } from "@/lib/journey-templates";
 import { CLASSIFICATIONS, type Classification } from "@/lib/governance";
-import { updateDocumentGovernance } from "@/lib/governance.functions";
+import { updateDocumentGovernance, notifyAgendaUpdated } from "@/lib/governance.functions";
 import { AdminGovernancePanel } from "@/components/portal/AdminGovernancePanel";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -205,6 +205,16 @@ export function AdminMemberDocuments({ memberId, memberName, preview }: Props) {
     if (patch.superseded && !confirm("Mark as superseded? It leaves active queues; signed copies and history are kept.")) return;
     try { await updateDocumentGovernance({ data: { document_id: id, ...patch, third_party_permission } }); await docs.refetch(); }
     catch (e) { setStatus(userFacingError(e, "Could not update")); }
+  }
+  async function announceAgenda() {
+    if (preview) return;
+    try {
+      const { count } = await notifyAgendaUpdated({ data: { dry_run: true } });
+      if (!count) return setStatus("No cleared members to notify yet.");
+      if (!confirm(`Email ${count} cleared member${count === 1 ? "" : "s"} that the agenda has been updated? Do this after you have replaced the PDF.`)) return;
+      const r = await notifyAgendaUpdated({ data: { dry_run: false } });
+      setStatus(`Agenda update emailed to ${r.sent} of ${r.count} cleared member${r.count === 1 ? "" : "s"}.`);
+    } catch (e) { setStatus(userFacingError(e, "Could not send the agenda update")); }
   }
   async function replacePdf(d: any, file: File | undefined) {
     if (!file || preview) return;
@@ -506,6 +516,7 @@ export function AdminMemberDocuments({ memberId, memberName, preview }: Props) {
                     <Button type="button" variant="outline" size="sm" onClick={() => { const t = prompt("Document title:", d.title); if (t === null || !t.trim()) return; const v = prompt("Version label (leave blank for none):", (d as any).version_label ?? ""); if (v === null) return; void setDocGov(d.id, { title: t.trim(), version_label: v.trim() || null }); }}>Rename</Button>
                     <Button type="button" variant="outline" size="sm" onClick={() => { const v = prompt("Order within its stage (lower comes first):", String((d as any).sort_order ?? 0)); if (v === null) return; const n = Number(v); if (!Number.isInteger(n) || n < 0 || n > 999) return setStatus("Enter a whole number from 0 to 999."); void setDocGov(d.id, { sort_order: n }); }}>Order {(d as any).sort_order ?? 0}</Button>
                     {(d as any).file_path && !(d as any).superseded_at && <label className="inline-flex cursor-pointer items-center rounded-md border border-input px-3 py-1 text-sm text-ivory/85 hover:bg-ivory/5">Replace PDF<input type="file" accept=".pdf" className="sr-only" onChange={(e) => { const f = e.target.files?.[0]; e.target.value = ""; void replacePdf(d, f); }} /></label>}
+                    {(d as any).forum_role === "agenda" && !(d as any).superseded_at && <Button type="button" variant="outline" size="sm" onClick={() => void announceAgenda()}>Email cleared members: agenda updated</Button>}
                   {(d as any).journey_stage === 1 && (
                     <label className="flex items-center gap-1 text-sm text-ivory/75" title="Stage 1 Forum documents the member can open before Forum clearance"><input type="checkbox" checked={!!(d as any).is_forum_prep} onChange={(e) => setDocGov(d.id, { is_forum_prep: e.target.checked })} /> Visible before clearance</label>
                   )}

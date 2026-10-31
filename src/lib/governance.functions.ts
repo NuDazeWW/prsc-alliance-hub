@@ -91,7 +91,7 @@ export const recordForumClearance = createServerFn({ method: "POST" })
   .handler(async ({ context, data }) => {
     await assertAdmin(context);
     const { supabaseAdmin: sbRead } = await import("@/integrations/supabase/client.server");
-    const { data: m } = await sbRead.from("portal_members").select("nda_verified_at").eq("id", data.member_id).single();
+    const { data: m } = await sbRead.from("portal_members").select("nda_verified_at, forum_clearance_status, email, first_name").eq("id", data.member_id).single();
     if ((data.decision === "cleared" || data.decision === "cleared_restricted") && !m?.nda_verified_at) throw new Error("Verify the NDA before clearing for the Forum");
     if (data.decision === "cleared" || data.decision === "cleared_restricted") {
       const problems = await clearanceProblemsFor(data.member_id);
@@ -110,7 +110,44 @@ export const recordForumClearance = createServerFn({ method: "POST" })
     }).eq("id", data.member_id);
     if (error) throw error;
     await log(context, data.member_id, "forum_clearance", data.decision, data.notes || null, { meeting_eligibility: data.meeting_eligibility, restrictions: data.restrictions, nda_verified: true, disclosures_reviewed: true });
+    // Tell the member the agenda is waiting. Members only see the portal notice if they happen to sign in,
+    // so this is the email that brings them back. Sent only on the change into "cleared", never on a repeat save.
+    const wasCleared = m?.forum_clearance_status === "cleared" || m?.forum_clearance_status === "cleared_restricted";
+    if (cleared && !wasCleared && m?.email) {
+      try {
+        const { data: agenda } = await sbAdmin.from("portal_documents").select("id").eq("forum_role", "agenda").is("superseded_at", null)
+          .or(`member_id.is.null,member_id.eq.${data.member_id}`).limit(1);
+        if (agenda?.length) {
+          const { sendPortalEmail, loadSystemEmail } = await import("@/lib/portal-notify.server");
+          const build = await loadSystemEmail("forum_agenda_ready");
+          await sendPortalEmail(m.email, build({ first_name: m.first_name?.trim() || "There" }), "forum-agenda-ready-member");
+        }
+      } catch (err) { console.error("Agenda-ready email failed", err); }
+    }
     return { ok: true };
+  });
+
+/** Admin: announce a changed agenda to every member already cleared for the Forum. */
+export const notifyAgendaUpdated = createServerFn({ method: "POST" })
+  .middleware([requirePortalAccess])
+  .inputValidator((i) => z.object({ dry_run: z.boolean().default(false) }).parse(i))
+  .handler(async ({ context, data }) => {
+    await assertAdmin(context);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { data: members, error } = await supabaseAdmin.from("portal_members").select("id, email, first_name")
+      .in("forum_clearance_status", ["cleared", "cleared_restricted"]).neq("status", "revoked");
+    if (error) throw error;
+    const list = (members ?? []).filter((x: any) => x.email);
+    if (data.dry_run) return { ok: true, count: list.length, sent: 0 };
+    const { sendPortalEmail, loadSystemEmail } = await import("@/lib/portal-notify.server");
+    const build = await loadSystemEmail("forum_agenda_updated");
+    let sent = 0;
+    for (const x of list as any[]) {
+      try { await sendPortalEmail(x.email, build({ first_name: x.first_name?.trim() || "There" }), "forum-agenda-updated-member"); sent++; }
+      catch (err) { console.error("Agenda-updated email failed", err); }
+    }
+    await supabaseAdmin.from("portal_activity").insert({ actor_user_id: context.userId, event_type: "agenda_update_announced", metadata: { recipients: sent } });
+    return { ok: true, count: list.length, sent };
   });
 
 export const updateDocumentGovernance = createServerFn({ method: "POST" })
