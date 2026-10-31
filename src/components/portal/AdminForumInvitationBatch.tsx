@@ -10,8 +10,7 @@ import { invitePortalMember, saveMemberInvitationNotes } from "@/lib/portal.func
 import { invitationNoteReady, saveMemberInvitationNotesSchema } from "@/lib/member-import-validation";
 import { eligibleForumInvitee, forumBatchAsyncToken, forumBatchInvitationPayload, forumBatchNotesSaved, forumBatchReadyProblem, forumBatchRow, type ForumBatchRow, type ForumInviteMember } from "@/lib/forum-invitation-batch";
 import { userFacingError } from "@/lib/user-facing-error";
-import { useStoredFlag } from "@/hooks/use-stored-flag";
-import { useAdminTarget } from "@/lib/admin-nav";
+import { useAccordion, useAdminTarget } from "@/lib/admin-nav";
 import { ChevronDown, ChevronUp } from "lucide-react";
 
 type Props = { members: unknown[]; preview: boolean; onSaved: () => void };
@@ -25,7 +24,7 @@ export function AdminForumInvitationBatch({ members, preview, onSaved }: Props) 
   const epoch = useRef(0);
   const mounted = useRef(true);
   const busyRef = useRef(false);
-  const [open, setOpen] = useStoredFlag("admin.forumBatchOpen");
+  const [open, setOpen] = useAccordion("forum-batch");
   useAdminTarget(["forum-batch"], () => setOpen(true));
   const [busy, setBusy] = useState("");
   const [message, setMessage] = useState("");

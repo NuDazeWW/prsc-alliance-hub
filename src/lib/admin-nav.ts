@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 
 /** Tells every admin card that the address hash may have changed (the router changes it without a hashchange event). */
 export function announceAdminNav() {
@@ -30,4 +30,27 @@ export function useAdminTarget(ids: string[], onHit: (id: string) => void) {
       window.removeEventListener("hashchange", check);
     };
   }, [key]);
+}
+
+/**
+ * Open/closed state for an admin panel. Panels start closed on every visit, and opening one closes the others
+ * (panels that share a `group` stay open together). A panel can also be opened by name with openAdminCard(id).
+ */
+export function useAccordion(id: string, group: string = id, startOpen = false) {
+  const [open, setOpen] = useState(startOpen);
+  useEffect(() => {
+    if (open) window.dispatchEvent(new CustomEvent("admin-card-open", { detail: group }));
+  }, [open, group]);
+  useEffect(() => {
+    const closeOthers = (e: Event) => { if ((e as CustomEvent<string>).detail !== group) setOpen(false); };
+    const openNamed = (e: Event) => { if ((e as CustomEvent<string>).detail === id) setOpen(true); };
+    window.addEventListener("admin-card-open", closeOthers);
+    window.addEventListener("admin-card-request", openNamed);
+    return () => { window.removeEventListener("admin-card-open", closeOthers); window.removeEventListener("admin-card-request", openNamed); };
+  }, [id, group]);
+  return [open, setOpen] as const;
+}
+
+export function openAdminCard(id: string) {
+  if (typeof window !== "undefined") window.dispatchEvent(new CustomEvent("admin-card-request", { detail: id }));
 }

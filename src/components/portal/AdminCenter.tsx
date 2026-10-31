@@ -9,7 +9,8 @@ import { parseMemberList, MEMBER_LIST_TEMPLATE, type MemberImportRow } from "@/l
 import { requiredInvitationNdaEntity, intendedDesignationSchema, readIntendedDesignation, intendedDesignationLabel, projectIntendedDesignation } from "@/lib/intended-designation";
 import { IntendedDesignationFields } from "@/components/portal/IntendedDesignationFields";
 import { useStoredFlag } from "@/hooks/use-stored-flag";
-import { useAdminTarget } from "@/lib/admin-nav";
+import { openAdminCard, useAccordion, useAdminTarget } from "@/lib/admin-nav";
+import { SYSTEM_EMAIL_DEFAULTS } from "@/lib/system-email-defaults";
 import { isInvitationEmailName } from "@/lib/email-log-name";
 import { AdminSentLog } from "@/components/portal/AdminSentLog";
 import { invitationWasSent, NOT_INVITED_DETAIL, NOT_INVITED_LABEL } from "@/lib/invitation-state";
@@ -270,8 +271,10 @@ function popOutEmail(html: string) {
 }
 
 /** An admin card that starts folded (caret at the top right) and remembers what you opened. */
-function CollapseCard({ id, hashes, domId = true, className, title, children }: { id: string; hashes?: string[]; domId?: boolean; className: string; title?: string; children: React.ReactNode }) {
-  const [collapsed, setCollapsed] = useStoredFlag(`admin.card.${id}`, true);
+function CollapseCard({ id, group, hashes, domId = true, className, title, children }: { id: string; group?: string; hashes?: string[]; domId?: boolean; className: string; title?: string; children: React.ReactNode }) {
+  const [open, setCardOpen] = useAccordion(id, group ?? id);
+  const collapsed = !open;
+  const setCollapsed = (v: boolean) => setCardOpen(!v);
   useAdminTarget(hashes ?? [id], () => setCollapsed(false));
   return (
     <section id={domId ? id : undefined} className={`${className} relative scroll-mt-24 pr-14 sm:pr-16 ${collapsed ? "[&>*:not(:first-child):not([data-collapse-toggle])]:hidden" : ""}`}>
@@ -332,10 +335,14 @@ export function AdminCenter({ page }: { page: "overview" | "send" }) {
   const [inviteNdaSaving, setInviteNdaSaving] = useState(false);
   const [inviteNdaMessage, setInviteNdaMessage] = useState("");
   const inviteNdaGeneration = useRef(0);
-  const [inviteCollapsed, setInviteCollapsed] = useStoredFlag("admin.inviteCollapsed.v2", true);
-  const [sentLogOpen, setSentLogOpen] = useStoredFlag("admin.sentLogOpen");
+  const [inviteOpen, setInviteOpen] = useAccordion("invite");
+  const inviteCollapsed = !inviteOpen;
+  const setInviteCollapsed = (v: boolean) => setInviteOpen(!v);
+  const [sentLogOpen, setSentLogOpen] = useAccordion("sent-log");
   const [recipientsOpen, setRecipientsOpen] = useStoredFlag("admin.recipientsOpen.v3", false);
-  const [membersCollapsed, setMembersCollapsed] = useStoredFlag("admin.membersCollapsed.v2", true);
+  const [membersOpen, setMembersOpen] = useAccordion("members");
+  const membersCollapsed = !membersOpen;
+  const setMembersCollapsed = (v: boolean) => setMembersOpen(!v);
   const [expandedRows, setExpandedRows] = useState<string[]>([]);
   useEffect(() => {
     if (page === "send" && window.location.hash === "#sent-log") setSentLogOpen(true);
@@ -350,7 +357,7 @@ export function AdminCenter({ page }: { page: "overview" | "send" }) {
       3: "self-start order-5 lg:col-start-2 lg:row-start-3",
       4: "self-start order-6 lg:col-start-2 lg:row-start-4",
     },
-    send: { 1: "lg:row-start-1", 2: "lg:col-start-2 lg:row-start-1", 3: "lg:col-span-2 2xl:col-span-1 2xl:col-start-3 2xl:row-start-1", 4: "lg:col-span-2 2xl:col-span-3" },
+    send: { 1: "order-1", 2: "order-3", 3: "order-4", 4: "order-6" },
   };
   const S = (on: "overview" | "send", order: number) => (page === on ? PLACE[on][order] ?? "" : "hidden");
   const [showAllActivity, setShowAllActivity] = useState(false);
@@ -1210,7 +1217,7 @@ export function AdminCenter({ page }: { page: "overview" | "send" }) {
   useAdminTarget(["invite"], () => setInviteCollapsed(false));
   useAdminTarget(["sent-log"], () => setSentLogOpen(true));
   useAdminTarget(["email-compose"], () => { setEmailMode("compose"); setDraft(emptyDraft); setComposeFromId(""); setEmailStatus(""); });
-  useAdminTarget(["email-templates"], () => { setEmailMode("template"); setDraft(emptyDraft); setComposeFromId(""); setEmailStatus("Pick a template on the left, upload one, or start a new one."); });
+  useAdminTarget(["email-templates"], () => { setEmailMode("template"); setDraft(emptyDraft); setComposeFromId(""); setEmailStatus("Open Saved email templates to pick one, upload one, or start a new one."); });
   useAdminTarget(["new-template"], () => { setEmailMode("template"); setDraft(emptyDraft); setComposeFromId(""); setEmailStatus("Starting a new template. Give it a name, subject and wording below."); });
 
   const importConfirmBar = importRows.length > 0 ? (
@@ -1263,9 +1270,9 @@ export function AdminCenter({ page }: { page: "overview" | "send" }) {
             </div>
           </div>
         </div>
-        {page === "send" && <AdminForumInvitationBatch members={members} preview={preview} onSaved={() => { void overview.refetch(); void email.refetch(); }} />}
-        {page === "send" && <div className="mt-6"><AdminSentLog sends={sends} members={members} open={sentLogOpen} onOpenChange={setSentLogOpen} /></div>}
-        <div className={`mt-6 grid gap-5 ${page === "overview" ? "lg:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)]" : "lg:grid-cols-2 2xl:grid-cols-[minmax(0,1fr)_minmax(0,1.3fr)_minmax(0,0.8fr)]"}`}>
+        <div className={`mt-6 grid gap-5 ${page === "overview" ? "lg:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)]" : "grid-cols-1"}`}>
+          {page === "send" && <div className="order-2"><AdminForumInvitationBatch members={members} preview={preview} onSaved={() => { void overview.refetch(); void email.refetch(); }} /></div>}
+          {page === "send" && <div className="order-5"><AdminSentLog sends={sends} members={members} open={sentLogOpen} onOpenChange={setSentLogOpen} /></div>}
           <div className="contents">
             <section className={`${S("send",1)} admin-card p-6 sm:p-8 ${inviteCollapsed ? "[&>*:not(:first-child)]:hidden" : ""}`}>
               <div className="flex items-start justify-between gap-3">
@@ -1281,6 +1288,12 @@ export function AdminCenter({ page }: { page: "overview" | "send" }) {
                 />
               </div>
               <form ref={inviteFormRef} onSubmit={invite} className="mt-7 grid gap-4 sm:grid-cols-2">
+                <div className="border border-gold/40 bg-gold/[.06] p-4 sm:col-span-2" data-testid="invite-email-name">
+                  <p className="text-xs uppercase tracking-[0.18em] text-gold">Email that will be sent</p>
+                  <p className="mt-1 text-base text-ivory">{SYSTEM_EMAIL_DEFAULTS.invite.name.replace(/ \(sent automatically\)$/, "")}</p>
+                  <p className="mt-1 text-sm text-ivory/60">Subject: {INVITE_EMAIL_SUBJECT}</p>
+                  <p className="mt-1 text-sm text-ivory/50">Goes only to the person chosen below, when you press Send invitation. Use Preview invitation at the bottom to see it first.</p>
+                </div>
                 <label className="text-base text-ivory/80 sm:col-span-2">Existing candidate / member
                   <select value={inviteCandidateId} onChange={(event) => void selectInviteCandidate(event.target.value)} className="mt-2 h-10 w-full rounded-md border border-input bg-navy px-3 text-base">
                     <option value="">Choose an existing individual, or enter a new recipient below…</option>
@@ -1522,7 +1535,7 @@ export function AdminCenter({ page }: { page: "overview" | "send" }) {
 
 
             {/* Template sidebar — constrained to the same column width as the invite panel */}
-            <aside className={`${S("send",3)} admin-card overflow-hidden`}>
+            <CollapseCard id="template-list" group="email" title="Saved email templates" className={`${S("send",3)} admin-card p-6 sm:p-8`}>
               <div className="flex items-center justify-between gap-3 border-b border-gold/15 px-5 py-4">
                 <div className="flex min-w-0 items-center gap-2.5">
                   <FileText className="h-4 w-4 shrink-0 text-gold" />
@@ -1558,7 +1571,8 @@ export function AdminCenter({ page }: { page: "overview" | "send" }) {
                         });
                         setEmailMode("template");
                         setEmailStatus(`Editing saved template “${t.name}”. Save to update it in the library.`);
-                        document.getElementById("email-center")?.scrollIntoView({ behavior: "smooth", block: "start" });
+                        openAdminCard("email-center");
+                        window.setTimeout(() => document.getElementById("email-center")?.scrollIntoView({ behavior: "smooth", block: "start" }), 120);
                       }}
                       className="min-w-0 flex-1 text-left"
                     >
@@ -1595,21 +1609,21 @@ export function AdminCenter({ page }: { page: "overview" | "send" }) {
               >
                 <Plus className="h-4 w-4" /> New template
               </button>
-            </aside>
+            </CollapseCard>
           </div>
 
           <div className="contents">
             <div className={`${S("overview",5)}`}><AdminLeadership /></div>
             {page === "overview" && !preview && (
-              <CollapseCard id="release-review" title="Release review" className="order-last lg:col-span-2 2xl:col-span-3 admin-card p-6 sm:p-8"><AdminReleaseReview /></CollapseCard>
+              <CollapseCard id="release-review" title="Release review" className="order-last col-span-full admin-card p-6 sm:p-8"><AdminReleaseReview /></CollapseCard>
             )}
             {page === "send" && !preview && (
-              <CollapseCard id="question-register" title="Executive questions register" className="order-last lg:col-span-2 2xl:col-span-3 admin-card p-6 sm:p-8"><AdminQuestionRegister /></CollapseCard>
+              <CollapseCard id="question-register" title="Executive questions register" className="order-last col-span-full admin-card p-6 sm:p-8"><AdminQuestionRegister /></CollapseCard>
             )}
-            <section id="forum-communications" className={`${page === "send" ? "order-last lg:col-span-2 2xl:col-span-3" : "hidden"} admin-card p-6 sm:p-8`}>
+            <section id="forum-communications" className={`${page === "send" ? "order-last col-span-full" : "hidden"} admin-card p-6 sm:p-8`}>
               {page === "send" && <AdminForumCommunications />}
             </section>
-            <section id="email-center" className={`${S("send",2)} admin-card p-6 sm:p-8`}>
+            <CollapseCard id="email-center" group="email" hashes={["email-compose", "email-templates", "new-template"]} title="Compose & send email" className={`${S("send",2)} admin-card p-6 sm:p-8`}>
               <span id="email-compose" className="block scroll-mt-24" /><span id="email-templates" className="block scroll-mt-24" /><span id="new-template" className="block scroll-mt-24" />
               <div className="mb-6 flex flex-wrap gap-2" role="tablist">
                 {([
@@ -1625,7 +1639,7 @@ export function AdminCenter({ page }: { page: "overview" | "send" }) {
                       setEmailMode(mode);
                       setDraft(emptyDraft);
                       setComposeFromId("");
-                      setEmailStatus(mode === "template" ? "Pick a template on the left, upload one, or start a new one." : "");
+                      setEmailStatus(mode === "template" ? "Open Saved email templates to pick one, upload one, or start a new one." : "");
                     }}
                     className={`border px-4 py-2 text-sm uppercase tracking-[0.14em] transition-colors ${emailMode === mode ? "border-gold bg-gold text-navy" : "border-gold/30 text-ivory/70 hover:text-gold"}`}
                   >
@@ -1874,7 +1888,7 @@ export function AdminCenter({ page }: { page: "overview" | "send" }) {
                 )}
                 {emailStatus && <p className="text-base text-ivory/60">{emailStatus}</p>}
               </div>
-            </section>
+            </CollapseCard>
           </div>
 
           <div className="contents">

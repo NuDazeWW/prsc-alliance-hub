@@ -3,8 +3,7 @@ import { usePrivateMedia } from "@/hooks/use-private-media";
 import { useEffect, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Users, ChevronRight, ArrowDown, ArrowUp, ChevronDown, ChevronUp, Eye, EyeOff, Plus, Save, Trash2, Upload } from "lucide-react";
-import { useStoredFlag } from "@/hooks/use-stored-flag";
-import { useAdminTarget } from "@/lib/admin-nav";
+import { useAccordion, useAdminTarget } from "@/lib/admin-nav";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import {
@@ -38,7 +37,9 @@ export function AdminLeadership() {
   const [settings, setSettings] = useState({ eyebrow: "", heading: "", subtext: "" });
   const [editing, setEditing] = useState<Draft | null>(null);
   const [busy, setBusy] = useState(false);
-  const [collapsed, setCollapsed] = useStoredFlag("admin.leadershipCollapsed.v2", true);
+  const [leadOpen, setLeadOpen] = useAccordion("leadership");
+  const collapsed = !leadOpen;
+  const setCollapsed = (v: boolean) => setLeadOpen(!v);
   const [showAll, setShowAll] = useState(false);
   useAdminTarget(["leadership"], () => setCollapsed(false));
 

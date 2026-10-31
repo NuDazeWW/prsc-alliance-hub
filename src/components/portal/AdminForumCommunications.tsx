@@ -5,8 +5,7 @@ import { FORUM_EMAILS, type ForumEmailKey } from "@/lib/forum-communications";
 import { SYSTEM_EMAIL_DEFAULTS } from "@/lib/system-email-defaults";
 import { getForumRecipients, sendForumEmail } from "@/lib/forum-communications.functions";
 import { applyTokens, parseSignatures, renderBrandedEmail } from "@/lib/branded-email";
-import { useStoredFlag } from "@/hooks/use-stored-flag";
-import { useAdminTarget } from "@/lib/admin-nav";
+import { useAccordion, useAdminTarget } from "@/lib/admin-nav";
 import { ChevronDown, ChevronUp } from "lucide-react";
 
 type Recipient = { id: string; name: string; email: string; reason: string | null; sent_at: string | null };
@@ -26,7 +25,7 @@ export function AdminForumCommunications() {
   const [status, setStatus] = useState("");
   const [preview, setPreview] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
-  const [open, setOpen] = useStoredFlag("admin.forumCommsOpen");
+  const [open, setOpen] = useAccordion("forum-communications");
   useAdminTarget(["forum-communications"], () => setOpen(true));
   const def = FORUM_EMAILS.find((d) => d.key === key)!;
 
