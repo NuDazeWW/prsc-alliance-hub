@@ -141,6 +141,9 @@ const NAVY = "#0A1322";
 const IVORY = "#F2EFE6";
 const BRONZE = "#8C6E3B";
 const RULE = "#D9CBA8";
+/** Solid-colour images behind each coloured block. Gmail and other dark modes recolour plain background colours (turning the navy slate-grey) but leave images alone. */
+export const bgAttrs = (name: "bg-navy" | "bg-outer" | "bg-cream", color: string) => `background="${EMAIL_ASSET_BASE}/${name}.png" bgcolor="${color}"`;
+export const bgStyle = (name: "bg-navy" | "bg-outer" | "bg-cream", color: string) => `background-color:${color};background-image:url(${EMAIL_ASSET_BASE}/${name}.png);`;
 
 function signatureBlock(signatures: EmailSignature[]) {
   if (!signatures.length) return "";
@@ -187,7 +190,7 @@ export const EMAIL_RESPONSIVE_CSS = `
     }`;
 
 export function emailFooterHtml(note = "Secure access for invited participants only.") {
-  return `<tr><td align="center" bgcolor="${NAVY}" style="background-color:${NAVY};padding:25px 30px 30px;border-top:3px solid #B98925;">
+  return `<tr><td align="center" ${bgAttrs("bg-navy", NAVY)} style="${bgStyle("bg-navy", NAVY)}padding:25px 30px 30px;border-top:3px solid #B98925;">
           <div style="font-family:Georgia,'Times New Roman',serif;color:${GOLD};font-size:12px;line-height:18px;letter-spacing:2px;">PARTNERSHIP READINESS STANDARDS COUNCIL, LLC</div>
           <div style="font-family:Arial,Helvetica,sans-serif;color:#BAC0CA;font-size:10px;line-height:17px;letter-spacing:1px;margin-top:9px;">${escapeHtml(note)}</div>
           <div style="font-family:Arial,Helvetica,sans-serif;color:#9AA6B7;font-size:11px;line-height:17px;margin-top:12px;">Private &amp; confidential. Sent from no-reply@readinessterminal.com</div>
@@ -221,19 +224,19 @@ export function renderBrandedEmail(input: BrandedEmailInput) {
     <title>${escapeHtml(input.subject)}</title>
     <style type="text/css">${EMAIL_RESPONSIVE_CSS}</style>
   </head>
-  <body bgcolor="#071221" style="margin:0;padding:0;background-color:#071221;">
-    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" bgcolor="#071221" style="width:100%;background-color:#071221;">
+  <body ${bgAttrs("bg-outer", "#071221")} style="margin:0;padding:0;${bgStyle("bg-outer", "#071221")}">
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" ${bgAttrs("bg-outer", "#071221")} style="width:100%;${bgStyle("bg-outer", "#071221")}">
       <tr>
         <td align="center" style="padding:24px 12px 32px;">
-          <table role="presentation" width="600" cellpadding="0" cellspacing="0" border="0" class="email-shell" style="width:600px;max-width:600px;background-color:${NAVY};">
+          <table role="presentation" width="600" cellpadding="0" cellspacing="0" border="0" class="email-shell" ${bgAttrs("bg-navy", NAVY)} style="width:600px;max-width:600px;${bgStyle("bg-navy", NAVY)}">
             <tr><td>
-              <img class="mobile-fluid" src="${EMAIL_ASSET_BASE}/prsc-header-slim.jpg" width="600" height="90" alt="" style="display:block;width:600px;max-width:100%;height:auto;">
+              <img class="mobile-fluid" src="${EMAIL_ASSET_BASE}/prsc-header-1200.jpg" width="600" height="200" alt="" style="display:block;width:600px;max-width:100%;height:auto;">
             </td></tr>
-            <tr><td align="center" class="mobile-pad" bgcolor="${NAVY}" style="padding:6px 34px 26px;background-color:${NAVY};">
+            <tr><td align="center" class="mobile-pad" ${bgAttrs("bg-navy", NAVY)} style="padding:6px 34px 26px;${bgStyle("bg-navy", NAVY)}">
               <img src="${EMAIL_ASSET_BASE}/prsc-logo.png" alt="PRSC — Partnership Readiness Standards Council" width="92" style="display:block;width:92px;max-width:92px;height:auto;margin:0 auto 12px auto;">
               <div style="font-family:Arial,Helvetica,sans-serif;font-size:11px;font-weight:600;letter-spacing:3px;line-height:18px;color:${GOLD};">PRIVATE BOARD &amp; ADVISOR CENTER</div>
             </td></tr>
-            <tr><td bgcolor="${IVORY}" class="mobile-pad" style="padding:34px 30px 34px;background-color:${IVORY};">
+            <tr><td ${bgAttrs("bg-cream", IVORY)} class="mobile-pad" style="padding:34px 30px 34px;${bgStyle("bg-cream", IVORY)}">
               <div style="font-family:Georgia,'Times New Roman',serif;font-size:11px;letter-spacing:4px;line-height:18px;text-transform:uppercase;color:${BRONZE};text-align:center;margin-bottom:12px;">${escapeHtml(
                 eyebrow,
               )}</div>

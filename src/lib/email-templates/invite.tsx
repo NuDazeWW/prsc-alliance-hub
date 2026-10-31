@@ -5,6 +5,10 @@ import { FORUM_INVITEE_LABEL, FORUM_ENTITY_LABEL, FORUM_ENTITY_FULL_NAME } from 
 import { SYSTEM_EMAIL_DEFAULTS } from '@/lib/system-email-defaults'
 import { EMAIL_ASSET_BASE, EMAIL_RESPONSIVE_CSS } from '@/lib/branded-email'
 
+// Solid-colour images behind coloured blocks: dark modes recolour plain background colours but leave images alone.
+const bg = (name: string, color: string) => ({ background: `${EMAIL_ASSET_BASE}/${name}.png`, bgcolor: color } as Record<string, string>)
+const bgCss = (name: string, color: string) => ({ backgroundColor: color, backgroundImage: `url(${EMAIL_ASSET_BASE}/${name}.png)` })
+
 export type InviteEntity = 'prsc' | 'dis' | 'both'
 
 export interface InviteEmailProps {
@@ -86,13 +90,13 @@ function InviteLayout({ inviteeName, short, forumOnly, disOnly, confirmationUrl,
   return <Html lang="en" dir="ltr">
     <Head><style dangerouslySetInnerHTML={{ __html: EMAIL_RESPONSIVE_CSS }} /></Head>
     <Preview>A private invitation to the {short} Board &amp; Advisor Center.</Preview>
-    <Body style={main}>
-      <table role="presentation" cellPadding={0} cellSpacing={0} border={0} width="100%" style={{ width: '100%', backgroundColor: '#071221' }}>
+    <Body {...bg('bg-outer', '#071221')} style={{ ...main, ...bgCss('bg-outer', '#071221') }}>
+      <table role="presentation" cellPadding={0} cellSpacing={0} border={0} width="100%" {...bg('bg-outer', '#071221')} style={{ width: '100%', ...bgCss('bg-outer', '#071221') }}>
         <tbody><tr><td align="center" style={{ padding: '24px 12px 32px' }}>
-          <table role="presentation" cellPadding={0} cellSpacing={0} border={0} width={600} className="email-shell" style={{ width: '600px', maxWidth: '600px', backgroundColor: '#0A1322' }}>
+          <table role="presentation" cellPadding={0} cellSpacing={0} border={0} width={600} className="email-shell" {...bg('bg-navy', '#0A1322')} style={{ width: '600px', maxWidth: '600px', ...bgCss('bg-navy', '#0A1322') }}>
             <tbody>
               <tr><td><Img className="mobile-fluid" src={`${EMAIL_ASSET_BASE}/prsc-header-1200.jpg`} width="600" height="200" alt="" style={{ display: 'block', width: '600px', maxWidth: '100%', height: 'auto' }} /></td></tr>
-              <tr><td align="center" className="mobile-pad" style={{ padding: '12px 34px 36px', backgroundColor: '#0A1322' }}>
+              <tr><td align="center" className="mobile-pad" {...bg('bg-navy', '#0A1322')} style={{ padding: '12px 34px 36px', ...bgCss('bg-navy', '#0A1322') }}>
                 {disOnly
                   ? <Img src={`${APP_ORIGIN}${disLogo.url}`} width="196" alt="Decision Intelligence Systems" style={{ display: 'block', width: '196px', maxWidth: '196px', height: 'auto', margin: '0 auto 17px' }} />
                   : <Img src={`${EMAIL_ASSET_BASE}/prsc-logo.png`} width="125" alt="PRSC — Partnership Readiness Standards Council" style={{ display: 'block', width: '125px', maxWidth: '125px', height: 'auto', margin: '0 auto 17px' }} />}
@@ -101,7 +105,7 @@ function InviteLayout({ inviteeName, short, forumOnly, disOnly, confirmationUrl,
                 <div style={heroLead}>Hello {inviteeName}, you&apos;ve been invited to access your secure portal for orientation, professional profile information, and the next steps relevant to your invitation.</div>
                 <div style={{ margin: '20px auto 0', width: '72px', borderTop: '2px solid #D4AF37', lineHeight: '1px', fontSize: '1px' }}>&nbsp;</div>
               </td></tr>
-              <tr><td className="mobile-pad" style={{ padding: '32px 27px 34px', backgroundColor: '#F2EFE6' }}>
+              <tr><td className="mobile-pad" {...bg('bg-cream', '#F2EFE6')} style={{ padding: '32px 27px 34px', ...bgCss('bg-cream', '#F2EFE6') }}>
                 <div style={stepsHeading}>YOUR NEXT STEPS</div>
                 <table className="step-table" role="presentation" cellPadding={0} cellSpacing={0} border={0} width="100%" style={{ width: '100%' }}>
                   <tbody><tr>
@@ -113,7 +117,7 @@ function InviteLayout({ inviteeName, short, forumOnly, disOnly, confirmationUrl,
                     </td>)}
                   </tr></tbody>
                 </table>
-                <table role="presentation" cellPadding={0} cellSpacing={0} border={0} width="100%" style={{ marginTop: '25px', backgroundColor: '#0A1322', border: '1px solid #B98925' }}>
+                <table role="presentation" cellPadding={0} cellSpacing={0} border={0} width="100%" {...bg('bg-navy', '#0A1322')} style={{ marginTop: '25px', ...bgCss('bg-navy', '#0A1322'), border: '1px solid #B98925' }}>
                   <tbody><tr>
                     <td width={86} valign="middle" style={{ width: '86px', padding: '15px 11px 15px 16px', textAlign: 'center' }}><Img src={`${EMAIL_ASSET_BASE}/icon-security.png`} alt="" width="66" height="66" style={{ display: 'block', width: '66px', height: '66px' }} /></td>
                     <td valign="middle" style={{ padding: '16px 19px 16px 13px', borderLeft: '1px solid #8C6E3B' }}><div style={{ fontFamily: 'Arial, Helvetica, sans-serif', fontSize: '13px', lineHeight: '21px', color: '#F2EFE6' }}>Your private portal helps you review assigned materials, complete required actions, and prepare for the next steps in your journey.</div></td>
@@ -135,7 +139,7 @@ function InviteLayout({ inviteeName, short, forumOnly, disOnly, confirmationUrl,
                 <div style={{ fontFamily: 'Arial, Helvetica, sans-serif', fontSize: '12px', lineHeight: '19px', color: '#4B4D4E', textAlign: 'center', marginTop: '14px' }}>Questions? <Link href="mailto:info@readinessterminal.com" style={{ color: '#123D64', textDecoration: 'underline' }}>Contact the PRSC team</Link>.</div>
                 <div style={{ marginTop: '30px', paddingTop: '26px', borderTop: '1px solid #D9CBA8' }}>{letter}</div>
               </td></tr>
-              <tr><td align="center" style={{ backgroundColor: '#0A1322', padding: '25px 30px 30px', borderTop: '3px solid #B98925' }}>
+              <tr><td align="center" {...bg('bg-navy', '#0A1322')} style={{ ...bgCss('bg-navy', '#0A1322'), padding: '25px 30px 30px', borderTop: '3px solid #B98925' }}>
                 <div style={{ fontFamily: "Georgia, 'Times New Roman', serif", color: '#D4AF37', fontSize: '12px', lineHeight: '18px', letterSpacing: '2px' }}>PARTNERSHIP READINESS STANDARDS COUNCIL, LLC</div>
                 <div style={{ fontFamily: 'Arial, Helvetica, sans-serif', color: '#BAC0CA', fontSize: '10px', lineHeight: '17px', letterSpacing: '1px', marginTop: '9px' }}>Secure access for invited participants only.</div>
                 <div style={{ fontFamily: 'Arial, Helvetica, sans-serif', color: '#9AA6B7', fontSize: '11px', lineHeight: '17px', marginTop: '12px' }}>This invitation was sent specifically to <Link href={`mailto:${recipientEmail}`} style={footerLink}>{recipientEmail}</Link>{forumOnly ? '.' : <> in connection with your previously discussed {roleLabel} role.</>} It provides access to the private onboarding process and does not constitute appointment to PRSC or DIS. Formal entity appointments and authority are governed by separate documentation and authorization.</div>
