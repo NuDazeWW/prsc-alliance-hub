@@ -1,7 +1,9 @@
 import { userFacingError } from "@/lib/user-facing-error";
 import { useEffect, useState } from "react";
 import { Link, useNavigate } from "@tanstack/react-router";
-import { Activity, CalendarDays, ChevronDown, Eye, EyeOff, FileText, HelpCircle, KeyRound, LayoutDashboard, LogOut, MailPlus, MessageSquare, ShieldPlus, Trash2, Users } from "lucide-react";
+import { Activity, BookOpen, CalendarDays, ChevronDown, ClipboardList, Eye, EyeOff, FilePlus, FileText, History, KeyRound, Landmark, LayoutDashboard, LogOut, MailPlus, MessageSquare, Send, ShieldCheck, ShieldPlus, Trash2, Upload, UserPlus, Users } from "lucide-react";
+import { announceAdminNav } from "@/lib/admin-nav";
+import { AdminGuide } from "@/components/portal/AdminGuide";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { PrscMark } from "@/components/site/PrscMark";
@@ -13,15 +15,35 @@ import { Input } from "@/components/ui/input";
 import { addAdmin, listAdmins, removeAdmin, type AdminAccount } from "@/lib/admin-accounts.functions";
 import { passwordChangeAttributes } from "@/lib/password-change";
 
-type Item = { label: string; to: "/admin" | "/admin/send"; hash?: string; icon: React.ComponentType<{ className?: string }>; page?: "overview" | "send" };
-const ITEMS: Item[] = [
-  { label: "Overview", to: "/admin", icon: LayoutDashboard, page: "overview" },
-  { label: "Invite & Email", to: "/admin/send", icon: MailPlus, page: "send" },
-  { label: "Members", to: "/admin", hash: "tracker", icon: Users },
-  { label: "Documents", to: "/admin", hash: "documents", icon: FileText },
-  { label: "Inquiries", to: "/admin", hash: "inquiries", icon: MessageSquare },
-  { label: "Meetings", to: "/admin", hash: "meetings", icon: CalendarDays },
-  { label: "Activity", to: "/admin", hash: "activity-log", icon: Activity },
+type Item = { label: string; to: "/admin" | "/admin/send"; hash?: string; icon: React.ComponentType<{ className?: string }> };
+type Group = { heading?: string; items: Item[] };
+const GROUPS: Group[] = [
+  { items: [{ label: "Overview", to: "/admin", icon: LayoutDashboard }] },
+  { heading: "People", items: [
+    { label: "Members", to: "/admin", hash: "tracker", icon: Users },
+    { label: "Invite a member", to: "/admin/send", hash: "invite", icon: UserPlus },
+    { label: "Upload a member list", to: "/admin", hash: "upload", icon: Upload },
+    { label: "Leadership team", to: "/admin", hash: "leadership", icon: Landmark },
+  ] },
+  { heading: "Communications", items: [
+    { label: "Compose & send", to: "/admin/send", hash: "email-compose", icon: Send },
+    { label: "Email templates", to: "/admin/send", hash: "email-templates", icon: FileText },
+    { label: "Create a template", to: "/admin/send", hash: "new-template", icon: FilePlus },
+    { label: "Forum emails", to: "/admin/send", hash: "forum-communications", icon: MailPlus },
+    { label: "Sent log", to: "/admin/send", hash: "sent-log", icon: History },
+  ] },
+  { heading: "Questionnaires", items: [
+    { label: "Executive questions", to: "/admin/send", hash: "question-register", icon: ClipboardList },
+  ] },
+  { heading: "Documents & releases", items: [
+    { label: "Documents", to: "/admin", hash: "documents", icon: FileText },
+    { label: "Release review", to: "/admin", hash: "release-review", icon: ShieldCheck },
+  ] },
+  { heading: "Everything else", items: [
+    { label: "Meetings", to: "/admin", hash: "meetings", icon: CalendarDays },
+    { label: "Inquiries", to: "/admin", hash: "inquiries", icon: MessageSquare },
+    { label: "Activity log", to: "/admin", hash: "activity-log", icon: Activity },
+  ] },
 ];
 
 export function AdminSidebar({ page, onNavigate }: { page: "overview" | "send"; onNavigate?: () => void }) {
@@ -29,6 +51,8 @@ export function AdminSidebar({ page, onNavigate }: { page: "overview" | "send"; 
   const [name, setName] = useState("Administrator");
   const [dialog, setDialog] = useState<null | "password" | "admins">(null);
   const collapse = useSidebarCollapse();
+  const [active_, setActive] = useState<string | null>(null);
+  const [guideOpen, setGuideOpen] = useState(false);
   const collapsed = collapse?.collapsed ?? false;
 
   useEffect(() => {
@@ -70,39 +94,47 @@ export function AdminSidebar({ page, onNavigate }: { page: "overview" | "send"; 
         </DropdownMenuContent>
       </DropdownMenu>
 
-      <nav aria-label="Admin sections" className="mt-6 border-t border-gold/15 pt-4">
-        {ITEMS.map((it) => {
-          const active = it.page === page;
-          const Icon = it.icon;
-          return (
-            <Link
-              key={it.label}
-              to={it.to}
-              hash={it.hash}
-              onClick={onNavigate}
-              title={collapsed ? it.label : undefined}
-              aria-label={collapsed ? it.label : undefined}
-              className={`border-l-[3px] py-3 text-[15px] transition-colors ${collapsed ? "-mx-4 flex justify-center" : "-mx-5 flex items-center gap-3 px-5"} ${active ? "border-gold bg-gold/10 text-gold" : "border-transparent text-ivory/75 hover:bg-ivory/5 hover:text-gold"}`}
-            >
-              <Icon className="h-[18px] w-[18px]" /> {!collapsed && it.label}
-            </Link>
-          );
-        })}
+      <nav aria-label="Admin sections" className="mt-6 border-t border-gold/15 pt-2">
+        {GROUPS.map((g, gi) => (
+          <div key={gi} className={g.heading ? "mt-3" : ""}>
+            {g.heading && !collapsed && <p className="px-0 pb-1 pt-2 text-[10px] font-semibold uppercase tracking-[0.24em] text-ivory/45">{g.heading}</p>}
+            {g.items.map((it) => {
+              const key = `${it.to}#${it.hash ?? ""}`;
+              const active = active_ === key || (!active_ && !it.hash && it.to === (page === "send" ? "/admin/send" : "/admin") && it.label === "Overview");
+              const Icon = it.icon;
+              return (
+                <Link
+                  key={it.label}
+                  to={it.to}
+                  hash={it.hash}
+                  onClick={() => { setActive(key); announceAdminNav(); onNavigate?.(); }}
+                  title={collapsed ? it.label : undefined}
+                  aria-label={collapsed ? it.label : undefined}
+                  className={`border-l-[3px] py-2.5 text-[15px] transition-colors ${collapsed ? "-mx-4 flex justify-center" : "-mx-5 flex items-center gap-3 px-5"} ${active ? "border-gold bg-gold/10 text-gold" : "border-transparent text-ivory/80 hover:bg-gold/5 hover:text-gold"}`}
+                >
+                  <Icon className="h-[18px] w-[18px]" /> {!collapsed && it.label}
+                </Link>
+              );
+            })}
+          </div>
+        ))}
       </nav>
 
       <div className="mt-6 border-t border-gold/15 pt-5">
         {!collapsed && <p className="text-[11px] uppercase tracking-[0.24em] text-ivory/45">Need help?</p>}
-        <a
-          href="mailto:info@readinessterminal.com"
-          title={collapsed ? "Questions? Send a message" : undefined}
-          aria-label={collapsed ? "Questions? Send a message" : undefined}
-          className={`text-ivory/80 hover:text-gold ${collapsed ? "mt-4 flex justify-center" : "mt-3 flex items-start gap-3"}`}
+        <button
+          type="button"
+          onClick={() => setGuideOpen(true)}
+          title={collapsed ? "Admin guide" : undefined}
+          aria-label={collapsed ? "Admin guide" : undefined}
+          className={`text-left text-ivory/80 hover:text-gold ${collapsed ? "mt-4 flex w-full justify-center" : "mt-3 flex items-start gap-3"}`}
         >
-          <HelpCircle className={`${collapsed ? "h-6 w-6" : "mt-0.5 h-6 w-6"} text-gold`} />
-          {!collapsed && <span><span className="block text-[15px]">Questions?</span><span className="block text-sm text-ivory/55">Send a message</span></span>}
-        </a>
+          <BookOpen className={`${collapsed ? "h-6 w-6" : "mt-0.5 h-6 w-6"} text-gold`} />
+          {!collapsed && <span><span className="block text-[15px]">Admin guide</span><span className="block text-sm text-ivory/55">How to do everything here</span></span>}
+        </button>
       </div>
 
+      <AdminGuide open={guideOpen} onOpenChange={setGuideOpen} />
       <ChangePasswordDialog open={dialog === "password"} onClose={() => setDialog(null)} />
       <ManageAdminsDialog open={dialog === "admins"} onClose={() => setDialog(null)} />
     </div>

@@ -11,6 +11,7 @@ import { invitationNoteReady, saveMemberInvitationNotesSchema } from "@/lib/memb
 import { eligibleForumInvitee, forumBatchAsyncToken, forumBatchInvitationPayload, forumBatchNotesSaved, forumBatchReadyProblem, forumBatchRow, type ForumBatchRow, type ForumInviteMember } from "@/lib/forum-invitation-batch";
 import { userFacingError } from "@/lib/user-facing-error";
 import { useStoredFlag } from "@/hooks/use-stored-flag";
+import { useAdminTarget } from "@/lib/admin-nav";
 import { ChevronDown, ChevronUp } from "lucide-react";
 
 type Props = { members: unknown[]; preview: boolean; onSaved: () => void };
@@ -25,6 +26,7 @@ export function AdminForumInvitationBatch({ members, preview, onSaved }: Props) 
   const mounted = useRef(true);
   const busyRef = useRef(false);
   const [open, setOpen] = useStoredFlag("admin.forumBatchOpen");
+  useAdminTarget(["forum-batch"], () => setOpen(true));
   const [busy, setBusy] = useState("");
   const [message, setMessage] = useState("");
   useEffect(() => { mounted.current = true; return () => { mounted.current = false; epoch.current += 1; }; }, []);
@@ -193,7 +195,7 @@ export function AdminForumInvitationBatch({ members, preview, onSaved }: Props) 
   const ready = selected.filter((row) => !forumBatchReadyProblem(row));
   const missingNotes = selected.filter((row) => row.loaded && !row.deliveryAttempted && !invitationNoteReady(row.why_you));
   const summary = !candidates.length ? "No saved Forum-only invitees yet." : `${candidates.length} saved invitee${candidates.length === 1 ? "" : "s"} · ${selected.length} selected · ${ready.length} ready to send`;
-  return <section className="border border-gold/25 bg-navy-light/20 p-5 md:p-7" aria-labelledby="forum-batch-title">
+  return <section id="forum-batch" className="scroll-mt-24 border border-gold/25 bg-navy-light/20 p-5 md:p-7" aria-labelledby="forum-batch-title">
     <button type="button" onClick={() => setOpen(!open)} aria-expanded={open} className="flex w-full items-center justify-between gap-3 text-left">
       <span>
         <h2 id="forum-batch-title" className="font-heading text-2xl text-ivory">Prepare saved Forum invitations</h2>

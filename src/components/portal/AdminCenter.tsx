@@ -8,6 +8,7 @@ import { parseMemberList, MEMBER_LIST_TEMPLATE, type MemberImportRow } from "@/l
 import { intendedDesignationSchema, readIntendedDesignation, intendedDesignationLabel, projectIntendedDesignation } from "@/lib/intended-designation";
 import { IntendedDesignationFields } from "@/components/portal/IntendedDesignationFields";
 import { useStoredFlag } from "@/hooks/use-stored-flag";
+import { useAdminTarget } from "@/lib/admin-nav";
 import { isInvitationEmailName } from "@/lib/email-log-name";
 import { AdminSentLog } from "@/components/portal/AdminSentLog";
 import { invitationWasSent, NOT_INVITED_DETAIL, NOT_INVITED_LABEL } from "@/lib/invitation-state";
@@ -267,10 +268,11 @@ function popOutEmail(html: string) {
 }
 
 /** An admin card that starts folded (caret at the top right) and remembers what you opened. */
-function CollapseCard({ id, className, title, children }: { id: string; className: string; title?: string; children: React.ReactNode }) {
+function CollapseCard({ id, hashes, domId = true, className, title, children }: { id: string; hashes?: string[]; domId?: boolean; className: string; title?: string; children: React.ReactNode }) {
   const [collapsed, setCollapsed] = useStoredFlag(`admin.card.${id}`, true);
+  useAdminTarget(hashes ?? [id], () => setCollapsed(false));
   return (
-    <section className={`${className} relative pr-14 sm:pr-16 ${collapsed ? "[&>*:not(:first-child):not([data-collapse-toggle])]:hidden" : ""}`}>
+    <section id={domId ? id : undefined} className={`${className} relative scroll-mt-24 pr-14 sm:pr-16 ${collapsed ? "[&>*:not(:first-child):not([data-collapse-toggle])]:hidden" : ""}`}>
       {title && <h2 className="font-display text-3xl">{title}</h2>}
       {children}
       <button type="button" data-collapse-toggle onClick={() => setCollapsed(!collapsed)} aria-expanded={!collapsed} aria-label={collapsed ? "Expand section" : "Collapse section"} className="absolute right-3 top-6 z-10 grid h-9 w-9 place-items-center rounded-full border border-gold/30 text-gold hover:bg-gold/10 sm:right-4 sm:top-8">
@@ -1178,11 +1180,19 @@ export function AdminCenter({ page }: { page: "overview" | "send" }) {
   };
 
   const statCards = [
-    { label: "Members", value: d.members.length, icon: Users, note: "Total members", href: "#tracker" },
-    { label: "Open inquiries", value: d.inquiries.filter((x: any) => x.status === "open").length, icon: MessageSquare, note: "New inquiries", href: "/admin#inquiries" },
-    { label: "Email templates", value: templates.length, icon: Mail, note: "Saved templates", href: "#email-center" },
-    { label: "Recent events", value: d.activity.length, icon: CalendarDays, note: "Recent activity", href: "/admin#activity-log" },
+    { label: "Members", value: d.members.length, icon: Users, note: "Total members", href: "#tracker", to: "/admin", hash: "tracker" },
+    { label: "Open inquiries", value: d.inquiries.filter((x: any) => x.status === "open").length, icon: MessageSquare, note: "New inquiries", href: "/admin#inquiries", to: "/admin", hash: "inquiries" },
+    { label: "Communications", value: templates.length, icon: Mail, note: "Saved templates", href: "#email-compose", to: "/admin/send", hash: "email-compose" },
+    { label: "Recent events", value: d.activity.length, icon: CalendarDays, note: "Recent activity", href: "/admin#activity-log", to: "/admin", hash: "activity-log" },
   ];
+
+  // Left-bar links open the matching card (or email mode) and scroll to it.
+  useAdminTarget(["tracker"], () => setMembersCollapsed(false));
+  useAdminTarget(["invite"], () => setInviteCollapsed(false));
+  useAdminTarget(["sent-log"], () => setSentLogOpen(true));
+  useAdminTarget(["email-compose"], () => { setEmailMode("compose"); setDraft(emptyDraft); setComposeFromId(""); setEmailStatus(""); });
+  useAdminTarget(["email-templates"], () => { setEmailMode("template"); setDraft(emptyDraft); setComposeFromId(""); setEmailStatus("Pick a template on the left, upload one, or start a new one."); });
+  useAdminTarget(["new-template"], () => { setEmailMode("template"); setDraft(emptyDraft); setComposeFromId(""); setEmailStatus("Starting a new template. Give it a name, subject and wording below."); });
 
   const importConfirmBar = importRows.length > 0 ? (
     <div className="mt-6 border border-gold/40 bg-gold/5 p-4">
@@ -1214,7 +1224,7 @@ export function AdminCenter({ page }: { page: "overview" | "send" }) {
     <PortalShell
       admin
       notifications={notifications}
-      stats={statCards.map(({ label, value, icon }) => ({ label, value, icon }))}
+      stats={statCards.map(({ label, value, icon, to, hash }) => ({ label, value, icon, to, hash }))}
       sidebar={<AdminSidebar page={page} />}
     >
       <main className="px-4 py-10 sm:px-6 lg:px-8">
@@ -1227,16 +1237,6 @@ export function AdminCenter({ page }: { page: "overview" | "send" }) {
               <p className="mt-2 font-display text-lg text-ivory/70 sm:text-xl">
                 {page === "overview" ? "Manage your members, meetings, and communications in one place." : "Member access, communications, and inquiries."}
               </p>
-              <nav aria-label="Admin pages" className="mt-5 flex gap-2">
-                {([["/admin", "Overview", "overview"], ["/admin/send", "Invite & Email", "send"]] as const).map(([to, label, key]) => (
-                  <Link key={to} to={to} className={`shrink-0 rounded-full border-2 px-6 py-2 text-sm font-medium transition-colors ${page === key ? "border-gold bg-gold text-navy" : "border-ivory/25 bg-navy-deep/60 text-ivory/85 hover:border-gold hover:text-gold"}`}>
-                    {label}
-                  </Link>
-                ))}
-                <Link to="/admin/send" hash="sent-log" onClick={() => setSentLogOpen(true)} className="inline-flex shrink-0 items-center gap-2 rounded-full border-2 border-ivory/25 bg-navy-deep/60 px-6 py-2 text-sm font-medium text-ivory/85 transition-colors hover:border-gold hover:text-gold">
-                  <History className="h-4 w-4" /> Sent log
-                </Link>
-              </nav>
             </div>
             <div className="hidden text-right md:block">
               <p className="max-w-[12rem] text-left text-xs uppercase leading-6 tracking-[0.32em] text-ivory/90">A higher standard for a stronger industry.</p>
@@ -1244,20 +1244,6 @@ export function AdminCenter({ page }: { page: "overview" | "send" }) {
             </div>
           </div>
         </div>
-        {page === "send" && (
-          <div className="mt-6 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-            {statCards.map(({ label, value, icon: Icon, note, href }) => (
-              <a key={label} href={href} className="admin-card group flex items-center gap-4 p-5">
-                <span className="grid h-12 w-12 shrink-0 place-items-center rounded-full border border-gold/40 text-gold"><Icon className="h-6 w-6" /></span>
-                <span className="min-w-0 flex-1">
-                  <span className="block font-display text-xl text-ivory">{label.replace(/^./, (c) => c.toUpperCase())}</span>
-                  <span className="mt-1 flex items-baseline gap-3"><span className="font-display text-3xl text-gold">{value}</span><span className="text-sm text-ivory/60">{note}</span></span>
-                </span>
-                <ChevronRight className="h-5 w-5 text-ivory/50 transition-colors group-hover:text-gold" />
-              </a>
-            ))}
-          </div>
-        )}
         {page === "send" && <AdminForumInvitationBatch members={members} preview={preview} onSaved={() => { void overview.refetch(); void email.refetch(); }} />}
         {page === "send" && <div className="mt-6"><AdminSentLog sends={sends} members={members} open={sentLogOpen} onOpenChange={setSentLogOpen} /></div>}
         <div className={`mt-6 grid gap-5 ${page === "overview" ? "lg:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)]" : "lg:grid-cols-2 2xl:grid-cols-[minmax(0,1fr)_minmax(0,1.3fr)_minmax(0,0.8fr)]"}`}>
@@ -1602,6 +1588,7 @@ export function AdminCenter({ page }: { page: "overview" | "send" }) {
               {page === "send" && <AdminForumCommunications />}
             </section>
             <section id="email-center" className={`${S("send",2)} admin-card p-6 sm:p-8`}>
+              <span id="email-compose" className="block scroll-mt-24" /><span id="email-templates" className="block scroll-mt-24" /><span id="new-template" className="block scroll-mt-24" />
               <div className="mb-6 flex flex-wrap gap-2" role="tablist">
                 {([
                   ["compose", "Compose & send"],
@@ -2287,7 +2274,7 @@ export function AdminCenter({ page }: { page: "overview" | "send" }) {
               {memberBusy && <p className="mt-3 text-base text-ivory/60">{memberBusy}</p>}
             </section>
 
-            <CollapseCard id="inquiries" className={`${S("overview",3)} admin-card p-6 sm:p-8`}>
+            <CollapseCard id="inquiries-card" hashes={["inquiries"]} domId={false} className={`${S("overview",3)} admin-card p-6 sm:p-8`}>
               <div className="flex items-start justify-between gap-3">
                 <h2 id="inquiries" className="flex scroll-mt-28 items-center gap-3 font-display text-3xl">
                   <MessageSquare className="h-7 w-7 text-gold" /> Recent inquiries
@@ -2347,7 +2334,7 @@ export function AdminCenter({ page }: { page: "overview" | "send" }) {
               </div>
             </CollapseCard>
 
-            <CollapseCard id="meetings" className={`${S("overview",2)} admin-card p-6 sm:p-8`}>
+            <CollapseCard id="meetings-card" hashes={["meetings"]} domId={false} className={`${S("overview",2)} admin-card p-6 sm:p-8`}>
               <div className="flex items-start justify-between gap-3">
                 <h2 id="meetings" className="flex scroll-mt-28 items-center gap-3 font-display text-3xl"><CalendarDays className="h-7 w-7 text-gold" /> Meetings &amp; calendar</h2>
                 <InfoTip
@@ -2359,7 +2346,7 @@ export function AdminCenter({ page }: { page: "overview" | "send" }) {
                 <AdminMeetings />
               </div>
             </CollapseCard>
-            <section className={`${page === "overview" ? "order-7 lg:col-span-2 lg:row-start-5" : "hidden"} admin-card p-6 sm:p-8`}>
+            <CollapseCard id="documents-card" hashes={["documents"]} domId={false} className={`${page === "overview" ? "order-7 lg:col-span-2 lg:row-start-5" : "hidden"} admin-card p-6 sm:p-8`}>
               <div className="flex flex-wrap items-center justify-between gap-3">
                 <h2 id="documents" className="flex scroll-mt-28 items-center gap-3 font-display text-3xl"><FileText className="h-7 w-7 text-gold" /> Documents</h2>
                 <label className="flex items-center gap-3 text-base text-ivory/70">
@@ -2388,8 +2375,8 @@ export function AdminCenter({ page }: { page: "overview" | "send" }) {
                   <p className="border border-gold/15 p-5 text-base text-ivory/55">Choose a member to add, release, and track their journey documents and one-off records</p>
                 )}
               </div>
-            </section>
-            <CollapseCard id="activity" className={`${S("overview",4)} admin-card p-6 sm:p-8`}>
+            </CollapseCard>
+            <CollapseCard id="activity-card" hashes={["activity-log"]} domId={false} className={`${S("overview",4)} admin-card p-6 sm:p-8`}>
               <div className="flex items-start justify-between gap-3">
                 <h2 id="activity-log" className="flex scroll-mt-28 items-center gap-3 font-display text-3xl"><Activity className="h-7 w-7 text-gold" /> Activity log</h2>
                 <InfoTip title="Activity log" body="A dated record of key steps: invitations, profile submissions, documents released, signatures, BoldSign check-offs, signed copies sent, and reminders you sent. Kept for your records in case anything is ever questioned." />

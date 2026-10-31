@@ -1,5 +1,6 @@
 import { createContext, useContext, useState } from "react";
-import { useNavigate } from "@tanstack/react-router";
+import { Link, useNavigate } from "@tanstack/react-router";
+import { announceAdminNav } from "@/lib/admin-nav";
 import { useQueryClient } from "@tanstack/react-query";
 import { Bell, ChevronsLeft, ChevronsRight, LogOut, Menu, User } from "lucide-react";
 import { Sheet, SheetContent, SheetTitle } from "@/components/ui/sheet";
@@ -9,7 +10,7 @@ import { useStoredFlag } from "@/hooks/use-stored-flag";
 
 type NavItem = { label: string; href: string; onSelect?: () => void };
 export type PortalNotification = { id: string; label: string; detail?: string; href?: string };
-export type PortalStat = { label: string; value: React.ReactNode; icon?: React.ComponentType<{ className?: string }> };
+export type PortalStat = { label: string; value: React.ReactNode; icon?: React.ComponentType<{ className?: string }>; to?: "/admin" | "/admin/send"; hash?: string };
 
 export type SidebarCollapseState = { collapsed: boolean; toggle: () => void };
 const SidebarCollapseContext = createContext<SidebarCollapseState | null>(null);
@@ -80,13 +81,20 @@ export function PortalShell({
           )}
           {admin && stats.length > 0 && (
             <div className="hidden h-full min-w-0 items-center justify-end gap-[clamp(1rem,2vw,2.25rem)] lg:flex">
-              {stats.map((s) => (
-                <div key={s.label} className="flex items-center gap-2 leading-tight">
-                  {s.icon && <s.icon className="h-5 w-5 text-gold/80" />}
-                  <span className="font-display text-3xl text-gold">{s.value}</span>
-                  <span className="text-xs uppercase tracking-[0.14em] text-ivory/75">{s.label}</span>
-                </div>
-              ))}
+              {stats.map((s) => {
+                const inner = (
+                  <>
+                    {s.icon && <s.icon className="h-5 w-5 text-gold/80" />}
+                    <span className="font-display text-3xl text-gold">{s.value}</span>
+                    <span className="text-xs uppercase tracking-[0.14em] text-ivory/75">{s.label}</span>
+                  </>
+                );
+                return s.to ? (
+                  <Link key={s.label} to={s.to} hash={s.hash} onClick={announceAdminNav} className="flex items-center gap-2 leading-tight transition-colors hover:[&_span]:text-gold-light">{inner}</Link>
+                ) : (
+                  <div key={s.label} className="flex items-center gap-2 leading-tight">{inner}</div>
+                );
+              })}
             </div>
           )}
           {!admin && memberProgress && (
