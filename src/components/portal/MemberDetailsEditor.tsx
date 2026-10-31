@@ -2,7 +2,7 @@ import { userFacingError } from "@/lib/user-facing-error";
 import { useState } from "react";
 import { Pencil } from "lucide-react";
 import { Input } from "@/components/ui/input";
-import { saveMemberIntendedDesignation, updateMemberDetails } from "@/lib/portal.functions";
+import { changeMemberEmail, saveMemberBoardSeat, saveMemberIntendedDesignation, updateMemberDetails } from "@/lib/portal.functions";
 import { memberRoleLabel, memberDesignation } from "@/lib/member-role-labels";
 import { readIntendedDesignation, type IntendedDesignation } from "@/lib/intended-designation";
 import { IntendedDesignationFields, INTENDED_ROLE_OPTIONS } from "./IntendedDesignationFields";
@@ -12,7 +12,7 @@ type Role = "board_member" | "advisor" | "prsc_board_dis_advisor" | "prsc_adviso
 type Member = {
   id: string; email?: string; first_name: string; last_name: string; organization: string; title: string | null;
   entity: Entity; role: Role | string; is_candidate?: boolean; is_methodology_committee?: boolean;
-  updated_at?: string; intended_designation?: IntendedDesignation | null;
+  updated_at?: string; intended_designation?: IntendedDesignation | null; board_seat?: string | null;
 };
 
 /** Admin edit of current employment and PRSC/DIS designation, including Forum candidate → appointed promotion. */
@@ -31,7 +31,47 @@ export function MemberDetailsEditor({ member, preview, onSaved }: { member: Memb
   const [intendedUpdatedAt, setIntendedUpdatedAt] = useState(member.updated_at ?? "");
   const [intendedBusy, setIntendedBusy] = useState(false);
   const [intendedMessage, setIntendedMessage] = useState("");
+  const [emailOpen, setEmailOpen] = useState(false);
+  const [newEmail, setNewEmail] = useState("");
+  const [emailBusy, setEmailBusy] = useState(false);
+  const [emailMessage, setEmailMessage] = useState("");
+  const [seatOpen, setSeatOpen] = useState(false);
+  const [seat, setSeat] = useState(member.board_seat ?? "");
+  const [seatBusy, setSeatBusy] = useState(false);
+  const [seatMessage, setSeatMessage] = useState("");
   const savedIntended = readIntendedDesignation(member);
+
+  async function saveEmail(e: React.FormEvent) {
+    e.preventDefault();
+    if (preview) return setEmailMessage("Preview mode: edits are available once you are signed in.");
+    setEmailBusy(true); setEmailMessage("");
+    try {
+      await changeMemberEmail({ data: { member_id: member.id, email: newEmail } });
+      setEmailMessage("Email address changed. They now sign in with the new address.");
+      setEmailOpen(false);
+      onSaved();
+    } catch (error) {
+      setEmailMessage(userFacingError(error, "Could not change the email address."));
+    } finally {
+      setEmailBusy(false);
+    }
+  }
+
+  async function saveSeat(e: React.FormEvent) {
+    e.preventDefault();
+    if (preview) return setSeatMessage("Preview mode: edits are available once you are signed in.");
+    setSeatBusy(true); setSeatMessage("");
+    try {
+      await saveMemberBoardSeat({ data: { member_id: member.id, board_seat: seat } });
+      setSeatMessage(seat.trim() ? "Board seat saved." : "Board seat cleared.");
+      setSeatOpen(false);
+      onSaved();
+    } catch (error) {
+      setSeatMessage(userFacingError(error, "Could not save the board seat."));
+    } finally {
+      setSeatBusy(false);
+    }
+  }
   const savedRoleLabels = INTENDED_ROLE_OPTIONS.filter((option) => savedIntended.roles.includes(option.value)).map((option) => option.value === "other" && savedIntended.other_text ? `Other: ${savedIntended.other_text}` : option.label);
 
   async function saveIntended(e: React.FormEvent) {
@@ -81,6 +121,42 @@ export function MemberDetailsEditor({ member, preview, onSaved }: { member: Memb
             <Pencil className="h-3.5 w-3.5" /> Edit member details
           </button>
         )}
+      </div>
+      <div className="mt-5 grid gap-4 sm:grid-cols-2">
+        <div className="border border-gold/20 p-4">
+          <p className="text-sm uppercase tracking-[0.16em] text-gold/90">Email address</p>
+          <p className="mt-2 break-all text-base text-ivory">{member.email}</p>
+          {!emailOpen ? (
+            <button type="button" onClick={() => { setNewEmail(""); setEmailMessage(""); setEmailOpen(true); }} className="mt-4 inline-flex items-center gap-2 rounded-full border border-gold/50 px-4 py-2 text-xs uppercase tracking-[0.16em] text-gold hover:bg-gold hover:text-navy-deep"><Pencil className="h-3.5 w-3.5" /> Change email</button>
+          ) : (
+            <form onSubmit={saveEmail} className="mt-3 space-y-3">
+              <Input type="email" value={newEmail} onChange={(e) => setNewEmail(e.target.value)} placeholder="New email address" aria-label="New email address" required autoFocus className="text-base" />
+              <p className="text-xs leading-5 text-gold">Their sign-in moves to this address right away. No email is sent to either address, and their NDA verification must be re-reviewed for the new address.</p>
+              <div className="flex gap-3">
+                <button type="submit" disabled={emailBusy || !newEmail.trim()} className="rounded-full bg-gold px-5 py-2 text-xs uppercase tracking-[0.16em] text-navy-deep disabled:opacity-60">{emailBusy ? "Saving…" : "Change email"}</button>
+                <button type="button" onClick={() => setEmailOpen(false)} className="rounded-full border border-gold/40 px-5 py-2 text-xs uppercase tracking-[0.16em] text-ivory/80">Cancel</button>
+              </div>
+            </form>
+          )}
+          {emailMessage && <p role="status" className="mt-3 text-sm text-gold">{emailMessage}</p>}
+        </div>
+        <div className="border border-gold/20 p-4">
+          <p className="text-sm uppercase tracking-[0.16em] text-gold/90">Board seat</p>
+          <p className="mt-2 text-base text-ivory">{member.board_seat || <span className="text-ivory/50">Not yet determined</span>}</p>
+          {!seatOpen ? (
+            <button type="button" onClick={() => { setSeat(member.board_seat ?? ""); setSeatMessage(""); setSeatOpen(true); }} className="mt-4 inline-flex items-center gap-2 rounded-full border border-gold/50 px-4 py-2 text-xs uppercase tracking-[0.16em] text-gold hover:bg-gold hover:text-navy-deep"><Pencil className="h-3.5 w-3.5" /> {member.board_seat ? "Edit board seat" : "Set board seat"}</button>
+          ) : (
+            <form onSubmit={saveSeat} className="mt-3 space-y-3">
+              <Input value={seat} onChange={(e) => setSeat(e.target.value)} maxLength={160} placeholder="e.g. PRSC Board, Seat 3" aria-label="Board seat" autoFocus className="text-base" />
+              <p className="text-xs leading-5 text-ivory/60">Record the actual seat once it is determined. Leave blank to clear it. This is a record only; it does not change access or activate an appointment.</p>
+              <div className="flex gap-3">
+                <button type="submit" disabled={seatBusy} className="rounded-full bg-gold px-5 py-2 text-xs uppercase tracking-[0.16em] text-navy-deep disabled:opacity-60">{seatBusy ? "Saving…" : "Save board seat"}</button>
+                <button type="button" onClick={() => setSeatOpen(false)} className="rounded-full border border-gold/40 px-5 py-2 text-xs uppercase tracking-[0.16em] text-ivory/80">Cancel</button>
+              </div>
+            </form>
+          )}
+          {seatMessage && <p role="status" className="mt-3 text-sm text-gold">{seatMessage}</p>}
+        </div>
       </div>
       <div className="mt-5 border border-gold/20 p-4">
         {!intendedOpen ? <>

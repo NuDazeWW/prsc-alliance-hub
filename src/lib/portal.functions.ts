@@ -1403,6 +1403,44 @@ export const saveMemberIntendedDesignation = createServerFn({ method: "POST" })
     return saved as { member_id: string; intended_designation: IntendedDesignation; updated_at: string };
   });
 
+/** Admin override of a member's sign-in and portal email address. No email is sent to either address. */
+export const changeMemberEmail = createServerFn({ method: "POST" })
+  .middleware([requirePortalAccess])
+  .inputValidator((input) => z.object({ member_id: z.string().uuid(), email: z.string().trim().toLowerCase().email().max(200) }).strict().parse(input))
+  .handler(async ({ context, data }) => {
+    await assertAdmin(context);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { data: m } = await supabaseAdmin.from("portal_members").select("id, user_id, email").eq("id", data.member_id).maybeSingle();
+    if (!m) throw new Error("Member not found");
+    if (m.email.toLowerCase() === data.email) throw new Error("That is already this member’s email address.");
+    const { data: taken } = await supabaseAdmin.from("portal_members").select("id").eq("email", data.email).neq("id", m.id).maybeSingle();
+    if (taken) throw new Error("Another member already uses that email address.");
+    if (m.user_id) {
+      const { error: authError } = await supabaseAdmin.auth.admin.updateUserById(m.user_id, { email: data.email, email_confirm: true });
+      if (authError) throw new Error(authError.message.includes("already") ? "That email address already belongs to another sign-in account." : "The sign-in email could not be changed. Nothing was saved.");
+    }
+    // NDA verification is bound to the recipient's email, so it must be re-reviewed for the new address.
+    const { error } = await supabaseAdmin.from("portal_members").update({ email: data.email, nda_verified_at: null, nda_verified_by: null }).eq("id", m.id);
+    if (error) throw new Error("The email address could not be saved.");
+    await supabaseAdmin.from("portal_activity").insert({ member_id: m.id, actor_user_id: context.userId, event_type: "member_email_changed", metadata: { previous_email: m.email, new_email: data.email } });
+    return { ok: true, email: data.email };
+  });
+
+/** Records the actual board seat once it is determined. Informational only. */
+export const saveMemberBoardSeat = createServerFn({ method: "POST" })
+  .middleware([requirePortalAccess])
+  .inputValidator((input) => z.object({ member_id: z.string().uuid(), board_seat: z.string().trim().max(160) }).strict().parse(input))
+  .handler(async ({ context, data }) => {
+    await assertAdmin(context);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { data: m } = await supabaseAdmin.from("portal_members").select("id, board_seat").eq("id", data.member_id).maybeSingle();
+    if (!m) throw new Error("Member not found");
+    const { error } = await supabaseAdmin.from("portal_members").update({ board_seat: data.board_seat || null } as any).eq("id", m.id);
+    if (error) throw new Error(error.message.includes("board_seat") ? "The board seat field is not set up in the database yet. Run the board seat SQL script first." : "The board seat could not be saved.");
+    await supabaseAdmin.from("portal_activity").insert({ member_id: m.id, actor_user_id: context.userId, event_type: "board_seat_updated", metadata: { previous: (m as any).board_seat ?? null, board_seat: data.board_seat || null } });
+    return { ok: true };
+  });
+
 /** Save invitation preparation only. This never creates an account, verifies an NDA, or sends an email. */
 export const saveMemberInvitationNotes = createServerFn({ method: "POST" })
   .middleware([requirePortalAccess])
