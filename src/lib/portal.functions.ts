@@ -1178,6 +1178,7 @@ export const createMemberDocument = createServerFn({ method: "POST" })
         version_label: z.string().trim().max(60).nullable().optional(),
         supersedes_id: z.string().uuid().nullable().optional(),
         third_party_permission: z.string().trim().max(1000).optional(),
+        forum_role: z.enum(["addendum", "protocol", "pre_read", "conflict", "agenda", "restricted_brief", "secretariat_controls", "facilitator_run_of_show"]).nullable().optional(),
       })
       .parse(input),
   )
@@ -1206,6 +1207,7 @@ export const createMemberDocument = createServerFn({ method: "POST" })
       is_forum_prep: data.is_forum_prep ?? data.journey_stage === 1,
       version_label: data.version_label ?? null,
       supersedes_id: data.supersedes_id ?? null,
+      forum_role: data.forum_role ?? null,
     });
     if (error) throw error;
     if (data.supersedes_id) {
