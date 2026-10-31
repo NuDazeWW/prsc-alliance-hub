@@ -1403,6 +1403,20 @@ export const saveMemberIntendedDesignation = createServerFn({ method: "POST" })
     return saved as { member_id: string; intended_designation: IntendedDesignation; updated_at: string };
   });
 
+/** A member may reword the note the team wrote about why they were invited. The original wording is kept in the activity history. */
+export const updateMyWhyYou = createServerFn({ method: "POST" })
+  .middleware([requirePortalAccess])
+  .inputValidator((input) => z.object({ why_you: z.string().trim().min(20, "Please write at least 20 characters.").max(2000, "Please keep this to 2,000 characters.") }).strict().parse(input))
+  .handler(async ({ context, data }) => {
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { data: member } = await context.supabase.from("portal_members").select("id, why_you, status").eq("user_id", context.userId).maybeSingle();
+    if (!member || member.status === "revoked") throw new Error("Member profile unavailable");
+    const { error } = await supabaseAdmin.from("portal_members").update({ why_you: data.why_you }).eq("id", member.id);
+    if (error) throw new Error("Your note could not be saved. Please try again.");
+    await supabaseAdmin.from("portal_activity").insert({ member_id: member.id, actor_user_id: context.userId, event_type: "why_you_edited_by_member", metadata: { previous: member.why_you, updated: data.why_you } });
+    return { ok: true, why_you: data.why_you };
+  });
+
 /** Admin override of a member's sign-in and portal email address. No email is sent to either address. */
 export const changeMemberEmail = createServerFn({ method: "POST" })
   .middleware([requirePortalAccess])

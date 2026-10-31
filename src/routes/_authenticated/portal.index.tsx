@@ -39,6 +39,7 @@ import {
   Users,
 } from "lucide-react";
 
+import { MemberWhyYou } from "@/components/portal/MemberWhyYou";
 import { MemberDocuments } from "@/components/portal/MemberDocuments";
 import { MemberMeetings } from "@/components/portal/MemberMeetings";
 import { MemberExecutiveQuestions } from "@/components/portal/MemberExecutiveQuestions";
@@ -501,7 +502,7 @@ function PortalHome() {
                   </p>
                 <div className="mt-2 flex flex-wrap gap-2">{roleChips.map((label) => <span key={label} className="rounded-full border border-gold/35 px-3 py-1 text-[10px] uppercase tracking-[0.16em] text-ivory/75">{label}</span>)}</div>
                 <h2 className="mt-4 font-display text-[clamp(1.75rem,2vw,2.3rem)] leading-tight">{name}, Your Perspective Matters.</h2>
-                <p className="mt-5 text-[15px] leading-7 text-ivory/75">{m.why_you}</p>
+                <MemberWhyYou text={m.why_you} canEdit={!asMember && !isDemo && !data?.isAdmin} onSaved={() => void queryClient.invalidateQueries({ queryKey: ["portal-session"] })} />
                 <div className="mt-6 h-px w-16 bg-gold" />
               </div>
               <div className="flex flex-col justify-center border-gold/20 xl:border-l xl:pl-6">
