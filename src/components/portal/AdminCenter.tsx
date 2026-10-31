@@ -11,7 +11,7 @@ import { useStoredFlag } from "@/hooks/use-stored-flag";
 import { isInvitationEmailName } from "@/lib/email-log-name";
 import { AdminSentLog } from "@/components/portal/AdminSentLog";
 import { invitationWasSent, NOT_INVITED_DETAIL, NOT_INVITED_LABEL } from "@/lib/invitation-state";
-import { ChevronDown, ChevronUp } from "lucide-react";
+import { ChevronDown, ChevronUp, ExternalLink } from "lucide-react";
 import { AdminLeadership } from "@/components/portal/AdminLeadership";
 import { AdminSidebar } from "@/components/portal/AdminSidebar";
 import heroRoad from "@/assets/portal-hero-road.jpg";
@@ -257,6 +257,14 @@ const emptyInvite: InviteEmailReview = {
   is_candidate: true,
   intended_designation: { version: 1, kind: "forum_invitee", entity: "none", roles: [], other_text: "", committee: "undetermined" },
 };
+
+/** Opens an email's HTML in its own browser tab so it can be judged at full size, like an inbox would show it. */
+function popOutEmail(html: string) {
+  if (!html) return;
+  const url = URL.createObjectURL(new Blob([html], { type: "text/html" }));
+  window.open(url, "_blank");
+  setTimeout(() => URL.revokeObjectURL(url), 120000);
+}
 
 function downloadListTemplate() {
   const url = URL.createObjectURL(new Blob([MEMBER_LIST_TEMPLATE], { type: "text/csv" }));
@@ -1745,6 +1753,7 @@ export function AdminCenter({ page }: { page: "overview" | "send" }) {
               <div className="min-w-0">
                 <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
                   <p className="text-xs uppercase tracking-[0.18em] text-gold">Live preview</p>
+                  <button type="button" onClick={() => popOutEmail(previewHtml)} className="inline-flex items-center gap-1.5 text-sm text-gold underline hover:text-gold-light"><ExternalLink className="h-4 w-4" />Pop out full size</button>
                   <label className="flex items-center gap-2 text-sm text-ivory/60">
                     Preview as
                     <select value={previewMember?.id ?? ""} onChange={(e) => setPreviewAsId(e.target.value)} className="h-8 max-w-[220px] rounded-md border border-input bg-navy px-2 text-sm">
@@ -2578,6 +2587,7 @@ export function AdminCenter({ page }: { page: "overview" | "send" }) {
             <div className="border-t border-gold/20 px-5 py-4 sm:px-7">
               <p className="mb-3 text-sm text-ivory/50">This is how the invitation will look. Use Send invitation to deliver it with a working access link.</p>
               <div className="flex flex-wrap items-center justify-end gap-3">
+                <Button type="button" className="rounded-none border border-gold/40 bg-transparent text-base text-ivory hover:bg-gold/10 hover:text-gold" onClick={() => popOutEmail(invitePreviewHtml)}><ExternalLink className="mr-2 h-4 w-4" />Pop out full size</Button>
                 <Button type="button" className="rounded-none bg-gold text-base text-navy hover:bg-gold-light hover:text-navy" onClick={() => setInvitePreviewOpen(false)}>Keep editing</Button>
               </div>
             </div>
@@ -2593,6 +2603,7 @@ export function AdminCenter({ page }: { page: "overview" | "send" }) {
                 <p className="text-xs uppercase tracking-[0.2em] text-gold">Branded preview</p>
                 <p className="truncate text-base text-ivory/70">{applyTokens(draft.subject || "Subject line", tokens)}</p>
               </div>
+              <button type="button" onClick={() => popOutEmail(previewHtml)} className="ml-auto mr-4 inline-flex shrink-0 items-center gap-1.5 text-sm text-gold underline hover:text-gold-light"><ExternalLink className="h-4 w-4" />Pop out</button>
               <button type="button" aria-label="Close preview" onClick={() => setPreviewOpen(false)} className="text-ivory/60 hover:text-gold">
                 <X className="h-5 w-5" />
               </button>
