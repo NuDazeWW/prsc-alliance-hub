@@ -6,7 +6,7 @@ import { getInvitationNda, saveInvitationNdaVerification } from "@/lib/invitatio
 import { invitationNdaFormValues, clearInvitationNdaConfirmation } from "@/lib/invitation-nda-form";
 import { normalizedNdaReference } from "@/lib/invitation-nda";
 import { parseMemberList, MEMBER_LIST_TEMPLATE, type MemberImportRow } from "@/lib/member-import";
-import { intendedDesignationSchema, readIntendedDesignation, intendedDesignationLabel, projectIntendedDesignation } from "@/lib/intended-designation";
+import { requiredInvitationNdaEntity, intendedDesignationSchema, readIntendedDesignation, intendedDesignationLabel, projectIntendedDesignation } from "@/lib/intended-designation";
 import { IntendedDesignationFields } from "@/components/portal/IntendedDesignationFields";
 import { useStoredFlag } from "@/hooks/use-stored-flag";
 import { useAdminTarget } from "@/lib/admin-nav";
@@ -473,13 +473,28 @@ export function AdminCenter({ page }: { page: "overview" | "send" }) {
       if (generation === inviteNdaGeneration.current) setInviteNdaLoading(false);
     }
   }
-  async function saveInviteNda() {
-    if (!inviteNda || !inviteCandidateId || !inviteGov.nda_confirmed || !inviteGov.nda_entities) return;
+  /** One-checkbox path for an existing member: records the administrator's verification with sensible defaults. */
+  async function quickConfirmNda(checked: boolean) {
+    if (!checked) { setInviteGov((current) => clearInvitationNdaConfirmation(current)); setInviteNdaReviewId(""); setInviteNdaMessage(""); return; }
+    if (!inviteNda) return;
+    const required = requiredInvitationNdaEntity({ ...(inviteNda.member as any), intended_designation: inviteDraft.intended_designation });
+    const over: Partial<InviteGov> = {
+      nda_reference: inviteGov.nda_reference.trim().length >= 3 ? inviteGov.nda_reference : "Signed NDA on file, confirmed by administrator",
+      nda_entities: (inviteGov.nda_entities || required) as InviteGov["nda_entities"],
+      nda_scope: inviteGov.nda_scope.trim().length >= 3 ? inviteGov.nda_scope : "Strategic Forum materials and discussions",
+      nda_confirmed: true, nda_recipient_email: normalizedRecipient(inviteDraft.email),
+    };
+    setInviteGov((current) => ({ ...current, ...over }));
+    await saveInviteNda(over);
+  }
+  async function saveInviteNda(over: Partial<InviteGov> = {}) {
+    const gov = { ...inviteGov, ...over };
+    if (!inviteNda || !inviteCandidateId || !gov.nda_confirmed || !gov.nda_entities) return;
     const generation = inviteNdaGeneration.current;
     setInviteNdaSaving(true); setInviteNdaMessage("");
     try {
       const result = await saveInvitationNdaVerification({ data: { member_id: inviteCandidateId, expected_updated_at: inviteNda.member.updated_at,
-        reference: inviteGov.nda_reference, entities: inviteGov.nda_entities, scope: inviteGov.nda_scope, confirmed: true } });
+        reference: gov.nda_reference, entities: gov.nda_entities as "prsc" | "dis" | "both", scope: gov.nda_scope, confirmed: true } });
       if (generation !== inviteNdaGeneration.current) return;
       setInviteNda(result); setInviteNdaReviewId(result.reviewId);
       setInviteGov((current) => ({ ...current, nda_reference: result.member.nda_reference ?? "", nda_entities: result.member.nda_entities ?? "", nda_scope: result.member.nda_scope ?? "", nda_confirmed: true, nda_recipient_email: normalizedRecipient(result.member.email) }));
@@ -1052,6 +1067,8 @@ export function AdminCenter({ page }: { page: "overview" | "send" }) {
     }
   }
 
+  // Choosing someone in "Invite a member" makes the live preview show that person.
+  useEffect(() => { if (inviteCandidateId) setPreviewAsId(inviteCandidateId); }, [inviteCandidateId]);
   const previewMember = members.find((m) => m.id === previewAsId) ?? members.find((m) => m.id === recipients[0]) ?? members[0];
   const tokens = previewMember ? buildMemberTokens(previewMember) : {};
   useEffect(() => {
@@ -1288,7 +1305,7 @@ export function AdminCenter({ page }: { page: "overview" | "send" }) {
                 </div>
                 {(() => {
                   const dup = members.find((m) => m.email?.toLowerCase() === inviteDraft.email.trim().toLowerCase());
-                  return dup && inviteDraft.email.trim() ? (
+                  return !inviteCandidateId && dup && inviteDraft.email.trim() ? (
                     <p className="border border-amber-400/40 bg-amber-500/10 px-4 py-3 text-sm text-amber-200 sm:col-span-2">
                       {dup.first_name} {dup.last_name} is already a member with this email. Select this existing member before proceeding so their saved identity, NDA and appointment history are retained.
                     </p>
@@ -1311,21 +1328,24 @@ export function AdminCenter({ page }: { page: "overview" | "send" }) {
                     <p className="text-gold">{inviteNdaLoading ? "Loading this candidate’s NDA…" : inviteNdaReviewId && !inviteNda?.eligibilityProblem ? "Administrator review saved" : "Needs Verification"}</p>
                     {inviteNda?.member.nda_verified_at && <p>Stored verification: {new Date(inviteNda.member.nda_verified_at).toLocaleString()} · Reviewer: {inviteNda.member.nda_verified_by || "Not recorded"}</p>}
                     {inviteNda?.eligibilityProblem && <p>{inviteNda.eligibilityProblem}</p>}
-                    {inviteNda && !inviteNda.member.nda_verified_at && !inviteNda.evidenceOptions.length && <p>No executed-NDA verification is recorded. Supply and verify the recipient’s own evidence before inviting.</p>}
+                    {inviteNda && !inviteNda.member.nda_verified_at && !inviteNda.evidenceOptions.length && <p>Check the box below to confirm this person has signed the NDA.</p>}
                   </div>}
-                  {!!inviteNda?.evidenceOptions.length && <label className="text-sm text-ivory/70 sm:col-span-3">Stored NDA evidence
+                  {!inviteCandidateId && !!inviteNda?.evidenceOptions.length && <label className="text-sm text-ivory/70 sm:col-span-3">Stored NDA evidence
                     <select className="mt-1 h-10 w-full rounded-md border border-input bg-navy px-3 text-base" disabled={inviteNdaLoading || inviteNdaSaving} value={inviteNda.evidenceOptions.some((record) => normalizedNdaReference(record.reference) === normalizedNdaReference(inviteGov.nda_reference)) ? normalizedNdaReference(inviteGov.nda_reference) : ""} onChange={(event) => { const record = inviteNda.evidenceOptions.find((option) => option.reference === event.target.value); if (record) editInviteNda({ nda_reference: record.reference, nda_entities: record.entities as InviteGov["nda_entities"], nda_scope: record.scope }); }}>
                       <option value="">Choose existing evidence, or correct the fields below…</option>
                       {inviteNda.evidenceOptions.map((record) => <option key={record.reference} value={record.reference}>{record.reference} · verified {new Date(record.verified_at).toLocaleDateString()} · {record.reviewer_id}</option>)}
                     </select>
                   </label>}
+{!inviteCandidateId && <>
                   <Input aria-label="NDA reference or storage location" disabled={inviteNdaLoading || inviteNdaSaving} value={inviteGov.nda_reference} onChange={(e) => editInviteNda({ nda_reference: e.target.value })} placeholder="NDA reference or storage location" className="text-base" />
                   <select disabled={inviteNdaLoading || inviteNdaSaving} value={inviteGov.nda_entities} onChange={(e) => editInviteNda({ nda_entities: e.target.value as InviteGov["nda_entities"] })} aria-label="Entities the NDA covers" className="h-9 w-full rounded-md border border-input bg-navy px-3 text-base">
                     <option value="">Choose NDA coverage…</option><option value="prsc">NDA covers PRSC</option><option value="dis">NDA covers DIS</option><option value="both">NDA covers PRSC and DIS</option>
                   </select>
                   <Input aria-label="NDA information-sharing scope" disabled={inviteNdaLoading || inviteNdaSaving} value={inviteGov.nda_scope} onChange={(e) => editInviteNda({ nda_scope: e.target.value })} placeholder="Information-sharing scope" className="text-base" />
-                  <label className="flex items-center gap-3 sm:col-span-3"><input type="checkbox" checked={inviteGov.nda_confirmed} disabled={!inviteDraft.email.trim() || inviteNdaLoading || inviteNdaSaving || Boolean(inviteCandidateId && !inviteNda)} onChange={(e) => { setInviteGov({ ...inviteGov, nda_confirmed: e.target.checked, nda_recipient_email: e.target.checked ? normalizedRecipient(inviteDraft.email) : "" }); if (!e.target.checked) setInviteNdaReviewId(""); }} className="h-4 w-4" /><span className="text-base text-ivory/85">I reviewed the executed NDA and verified that it applies to {inviteDraft.email || "this recipient"} and this intended invitation.</span></label>
-                  {inviteCandidateId && <div className="sm:col-span-3"><Button type="button" variant="outline" disabled={!inviteNda || inviteNdaLoading || inviteNdaSaving || !inviteGov.nda_confirmed || !inviteGov.nda_entities || inviteGov.nda_reference.trim().length < 3 || inviteGov.nda_scope.trim().length < 3} onClick={() => void saveInviteNda()}>{inviteNdaSaving ? "Saving review…" : "Save reviewed NDA"}</Button><Button type="button" variant="ghost" disabled={inviteNdaLoading || inviteNdaSaving} onClick={() => void selectInviteCandidate(inviteCandidateId)}>Reload stored details</Button></div>}
+</>}
+{!inviteCandidateId && <label className="flex items-center gap-3 sm:col-span-3"><input type="checkbox" checked={inviteGov.nda_confirmed} disabled={!inviteDraft.email.trim() || inviteNdaLoading || inviteNdaSaving || Boolean(inviteCandidateId && !inviteNda)} onChange={(e) => { setInviteGov({ ...inviteGov, nda_confirmed: e.target.checked, nda_recipient_email: e.target.checked ? normalizedRecipient(inviteDraft.email) : "" }); if (!e.target.checked) setInviteNdaReviewId(""); }} className="h-4 w-4" /><span className="text-base text-ivory/85">I reviewed the executed NDA and verified that it applies to {inviteDraft.email || "this recipient"} and this intended invitation.</span></label>}
+{inviteCandidateId && <label className="flex items-center gap-3 sm:col-span-3"><input type="checkbox" checked={inviteGov.nda_confirmed && Boolean(inviteNdaReviewId)} disabled={inviteNdaLoading || inviteNdaSaving || !inviteNda} onChange={(e) => void quickConfirmNda(e.target.checked)} className="h-4 w-4" /><span className="text-base text-ivory/85">{inviteDraft.first_name || "This person"} has signed the NDA and I have verified it.{inviteNdaSaving && " Saving…"}</span></label>}
+
                   {inviteNdaMessage && <p role="status" className="text-sm text-gold sm:col-span-3">{inviteNdaMessage}</p>}
                 </div>
                 {!inviteDraft.is_candidate && roleCombinationTier(inviteDraft.entity, inviteDraft.role, inviteDraft.is_methodology_committee ?? false).tier === "review" && (
