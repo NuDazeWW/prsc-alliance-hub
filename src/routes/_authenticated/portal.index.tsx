@@ -139,6 +139,7 @@ function PortalHome() {
   const queryClient = useQueryClient();
   const navigate = useNavigate();
   const [panel, setPanel] = useState<"role" | "hub" | "documents" | "questions" | "meetings" | null>(null);
+  const [focusDocId, setFocusDocId] = useState<string | null>(null);
   useEffect(() => {
     if (data?.isAdmin && !data?.viewingAs) navigate({ to: "/admin", replace: true });
   }, [data, navigate]);
@@ -231,6 +232,11 @@ function PortalHome() {
   const packageReady = m.package_status === "package_ready";
   const myDocs = documents.data?.documents ?? [];
   const documentsReleased = myDocs.length > 0;
+  // The agenda only appears in the member's documents once they are cleared, so its presence is the gate.
+  const agendaDoc = (myDocs as any[]).find((d) => d.forum_role === "agenda" && !d.superseded_at) ?? null;
+  const agenda = agendaDoc ? { id: agendaDoc.id as string, title: agendaDoc.title as string } : null;
+  const openAgenda = (id: string) => { setFocusDocId(id); setPanel("documents"); };
+  useEffect(() => { if (panel !== "documents") setFocusDocId(null); }, [panel]);
   const acknowledged = new Set(documents.data?.acknowledged ?? []);
   const docEntity = (documents.data as { entity?: string } | null)?.entity ?? m.entity;
   const journey = journeyStatus((myDocs as any[]).filter((d) => !d.superseded_at), acknowledged, docEntity, (documents.data as any)?.activation ?? { prsc: null, dis: null }, m.participates_in_forum !== false, (documents.data as any)?.forumCleared === true);
@@ -520,7 +526,7 @@ function PortalHome() {
           <h2 className="mt-3 font-display text-[clamp(1.75rem,2.2vw,2.4rem)] leading-tight">Your meeting calendar</h2>
           <p className="mt-2 text-sm text-ivory/60">Mark your availability for proposed dates, check confirmed meetings, and add them to your calendar.</p>
           <div className="mt-6">
-            <MemberMeetings asMemberId={asMember} hideIntro />
+            <MemberMeetings asMemberId={asMember} hideIntro agenda={asMember ? null : agenda} onOpenAgenda={openAgenda} />
           </div>
         </section>
         {!asMember && <MemberExecutiveQuestions />}
@@ -549,7 +555,7 @@ function PortalHome() {
                 </DialogTitle>
               </DialogHeader>
               <div className="mt-8">
-                <MemberMeetings />
+                <MemberMeetings agenda={agenda} onOpenAgenda={openAgenda} />
                 <Button onClick={() => navigate({ to: "/portal/profile" })} className="mt-6">Continue to Executive Profile <ArrowRight className="h-4 w-4" /></Button>
               </div>
             </div>
@@ -626,7 +632,7 @@ function PortalHome() {
               ) : (
                 <>
                   {documentsReleased ? (
-                    <MemberDocuments onAllRequiredDone={() => { setPanel(null); toast.success("Your Forum preparation is complete. Your clearance is now with the Secretariat for review."); }} documents={myDocs as any} completions={documents.data?.completions ?? []} entity={docEntity} forum={(documents.data as any)?.forum !== false} forumOnly={forumOnly} forumCleared={(documents.data as any)?.forumCleared === true} entityReleased={(documents.data as any)?.entityReleased} unavailable={(documents.data as any)?.unavailable ?? []} signing={(documents.data as any)?.signing ?? []} profileComplete={profileComplete} />
+                    <MemberDocuments focusDocId={focusDocId} onAllRequiredDone={() => { setPanel(null); toast.success("Your Forum preparation is complete. Your clearance is now with the Secretariat for review."); }} documents={myDocs as any} completions={documents.data?.completions ?? []} entity={docEntity} forum={(documents.data as any)?.forum !== false} forumOnly={forumOnly} forumCleared={(documents.data as any)?.forumCleared === true} entityReleased={(documents.data as any)?.entityReleased} unavailable={(documents.data as any)?.unavailable ?? []} signing={(documents.data as any)?.signing ?? []} profileComplete={profileComplete} />
                   ) : (
                     <div className="mt-8 border border-gold/25 bg-ivory/[.03] p-8 text-center"><FileText className="mx-auto h-7 w-7 text-gold"/><h3 className="mt-5 font-display text-[24px] leading-snug">{DOCUMENTS_NOT_RELEASED_TITLE}</h3><p className="mx-auto mt-4 max-w-[34rem] text-[15px] leading-7 text-ivory/65">{DOCUMENTS_NOT_RELEASED_BODY}</p><p className="mx-auto mt-4 max-w-[34rem] text-[14px] leading-6 text-ivory/55">{PROFILE_ENCOURAGEMENT}</p><Link to="/portal/profile" onClick={() => setPanel(null)} className="mt-4 inline-block text-[14px] text-gold underline underline-offset-4 hover:text-ivory">{profileLinkLabel(profileComplete)} →</Link></div>
                   )}

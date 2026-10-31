@@ -40,6 +40,8 @@ type Props = {
   profileComplete?: boolean;
   /** Called once, right after the member completes their last required action in this sitting. */
   onAllRequiredDone?: () => void;
+  /** Opens this document straight away (for example the agenda, from the meetings view). */
+  focusDocId?: string | null;
 };
 
 const TRACK_LABEL = { shared: "Shared Forum", prsc: "PRSC", dis: "DIS" } as const;
@@ -54,10 +56,11 @@ function Unavailable({ reason, label }: { reason: UnavailableReason; label?: str
   );
 }
 
-export function MemberDocuments({ documents: all, completions, entity, forum = true, forumOnly = false, forumCleared = true, entityReleased = { prsc: false, dis: false }, unavailable = [], signing = [], profileComplete = false, onAllRequiredDone }: Props) {
+export function MemberDocuments({ documents: all, completions, entity, forum = true, forumOnly = false, forumCleared = true, entityReleased = { prsc: false, dis: false }, unavailable = [], signing = [], profileComplete = false, onAllRequiredDone, focusDocId = null }: Props) {
   const documents = all.filter((d: any) => !d.superseded_at && (forum || d.journey_stage !== 1));
   const history = all.filter((d: any) => d.superseded_at);
   const [openId, setOpenId] = useState<string | null>(null);
+  useEffect(() => { if (focusDocId) setOpenId(focusDocId); }, [focusDocId]);
   const [shown, setShown] = useState<Set<string>>(new Set());
   const open = all.find((d) => d.id === openId) ?? null;
   const doneMap = new Map(completions.map((c) => [c.document_id, c]));

@@ -3,7 +3,7 @@ import { userFacingError } from "@/lib/user-facing-error";
 import { fetchPrivateFile } from "@/lib/private-file-client";
 import { DEFAULT_MEETING_TZ, timezoneLabel } from "@/lib/meeting-block";
 import { Fragment, useEffect, useState } from "react";
-import { CalendarDays, Check, Clock, Download, MapPin, Video } from "lucide-react";
+import { ArrowRight, CalendarDays, Check, Clock, Download, MapPin, Video } from "lucide-react";
 import { toast } from "sonner";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { getMyMeetings, submitMyAvailability } from "@/lib/meetings.functions";
@@ -70,7 +70,7 @@ function fmt(iso: string, tz?: string | null) {
   });
 }
 
-export function MemberMeetings({ hideWhenEmpty = false, hideIntro = false, asMemberId }: { hideWhenEmpty?: boolean; hideIntro?: boolean; asMemberId?: string } = {}) {
+export function MemberMeetings({ hideWhenEmpty = false, hideIntro = false, asMemberId, agenda = null, onOpenAgenda }: { hideWhenEmpty?: boolean; hideIntro?: boolean; asMemberId?: string; agenda?: { id: string; title: string } | null; onOpenAgenda?: (id: string) => void } = {}) {
   const [saving, setSaving] = useState<string | null>(null);
   const [drafts, setDrafts] = useState<Record<string, Record<string, string>>>({});
   const [notes, setNotes] = useState<Record<string, string>>({});
@@ -143,6 +143,15 @@ export function MemberMeetings({ hideWhenEmpty = false, hideIntro = false, asMem
 
   return (
     <div className="space-y-8">
+      {agenda && onOpenAgenda && (
+        <button type="button" onClick={() => onOpenAgenda(agenda.id)} className="flex w-full items-center justify-between gap-4 border border-gold bg-gold/[.08] px-5 py-4 text-left transition-colors hover:bg-gold/15">
+          <span>
+            <span className="block text-[10px] uppercase tracking-[0.24em] text-gold">Forum agenda</span>
+            <span className="mt-1 block font-display text-[19px] leading-snug text-ivory">{agenda.title}</span>
+          </span>
+          <span className="inline-flex shrink-0 items-center gap-2 text-[13px] text-gold">Open the agenda <ArrowRight className="h-4 w-4" /></span>
+        </button>
+      )}
       {!hideIntro && (
         <div>
           <h3 className="font-display text-xl text-ivory">Meetings &amp; availability</h3>
