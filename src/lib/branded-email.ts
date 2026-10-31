@@ -199,8 +199,8 @@ export function emailFooterHtml(note = "Secure access for invited participants o
 
 export function goldButtonHtml(label: string, url: string) {
   return `<table role="presentation" cellpadding="0" cellspacing="0" border="0" align="center" style="margin:26px auto 8px;">
-            <tr><td bgcolor="${GOLD}" align="center" style="background-color:${GOLD};border:1px solid ${BRONZE};border-radius:5px;">
-              <a href="${escapeHtml(url)}" style="display:inline-block;font-family:Arial,Helvetica,sans-serif;text-decoration:none;color:#091424;font-size:15px;line-height:22px;font-weight:bold;letter-spacing:1.5px;text-transform:uppercase;padding:17px 30px;white-space:normal;">${escapeHtml(label)} &nbsp;&rarr;</a>
+            <tr><td bgcolor="#D9AE45" align="center" style="background-color:#D9AE45;background-image:linear-gradient(180deg,#F0D27A 0%,#D9AE45 48%,#BC8B28 100%);border:1px solid #A47A22;border-radius:6px;box-shadow:0 3px 6px rgba(60,40,0,0.35);">
+              <a href="${escapeHtml(url)}" style="display:inline-block;font-family:Georgia,'Times New Roman',serif;text-decoration:none;color:#0A1322;font-size:16px;line-height:24px;font-weight:bold;letter-spacing:3px;text-transform:uppercase;padding:17px 34px;white-space:normal;">${escapeHtml(label)} &nbsp;&rarr;</a>
             </td></tr>
           </table>`;
 }

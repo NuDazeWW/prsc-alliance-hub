@@ -104,45 +104,67 @@ function InviteLayout({ inviteeName, short, forumOnly, disOnly, confirmationUrl,
                 <div style={heroLead}>Hello {inviteeName}, you&apos;ve been invited to access your secure portal for orientation, professional profile information, and the next steps relevant to your invitation.</div>
                 <div style={{ margin: '20px auto 0', width: '72px', borderTop: '2px solid #D4AF37', lineHeight: '1px', fontSize: '1px' }}>&nbsp;</div>
               </td></tr>
-              <tr><td className="mobile-pad" {...bg('bg-cream', '#F2EFE6')} style={{ padding: '32px 27px 34px', ...bgCss('bg-cream', '#F2EFE6') }}>
-                <div style={stepsHeading}>YOUR NEXT STEPS</div>
-                <table className="step-table" role="presentation" cellPadding={0} cellSpacing={0} border={0} width="100%" style={{ width: '100%' }}>
-                  <tbody><tr>
-                    {steps.map((st, i) => <td key={i} className="step-column" valign="top" width="25%" style={{ width: '25%', borderRight: i < 3 ? '1px solid #D9CBA8' : undefined, padding: '0 10px 12px', textAlign: 'center', verticalAlign: 'top' }}>
-                      <Img src={`${EMAIL_ASSET_BASE}/${st.icon}`} width="64" height="64" alt="" style={{ display: 'block', width: '64px', height: '64px', maxWidth: '64px', margin: '0 auto 10px' }} />
-                      <div style={stepNumber}>{i + 1}</div>
-                      <div style={stepTitle}><Lines lines={st.title} /></div>
-                      <div style={stepText}>{st.text}</div>
-                    </td>)}
-                  </tr></tbody>
-                </table>
-                <table role="presentation" cellPadding={0} cellSpacing={0} border={0} width="100%" {...bg('bg-navy', '#0A1322')} style={{ marginTop: '25px', ...bgCss('bg-navy', '#0A1322'), border: '1px solid #B98925' }}>
-                  <tbody><tr>
-                    <td width={86} valign="middle" style={{ width: '86px', padding: '15px 11px 15px 16px', textAlign: 'center' }}><Img src={`${EMAIL_ASSET_BASE}/icon-security.png`} alt="" width="66" height="66" style={{ display: 'block', width: '66px', height: '66px' }} /></td>
-                    <td valign="middle" style={{ padding: '16px 19px 16px 13px', borderLeft: '1px solid #8C6E3B' }}><div style={{ fontFamily: 'Arial, Helvetica, sans-serif', fontSize: '13px', lineHeight: '21px', color: '#F2EFE6' }}>Your private portal helps you review assigned materials, complete required actions, and prepare for the next steps in your journey.</div></td>
-                  </tr></tbody>
-                </table>
-                {whyYou?.trim() && <table role="presentation" cellPadding={0} cellSpacing={0} border={0} width="100%" style={{ marginTop: '22px' }}>
-                  <tbody><tr><td style={{ padding: '17px 12px 18px', textAlign: 'center', borderTop: '1px solid #D9CBA8', borderBottom: '1px solid #D9CBA8' }}>
-                    <div style={{ fontFamily: "Georgia, 'Times New Roman', serif", color: '#8C6E3B', fontSize: '15px', lineHeight: '20px', marginBottom: '7px' }}>Why You&apos;re Here</div>
-                    <div style={{ fontFamily: 'Arial, Helvetica, sans-serif', color: '#403B34', fontSize: '13px', lineHeight: '21px' }}>{whyYou.trim()}</div>
+              <tr><td className="mobile-pad" {...bg('bg-navy', '#0A1322')} style={{ padding: '0 14px 22px', ...bgCss('bg-navy', '#0A1322') }}>
+                <table role="presentation" cellPadding={0} cellSpacing={0} border={0} width="100%" {...({ background: `${EMAIL_ASSET_BASE}/parchment-cream.jpg` } as Record<string, string>)} bgcolor="#F2EFE6" style={{ width: '100%', backgroundColor: '#F2EFE6', backgroundImage: `url(${EMAIL_ASSET_BASE}/parchment-cream.jpg)`, border: '1px solid #C9A24A', borderRadius: '6px' }}>
+                  <tbody><tr><td className="mobile-pad" style={{ padding: '30px 14px 32px' }}>
+                    <table role="presentation" cellPadding={0} cellSpacing={0} border={0} width="100%" style={{ width: '100%', marginBottom: '22px' }}>
+                      <tbody><tr>
+                        <td style={{ borderBottom: '1px solid #C9A24A', width: '18%', fontSize: '1px', lineHeight: '1px' }}>&nbsp;</td>
+                        <td style={stepsHeading}>YOUR NEXT STEPS</td>
+                        <td style={{ borderBottom: '1px solid #C9A24A', width: '18%', fontSize: '1px', lineHeight: '1px' }}>&nbsp;</td>
+                      </tr></tbody>
+                    </table>
+                    <table className="step-table" role="presentation" cellPadding={0} cellSpacing={0} border={0} width="100%" style={{ width: '100%' }}>
+                      <tbody><tr>
+                        {steps.map((st, i) => <td key={i} className="step-column" valign="top" width="25%" style={{ width: '25%', borderRight: i < 3 ? '1px solid #D9C28A' : undefined, padding: '0 5px 12px', verticalAlign: 'top' }}>
+                          <Img src={`${EMAIL_ASSET_BASE}/${st.icon}`} width="64" height="64" alt="" style={{ display: 'block', width: '64px', height: '64px', maxWidth: '64px', margin: '0 auto 8px' }} />
+                          <table role="presentation" cellPadding={0} cellSpacing={0} border={0} align="center" style={{ margin: '0 auto' }}>
+                            <tbody><tr>
+                              <td valign="top" style={{ ...stepNumber, paddingRight: '5px' }}>{i + 1}</td>
+                              <td valign="top" style={{ textAlign: 'left' }}><div style={stepTitle}><Lines lines={st.title} /></div></td>
+                            </tr></tbody>
+                          </table>
+                          <div style={stepText}>{st.text}</div>
+                        </td>)}
+                      </tr></tbody>
+                    </table>
+                    <table role="presentation" cellPadding={0} cellSpacing={0} border={0} width="100%" {...bg('bg-navy', '#0A1322')} style={{ marginTop: '26px', ...bgCss('bg-navy', '#0A1322'), border: '2px solid #B98925', borderRadius: '8px' }}>
+                      <tbody><tr>
+                        <td width={104} valign="middle" style={{ width: '104px', padding: '14px 12px 14px 18px', textAlign: 'center' }}><Img src={`${EMAIL_ASSET_BASE}/icon-security.png`} alt="" width="76" height="76" style={{ display: 'block', width: '76px', height: '76px' }} /></td>
+                        <td valign="middle" style={{ padding: '16px 22px 16px 18px', borderLeft: '1px solid #8C6E3B' }}><div style={{ fontFamily: 'Arial, Helvetica, sans-serif', fontSize: '15px', lineHeight: '24px', color: '#F2EFE6' }}>Your private portal helps you review assigned materials, complete required actions, and prepare for the next steps in your journey.</div></td>
+                      </tr></tbody>
+                    </table>
+                    {whyYou?.trim() && <table role="presentation" cellPadding={0} cellSpacing={0} border={0} width="100%" style={{ marginTop: '22px' }}>
+                      <tbody><tr><td style={{ padding: '17px 12px 18px', textAlign: 'center', borderTop: '1px solid #C9A24A', borderBottom: '1px solid #C9A24A' }}>
+                        <div style={{ fontFamily: "Georgia, 'Times New Roman', serif", color: '#8C6E3B', fontSize: '16px', lineHeight: '22px', marginBottom: '7px' }}>Why You&apos;re Here</div>
+                        <div style={{ fontFamily: 'Arial, Helvetica, sans-serif', color: '#403B34', fontSize: '14px', lineHeight: '22px' }}>{whyYou.trim()}</div>
+                      </td></tr></tbody>
+                    </table>}
+                    <div style={{ marginTop: '22px' }}><MeetingSection block={meetingBlock} /></div>
+                    <table role="presentation" cellPadding={0} cellSpacing={0} border={0} align="center" style={{ margin: '28px auto 10px' }}>
+                      <tbody><tr><td align="center" bgcolor="#D9AE45" style={goldButtonCell}>
+                        <a href={confirmationUrl} style={ctaLink}>{ctaLabel} &nbsp;→</a>
+                      </td></tr></tbody>
+                    </table>
+                    {ctaSubtext?.trim() && <div style={{ fontFamily: 'Arial, Helvetica, sans-serif', fontSize: '12px', lineHeight: '19px', color: '#4B4D4E', textAlign: 'center', margin: '12px 0 0' }}>{ctaSubtext.trim()}</div>}
+                    <div style={{ fontFamily: 'Arial, Helvetica, sans-serif', fontSize: '14px', lineHeight: '20px', color: '#123D64', textAlign: 'center', marginTop: '14px' }}>Questions? <Link href="mailto:info@readinessterminal.com" style={{ color: '#123D64', textDecoration: 'underline' }}>Reply to this email</Link></div>
+                    <div style={{ marginTop: '30px', paddingTop: '26px', borderTop: '1px solid #C9A24A' }}>{letter}</div>
                   </td></tr></tbody>
-                </table>}
-                <div style={{ marginTop: '22px' }}><MeetingSection block={meetingBlock} /></div>
-                <table role="presentation" cellPadding={0} cellSpacing={0} border={0} align="center" style={{ margin: '28px auto 10px' }}>
-                  <tbody><tr><td align="center" style={{ backgroundColor: '#D4AF37', border: '1px solid #8C6E3B', borderRadius: '5px' }}>
-                    <a href={confirmationUrl} style={ctaLink}>{ctaLabel} &nbsp; →</a>
-                  </td></tr></tbody>
                 </table>
-                {ctaSubtext?.trim() && <div style={{ fontFamily: 'Arial, Helvetica, sans-serif', fontSize: '12px', lineHeight: '19px', color: '#4B4D4E', textAlign: 'center', margin: '12px 0 0' }}>{ctaSubtext.trim()}</div>}
-                <div style={{ fontFamily: 'Arial, Helvetica, sans-serif', fontSize: '12px', lineHeight: '19px', color: '#4B4D4E', textAlign: 'center', marginTop: '14px' }}>Questions? <Link href="mailto:info@readinessterminal.com" style={{ color: '#123D64', textDecoration: 'underline' }}>Contact the PRSC team</Link>.</div>
-                <div style={{ marginTop: '30px', paddingTop: '26px', borderTop: '1px solid #D9CBA8' }}>{letter}</div>
               </td></tr>
-              <tr><td align="center" {...bg('bg-navy', '#0A1322')} style={{ ...bgCss('bg-navy', '#0A1322'), padding: '25px 30px 30px', borderTop: '3px solid #B98925' }}>
-                <div style={{ fontFamily: "Georgia, 'Times New Roman', serif", color: '#D4AF37', fontSize: '12px', lineHeight: '18px', letterSpacing: '2px' }}>PARTNERSHIP READINESS STANDARDS COUNCIL, LLC</div>
-                <div style={{ fontFamily: 'Arial, Helvetica, sans-serif', color: '#BAC0CA', fontSize: '10px', lineHeight: '17px', letterSpacing: '1px', marginTop: '9px' }}>Secure access for invited participants only.</div>
+              <tr><td align="center" {...bg('bg-navy', '#0A1322')} style={{ ...bgCss('bg-navy', '#0A1322'), padding: '8px 30px 28px' }}>
+                <table role="presentation" cellPadding={0} cellSpacing={0} border={0} width="100%" style={{ width: '100%', marginBottom: '16px' }}>
+                  <tbody><tr>
+                    <td style={{ borderBottom: '1px solid #B98925', fontSize: '1px', lineHeight: '1px' }}>&nbsp;</td>
+                    <td width={30} align="center" style={{ width: '30px', color: '#D4AF37', fontSize: '14px', lineHeight: '14px' }}>◆</td>
+                    <td style={{ borderBottom: '1px solid #B98925', fontSize: '1px', lineHeight: '1px' }}>&nbsp;</td>
+                  </tr></tbody>
+                </table>
+                <div style={{ fontFamily: "Georgia, 'Times New Roman', serif", color: '#D4AF37', fontSize: '12px', lineHeight: '18px', letterSpacing: '3px' }}>PARTNERSHIP READINESS STANDARDS COUNCIL, LLC</div>
+                <div style={{ fontFamily: 'Arial, Helvetica, sans-serif', color: '#BAC0CA', fontSize: '10px', lineHeight: '17px', letterSpacing: '2px', marginTop: '9px' }}>SECURE ACCESS FOR INVITED PARTICIPANTS ONLY.</div>
                 <div style={{ fontFamily: 'Arial, Helvetica, sans-serif', color: '#9AA6B7', fontSize: '11px', lineHeight: '17px', marginTop: '12px' }}>This invitation was sent specifically to <Link href={`mailto:${recipientEmail}`} style={footerLink}>{recipientEmail}</Link>{forumOnly ? '.' : <> in connection with your previously discussed {roleLabel} role.</>} It provides access to the private onboarding process and does not constitute appointment to PRSC or DIS. Formal entity appointments and authority are governed by separate documentation and authorization.</div>
               </td></tr>
+              <tr><td style={{ height: '8px', lineHeight: '8px', fontSize: '1px', backgroundColor: '#B98925', backgroundImage: 'linear-gradient(90deg,#8C6E3B,#E6C56A,#8C6E3B)' }}>&nbsp;</td></tr>
             </tbody>
           </table>
         </td></tr></tbody>
@@ -220,11 +242,12 @@ const main = { backgroundColor: '#071221', fontFamily: "Georgia, 'Times New Roma
 const eyebrowGold = { fontFamily: 'Arial, Helvetica, sans-serif', fontSize: '11px', fontWeight: 600, letterSpacing: '3px', lineHeight: '18px', color: '#D4AF37', marginBottom: '12px' }
 const heroTitle = { fontFamily: "Georgia, 'Times New Roman', serif", fontSize: '37px', lineHeight: '45px', color: '#F2EFE6', fontWeight: 'normal' as const, letterSpacing: '-0.5px', marginBottom: '16px' }
 const heroLead = { fontFamily: 'Arial, Helvetica, sans-serif', fontSize: '15px', lineHeight: '24px', color: '#DFE5EC', padding: '0 8px' }
-const stepsHeading = { fontFamily: "Georgia, 'Times New Roman', serif", textAlign: 'center' as const, color: '#8C6E3B', fontSize: '19px', lineHeight: '26px', letterSpacing: '4px', marginBottom: '23px' }
-const stepNumber = { fontFamily: "Georgia, 'Times New Roman', serif", fontSize: '25px', lineHeight: '27px', color: '#A4771C', paddingBottom: '4px' }
-const stepTitle = { fontFamily: "Georgia, 'Times New Roman', serif", fontSize: '15px', lineHeight: '20px', color: '#0A1322', fontWeight: 'bold' as const, minHeight: '42px' }
-const stepText = { fontFamily: 'Arial, Helvetica, sans-serif', fontSize: '12px', lineHeight: '19px', color: '#4E4A45', paddingTop: '8px' }
-const ctaLink = { display: 'inline-block', fontFamily: 'Arial, Helvetica, sans-serif', textDecoration: 'none', color: '#091424', fontSize: '15px', lineHeight: '22px', fontWeight: 'bold' as const, letterSpacing: '1.5px', textTransform: 'uppercase' as const, padding: '17px 30px', whiteSpace: 'normal' as const }
+const stepsHeading = { fontFamily: "Georgia, 'Times New Roman', serif", textAlign: 'center' as const, color: '#8C6E3B', fontSize: '20px', lineHeight: '26px', letterSpacing: '5px', padding: '0 14px', whiteSpace: 'nowrap' as const }
+const stepNumber = { fontFamily: "Georgia, 'Times New Roman', serif", fontSize: '32px', lineHeight: '34px', color: '#B58A25' }
+const stepTitle = { fontFamily: "Georgia, 'Times New Roman', serif", fontSize: '14px', lineHeight: '19px', color: '#0A1322', fontWeight: 'bold' as const, textAlign: 'left' as const }
+const stepText = { fontFamily: 'Arial, Helvetica, sans-serif', fontSize: '12px', lineHeight: '18px', color: '#4E4A45', paddingTop: '8px', textAlign: 'center' as const }
+const goldButtonCell = { backgroundColor: '#D9AE45', backgroundImage: 'linear-gradient(180deg,#F0D27A 0%,#D9AE45 48%,#BC8B28 100%)', border: '1px solid #A47A22', borderRadius: '6px', boxShadow: '0 3px 6px rgba(60,40,0,0.35)' }
+const ctaLink = { display: 'inline-block', fontFamily: "Georgia, 'Times New Roman', serif", textDecoration: 'none', color: '#0A1322', fontSize: '17px', lineHeight: '24px', fontWeight: 'bold' as const, letterSpacing: '3px', textTransform: 'uppercase' as const, padding: '18px 38px', whiteSpace: 'normal' as const }
 const eyebrow = { color: '#8C6E3B', fontSize: '11px', letterSpacing: '0.18em', textTransform: 'uppercase' as const, margin: '0 0 10px' }
 const h1 = { fontSize: '24px', fontWeight: 'normal' as const, color: '#0A1322', lineHeight: '1.25', margin: '0 0 14px' }
 const lead = { fontSize: '17px', color: '#8C6E3B', lineHeight: '1.5', margin: '0 0 20px' }

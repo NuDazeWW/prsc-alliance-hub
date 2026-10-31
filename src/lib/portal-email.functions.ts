@@ -251,3 +251,15 @@ export const sendTestEmail = createServerFn({ method: "POST" })
     if (!ok) throw new Error("The email service did not accept the test. Check the server logs for the delivery error.");
     return { ok: true };
   });
+
+/** Admin only: send an already-rendered invitation preview to one typed address. The link in it is the inactive preview link. */
+export const sendTestInvitation = createServerFn({ method: "POST" })
+  .middleware([requirePortalAccess])
+  .inputValidator((input) => z.object({ to: z.string().trim().email().max(254), subject: z.string().trim().min(1).max(200), html: z.string().min(200).max(400000) }).parse(input))
+  .handler(async ({ context, data }) => {
+    await assertAdmin(context);
+    const { sendRawPortalEmail } = await import("@/lib/portal-notify.server");
+    const ok = await sendRawPortalEmail(data.to, `[TEST] ${data.subject}`, data.html, "admin-test-invitation");
+    if (!ok) throw new Error("The email service did not accept the test.");
+    return { ok: true };
+  });

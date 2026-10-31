@@ -69,6 +69,7 @@ import {
   saveEmailTemplate,
   sendMemberEmail,
   sendTestEmail,
+  sendTestInvitation,
   type EmailSend,
   type EmailTemplate,
 } from "@/lib/portal-email.functions";
@@ -928,6 +929,22 @@ export function AdminCenter({ page }: { page: "overview" | "send" }) {
   }
 
   const [testTo, setTestTo] = useState("");
+  const [inviteTestTo, setInviteTestTo] = useState("");
+  const [inviteTestStatus, setInviteTestStatus] = useState("");
+  async function sendInviteTest() {
+    const to = inviteTestTo.trim();
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(to)) return setInviteTestStatus("Enter a valid email address.");
+    if (preview) return setInviteTestStatus("Preview mode: sending is available once you are signed in.");
+    if (!confirm(`Send a test copy of this invitation to ${to} only? The button in it is inactive and the subject starts with [TEST].`)) return;
+    setInviteTestStatus("Sending…");
+    try {
+      await sendTestInvitation({ data: { to, subject: INVITE_EMAIL_SUBJECT, html: invitePreviewHtml } });
+      setInviteTestStatus(`Test sent to ${to}.`);
+    } catch (error) {
+      setInviteTestStatus(userFacingError(error, "The test could not be sent."));
+    }
+  }
+
   const [recipientFilter, setRecipientFilter] = useState("");
   async function sendTest() {
     const to = testTo.trim();
@@ -2512,6 +2529,12 @@ export function AdminCenter({ page }: { page: "overview" | "send" }) {
               <Button type="button" size="icon" variant="ghost" aria-label="Close invitation preview" onClick={() => setInvitePreviewOpen(false)} className="shrink-0 text-ivory/60 hover:text-gold">
                 <X className="h-5 w-5" />
               </Button>
+            </div>
+            <div className="flex flex-wrap items-center gap-3 border-b border-gold/20 px-5 py-3 sm:px-7">
+              <span className="text-xs uppercase tracking-[0.16em] text-gold">Send a test</span>
+              <Input type="email" value={inviteTestTo} onChange={(e) => setInviteTestTo(e.target.value)} placeholder="name@example.com" aria-label="Test email address" className="max-w-xs text-base" />
+              <Button type="button" variant="outline" className="rounded-none text-base" onClick={() => void sendInviteTest()}>Send test invitation</Button>
+              {inviteTestStatus && <span className="text-sm text-ivory/65">{inviteTestStatus}</span>}
             </div>
 
             <div className="grid gap-px bg-gold/15 sm:grid-cols-2 lg:grid-cols-4">

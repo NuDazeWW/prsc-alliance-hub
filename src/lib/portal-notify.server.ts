@@ -86,3 +86,28 @@ export async function loadSystemEmail(key: string) {
     };
   };
 }
+
+/** Sends already-rendered HTML (used for administrator test sends of the invitation). Never logged as a member email. */
+export async function sendRawPortalEmail(to: string, subject: string, html: string, label: string): Promise<boolean> {
+  const apiKey = process.env["LOVABLE_API_KEY"];
+  if (!apiKey) return false;
+  try {
+    const { sendLovableEmail } = await import("@lovable.dev/email-js");
+    const text = html.replace(/<style[\s\S]*?<\/style>/gi, "").replace(/<br\s*\/?>/gi, "\n").replace(/<\/(p|div|tr|h\d)>/gi, "\n").replace(/<[^>]+>/g, "").replace(/&nbsp;/g, " ").replace(/&amp;/g, "&").replace(/\n{3,}/g, "\n\n").trim();
+    await sendLovableEmail(
+      {
+        to,
+        from: "PRSC Board & Advisor Center <no-reply@readinessterminal.com>",
+        sender_domain: "notify.readinessterminal.com",
+        reply_to: "info@readinessterminal.com",
+        subject, html, text, label, purpose: "transactional",
+        idempotency_key: `${label}-${to.toLowerCase()}-${crypto.randomUUID()}`,
+      },
+      { apiKey, sendUrl: process.env["LOVABLE_SEND_URL"] },
+    );
+    return true;
+  } catch (err) {
+    console.error(`Raw portal email "${label}" failed`, err);
+    return false;
+  }
+}
