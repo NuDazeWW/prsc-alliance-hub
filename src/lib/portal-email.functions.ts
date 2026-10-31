@@ -173,7 +173,6 @@ export const sendMemberEmail = createServerFn({ method: "POST" })
       await addMembersToPoll(data.poll_id, (members as any[]).map((m) => m.id));
     }
 
-    const apiKey = process.env["SENDGRID_API_KEY"];
     const results: { member_id: string; status: string; error?: string }[] = [];
 
     const signatures = parseSignatures(data.signatures);
@@ -192,31 +191,11 @@ export const sendMemberEmail = createServerFn({ method: "POST" })
         signatures,
       };
 
-      let status = "sent";
-      let errorText: string | null = null;
-
-      if (!apiKey) {
-        status = "failed";
-        errorText = "Email sending is not configured";
-      } else {
-        const res = await fetch("https://api.sendgrid.com/v3/mail/send", {
-          method: "POST",
-          headers: { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json" },
-          body: JSON.stringify({
-            personalizations: [{ to: [{ email: member.email }], subject }],
-            from: { email: "no-reply@readinessterminal.com", name: "PRSC Private Center" },
-            reply_to: { email: "info@readinessterminal.com" },
-            content: [
-              { type: "text/plain", value: renderBrandedEmailText(composed) },
-              { type: "text/html", value: renderBrandedEmail(composed) },
-            ],
-          }),
-        });
-        if (!res.ok) {
-          status = "failed";
-          errorText = `Delivery failed (${res.status})`;
-        }
-      }
+      // Same delivery service as every automatic portal email (the one already proven to reach inboxes).
+      const { sendPortalEmail } = await import("@/lib/portal-notify.server");
+      const delivered = await sendPortalEmail(member.email, composed, "compose-send", undefined, { log: false });
+      const status = delivered ? "sent" : "failed";
+      const errorText: string | null = delivered ? null : "Delivery failed. See the server logs.";
 
       await context.supabase.from("portal_email_sends").insert({
         member_id: member.id,
@@ -254,8 +233,6 @@ export const sendTestEmail = createServerFn({ method: "POST" })
   .inputValidator((input) => testSchema.parse(input))
   .handler(async ({ context, data }) => {
     await assertAdmin(context);
-    const apiKey = process.env["SENDGRID_API_KEY"];
-    if (!apiKey) throw new Error("Email sending is not configured");
     // Sample values so merge fields are visibly filled instead of showing raw {{tokens}}.
     const tokens = buildMemberTokens({ first_name: "Alex", last_name: "Morgan", organization: "Sample Organization", title: "Sample Title", entity: "prsc", role: "advisor", email: data.to });
     const subject = `[TEST] ${applyTokens(data.subject, tokens)}`;
@@ -269,19 +246,8 @@ export const sendTestEmail = createServerFn({ method: "POST" })
       ctaSubtext: applyTokens(data.cta_subtext || "", tokens) || null,
       signatures: parseSignatures(data.signatures),
     };
-    const res = await fetch("https://api.sendgrid.com/v3/mail/send", {
-      method: "POST",
-      headers: { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json" },
-      body: JSON.stringify({
-        personalizations: [{ to: [{ email: data.to }], subject }],
-        from: { email: "no-reply@readinessterminal.com", name: "PRSC Private Center" },
-        reply_to: { email: "info@readinessterminal.com" },
-        content: [
-          { type: "text/plain", value: renderBrandedEmailText(composed) },
-          { type: "text/html", value: renderBrandedEmail(composed) },
-        ],
-      }),
-    });
-    if (!res.ok) throw new Error(`Delivery failed (${res.status})`);
+    const { sendPortalEmail } = await import("@/lib/portal-notify.server");
+    const ok = await sendPortalEmail(data.to, composed, "admin-test-email", undefined, { log: false });
+    if (!ok) throw new Error("The email service did not accept the test. Check the server logs for the delivery error.");
     return { ok: true };
   });

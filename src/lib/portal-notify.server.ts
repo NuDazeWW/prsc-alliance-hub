@@ -19,10 +19,11 @@ async function logMemberEmail(to: string, subject: string, label: string, ok: bo
   }
 }
 
-export async function sendPortalEmail(to: string, email: BrandedEmail, label: string, idempotencyKey?: string): Promise<boolean> {
+export async function sendPortalEmail(to: string, email: BrandedEmail, label: string, idempotencyKey?: string, opts: { log?: boolean } = {}): Promise<boolean> {
+  const log = opts.log !== false;
   const apiKey = process.env["LOVABLE_API_KEY"];
   if (!apiKey) {
-    await logMemberEmail(to, email.subject, label, false, "Email service is not configured");
+    if (log) await logMemberEmail(to, email.subject, label, false, "Email service is not configured");
     return false;
   }
   try {
@@ -42,11 +43,11 @@ export async function sendPortalEmail(to: string, email: BrandedEmail, label: st
       },
       { apiKey, sendUrl: process.env["LOVABLE_SEND_URL"] },
     );
-    await logMemberEmail(to, email.subject, label, true);
+    if (log) await logMemberEmail(to, email.subject, label, true);
     return true;
   } catch (err) {
     console.error(`Portal email "${label}" failed`, err);
-    await logMemberEmail(to, email.subject, label, false, err instanceof Error ? err.message : undefined);
+    if (log) await logMemberEmail(to, email.subject, label, false, err instanceof Error ? err.message : undefined);
     return false;
   }
 }
