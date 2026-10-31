@@ -101,9 +101,9 @@ function InviteLayout({ inviteeName, short, forumOnly, disOnly, confirmationUrl,
   const steps = forumOnly
     ? [
         STEPS[0],
-        { ...STEPS[1], text: 'A short overview of the Forum, PRSC and DIS, and what happens next.' },
+        { ...STEPS[1], text: 'A common foundation on the Forum, PRSC and DIS, and the motorsport opportunity.' },
         { icon: 'icon-calendar.png', title: ['Share your', 'availability'], text: 'Mark the times that work when the Forum poll opens.' },
-        { icon: 'icon-document.png', title: ['Prepare for', 'the Forum'], text: 'Complete your Forum profile, review the pre-read and participation boundaries, and confirm conflicts.' },
+        { icon: 'icon-document.png', title: ['Prepare for', 'the Forum'], text: 'Complete your Forum profile, review the pre-read, PRSC–DIS authority summary and boundaries, and confirm conflicts.' },
       ]
     : [
         ...STEPS,

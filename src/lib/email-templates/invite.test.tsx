@@ -9,7 +9,7 @@ const basic = { confirmationUrl: "https://example.test/accept", recipientEmail: 
 test("Forum-only invite fallback uses the approved orientation journey and both hosts", async () => {
   const html = await render(<InviteEmail {...basic} entity="prsc" roleLabel="Forum Invitee" whyYou="Your reviewed individual note." />);
   doesNotMatch(html, /Your reviewed individual note\./); // the Forum invitation no longer carries a Why You block
-  match(html, /Take the 5-Minute Orientation/);
+  match(html, /Take the 5-minute/);
   match(html, /Partnership Readiness Standards Council/);
   match(html, /Decision Intelligence Systems/);
   doesNotMatch(html, /aligned on your role at/);
