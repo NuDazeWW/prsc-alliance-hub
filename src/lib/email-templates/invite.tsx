@@ -94,9 +94,9 @@ function Lines({ lines }: { lines: string[] }) {
   return <>{lines.map((l, i) => <React.Fragment key={i}>{i > 0 && <br />}{l}</React.Fragment>)}</>
 }
 
-function InviteLayout({ inviteeName, short, forumOnly, disOnly, confirmationUrl, ctaLabel, ctaSubtext, whyYou, recipientEmail, roleLabel, letter, meetingBlock }: {
+function InviteLayout({ inviteeName, short, forumOnly, disOnly, confirmationUrl, ctaLabel, ctaSubtext, whyYou, recipientEmail, roleLabel, letter, footnote, meetingBlock }: {
   inviteeName: string; short: string; forumOnly: boolean; disOnly: boolean; confirmationUrl: string; ctaLabel: string; ctaSubtext?: string | null
-  whyYou?: string | null; recipientEmail: string; roleLabel: string; letter: React.ReactNode; meetingBlock?: string | null
+  whyYou?: string | null; recipientEmail: string; roleLabel: string; letter: React.ReactNode; footnote?: React.ReactNode; meetingBlock?: string | null
 }) {
   const steps = forumOnly
     ? [
@@ -129,6 +129,8 @@ function InviteLayout({ inviteeName, short, forumOnly, disOnly, confirmationUrl,
               <tr><td className="mobile-pad" {...bg('bg-navy', '#0A1322')} style={{ padding: '0 14px 22px', ...bgCss('bg-navy', '#0A1322') }}>
                 <table role="presentation" cellPadding={0} cellSpacing={0} border={0} width="100%" {...({ background: `${EMAIL_ASSET_BASE}/parchment-cream.jpg` } as Record<string, string>)} bgcolor="#F2EFE6" style={{ width: '100%', backgroundColor: '#F2EFE6', backgroundImage: `url(${EMAIL_ASSET_BASE}/parchment-cream.jpg)`, border: '1px solid #C9A24A', borderRadius: '6px' }}>
                   <tbody><tr><td className="mobile-pad" style={{ padding: '30px 14px 32px' }}>
+                    <div>{letter}</div>
+                    <div style={{ marginTop: '30px', paddingTop: '26px', borderTop: '1px solid #C9A24A' }} />
                     <table role="presentation" cellPadding={0} cellSpacing={0} border={0} width="100%" style={{ width: '100%', marginBottom: '22px' }}>
                       <tbody><tr>
                         <td style={{ borderBottom: '1px solid #C9A24A', width: '18%', fontSize: '1px', lineHeight: '1px', height: '14px' }}>&nbsp;</td>
@@ -170,7 +172,7 @@ function InviteLayout({ inviteeName, short, forumOnly, disOnly, confirmationUrl,
                     </table>
                     {ctaSubtext?.trim() && <div style={{ fontFamily: 'Arial, Helvetica, sans-serif', fontSize: '12px', lineHeight: '19px', color: '#4B4D4E', textAlign: 'center', margin: '12px 0 0' }}>{ctaSubtext.trim()}</div>}
                     <div style={{ fontFamily: 'Arial, Helvetica, sans-serif', fontSize: '14px', lineHeight: '20px', color: '#123D64', textAlign: 'center', marginTop: '14px' }}>Questions? <Link href="mailto:info@readinessterminal.com" style={{ color: '#123D64', textDecoration: 'underline' }}>Reply to this email</Link></div>
-                    <div style={{ marginTop: '30px', paddingTop: '26px', borderTop: '1px solid #C9A24A' }}>{letter}</div>
+                    {footnote && <div style={{ marginTop: '26px', paddingTop: '18px', borderTop: '1px solid #C9A24A' }}>{footnote}</div>}
                   </td></tr></tbody>
                 </table>
               </td></tr>
@@ -236,9 +238,9 @@ export const InviteEmail = ({
       <Text style={signoff}>Warmly,</Text>
       <Text style={signature}>{sigName.trim()}</Text>
       <Text style={signatureTitle}><Lines lines={sigTitle.join('|').split(',').map((part) => part.trim())} /></Text>
-      {footers.map((lines, fi) => <Text key={fi} style={footnote}>{lines.map((l, li) => <React.Fragment key={li}>{li > 0 && <br />}{renderInline(l)}</React.Fragment>)}</Text>)}
     </>
-    return <InviteLayout {...layout} ctaLabel={fill(copy.cta_label, 'Accept Your Private Invitation')} ctaSubtext={copy.cta_subtext?.trim() ? fill(copy.cta_subtext) : null} whyYou={null} letter={letter} />
+    const footnoteNode = footers.length ? <>{footers.map((lines, fi) => <Text key={fi} style={{ ...footnote, margin: 0 }}>{lines.map((l, li) => <React.Fragment key={li}>{li > 0 && <br />}{renderInline(l)}</React.Fragment>)}</Text>)}</> : null
+    return <InviteLayout {...layout} footnote={footnoteNode} ctaLabel={fill(copy.cta_label, 'Accept Your Private Invitation')} ctaSubtext={copy.cta_subtext?.trim() ? fill(copy.cta_subtext) : null} whyYou={null} letter={letter} />
   }
 
   const letter = <>
