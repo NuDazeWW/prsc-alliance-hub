@@ -126,24 +126,33 @@ function paragraphs(body: string) {
     .filter(Boolean)
     .map(
       (block) =>
-        `<p style="margin:0 0 18px 0;font-family:Georgia,serif;font-size:16px;line-height:1.7;color:#25303F;">${escapeHtml(
+        `<p style="margin:0 0 18px 0;font-family:Georgia,'Times New Roman',serif;font-size:16px;line-height:27px;color:#25303F;">${escapeHtml(
           block,
         ).replace(/\n/g, "<br />")}</p>`,
     )
     .join("");
 }
 
+/** Hosted copies of the design-kit images (served from the site's public folder). Emails cannot load local files. */
+export const EMAIL_ASSET_BASE = "https://access.prscstandards.org/email";
+
+const GOLD = "#D4AF37";
+const NAVY = "#0A1322";
+const IVORY = "#F2EFE6";
+const BRONZE = "#8C6E3B";
+const RULE = "#D9CBA8";
+
 function signatureBlock(signatures: EmailSignature[]) {
   if (!signatures.length) return "";
   const cells = signatures
     .map(
       (s) => `<td align="center" style="padding:0 10px;vertical-align:top;">
-          <div style="font-family:'Snell Roundhand','Apple Chancery','Brush Script MT','Segoe Script',cursive;font-size:30px;line-height:1.2;color:#8C6E3B;">${escapeHtml(
+          <div style="font-family:'Snell Roundhand','Apple Chancery','Brush Script MT','Segoe Script',cursive;font-size:30px;line-height:1.2;color:${BRONZE};">${escapeHtml(
             s.name,
           )}</div>
           ${
             s.title
-              ? `<div style="font-family:Georgia,serif;font-size:10px;letter-spacing:0.14em;text-transform:uppercase;color:#25303F;margin-top:6px;">${escapeHtml(
+              ? `<div style="font-family:Georgia,serif;font-size:10px;letter-spacing:0.14em;text-transform:uppercase;color:${NAVY};margin-top:6px;">${escapeHtml(
                   s.title,
                 )}</div>`
               : ""
@@ -153,7 +162,7 @@ function signatureBlock(signatures: EmailSignature[]) {
     .join("");
   return `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin:26px 0 4px 0;">
       <tr>
-        <td style="padding-top:22px;border-top:1px solid #E8E4DA;">
+        <td style="padding-top:22px;border-top:1px solid ${RULE};">
           <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
             <tr>${cells}</tr>
           </table>
@@ -162,64 +171,81 @@ function signatureBlock(signatures: EmailSignature[]) {
     </table>`;
 }
 
+/** Shared mobile rules. Clients that ignore them still get the readable 600px layout. */
+export const EMAIL_RESPONSIVE_CSS = `
+    body {margin:0;padding:0;-webkit-text-size-adjust:100%;-ms-text-size-adjust:100%;}
+    table {border-collapse:collapse;}
+    img {border:0;outline:none;text-decoration:none;}
+    @media only screen and (max-width:620px) {
+      .email-shell {width:100%!important;}
+      .mobile-pad {padding-left:20px!important;padding-right:20px!important;}
+      .hero-title {font-size:30px!important;line-height:38px!important;}
+      .step-column {display:block!important;width:100%!important;box-sizing:border-box!important;border-right:none!important;border-bottom:1px solid ${RULE}!important;padding:16px 12px!important;}
+      .step-table {width:100%!important;}
+      .mobile-fluid {width:100%!important;max-width:100%!important;height:auto!important;}
+      .mobile-cta {width:100%!important;}
+    }`;
+
+export function emailFooterHtml(note = "Secure access for invited participants only.") {
+  return `<tr><td align="center" bgcolor="${NAVY}" style="background-color:${NAVY};padding:25px 30px 30px;border-top:3px solid #B98925;">
+          <div style="font-family:Georgia,'Times New Roman',serif;color:${GOLD};font-size:12px;line-height:18px;letter-spacing:2px;">PARTNERSHIP READINESS STANDARDS COUNCIL, LLC</div>
+          <div style="font-family:Arial,Helvetica,sans-serif;color:#BAC0CA;font-size:10px;line-height:17px;letter-spacing:1px;margin-top:9px;">${escapeHtml(note)}</div>
+          <div style="font-family:Arial,Helvetica,sans-serif;color:#9AA6B7;font-size:11px;line-height:17px;margin-top:12px;">Private &amp; confidential. Sent from no-reply@readinessterminal.com</div>
+        </td></tr>`;
+}
+
+export function goldButtonHtml(label: string, url: string) {
+  return `<table role="presentation" cellpadding="0" cellspacing="0" border="0" align="center" style="margin:26px auto 8px;">
+            <tr><td bgcolor="${GOLD}" align="center" style="background-color:${GOLD};border:1px solid ${BRONZE};border-radius:5px;">
+              <a href="${escapeHtml(url)}" style="display:inline-block;font-family:Arial,Helvetica,sans-serif;text-decoration:none;color:#091424;font-size:15px;line-height:22px;font-weight:bold;letter-spacing:1.5px;text-transform:uppercase;padding:17px 30px;white-space:normal;">${escapeHtml(label)} &nbsp;&rarr;</a>
+            </td></tr>
+          </table>`;
+}
+
 export function renderBrandedEmail(input: BrandedEmailInput) {
   const heading = input.heading?.trim() || input.subject;
   const eyebrow = input.eyebrow?.trim() || "Private Communication";
   const ctaSubtext = input.ctaSubtext?.trim()
-    ? `<p style="margin:14px 0 0 0;font-family:Georgia,serif;font-size:12px;font-style:italic;line-height:1.6;color:#8C9BB0;">${escapeHtml(
+    ? `<p style="margin:14px 0 0 0;font-family:Arial,Helvetica,sans-serif;font-size:12px;line-height:19px;text-align:center;color:#4B4D4E;">${escapeHtml(
         input.ctaSubtext.trim(),
       )}</p>`
     : "";
-  const cta =
-    input.ctaLabel && input.ctaUrl
-      ? `<table role="presentation" cellpadding="0" cellspacing="0" style="margin:8px 0 4px 0;">
-            <tr>
-              <td style="background:#0A1322;border:1px solid #D4AF37;">
-                <a href="${escapeHtml(input.ctaUrl)}" style="display:inline-block;padding:14px 30px;font-family:Georgia,serif;font-size:13px;letter-spacing:0.16em;text-transform:uppercase;color:#D4AF37;text-decoration:none;">${escapeHtml(
-                  input.ctaLabel,
-                )}</a>
-              </td>
-            </tr>
-          </table>${ctaSubtext}`
-      : "";
+  const cta = input.ctaLabel && input.ctaUrl ? `${goldButtonHtml(input.ctaLabel, input.ctaUrl)}${ctaSubtext}` : "";
 
   return `<!doctype html>
-<html>
-  <body style="margin:0;padding:0;background:#F4F1EA;">
-    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#F4F1EA;padding:40px 16px;">
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="x-apple-disable-message-reformatting">
+    <title>${escapeHtml(input.subject)}</title>
+    <style type="text/css">${EMAIL_RESPONSIVE_CSS}</style>
+  </head>
+  <body bgcolor="#071221" style="margin:0;padding:0;background-color:#071221;">
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" bgcolor="#071221" style="width:100%;background-color:#071221;">
       <tr>
-        <td align="center">
-          <table role="presentation" width="600" cellpadding="0" cellspacing="0" style="width:100%;max-width:600px;background:#FFFFFF;border:1px solid #E8E4DA;">
-            <tr>
-              <td style="background:#0A1322;padding:30px 32px;text-align:center;">
-                <div style="font-family:Georgia,serif;font-size:11px;letter-spacing:0.28em;text-transform:uppercase;color:#D4AF37;">Partnership Readiness Standards Council</div>
-                <div style="font-family:Georgia,serif;font-size:10px;letter-spacing:0.22em;text-transform:uppercase;color:#8C9BB0;margin-top:8px;">Private Board &amp; Advisor Center</div>
-              </td>
-            </tr>
-            <tr>
-              <td style="padding:38px 34px 10px 34px;">
-                <div style="font-family:Georgia,serif;font-size:11px;letter-spacing:0.2em;text-transform:uppercase;color:#8C6E3B;margin-bottom:10px;">${escapeHtml(
-                  eyebrow,
-                )}</div>
-                <h1 style="margin:0;font-family:Georgia,serif;font-size:26px;line-height:1.28;color:#0A1322;font-weight:normal;">${escapeHtml(
-                  heading,
-                )}</h1>
-                <div style="height:1px;background:linear-gradient(90deg,#8C6E3B,transparent);margin:22px 0 4px 0;"></div>
-              </td>
-            </tr>
-            <tr>
-              <td style="padding:14px 34px 34px 34px;">
-                ${paragraphs(input.body)}
-                ${cta}
-                ${signatureBlock(input.signatures ?? [])}
-              </td>
-            </tr>
-            <tr>
-              <td style="background:#0A1322;padding:22px 32px;text-align:center;">
-                <div style="font-family:Georgia,serif;font-size:11px;letter-spacing:0.2em;text-transform:uppercase;color:#D4AF37;">Private &amp; Confidential</div>
-                <div style="font-family:Georgia,serif;font-size:11px;color:#8C9BB0;margin-top:8px;">Sent from no-reply@readinessterminal.com</div>
-              </td>
-            </tr>
+        <td align="center" style="padding:24px 12px 32px;">
+          <table role="presentation" width="600" cellpadding="0" cellspacing="0" border="0" class="email-shell" style="width:600px;max-width:600px;background-color:${NAVY};">
+            <tr><td>
+              <img class="mobile-fluid" src="${EMAIL_ASSET_BASE}/prsc-header-slim.jpg" width="600" height="90" alt="" style="display:block;width:600px;max-width:100%;height:auto;">
+            </td></tr>
+            <tr><td align="center" class="mobile-pad" bgcolor="${NAVY}" style="padding:6px 34px 26px;background-color:${NAVY};">
+              <img src="${EMAIL_ASSET_BASE}/prsc-logo.png" alt="PRSC — Partnership Readiness Standards Council" width="92" style="display:block;width:92px;max-width:92px;height:auto;margin:0 auto 12px auto;">
+              <div style="font-family:Arial,Helvetica,sans-serif;font-size:11px;font-weight:600;letter-spacing:3px;line-height:18px;color:${GOLD};">PRIVATE BOARD &amp; ADVISOR CENTER</div>
+            </td></tr>
+            <tr><td bgcolor="${IVORY}" class="mobile-pad" style="padding:34px 30px 34px;background-color:${IVORY};">
+              <div style="font-family:Georgia,'Times New Roman',serif;font-size:11px;letter-spacing:4px;line-height:18px;text-transform:uppercase;color:${BRONZE};text-align:center;margin-bottom:12px;">${escapeHtml(
+                eyebrow,
+              )}</div>
+              <h1 class="hero-title" style="margin:0 0 6px 0;font-family:Georgia,'Times New Roman',serif;font-size:28px;line-height:36px;color:${NAVY};font-weight:normal;text-align:center;">${escapeHtml(
+                heading,
+              )}</h1>
+              <div style="margin:18px auto 24px;width:72px;border-top:2px solid ${GOLD};line-height:1px;font-size:1px;">&nbsp;</div>
+              ${paragraphs(input.body)}
+              ${cta}
+              ${signatureBlock(input.signatures ?? [])}
+            </td></tr>
+            ${emailFooterHtml()}
           </table>
         </td>
       </tr>
