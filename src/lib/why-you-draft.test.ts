@@ -62,7 +62,7 @@ test("supplied commands remain JSON data and cannot become model instructions or
 
 test("Forum-only None uses Forum context despite legacy PRSC placeholder, without entity assignment claims", () => {
   const result = prepareWhyYouDraft(whyYouDraftSchema.parse({ ...input, linkedin_url: null, is_candidate: true, intended_designation: { version: 1, kind: "forum_invitee", entity: "none", roles: [], other_text: "", committee: "undetermined" } }));
-  assert.match(result.instructions.split("\n")[0], /on behalf of the United Strategic Coordination Forum/);
+  assert.match(result.instructions.split("\n")[0], /on behalf of the Readiness Vanguard Coordination Forum/);
   assert.match(result.instructions, /no PRSC\/DIS entity role identified/);
   assert.match(result.instructions, /without assigning or implying a PRSC\/DIS entity role or mandatory entity onboarding/);
 });

@@ -34,7 +34,7 @@ function demoPolls() {
       id: "demo-poll",
       status: "open",
       meeting_type: "forum",
-      title: "United Strategic Coordination Forum",
+      title: "Readiness Vanguard Coordination Forum",
       description: "Sample meeting shown in preview only.",
       format: "virtual",
       location: null,

@@ -146,7 +146,7 @@ describe("fictional Table 1–4 legacy and future edits", () => {
   it("ignores malformed stored metadata and safely derives the established legacy presentation", () => {
     const fallback = readIntendedDesignation({ ...table[1].member, intended_designation: { ...forum, role: "admin" } });
     assert.deepEqual(fallback, table[1].expected);
-    assert.match(intendedDesignationLabel(forum), /United Forum Invitee/);
+    assert.match(intendedDesignationLabel(forum), /Forum Invitee/);
     assert.match(intendedDesignationLabel(table[1].member), /^Intended:/);
   });
 });

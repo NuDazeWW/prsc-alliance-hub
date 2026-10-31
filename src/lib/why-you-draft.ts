@@ -20,7 +20,7 @@ const ENTITY = {
   prsc: "the Partnership Readiness Standards Council (PRSC), an independent body that governs the PRSC Readiness Standard™ and PRSC Readiness Score™ for sponsorship and partnership readiness",
   dis: "Decision Intelligence Systems (DIS), a decision-intelligence company now entering investor prospecting",
   both: "both the Partnership Readiness Standards Council (PRSC), which governs the PRSC Readiness Standard™ for sponsorship and partnership readiness, and Decision Intelligence Systems (DIS), a decision-intelligence company now entering investor prospecting",
-  none: "the United Strategic Coordination Forum, a shared strategic coordination forum across PRSC and DIS. This is a Forum-only invitation, with no PRSC/DIS entity role identified",
+  none: "the Readiness Vanguard Coordination Forum, a shared strategic coordination forum across PRSC and DIS. This is a Forum-only invitation, with no PRSC/DIS entity role identified",
 };
 
 /** Match Admin /send: supplied facts and a profile reference go directly to the existing AI gateway. */
@@ -30,7 +30,7 @@ export function prepareWhyYouDraft(data: WhyYouDraftInput) {
     ...(data.linkedin_url ? { url: data.linkedin_url } : {}),
   };
   const forumOnly = data.intended_designation?.entity === "none" || Boolean(data.is_candidate && !data.intended_designation);
-  const role = data.intended_designation ? `${intendedDesignationLabel(data.intended_designation)} (under consideration only; no appointment or entity authority is conferred; never imply an activated seat)` : data.is_candidate ? "United Forum invitee (not appointed to any PRSC or DIS board, advisory, or committee seat; never imply a seat)" : INVITE_ROLE_LABELS[data.role];
+  const role = data.intended_designation ? `${intendedDesignationLabel(data.intended_designation)} (under consideration only; no appointment or entity authority is conferred; never imply an activated seat)` : data.is_candidate ? "Forum invitee (not appointed to any PRSC or DIS board, advisory, or committee seat; never imply a seat)" : INVITE_ROLE_LABELS[data.role];
   const languageEntity = forumOnly ? "none" : data.intended_designation?.entity ?? data.entity;
   const instructions = `Write a private, personal note from Shirley Johnson, Founder, on behalf of ${ENTITY[languageEntity]}, explaining directly to an invited ${role} why we chose them.
 

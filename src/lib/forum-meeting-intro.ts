@@ -3,9 +3,9 @@
 
 export const FORUM_CALENDAR_WELCOME = "Welcome to Your Live Meeting Calendar!";
 export const FORUM_CALENDAR_PURPOSE = "This calendar is used to coordinate and confirm meetings among invited executives and advisors.";
-export const FORUM_INTRO_HEADING = "We're Planning the First United Strategic Coordination Forum";
+export const FORUM_INTRO_HEADING = "We're Planning the First Readiness Vanguard Coordination Forum";
 export const FORUM_INTRO_PARAGRAPHS = [
-  "We are bringing together a select group of experienced executives and strategic advisors for an inaugural United Strategic Coordination Forum, a confidential, 90-minute working discussion focused on the next phase of growth for the Partnership Readiness Standards Council (PRSC) and Decision Intelligence Systems (DIS).",
+  "We are bringing together a select group of experienced executives and strategic advisors for an inaugural Readiness Vanguard Coordination Forum, a confidential, 90-minute working discussion focused on the next phase of growth for the Partnership Readiness Standards Council (PRSC) and Decision Intelligence Systems (DIS).",
   "Our urgent, central issue is how emerging opportunities and potential strategic partnerships could change the way we introduce the PRSC Readiness Standard™ and the DIS technology platform to the market. We will explore potential brand, media, data, and industry relationships; evaluate alternative approaches; and identify the evidence and next steps needed to move forward responsibly.",
 ] as const;
 export const FORUM_NON_VOTING_NOTE =

@@ -1250,7 +1250,7 @@ export function AdminCenter({ page }: { page: "overview" | "send" }) {
                 </button>
                 <InfoTip
                   title="Invite a member"
-                  body="United Forum Invitees can enter the Forum journey with entity None. Prepare and review their private Why You note and recipient-specific NDA before sending. PRSC/DIS role choices can be recorded later."
+                  body="Forum Invitees can enter the Forum journey with entity None. Prepare and review their private Why You note and recipient-specific NDA before sending. PRSC/DIS role choices can be recorded later."
                 />
               </div>
               <form ref={inviteFormRef} onSubmit={invite} className="mt-7 grid gap-4 sm:grid-cols-2">
@@ -1399,7 +1399,7 @@ export function AdminCenter({ page }: { page: "overview" | "send" }) {
                 </div>
                 <InfoTip
                   title="Upload a member list"
-                  body="Save the roster with United Forum Invitee and entity None. LinkedIn links are saved for later batch preparation; Why You can stay blank. Generate and review the notes in Prepare Forum invitations when you are ready to invite. NDA verification remains separate."
+                  body="Save the roster with Forum Invitee and entity None. LinkedIn links are saved for later batch preparation; Why You can stay blank. Generate and review the notes in Prepare Forum invitations when you are ready to invite. NDA verification remains separate."
                 />
               </div>
 

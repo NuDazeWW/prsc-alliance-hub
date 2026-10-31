@@ -52,7 +52,7 @@ test("each persisted LinkedIn link remains associated with its original recipien
 });
 
 test("a reviewed substantive note passes input validation without assigning an entity role", () => {
-  const row = { ...rows()[0], why_you: "We value your professional perspective for the United Forum discussion." };
+  const row = { ...rows()[0], why_you: "We value your professional perspective for the Forum discussion." };
   const parsed = invitePortalMemberSchema.parse(row);
   assert.equal(parsed.intended_designation?.entity, "none");
   assert.deepEqual(parsed.intended_designation?.roles, []);

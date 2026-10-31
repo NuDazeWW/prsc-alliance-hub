@@ -20,7 +20,7 @@ describe("Forum meeting calendar introduction", () => {
   it("recognises Forum polls only", () => {
     assert.equal(isForumPoll({ meeting_type: "forum", title: "Anything" }), true);
     assert.equal(isForumPoll({ meeting_type: "Forum", title: "x" }), true);
-    assert.equal(isForumPoll({ meeting_type: "custom", title: "United Strategic Coordination Forum" }), true);
+    assert.equal(isForumPoll({ meeting_type: "custom", title: "Readiness Vanguard Coordination Forum" }), true);
     assert.equal(isForumPoll({ meeting_type: "board", title: "Inaugural Board Meeting" }), false);
     assert.equal(isForumPoll({ meeting_type: "advisory", title: null }), false);
     assert.equal(isForumPoll({}), false);

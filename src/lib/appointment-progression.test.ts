@@ -29,7 +29,7 @@ describe("complete appointment progression for each entity", () => {
   }
   it("Forum access never confers either entity appointment", () => {
     const forumOnly = { role: "advisor", entity: "both", is_candidate: true, acceptance_complete: { prsc: true, dis: true }, prsc_activated_at: "2026-10-26" };
-    deepStrictEqual(memberDesignation({ ...forumOnly, forum_clearance_status: "not_reviewed" }), "United Forum Invitee");
+    deepStrictEqual(memberDesignation({ ...forumOnly, forum_clearance_status: "not_reviewed" }), "Forum Invitee");
     deepStrictEqual(memberDesignation({ ...forumOnly, forum_clearance_status: "cleared" }), "Forum Participant");
     deepStrictEqual(entityAppointmentStatus({ acceptanceComplete: false, roleReviewStatus: "not_required", forumClearanceStatus: "cleared" }), "candidate");
   });

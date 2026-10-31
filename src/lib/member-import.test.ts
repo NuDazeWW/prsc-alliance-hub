@@ -12,7 +12,7 @@ const person = (n: number, invitation: string, entity: string, roles: string, co
 describe("member CSV staging with intended designations", () => {
   it("stages four fictional recipients with distinct names, emails, choices, and no invitation or NDA writes", () => {
     const parsed = parseMemberList(fixture([
-      person(1, "United Forum invitee", "None", "", "Undetermined"),
+      person(1, "Forum invitee", "None", "", "Undetermined"),
       person(2, "identified", "Both", "PRSC Board; DIS Advisor", "No"),
       person(3, "identified", "PRSC", "PRSC Advisor", "Yes"),
       person(4, "identified", "DIS", "DIS Board | DIS Advisor | Other", "No", "Research working group"),
@@ -50,7 +50,7 @@ describe("member CSV staging with intended designations", () => {
   });
 
   it("accepts role as a singular header and both spaced and underscored Forum aliases", () => {
-    for (const role of ["United Forum invitee", "united_forum_invitee", "forum_invitee"]) {
+    for (const role of ["Forum invitee", "united_forum_invitee", "forum_invitee"]) {
       const parsed = parseMemberList(`first_name,last_name,email,entity,role\nTest,One,test1@example.test,None,${role}`);
       assert.deepEqual(parsed.errors, []);
       assert.equal(parsed.rows[0].intended_designation.kind, "forum_invitee");

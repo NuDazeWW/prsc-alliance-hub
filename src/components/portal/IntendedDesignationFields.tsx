@@ -48,7 +48,7 @@ export function IntendedDesignationFields({ value, onChange, disabled = false }:
       <fieldset className="grid gap-2 sm:grid-cols-2">
         <legend className="mb-2 text-base text-ivory/80">Invitation status</legend>
         {([
-          { kind: "forum_invitee", label: "United Forum Invitee" },
+          { kind: "forum_invitee", label: "Forum Invitee" },
           { kind: "identified", label: "Identified for intended roles" },
         ] as const).map((option) => (
           <label key={option.kind} className={`flex items-center gap-3 border px-3 py-3 ${value.kind === option.kind ? "border-gold bg-gold/10" : "border-gold/20"}`}>
@@ -86,7 +86,7 @@ export function IntendedDesignationFields({ value, onChange, disabled = false }:
         </select>
       </label>
       {requiresAssignmentReview && <p role="status" className="text-sm leading-6 text-gold">These intended roles can be saved. Existing entity onboarding requires a separate assignment review.</p>}
-      {forumOnly && <p className="text-sm text-ivory/60">United Forum Invitees have no intended entity roles. Choose an identified designation to record an intended committee role.</p>}
+      {forumOnly && <p className="text-sm text-ivory/60">Forum Invitees have no intended entity roles. Choose an identified designation to record an intended committee role.</p>}
     </fieldset>
   );
 }

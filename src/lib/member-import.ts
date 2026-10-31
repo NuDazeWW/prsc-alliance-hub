@@ -117,7 +117,7 @@ function parseDesignation(record: Record<string, string>, legacy: boolean): Inte
   }
   const kind = rawKind ? (FORUM_ALIASES.has(rawKind) ? "forum_invitee" : "identified") : forumRole ? "forum_invitee" : "identified";
   if (forumRole && (rawRoles.length !== 1 || kind !== "forum_invitee")) {
-    throw new Error("United Forum invitee cannot be combined with intended PRSC/DIS roles.");
+    throw new Error("Forum invitee cannot be combined with intended PRSC/DIS roles.");
   }
   let entity = normalizeKey(record.entity ?? "");
   if (!entity && kind === "forum_invitee") entity = "none";
@@ -145,7 +145,7 @@ function parseDesignation(record: Record<string, string>, legacy: boolean): Inte
       if (entity === "dis" || entity === "both") roles.push(`dis_${suffix}` as IntendedRole);
       continue;
     }
-    throw new Error(`unknown role “${role}”. Use PRSC Board, PRSC Advisor, DIS Board, DIS Advisor, Other, or United Forum invitee.`);
+    throw new Error(`unknown role “${role}”. Use PRSC Board, PRSC Advisor, DIS Board, DIS Advisor, Other, or Forum invitee.`);
   }
   const parsed = intendedDesignationSchema.safeParse({
     version: 1, kind, entity, roles: [...new Set(roles)], other_text: record.other_role ?? "", committee,

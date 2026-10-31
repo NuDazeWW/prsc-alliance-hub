@@ -85,7 +85,7 @@ export function MemberDetailsEditor({ member, preview, onSaved }: { member: Memb
       <div className="mt-5 border border-gold/20 p-4">
         {!intendedOpen ? <>
           <p className="text-sm uppercase tracking-[0.16em] text-gold/90">Intended designation · pending appointment</p>
-          <p className="mt-2 text-base text-ivory">{savedIntended.kind === "forum_invitee" ? "United Forum Invitee" : savedRoleLabels.length ? savedRoleLabels.join(" / ") : "Entity role to be determined"}</p>
+          <p className="mt-2 text-base text-ivory">{savedIntended.kind === "forum_invitee" ? "Forum Invitee" : savedRoleLabels.length ? savedRoleLabels.join(" / ") : "Entity role to be determined"}</p>
           <p className="mt-1 text-sm text-ivory/60">Intended entity: {savedIntended.entity === "none" ? "None" : savedIntended.entity === "both" ? "Both" : savedIntended.entity.toUpperCase()} · Methodology Committee: {savedIntended.committee === "undetermined" ? "Undetermined" : savedIntended.committee === "yes" ? "Yes" : "No"}</p>
           <button type="button" disabled={busy || intendedBusy} onClick={() => { setIntendedForm(readIntendedDesignation(member)); setIntendedUpdatedAt(member.updated_at ?? ""); setIntendedMessage(""); setIntendedOpen(true); }} className="mt-4 inline-flex items-center gap-2 rounded-full border border-gold/50 px-4 py-2 text-xs uppercase tracking-[0.16em] text-gold hover:bg-gold hover:text-navy-deep disabled:opacity-60"><Pencil className="h-3.5 w-3.5" /> Edit intended designation</button>
         </> : <form onSubmit={saveIntended} className="space-y-4">
@@ -111,7 +111,7 @@ export function MemberDetailsEditor({ member, preview, onSaved }: { member: Memb
           <fieldset className="grid gap-2 border border-gold/30 p-4 sm:col-span-2 sm:grid-cols-2">
             <legend className="px-1 text-sm uppercase tracking-[0.16em] text-gold/80">Entity onboarding designation</legend>
             <p className="text-sm leading-6 text-ivory/60 sm:col-span-2">This section configures the existing entity onboarding track. Record future role considerations in the intended designation section above.</p>
-            {([{ v: true, t: "United Forum invitee" }, { v: false, t: "Identified for a PRSC / DIS role" }] as const).map((o) => (
+            {([{ v: true, t: "Forum invitee" }, { v: false, t: "Identified for a PRSC / DIS role" }] as const).map((o) => (
               <label key={String(o.v)} className={`flex cursor-pointer items-center gap-3 border px-4 py-3 ${form.is_candidate === o.v ? "border-gold bg-gold/10" : "border-gold/20"}`}>
                 <input type="radio" name={`status-${member.id}`} checked={form.is_candidate === o.v} onChange={() => setForm({ ...form, is_candidate: o.v })} className="h-4 w-4 accent-[#d4af37]" />
                 <span className="text-base text-ivory">{o.t}</span>

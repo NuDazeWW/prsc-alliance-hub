@@ -44,11 +44,26 @@ function fillInviteTokens(value: string, tokens: Record<string, string>) {
   return value.replace(/\{\{\s*(\w+)\s*\}\}/g, (m, k) => tokens[k] ?? m)
 }
 
-function renderInline(line: string) {
-  const phrase = 'Send us any questions'
-  const i = line.indexOf(phrase)
-  if (i < 0) return line
-  return <>{line.slice(0, i)}<Link href="mailto:info@readinessterminal.com" style={questionLink}>{phrase}</Link>{line.slice(i + phrase.length)}</>
+function renderInline(line: string): React.ReactNode {
+  // **bold**, *italic*, and the "Send us any questions" mailto link.
+  const parts: React.ReactNode[] = []
+  const re = /\*\*(.+?)\*\*|\*(.+?)\*/g
+  let last = 0
+  let m: RegExpExecArray | null
+  let k = 0
+  const plain = (t: string) => {
+    const phrase = 'Send us any questions'
+    const i = t.indexOf(phrase)
+    if (i < 0) return t
+    return <>{t.slice(0, i)}<Link href="mailto:info@readinessterminal.com" style={questionLink}>{phrase}</Link>{t.slice(i + phrase.length)}</>
+  }
+  while ((m = re.exec(line))) {
+    if (m.index > last) parts.push(<React.Fragment key={k++}>{plain(line.slice(last, m.index))}</React.Fragment>)
+    parts.push(m[1] !== undefined ? <strong key={k++}>{m[1]}</strong> : <em key={k++}>{m[2]}</em>)
+    last = m.index + m[0].length
+  }
+  if (last < line.length) parts.push(<React.Fragment key={k++}>{plain(line.slice(last))}</React.Fragment>)
+  return <>{parts}</>
 }
 
 const APP_ORIGIN = 'https://access.prscstandards.org'
@@ -83,10 +98,17 @@ function InviteLayout({ inviteeName, short, forumOnly, disOnly, confirmationUrl,
   inviteeName: string; short: string; forumOnly: boolean; disOnly: boolean; confirmationUrl: string; ctaLabel: string; ctaSubtext?: string | null
   whyYou?: string | null; recipientEmail: string; roleLabel: string; letter: React.ReactNode; meetingBlock?: string | null
 }) {
-  const step4 = forumOnly
-    ? { icon: 'icon-calendar.png', title: ['Prepare for', 'the United Forum'], text: 'Share availability and review materials released for you.' }
-    : { icon: 'icon-calendar.png', title: ['Review your', 'onboarding materials'], text: 'See what the administrator has released for you.' }
-  const steps = [...STEPS, step4]
+  const steps = forumOnly
+    ? [
+        STEPS[0],
+        { ...STEPS[1], text: 'A short overview of the Forum, PRSC and DIS, and what happens next.' },
+        { icon: 'icon-calendar.png', title: ['Share your', 'availability'], text: 'Mark the times that work when the Forum poll opens.' },
+        { icon: 'icon-document.png', title: ['Prepare for', 'the Forum'], text: 'Complete your Forum profile, review the pre-read and participation boundaries, and confirm conflicts.' },
+      ]
+    : [
+        ...STEPS,
+        { icon: 'icon-calendar.png', title: ['Review your', 'onboarding materials'], text: 'See what the administrator has released for you.' },
+      ]
   return <Html lang="en" dir="ltr">
     <Head><style dangerouslySetInnerHTML={{ __html: EMAIL_RESPONSIVE_CSS }} /></Head>
     <Preview>A private invitation to the {short} Board &amp; Advisor Center.</Preview>
@@ -196,10 +218,13 @@ export const InviteEmail = ({
   if (copy?.body?.trim()) {
     const tokens = { first_name: inviteeName, full_name: inviteeName, entity_full: selectedEntity.full, entity: selectedEntity.short, role: roleLabel, email: recipientEmail, why_you: whyYou?.trim() || 'We have been intentional about who we invite into this next chapter, and your experience and judgment are a meaningful part of why you were selected.' }
     const fill = (v?: string | null, d = '') => fillInviteTokens(v?.trim() || d, tokens)
-    const blocks = fill(copy.body).split(/\n\s*\n/).map((b) => b.split('\n').map((l) => l.trim()).filter(Boolean)).filter((b) => b.length)
+    const allBlocks = fill(copy.body).split(/\n\s*\n/).map((b) => b.split('\n').map((l) => l.trim()).filter(Boolean)).filter((b) => b.length)
+    // Blocks that start with [footer] print small and italic under the signature.
+    const isFooter = (b: string[]) => /^\[footer\]/i.test(b[0])
+    const blocks = allBlocks.filter((b) => !isFooter(b))
+    const footers = allBlocks.filter(isFooter).map((b) => [b[0].replace(/^\[footer\]\s*/i, ''), ...b.slice(1)].filter(Boolean))
     const [sigName, ...sigTitle] = (copy.signatures?.trim() || 'Shirley Johnson|Founder').split('|')
     // The letter below the button already carries the "Why You're Here" note when the saved copy uses that token.
-    const whyInBody = /\{\{\s*why_you\s*\}\}/.test(copy.body)
     const letter = <>
       <Text style={eyebrow}>{fill(copy.eyebrow, 'Private invitation')}</Text>
       <Text style={h1}>{fill(copy.heading, 'Welcome, {{first_name}}!')}</Text>
@@ -211,8 +236,9 @@ export const InviteEmail = ({
       <Text style={signoff}>Warmly,</Text>
       <Text style={signature}>{sigName.trim()}</Text>
       <Text style={signatureTitle}><Lines lines={sigTitle.join('|').split(',').map((part) => part.trim())} /></Text>
+      {footers.map((lines, fi) => <Text key={fi} style={footnote}>{lines.map((l, li) => <React.Fragment key={li}>{li > 0 && <br />}{renderInline(l)}</React.Fragment>)}</Text>)}
     </>
-    return <InviteLayout {...layout} ctaLabel={fill(copy.cta_label, 'Accept Your Private Invitation')} ctaSubtext={copy.cta_subtext?.trim() ? fill(copy.cta_subtext) : null} whyYou={whyInBody ? null : whyYou} letter={letter} />
+    return <InviteLayout {...layout} ctaLabel={fill(copy.cta_label, 'Accept Your Private Invitation')} ctaSubtext={copy.cta_subtext?.trim() ? fill(copy.cta_subtext) : null} whyYou={null} letter={letter} />
   }
 
   const letter = <>
@@ -251,6 +277,7 @@ const ctaLink = { display: 'block', textAlign: 'center' as const, fontFamily: "G
 const eyebrow = { color: '#8C6E3B', fontSize: '11px', letterSpacing: '0.18em', textTransform: 'uppercase' as const, margin: '0 0 10px' }
 const h1 = { fontSize: '24px', fontWeight: 'normal' as const, color: '#0A1322', lineHeight: '1.25', margin: '0 0 14px' }
 const lead = { fontSize: '17px', color: '#8C6E3B', lineHeight: '1.5', margin: '0 0 20px' }
+const footnote = { fontSize: '12px', fontStyle: 'italic', color: '#5B6472', lineHeight: '1.55', margin: '22px 0 0' }
 const text = { fontSize: '15px', color: '#25303F', lineHeight: '1.65', margin: '0 0 18px' }
 const list = { margin: '0 0 22px', paddingLeft: '4px' }
 const listItem = { ...text, margin: '0 0 8px' }

@@ -196,7 +196,7 @@ export function AdminForumInvitationBatch({ members, preview, onSaved }: Props) 
   return <section className="border border-gold/25 bg-navy-light/20 p-5 md:p-7" aria-labelledby="forum-batch-title">
     <button type="button" onClick={() => setOpen(!open)} aria-expanded={open} className="flex w-full items-center justify-between gap-3 text-left">
       <span>
-        <h2 id="forum-batch-title" className="font-heading text-2xl text-ivory">Prepare saved United Forum invitations</h2>
+        <h2 id="forum-batch-title" className="font-heading text-2xl text-ivory">Prepare saved Forum invitations</h2>
         <span className="mt-1 block text-sm text-ivory/60">{summary}</span>
       </span>
       {open ? <ChevronUp className="h-5 w-5 shrink-0 text-gold" /> : <ChevronDown className="h-5 w-5 shrink-0 text-gold" />}
@@ -224,7 +224,7 @@ export function AdminForumInvitationBatch({ members, preview, onSaved }: Props) 
               if (event.target.checked) void load(member);
               else update(member.id, (value) => ({ ...value, selected: false, epoch: ++epoch.current, nda_confirmed: false, ndaReviewId: null }));
             }} />
-            <span><strong>{member.first_name} {member.last_name}</strong><span className="block text-sm text-ivory/60">{member.email} · United Forum invitee · Entity None</span></span>
+            <span><strong>{member.first_name} {member.last_name}</strong><span className="block text-sm text-ivory/60">{member.email} · Forum invitee · Entity None</span></span>
           </label>
           {active && row && <div className="mt-4 space-y-4">
             {row.loading ? <p role="status" className="text-sm text-gold">Loading this recipient’s stored information…</p> : row.loaded && <>

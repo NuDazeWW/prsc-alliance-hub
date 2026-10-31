@@ -31,7 +31,7 @@ describe("forum candidates", () => {
     deepStrictEqual(memberEntityDesignationLabel({ entity: "both", is_candidate: false }), "PRSC and DIS");
   });
   test("shows the Forum candidate designation instead of any PRSC/DIS seat", () => {
-    deepStrictEqual(memberRoleLabel("advisor", "prsc", true), "United Forum Invitee");
+    deepStrictEqual(memberRoleLabel("advisor", "prsc", true), "Forum Invitee");
     deepStrictEqual(memberDesignation({ role: "advisor", entity: "prsc", is_candidate: true, forum_clearance_status: "cleared" }), "Forum Participant");
   });
   test("shows a PRSC/DIS title only after that entity's activation", () => {

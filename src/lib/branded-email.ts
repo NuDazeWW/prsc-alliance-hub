@@ -86,7 +86,7 @@ export function buildMemberTokens(member: {
     entity_full: member.is_candidate ? FORUM_ENTITY_FULL_NAME : ENTITY_FULL[entity] ?? entity.toUpperCase(),
     role: memberDesignation({ ...member, role, entity }),
     role_label: memberDesignation({ ...member, role, entity }),
-    package_label: member.is_candidate ? "United Forum" : PACKAGE_LABEL[role] ?? "Board / Advisor",
+    package_label: member.is_candidate ? "Readiness Vanguard Coordination Forum" : PACKAGE_LABEL[role] ?? "Board / Advisor",
     email: member.email ?? "",
     why_you: member.why_you?.trim() || "",
   };
