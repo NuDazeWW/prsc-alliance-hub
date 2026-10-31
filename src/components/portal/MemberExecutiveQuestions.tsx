@@ -2,6 +2,7 @@ import { userFacingError } from "@/lib/user-facing-error";
 import { useEffect, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { getMyQuestionRounds, saveMyQuestions } from "@/lib/executive-questions.functions";
 import { MAX_QUESTIONS, QUESTION_SOURCES } from "@/lib/executive-questions";
 
@@ -13,18 +14,37 @@ const field = "mt-1 w-full rounded-md border border-input bg-navy px-3 py-2 text
 export function MemberExecutiveQuestions({ readOnly = false }: { readOnly?: boolean }) {
   const q = useQuery({ queryKey: ["my-question-rounds"], queryFn: () => getMyQuestionRounds().catch(() => ({ rounds: [] })) });
   const rounds = (q.data?.rounds ?? []) as any[];
+  const [open, setOpen] = useState(false);
+  const pending = rounds.filter((r) => r.open && !r.response?.status);
+  // The email link (#executive-questions) opens the questions straight away while a round is waiting for an answer.
+  useEffect(() => {
+    if (typeof window !== "undefined" && window.location.hash === "#executive-questions" && pending.length) setOpen(true);
+  }, [rounds.length, pending.length]);
   if (!rounds.length) return null;
   return (
     <section id="executive-questions" className="scroll-mt-6 border border-gold/25 bg-[linear-gradient(135deg,var(--color-midnight),var(--color-navy))] p-6 sm:p-8">
-      <p className="text-xs uppercase tracking-[0.2em] text-gold">Strategic Forum</p>
-      <h2 className="mt-2 font-serif text-2xl text-ivory">Executive Questions</h2>
-      <p className="mt-2 text-sm text-ivory/60">Share up to three questions we may not have considered. Optional, and not required to attend the Forum. Your questions are seen only by you and the Secretariat</p>
-      <div className="mt-6 space-y-8">{rounds.map((r) => <RoundForm key={r.id} round={r} readOnly={readOnly} />)}</div>
+      <div className="flex flex-wrap items-center justify-between gap-4">
+        <div className="min-w-0">
+          <p className="text-xs uppercase tracking-[0.2em] text-gold">Strategic Forum</p>
+          <h2 className="mt-2 font-serif text-2xl text-ivory">Executive Questions</h2>
+          <p className="mt-2 text-sm text-ivory/60">{pending.length ? "Share up to three questions we may not have considered. Optional, and not required to attend the Forum." : "Thank you. Your response is recorded. You can review or change it until the deadline."}</p>
+        </div>
+        <Button type="button" onClick={() => setOpen(true)}>{pending.length ? "Answer the questions" : "Review my response"}</Button>
+      </div>
+      <Dialog open={open} onOpenChange={setOpen}>
+        <DialogContent className="max-h-[90vh] max-w-3xl overflow-y-auto border-gold/30 bg-navy text-ivory">
+          <DialogHeader>
+            <DialogTitle className="font-serif text-2xl text-ivory">Executive Questions</DialogTitle>
+            <DialogDescription className="text-ivory/60">Share up to three questions we may not have considered. Your questions are seen only by you and the Secretariat.</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-8">{rounds.map((r) => <RoundForm key={r.id} round={r} readOnly={readOnly} onSaved={() => setOpen(false)} />)}</div>
+        </DialogContent>
+      </Dialog>
     </section>
   );
 }
 
-function RoundForm({ round, readOnly }: { round: any; readOnly: boolean }) {
+function RoundForm({ round, readOnly, onSaved }: { round: any; readOnly: boolean; onSaved?: () => void }) {
   const qc = useQueryClient();
   const [items, setItems] = useState<Q[]>([]);
   const [status, setStatus] = useState("");
@@ -39,6 +59,7 @@ function RoundForm({ round, readOnly }: { round: any; readOnly: boolean }) {
       await saveMyQuestions({ data: { round_id: round.id, no_questions: noQuestions, questions: noQuestions ? [] : qs } });
       setStatus(noQuestions ? "Recorded: no additional questions." : "Your questions are saved. You can edit them until the deadline.");
       await qc.invalidateQueries({ queryKey: ["my-question-rounds"] });
+      onSaved?.();
     } catch (e) { setStatus(userFacingError(e, "Could not save")); }
   }
   const resp = round.response?.status;

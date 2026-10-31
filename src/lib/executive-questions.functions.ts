@@ -9,7 +9,7 @@ async function assertAdmin(context: { supabase: any; userId: string }) {
   if (!data) throw new Error("Unauthorized");
 }
 
-const MEMBER_COLS = "id, status, participates_in_forum, nda_verified_at, forum_clearance_status, is_candidate";
+const MEMBER_COLS = "id, status, participates_in_forum, nda_verified_at, forum_clearance_status, is_candidate, first_name, last_name, email";
 
 /** Server-side access check for one member and round; uses the privileged client after identity is fixed by the session. */
 export async function memberRoundAccess(admin: any, member: any, round: any) {
@@ -81,6 +81,19 @@ export const saveMyQuestions = createServerFn({ method: "POST" })
     const status = data.no_questions ? "no_questions" : "submitted";
     await supabaseAdmin.from("question_round_responses").upsert({ round_id: round.id, member_id: member.id, status, updated_at: new Date().toISOString() });
     await supabaseAdmin.from("portal_activity").insert({ member_id: member.id, actor_user_id: context.userId, event_type: "executive_questions_saved", metadata: { round_id: round.id, status, count: qs.length } });
+    // Tell the administrator as each submission arrives. Nothing here is ever sent to Jared or any outside party.
+    try {
+      const { sendPortalEmail } = await import("@/lib/portal-notify.server");
+      const name = `${member.first_name ?? ""} ${member.last_name ?? ""}`.trim() || member.email;
+      const list = qs.map((q, i) => `${i + 1}. ${q.question}${q.why_it_matters ? `\n   Why it matters: ${q.why_it_matters}` : ""}${q.source ? `\n   Source: ${q.source}` : ""}`).join("\n\n");
+      await sendPortalEmail("admin@readinessterminal.com", {
+        subject: `${data.no_questions ? "No questions" : "Executive questions"} from ${name}: ${round.title}`,
+        eyebrow: "Executive questions",
+        heading: data.no_questions ? `${name} has no additional questions.` : `${name} submitted ${qs.length} question${qs.length === 1 ? "" : "s"}.`,
+        body: `Round: ${round.title}\n\n${data.no_questions ? "They chose No additional questions." : list}\n\nThe answers are saved in the Question Register. Nothing has been shared with Jared or anyone outside the Secretariat.`,
+        ctaLabel: "Open Administrator Center", ctaUrl: "https://access.prscstandards.org/admin/send#question-register",
+      }, "executive-questions-submitted");
+    } catch (err) { console.error("Question submission notice failed", err); }
     return { status };
   });
 

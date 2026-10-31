@@ -10,6 +10,9 @@ export type BrandedEmailInput = {
   ctaLabel?: string | null;
   ctaUrl?: string | null;
   ctaSubtext?: string | null;
+  /** Optional second button (for example, a link to a document in the portal). */
+  secondaryCtaLabel?: string | null;
+  secondaryCtaUrl?: string | null;
   signatures?: EmailSignature[];
 };
 
@@ -218,7 +221,8 @@ export function renderBrandedEmail(input: BrandedEmailInput) {
         input.ctaSubtext.trim(),
       )}</p>`
     : "";
-  const cta = input.ctaLabel && input.ctaUrl ? `${goldButtonHtml(input.ctaLabel, input.ctaUrl)}${ctaSubtext}` : "";
+  const secondary = input.secondaryCtaLabel && input.secondaryCtaUrl ? goldButtonHtml(input.secondaryCtaLabel, input.secondaryCtaUrl) : "";
+  const cta = input.ctaLabel && input.ctaUrl ? `${goldButtonHtml(input.ctaLabel, input.ctaUrl)}${secondary}${ctaSubtext}` : "";
 
   return `<!doctype html>
 <html lang="en">
@@ -262,7 +266,7 @@ export function renderBrandedEmail(input: BrandedEmailInput) {
 }
 
 export function renderBrandedEmailText(input: BrandedEmailInput) {
-  const cta = input.ctaLabel && input.ctaUrl ? `\n\n${input.ctaLabel}: ${input.ctaUrl}` : "";
+  const cta = (input.ctaLabel && input.ctaUrl ? `\n\n${input.ctaLabel}: ${input.ctaUrl}` : "") + (input.secondaryCtaLabel && input.secondaryCtaUrl ? `\n${input.secondaryCtaLabel}: ${input.secondaryCtaUrl}` : "");
   const subtext = input.ctaSubtext?.trim() ? `\n${input.ctaSubtext.trim()}` : "";
   const signatures = (input.signatures ?? [])
     .map((s) => (s.title ? `${s.name}, ${s.title}` : s.name))

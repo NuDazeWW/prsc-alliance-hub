@@ -113,6 +113,19 @@ export const recordForumClearance = createServerFn({ method: "POST" })
     // Tell the member the agenda is waiting. Members only see the portal notice if they happen to sign in,
     // so this is the email that brings them back. Sent only on the change into "cleared", never on a repeat save.
     const wasCleared = m?.forum_clearance_status === "cleared" || m?.forum_clearance_status === "cleared_restricted";
+    // Clearing someone is the individual authorization for the restricted strategy brief, so grant it in the same step.
+    let briefGranted = false;
+    if (cleared) {
+      try {
+        const { data: briefs } = await sbAdmin.from("portal_documents").select("id, version_label, title").eq("forum_role", "restricted_brief")
+          .eq("classification", "restricted_opportunity").is("superseded_at", null).or(`member_id.is.null,member_id.eq.${data.member_id}`);
+        for (const b of briefs ?? []) {
+          const { error: gErr } = await sbAdmin.from("restricted_document_grants").insert({ document_id: b.id, member_id: data.member_id, version_label: b.version_label, granted_by: context.userId, reason: "Granted automatically when cleared for the Forum" });
+          if (!gErr) { briefGranted = true; await log(context, data.member_id, "restricted_grant", "granted", "Granted automatically when cleared for the Forum", { document_id: b.id, title: b.title, version: b.version_label }); }
+          else if (gErr.code === "23505") briefGranted = true;
+        }
+      } catch (err) { console.error("Restricted brief grant failed", err); }
+    }
     if (cleared && !wasCleared && m?.email) {
       try {
         const { data: agenda } = await sbAdmin.from("portal_documents").select("id").eq("forum_role", "agenda").is("superseded_at", null)
@@ -120,7 +133,11 @@ export const recordForumClearance = createServerFn({ method: "POST" })
         if (agenda?.length) {
           const { sendPortalEmail, loadSystemEmail } = await import("@/lib/portal-notify.server");
           const build = await loadSystemEmail("forum_agenda_ready");
-          await sendPortalEmail(m.email, build({ first_name: m.first_name?.trim() || "There" }), "forum-agenda-ready-member");
+          const email = build({ first_name: m.first_name?.trim() || "There" });
+          const out = briefGranted
+            ? { ...email, body: `${email.body}\n\nYour confidential strategy brief is also ready for you to read in the portal. It is not attached to this email.`, secondaryCtaLabel: "Read the Strategy Brief", secondaryCtaUrl: "https://access.prscstandards.org/portal#documents" }
+            : email;
+          await sendPortalEmail(m.email, out, "forum-agenda-ready-member");
         }
       } catch (err) { console.error("Agenda-ready email failed", err); }
     }
