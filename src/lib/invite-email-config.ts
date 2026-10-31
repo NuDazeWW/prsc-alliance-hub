@@ -1,4 +1,4 @@
-export const INVITE_EMAIL_SUBJECT = "PRSC & DIS | Board & Advisor Center";
+export const INVITE_EMAIL_SUBJECT = "A private invitation to the next stage of Motorsport Partnership Readiness";
 export const INVITE_EMAIL_SITE_NAME = "PRSC Board & Advisor Center";
 export const INVITE_EMAIL_SENDER_DOMAIN = "notify.readinessterminal.com";
 export const INVITE_EMAIL_FROM = `${INVITE_EMAIL_SITE_NAME} <no-reply@notify.readinessterminal.com>`;
