@@ -94,9 +94,9 @@ function Lines({ lines }: { lines: string[] }) {
   return <>{lines.map((l, i) => <React.Fragment key={i}>{i > 0 && <br />}{l}</React.Fragment>)}</>
 }
 
-function InviteLayout({ inviteeName, short, forumOnly, disOnly, confirmationUrl, ctaLabel, ctaSubtext, whyYou, recipientEmail, roleLabel, letter, footnote, meetingBlock }: {
+function InviteLayout({ inviteeName, short, forumOnly, disOnly, confirmationUrl, ctaLabel, ctaSubtext, whyYou, recipientEmail, roleLabel, letter, letterAfter, footnote, meetingBlock }: {
   inviteeName: string; short: string; forumOnly: boolean; disOnly: boolean; confirmationUrl: string; ctaLabel: string; ctaSubtext?: string | null
-  whyYou?: string | null; recipientEmail: string; roleLabel: string; letter: React.ReactNode; footnote?: React.ReactNode; meetingBlock?: string | null
+  whyYou?: string | null; recipientEmail: string; roleLabel: string; letter: React.ReactNode; footnote?: React.ReactNode; letterAfter?: React.ReactNode; meetingBlock?: string | null
 }) {
   const steps = forumOnly
     ? [
@@ -115,9 +115,9 @@ function InviteLayout({ inviteeName, short, forumOnly, disOnly, confirmationUrl,
     <Body {...bg('bg-outer', '#071221')} style={{ ...main, ...bgCss('bg-outer', '#071221') }}>
       <table role="presentation" cellPadding={0} cellSpacing={0} border={0} width="100%" {...bg('bg-outer', '#071221')} style={{ width: '100%', ...bgCss('bg-outer', '#071221') }}>
         <tbody><tr><td align="center" style={{ padding: '24px 12px 32px' }}>
-          <table role="presentation" cellPadding={0} cellSpacing={0} border={0} width={680} className="email-shell" {...bg('bg-navy', '#0A1322')} style={{ width: '680px', maxWidth: '680px', ...bgCss('bg-navy', '#0A1322') }}>
+          <table role="presentation" cellPadding={0} cellSpacing={0} border={0} width={760} className="email-shell" {...bg('bg-navy', '#0A1322')} style={{ width: '760px', maxWidth: '760px', ...bgCss('bg-navy', '#0A1322') }}>
             <tbody>
-              <tr><td><Img className="mobile-fluid" src={`${EMAIL_ASSET_BASE}/${disOnly ? 'prsc-header-1200.jpg' : 'prsc-hero-1200.jpg'}`} width="680" height={disOnly ? '227' : '431'} alt={disOnly ? '' : 'PRSC — Partnership Readiness Standards Council'} style={{ display: 'block', width: '680px', maxWidth: '100%', height: 'auto' }} /></td></tr>
+              <tr><td><Img className="mobile-fluid" src={`${EMAIL_ASSET_BASE}/${disOnly ? 'prsc-header-1200.jpg' : 'prsc-hero-compact-1200.jpg'}`} width="760" height={disOnly ? '253' : '279'} alt={disOnly ? '' : 'PRSC — Partnership Readiness Standards Council'} style={{ display: 'block', width: '760px', maxWidth: '100%', height: 'auto' }} /></td></tr>
               <tr><td align="center" className="mobile-pad" {...bg('bg-navy', '#0A1322')} style={{ padding: disOnly ? '12px 34px 36px' : '0 34px 36px', ...bgCss('bg-navy', '#0A1322') }}>
                 {disOnly &&
                   <Img src={`${APP_ORIGIN}${disLogo.url}`} width="196" alt="Decision Intelligence Systems" style={{ display: 'block', width: '196px', maxWidth: '196px', height: 'auto', margin: '0 auto 17px' }} />}
@@ -172,6 +172,7 @@ function InviteLayout({ inviteeName, short, forumOnly, disOnly, confirmationUrl,
                     </table>
                     {ctaSubtext?.trim() && <div style={{ fontFamily: 'Arial, Helvetica, sans-serif', fontSize: '12px', lineHeight: '19px', color: '#4B4D4E', textAlign: 'center', margin: '12px 0 0' }}>{ctaSubtext.trim()}</div>}
                     <div style={{ fontFamily: 'Arial, Helvetica, sans-serif', fontSize: '14px', lineHeight: '20px', color: '#123D64', textAlign: 'center', marginTop: '14px' }}>Questions? <Link href="mailto:info@readinessterminal.com" style={{ color: '#123D64', textDecoration: 'underline' }}>Reply to this email</Link></div>
+                    {letterAfter && <div style={{ marginTop: '30px', paddingTop: '26px', borderTop: '1px solid #C9A24A' }}>{letterAfter}</div>}
                     {footnote && <div style={{ marginTop: '26px', paddingTop: '18px', borderTop: '1px solid #C9A24A' }}>{footnote}</div>}
                   </td></tr></tbody>
                 </table>
@@ -223,23 +224,32 @@ export const InviteEmail = ({
     const allBlocks = fill(copy.body).split(/\n\s*\n/).map((b) => b.split('\n').map((l) => l.trim()).filter(Boolean)).filter((b) => b.length)
     // Blocks that start with [footer] print small and italic under the signature.
     const isFooter = (b: string[]) => /^\[footer\]/i.test(b[0])
-    const blocks = allBlocks.filter((b) => !isFooter(b))
+    const bodyBlocks = allBlocks.filter((b) => !isFooter(b))
+    // A block that says [steps] marks where the next-steps panel and the button go; the rest of the letter follows them.
+    const stepsAt = bodyBlocks.findIndex((b) => /^\[steps\]$/i.test(b[0]) && b.length === 1)
+    const blocks = stepsAt >= 0 ? bodyBlocks.slice(0, stepsAt) : bodyBlocks
+    const afterBlocks = stepsAt >= 0 ? bodyBlocks.slice(stepsAt + 1) : []
     const footers = allBlocks.filter(isFooter).map((b) => [b[0].replace(/^\[footer\]\s*/i, ''), ...b.slice(1)].filter(Boolean))
     const sigName = (copy.signatures?.trim() || 'Shirley Johnson').split('|')[0].split(',')[0]
     // The letter below the button already carries the "Why You're Here" note when the saved copy uses that token.
-    const letter = <>
-      <Text style={eyebrow}>{fill(copy.eyebrow, 'Private invitation')}</Text>
-      <Text style={h1}>{fill(copy.heading, 'Welcome, {{first_name}}!')}</Text>
-      {blocks.map((lines, bi) => {
-        const isList = lines.every((l) => /^[•\-*]\s/.test(l))
-        if (isList) return <Section key={bi} style={list}>{lines.map((l, li) => <Text key={li} style={listItem}>• {renderInline(l.replace(/^[•\-*]\s+/, ''))}</Text>)}</Section>
-        return <Text key={bi} style={bi === 0 ? lead : text}>{lines.map((l, li) => <React.Fragment key={li}>{li > 0 && <br />}{renderInline(l)}</React.Fragment>)}</Text>
-      })}
+    const renderBlocks = (list: string[][], first = true) => list.map((lines, bi) => {
+      const isList = lines.every((l) => /^[•\-*]\s/.test(l))
+      if (isList) return <Section key={bi} style={list}>{lines.map((l, li) => <Text key={li} style={listItem}>• {renderInline(l.replace(/^[•\-*]\s+/, ''))}</Text>)}</Section>
+      return <Text key={bi} style={first && bi === 0 ? lead : text}>{lines.map((l, li) => <React.Fragment key={li}>{li > 0 && <br />}{renderInline(l)}</React.Fragment>)}</Text>
+    })
+    const signOff = <>
       <Text style={signoff}>Warmly,</Text>
       <Text style={signature}>{sigName.trim()}</Text>
     </>
+    const letter = <>
+      <Text style={eyebrow}>{fill(copy.eyebrow, 'Private invitation')}</Text>
+      <Text style={h1}>{fill(copy.heading, 'Welcome, {{first_name}}!')}</Text>
+      {renderBlocks(blocks)}
+      {stepsAt < 0 && signOff}
+    </>
+    const letterAfter = stepsAt >= 0 ? <>{renderBlocks(afterBlocks, false)}{signOff}</> : null
     const footnoteNode = footers.length ? <>{footers.map((lines, fi) => <Text key={fi} style={{ ...footnote, margin: 0 }}>{lines.map((l, li) => <React.Fragment key={li}>{li > 0 && <br />}{renderInline(l)}</React.Fragment>)}</Text>)}</> : null
-    return <InviteLayout {...layout} footnote={footnoteNode} ctaLabel={fill(copy.cta_label, 'Accept Your Private Invitation')} ctaSubtext={copy.cta_subtext?.trim() ? fill(copy.cta_subtext) : null} whyYou={null} letter={letter} />
+    return <InviteLayout {...layout} footnote={footnoteNode} letterAfter={letterAfter} ctaLabel={fill(copy.cta_label, 'Accept Your Private Invitation')} ctaSubtext={copy.cta_subtext?.trim() ? fill(copy.cta_subtext) : null} whyYou={null} letter={letter} />
   }
 
   const letter = <>
