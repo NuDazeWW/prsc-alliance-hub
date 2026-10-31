@@ -2,7 +2,7 @@ import { userFacingError } from "@/lib/user-facing-error";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { useQuery } from "@tanstack/react-query";
-import { getClearancePrerequisites, getMemberGovernance, listRestrictedDocuments, grantRestrictedDocument, listRestrictedGrants, recordConflictReview, recordForumClearance, recordNdaVerification, recordRoleReview, revokeRestrictedDocument } from "@/lib/governance.functions";
+import { getClearancePrerequisites, getMemberGovernance, listRestrictedDocuments, grantRestrictedDocument, grantRestrictedToCleared, listRestrictedGrants, recordConflictReview, recordForumClearance, recordNdaVerification, recordRoleReview, revokeRestrictedDocument } from "@/lib/governance.functions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -212,7 +212,16 @@ export function AdminGovernancePanel({ memberId, preview, onChange }: { memberId
                 <span className="text-base text-ivory/80">{d.title}{d.version_label ? ` · ${d.version_label}` : ""} · {active ? <span className="text-gold">Granted</span> : "Not granted"}</span>
                 {active
                   ? <Button type="button" size="sm" variant="outline" onClick={() => run(() => revokeRestrictedDocument({ data: { member_id: memberId, document_id: d.id, reason: grantReason } }), "Access revoked.")}>Revoke</Button>
-                  : <Button type="button" size="sm" onClick={() => run(() => grantRestrictedDocument({ data: { member_id: memberId, document_id: d.id, reason: grantReason } }), "Access granted for this version.")}>Grant</Button>}
+                  : <Button type="button" size="sm" onClick={() => run(() => grantRestrictedDocument({ data: { member_id: memberId, document_id: d.id, reason: grantReason.trim() || "Authorized for the Forum" } }), "Access granted for this version.")}>Grant</Button>}
+                <Button type="button" size="sm" variant="outline" onClick={async () => {
+                  if (preview) return setMsg("Preview mode: this works on the live admin page.");
+                  try {
+                    const r = await grantRestrictedToCleared({ data: { document_id: d.id, dry_run: true } });
+                    if (!r.count) return setMsg("Everyone cleared for the Forum already has access.");
+                    if (!confirm(`Give ${r.count} cleared member${r.count === 1 ? "" : "s"} access to "${d.title}"? No email is sent.`)) return;
+                  } catch (e) { return setMsg(userFacingError(e, "Could not check who is cleared.")); }
+                  await run(() => grantRestrictedToCleared({ data: { document_id: d.id } }), "Access granted to everyone cleared for the Forum.");
+                }}>Grant to all cleared members</Button>
               </div>
             );
           })}

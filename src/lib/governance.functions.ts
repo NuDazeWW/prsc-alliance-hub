@@ -295,6 +295,29 @@ export const grantRestrictedDocument = createServerFn({ method: "POST" })
     return { ok: true };
   });
 
+/** Admin: give every member already cleared for the Forum access to one restricted document, in one step. */
+export const grantRestrictedToCleared = createServerFn({ method: "POST" })
+  .middleware([requirePortalAccess])
+  .inputValidator((i) => z.object({ document_id: z.string().uuid(), dry_run: z.boolean().default(false) }).parse(i))
+  .handler(async ({ context, data }) => {
+    await assertAdmin(context);
+    const { supabaseAdmin: sb } = await import("@/integrations/supabase/client.server");
+    const { data: doc } = await sb.from("portal_documents").select("id, classification, superseded_at, version_label, title").eq("id", data.document_id).single();
+    if (!doc || doc.classification !== "restricted_opportunity") throw new Error("Only Restricted Opportunity documents use grants");
+    if (doc.superseded_at) throw new Error("This version has been superseded");
+    const { data: members } = await sb.from("portal_members").select("id").in("forum_clearance_status", ["cleared", "cleared_restricted"]).neq("status", "revoked");
+    const { data: have } = await sb.from("restricted_document_grants").select("member_id").eq("document_id", doc.id).is("revoked_at", null);
+    const haveIds = new Set((have ?? []).map((g: any) => g.member_id));
+    const todo = (members ?? []).filter((m: any) => !haveIds.has(m.id));
+    if (data.dry_run) return { ok: true, count: todo.length, granted: 0 };
+    let granted = 0;
+    for (const m of todo as any[]) {
+      const { error } = await sb.from("restricted_document_grants").insert({ document_id: doc.id, member_id: m.id, version_label: doc.version_label, granted_by: context.userId, reason: "Granted to all members cleared for the Forum" });
+      if (!error) { granted++; await log(context, m.id, "restricted_grant", "granted", "Granted to all members cleared for the Forum", { document_id: doc.id, title: doc.title, version: doc.version_label }); }
+    }
+    return { ok: true, count: todo.length, granted };
+  });
+
 export const revokeRestrictedDocument = createServerFn({ method: "POST" })
   .middleware([requirePortalAccess])
   .inputValidator((i) => memberId.extend({ document_id: z.string().uuid(), reason: z.string().trim().min(5).max(1000) }).parse(i))
