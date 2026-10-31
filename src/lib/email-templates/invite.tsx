@@ -109,9 +109,9 @@ function InviteLayout({ inviteeName, short, forumOnly, disOnly, confirmationUrl,
                   <tbody><tr><td className="mobile-pad" style={{ padding: '30px 14px 32px' }}>
                     <table role="presentation" cellPadding={0} cellSpacing={0} border={0} width="100%" style={{ width: '100%', marginBottom: '22px' }}>
                       <tbody><tr>
-                        <td style={{ borderBottom: '1px solid #C9A24A', width: '18%', fontSize: '1px', lineHeight: '1px' }}>&nbsp;</td>
+                        <td style={{ borderBottom: '1px solid #C9A24A', width: '18%', fontSize: '1px', lineHeight: '1px', height: '14px' }}>&nbsp;</td>
                         <td style={stepsHeading}>YOUR NEXT STEPS</td>
-                        <td style={{ borderBottom: '1px solid #C9A24A', width: '18%', fontSize: '1px', lineHeight: '1px' }}>&nbsp;</td>
+                        <td style={{ borderBottom: '1px solid #C9A24A', width: '18%', fontSize: '1px', lineHeight: '1px', height: '14px' }}>&nbsp;</td>
                       </tr></tbody>
                     </table>
                     <table className="step-table" role="presentation" cellPadding={0} cellSpacing={0} border={0} width="100%" style={{ width: '100%' }}>
@@ -128,7 +128,7 @@ function InviteLayout({ inviteeName, short, forumOnly, disOnly, confirmationUrl,
                         </td>)}
                       </tr></tbody>
                     </table>
-                    <table role="presentation" cellPadding={0} cellSpacing={0} border={0} width="100%" {...bg('bg-navy', '#0A1322')} style={{ marginTop: '26px', ...bgCss('bg-navy', '#0A1322'), border: '2px solid #B98925', borderRadius: '8px' }}>
+                    <table role="presentation" cellPadding={0} cellSpacing={0} border={0} width="100%" {...bg('bg-navy', '#0A1322')} style={{ marginTop: '26px', ...bgCss('bg-navy', '#0A1322'), backgroundImage: 'linear-gradient(100deg,#0A1322 0%,#16233B 55%,#0A1322 100%)', border: '2px solid #B98925', borderRadius: '8px' }}>
                       <tbody><tr>
                         <td width={104} valign="middle" style={{ width: '104px', padding: '14px 12px 14px 18px', textAlign: 'center' }}><Img src={`${EMAIL_ASSET_BASE}/icon-security.png`} alt="" width="76" height="76" style={{ display: 'block', width: '76px', height: '76px' }} /></td>
                         <td valign="middle" style={{ padding: '16px 22px 16px 18px', borderLeft: '1px solid #8C6E3B' }}><div style={{ fontFamily: 'Arial, Helvetica, sans-serif', fontSize: '15px', lineHeight: '24px', color: '#F2EFE6' }}>Your private portal helps you review assigned materials, complete required actions, and prepare for the next steps in your journey.</div></td>
@@ -243,7 +243,7 @@ const eyebrowGold = { fontFamily: 'Arial, Helvetica, sans-serif', fontSize: '11p
 const heroTitle = { fontFamily: "Georgia, 'Times New Roman', serif", fontSize: '37px', lineHeight: '45px', color: '#F2EFE6', fontWeight: 'normal' as const, letterSpacing: '-0.5px', marginBottom: '16px' }
 const heroLead = { fontFamily: 'Arial, Helvetica, sans-serif', fontSize: '15px', lineHeight: '24px', color: '#DFE5EC', padding: '0 8px' }
 const stepsHeading = { fontFamily: "Georgia, 'Times New Roman', serif", textAlign: 'center' as const, color: '#8C6E3B', fontSize: '20px', lineHeight: '26px', letterSpacing: '5px', padding: '0 14px', whiteSpace: 'nowrap' as const }
-const stepNumber = { fontFamily: "Georgia, 'Times New Roman', serif", fontSize: '32px', lineHeight: '34px', color: '#B58A25' }
+const stepNumber = { fontFamily: "Georgia, 'Times New Roman', serif", fontSize: '34px', lineHeight: '36px', color: '#B8862A' }
 const stepTitle = { fontFamily: "Georgia, 'Times New Roman', serif", fontSize: '14px', lineHeight: '19px', color: '#0A1322', fontWeight: 'bold' as const, textAlign: 'left' as const }
 const stepText = { fontFamily: 'Arial, Helvetica, sans-serif', fontSize: '12px', lineHeight: '18px', color: '#4E4A45', paddingTop: '8px', textAlign: 'center' as const }
 const goldButtonCell = { backgroundColor: '#D9AE45', backgroundImage: 'linear-gradient(180deg,#F0D27A 0%,#D9AE45 48%,#BC8B28 100%)', border: '1px solid #A47A22', borderRadius: '6px', boxShadow: '0 3px 6px rgba(60,40,0,0.35)', padding: '18px 38px' }
