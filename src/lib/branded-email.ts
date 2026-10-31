@@ -230,10 +230,9 @@ export function renderBrandedEmail(input: BrandedEmailInput) {
         <td align="center" style="padding:24px 12px 32px;">
           <table role="presentation" width="600" cellpadding="0" cellspacing="0" border="0" class="email-shell" ${bgAttrs("bg-navy", NAVY)} style="width:600px;max-width:600px;${bgStyle("bg-navy", NAVY)}">
             <tr><td>
-              <img class="mobile-fluid" src="${EMAIL_ASSET_BASE}/prsc-header-1200.jpg" width="600" height="200" alt="" style="display:block;width:600px;max-width:100%;height:auto;">
+              <img class="mobile-fluid" src="${EMAIL_ASSET_BASE}/prsc-hero-compact-1200.jpg" width="600" height="220" alt="PRSC — Partnership Readiness Standards Council" style="display:block;width:600px;max-width:100%;height:auto;">
             </td></tr>
-            <tr><td align="center" class="mobile-pad" ${bgAttrs("bg-navy", NAVY)} style="padding:6px 34px 26px;${bgStyle("bg-navy", NAVY)}">
-              <img src="${EMAIL_ASSET_BASE}/prsc-logo.png" alt="PRSC — Partnership Readiness Standards Council" width="92" style="display:block;width:92px;max-width:92px;height:auto;margin:0 auto 12px auto;">
+            <tr><td align="center" class="mobile-pad" ${bgAttrs("bg-navy", NAVY)} style="padding:0 34px 26px;${bgStyle("bg-navy", NAVY)}">
               <div style="font-family:Arial,Helvetica,sans-serif;font-size:11px;font-weight:600;letter-spacing:3px;line-height:18px;color:${GOLD};">PRIVATE BOARD &amp; ADVISOR CENTER</div>
             </td></tr>
             <tr><td ${bgAttrs("bg-cream", IVORY)} class="mobile-pad" style="padding:34px 30px 34px;${bgStyle("bg-cream", IVORY)}">

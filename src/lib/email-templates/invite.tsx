@@ -95,11 +95,10 @@ function InviteLayout({ inviteeName, short, forumOnly, disOnly, confirmationUrl,
         <tbody><tr><td align="center" style={{ padding: '24px 12px 32px' }}>
           <table role="presentation" cellPadding={0} cellSpacing={0} border={0} width={600} className="email-shell" {...bg('bg-navy', '#0A1322')} style={{ width: '600px', maxWidth: '600px', ...bgCss('bg-navy', '#0A1322') }}>
             <tbody>
-              <tr><td><Img className="mobile-fluid" src={`${EMAIL_ASSET_BASE}/prsc-header-1200.jpg`} width="600" height="200" alt="" style={{ display: 'block', width: '600px', maxWidth: '100%', height: 'auto' }} /></td></tr>
-              <tr><td align="center" className="mobile-pad" {...bg('bg-navy', '#0A1322')} style={{ padding: '12px 34px 36px', ...bgCss('bg-navy', '#0A1322') }}>
-                {disOnly
-                  ? <Img src={`${APP_ORIGIN}${disLogo.url}`} width="196" alt="Decision Intelligence Systems" style={{ display: 'block', width: '196px', maxWidth: '196px', height: 'auto', margin: '0 auto 17px' }} />
-                  : <Img src={`${EMAIL_ASSET_BASE}/prsc-logo.png`} width="125" alt="PRSC — Partnership Readiness Standards Council" style={{ display: 'block', width: '125px', maxWidth: '125px', height: 'auto', margin: '0 auto 17px' }} />}
+              <tr><td><Img className="mobile-fluid" src={`${EMAIL_ASSET_BASE}/${disOnly ? 'prsc-header-1200.jpg' : 'prsc-hero-1200.jpg'}`} width="600" height={disOnly ? '200' : '380'} alt={disOnly ? '' : 'PRSC — Partnership Readiness Standards Council'} style={{ display: 'block', width: '600px', maxWidth: '100%', height: 'auto' }} /></td></tr>
+              <tr><td align="center" className="mobile-pad" {...bg('bg-navy', '#0A1322')} style={{ padding: disOnly ? '12px 34px 36px' : '0 34px 36px', ...bgCss('bg-navy', '#0A1322') }}>
+                {disOnly &&
+                  <Img src={`${APP_ORIGIN}${disLogo.url}`} width="196" alt="Decision Intelligence Systems" style={{ display: 'block', width: '196px', maxWidth: '196px', height: 'auto', margin: '0 auto 17px' }} />}
                 <div style={eyebrowGold}>PRIVATE BOARD &amp; ADVISOR CENTER</div>
                 <div className="hero-title" style={heroTitle}>Welcome to the <span style={{ color: '#F5D885' }}>{short}</span><br />Member Portal</div>
                 <div style={heroLead}>Hello {inviteeName}, you&apos;ve been invited to access your secure portal for orientation, professional profile information, and the next steps relevant to your invitation.</div>
