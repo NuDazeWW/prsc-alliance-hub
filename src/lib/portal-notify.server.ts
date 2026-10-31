@@ -31,7 +31,7 @@ export async function sendPortalEmail(to: string, email: BrandedEmail, label: st
     await sendLovableEmail(
       {
         to,
-        from: "PRSC Board & Advisor Center <no-reply@readinessterminal.com>",
+        from: "PRSC Board & Advisor Center <no-reply@notify.readinessterminal.com>",
         sender_domain: "notify.readinessterminal.com",
         reply_to: "info@readinessterminal.com",
         subject: email.subject,
@@ -97,7 +97,7 @@ export async function sendRawPortalEmail(to: string, subject: string, html: stri
     await sendLovableEmail(
       {
         to,
-        from: "PRSC Board & Advisor Center <no-reply@readinessterminal.com>",
+        from: "PRSC Board & Advisor Center <no-reply@notify.readinessterminal.com>",
         sender_domain: "notify.readinessterminal.com",
         reply_to: "info@readinessterminal.com",
         subject, html, text, label, purpose: "transactional",

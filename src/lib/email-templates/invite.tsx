@@ -115,9 +115,9 @@ function InviteLayout({ inviteeName, short, forumOnly, disOnly, confirmationUrl,
     <Body {...bg('bg-outer', '#071221')} style={{ ...main, ...bgCss('bg-outer', '#071221') }}>
       <table role="presentation" cellPadding={0} cellSpacing={0} border={0} width="100%" {...bg('bg-outer', '#071221')} style={{ width: '100%', ...bgCss('bg-outer', '#071221') }}>
         <tbody><tr><td align="center" style={{ padding: '24px 12px 32px' }}>
-          <table role="presentation" cellPadding={0} cellSpacing={0} border={0} width={600} className="email-shell" {...bg('bg-navy', '#0A1322')} style={{ width: '600px', maxWidth: '600px', ...bgCss('bg-navy', '#0A1322') }}>
+          <table role="presentation" cellPadding={0} cellSpacing={0} border={0} width={680} className="email-shell" {...bg('bg-navy', '#0A1322')} style={{ width: '680px', maxWidth: '680px', ...bgCss('bg-navy', '#0A1322') }}>
             <tbody>
-              <tr><td><Img className="mobile-fluid" src={`${EMAIL_ASSET_BASE}/${disOnly ? 'prsc-header-1200.jpg' : 'prsc-hero-1200.jpg'}`} width="600" height={disOnly ? '200' : '380'} alt={disOnly ? '' : 'PRSC — Partnership Readiness Standards Council'} style={{ display: 'block', width: '600px', maxWidth: '100%', height: 'auto' }} /></td></tr>
+              <tr><td><Img className="mobile-fluid" src={`${EMAIL_ASSET_BASE}/${disOnly ? 'prsc-header-1200.jpg' : 'prsc-hero-1200.jpg'}`} width="680" height={disOnly ? '227' : '431'} alt={disOnly ? '' : 'PRSC — Partnership Readiness Standards Council'} style={{ display: 'block', width: '680px', maxWidth: '100%', height: 'auto' }} /></td></tr>
               <tr><td align="center" className="mobile-pad" {...bg('bg-navy', '#0A1322')} style={{ padding: disOnly ? '12px 34px 36px' : '0 34px 36px', ...bgCss('bg-navy', '#0A1322') }}>
                 {disOnly &&
                   <Img src={`${APP_ORIGIN}${disLogo.url}`} width="196" alt="Decision Intelligence Systems" style={{ display: 'block', width: '196px', maxWidth: '196px', height: 'auto', margin: '0 auto 17px' }} />}

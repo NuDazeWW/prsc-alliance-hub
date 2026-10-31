@@ -198,7 +198,7 @@ export function emailFooterHtml(note = "Secure access for invited participants o
   return `<tr><td align="center" ${bgAttrs("bg-navy", NAVY)} style="${bgStyle("bg-navy", NAVY)}padding:25px 30px 30px;border-top:3px solid #B98925;">
           <div style="font-family:Georgia,'Times New Roman',serif;color:${GOLD};font-size:12px;line-height:18px;letter-spacing:2px;">PARTNERSHIP READINESS STANDARDS COUNCIL, LLC</div>
           <div style="font-family:Arial,Helvetica,sans-serif;color:#BAC0CA;font-size:10px;line-height:17px;letter-spacing:1px;margin-top:9px;">${escapeHtml(note)}</div>
-          <div style="font-family:Arial,Helvetica,sans-serif;color:#9AA6B7;font-size:11px;line-height:17px;margin-top:12px;">Private &amp; confidential. Sent from no-reply@readinessterminal.com</div>
+          <div style="font-family:Arial,Helvetica,sans-serif;color:#9AA6B7;font-size:11px;line-height:17px;margin-top:12px;">Private &amp; confidential. Sent from no-reply@notify.readinessterminal.com</div>
         </td></tr>`;
 }
 
@@ -233,9 +233,9 @@ export function renderBrandedEmail(input: BrandedEmailInput) {
     <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" ${bgAttrs("bg-outer", "#071221")} style="width:100%;${bgStyle("bg-outer", "#071221")}">
       <tr>
         <td align="center" style="padding:24px 12px 32px;">
-          <table role="presentation" width="600" cellpadding="0" cellspacing="0" border="0" class="email-shell" ${bgAttrs("bg-navy", NAVY)} style="width:600px;max-width:600px;${bgStyle("bg-navy", NAVY)}">
+          <table role="presentation" width="680" cellpadding="0" cellspacing="0" border="0" class="email-shell" ${bgAttrs("bg-navy", NAVY)} style="width:680px;max-width:680px;${bgStyle("bg-navy", NAVY)}">
             <tr><td>
-              <img class="mobile-fluid" src="${EMAIL_ASSET_BASE}/prsc-hero-compact-1200.jpg" width="600" height="220" alt="PRSC — Partnership Readiness Standards Council" style="display:block;width:600px;max-width:100%;height:auto;">
+              <img class="mobile-fluid" src="${EMAIL_ASSET_BASE}/prsc-hero-compact-1200.jpg" width="680" height="249" alt="PRSC — Partnership Readiness Standards Council" style="display:block;width:680px;max-width:100%;height:auto;">
             </td></tr>
             <tr><td align="center" class="mobile-pad" ${bgAttrs("bg-navy", NAVY)} style="padding:0 34px 26px;${bgStyle("bg-navy", NAVY)}">
               <div style="font-family:Arial,Helvetica,sans-serif;font-size:11px;font-weight:600;letter-spacing:3px;line-height:18px;color:${GOLD};">PRIVATE BOARD &amp; ADVISOR CENTER</div>
