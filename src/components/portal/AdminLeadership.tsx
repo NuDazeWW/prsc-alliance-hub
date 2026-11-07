@@ -8,6 +8,7 @@ import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import {
   deleteLeader,
+  syncLeadershipFromProfiles,
   getLeadershipTeam,
   reorderLeaders,
   saveLeader,
@@ -98,9 +99,12 @@ export function AdminLeadership() {
         {collapsed ? <ChevronDown className="mt-2 h-5 w-5 text-gold" /> : <ChevronUp className="mt-2 h-5 w-5 text-gold" />}
       </button>
       <p className="mt-2 text-sm text-ivory/60">
-        Edit the "Our Leadership Team" panel members see. Link a person to a portal member and their profile photo and bio fill in
-        only when their permissions allow it and you approve display to portal members.
+        The "Our Leadership Team" panel members see. A member is added here automatically, with their photo, name, organization and bio from their profile,
+        the moment they submit their profile. It is shown only inside the portal. Use Hide or Remove to take someone off.
       </p>
+      <Button variant="outline" disabled={busy} onClick={() => void run(async () => { const r = await syncLeadershipFromProfiles(); toast.success(r.added ? `Added ${r.added} ${r.added === 1 ? "person" : "people"} from submitted profiles` : "Everyone with a submitted profile is already here"); }, "Checked submitted profiles")} className="mt-3 border-gold/40 bg-transparent text-gold hover:bg-gold hover:text-navy">
+        Add everyone who has submitted a profile
+      </Button>
 
       {showAll && (<>
       <div className="mt-6 grid gap-3 sm:grid-cols-2">

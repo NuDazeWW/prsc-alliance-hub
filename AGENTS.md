@@ -29,7 +29,7 @@
 - Portal RPCs use requirePortalAccess and portal_access_current with restrictive RLS; invited onboarding remains permitted. Why: revoked bearer sessions must fail immediately.
 - Member removal revokes and audits without deleting records/files. Why: retain signed evidence and history.
 - Invitation reminder HTTP dispatch verifies a bearer and admin role, never a public key. Why: hiding controls is not authorization.
-- Leadership publishing requires explicit portal-member approval and profile field permissions; omit private IDs/paths from member DTOs. Why: linking is not consent.
+- Submitting the Executive Profile adds the member to the Leadership Team panel automatically (`ensureLeaderForMember`, portal members only; name, organization, bio and photo read live from the profile). Owner decision: everyone with portal access is under NDA and nothing is shown outside the portal. Admins can hide/remove; revoked members are never shown; omit private IDs/paths from member DTOs. Why: the profile page tells members this before they submit.
 - Private member files use authenticated portal-file fetches, and calendar downloads require current access. Why: new member links cannot bypass revocation; old storage links expire on their original schedule.
 - Password login calls the identity provider directly; anonymous email-keyed locks never govern access. Why: retain provider IP protections without attacker-triggered account denial.
 - Export text uses csvCell. Why: CSV quoting does not prevent spreadsheet formulas.

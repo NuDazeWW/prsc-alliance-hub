@@ -131,6 +131,12 @@ export const saveMyProfile = createServerFn({ method: "POST" })
     }
     if (data.submit && !alreadySubmitted) {
       await context.supabase.from("portal_activity").insert({ member_id: member.id, actor_user_id: context.userId, event_type: "profile_submitted" });
+      // Submitting the profile places the member in the portal-only Leadership Team panel. A failure here never undoes the saved profile.
+      try {
+        const { ensureLeaderForMember } = await import("@/lib/leadership.server");
+        const { supabaseAdmin: adminDb } = await import("@/integrations/supabase/client.server");
+        await ensureLeaderForMember(adminDb, member.id, context.userId);
+      } catch (leaderError) { console.error("Could not add member to the Leadership Team", leaderError); }
       const { planProfileEmails, deliverProfileEmails } = await import("@/lib/profile-emails");
       const { loadSystemEmail, sendPortalEmail } = await import("@/lib/portal-notify.server");
       await deliverProfileEmails(planProfileEmails({

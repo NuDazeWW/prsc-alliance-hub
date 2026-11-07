@@ -42,6 +42,11 @@ export const getLeadershipTeam = createServerFn({ method: "GET" })
     if (error) throw error;
     const rows = (allRows ?? []).filter((r: any) => admin || leadershipPublicationAllowed(r));
     const memberIds = (rows ?? []).map((r: any) => r.member_id).filter(Boolean);
+    const revoked = new Set<string>();
+    if (memberIds.length) {
+      const { data: ms } = await supabaseAdmin.from("portal_members").select("id, status").in("id", memberIds);
+      for (const m of ms ?? []) if (m.status === "revoked") revoked.add(m.id);
+    }
     const profiles = new Map<string, { bio: string | null; headshot_path: string | null; visibility_instructions: Record<string, unknown> | null }>();
     if (memberIds.length) {
       const { data } = await supabaseAdmin.from("portal_profiles").select("member_id, bio, headshot_path, visibility_instructions").in("member_id", memberIds);
@@ -51,7 +56,7 @@ export const getLeadershipTeam = createServerFn({ method: "GET" })
       (rows ?? []).map(async (r: any) => {
         const prof = r.member_id ? profiles.get(r.member_id) : undefined;
         const permitted = linkedProfilePermissions(prof?.visibility_instructions);
-        if (!admin && r.member_id && !permitted.name) return null;
+        if (!admin && r.member_id && (!permitted.name || revoked.has(r.member_id))) return null;
         let photo_url: string | null = null;
         if ((r.photo_path || prof?.headshot_path) && (admin || !r.member_id || permitted.photo)) {
           photo_url = `/api/public/portal-file?kind=leader&id=${r.id}&v=${mediaVersion(String(r.photo_path ?? prof?.headshot_path))}`;
@@ -111,6 +116,19 @@ export const saveLeader = createServerFn({ method: "POST" })
     const { error } = await q;
     if (error) throw error;
     return { ok: true };
+  });
+
+/** Adds everyone who has already submitted a profile and is not yet in the panel. New submissions are added automatically. */
+export const syncLeadershipFromProfiles = createServerFn({ method: "POST" })
+  .middleware([requirePortalAccess])
+  .handler(async ({ context }) => {
+    if (!(await isAdmin(context))) throw new Error("Unauthorized");
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { ensureLeaderForMember } = await import("@/lib/leadership.server");
+    const { data: profiles } = await supabaseAdmin.from("portal_profiles").select("member_id").not("submitted_at", "is", null);
+    let added = 0;
+    for (const p of profiles ?? []) if ((await ensureLeaderForMember(supabaseAdmin, p.member_id, context.userId)) === "added") added += 1;
+    return { added };
   });
 
 export const deleteLeader = createServerFn({ method: "POST" })

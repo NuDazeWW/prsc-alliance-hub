@@ -200,7 +200,7 @@ export const ADMIN_GUIDE: GuideEntry[] = [
     steps: [
       "Left bar: People > Leadership team.",
       "Add or edit a person, change the order with the arrows, and use the eye button to show or hide them.",
-      "Link a person to a portal member to fill in their photo and bio, if their permissions allow it.",
+      "Members are added automatically, with their photo, organization and bio, as soon as they submit their profile. Nothing is shown outside the portal. For anyone who submitted earlier, press Add everyone who has submitted a profile.",
     ],
     keywords: "leadership team panel photo bio welcome center",
   },

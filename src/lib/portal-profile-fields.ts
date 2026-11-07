@@ -203,7 +203,7 @@ export function communicationReadoutRows(record?: Record<string, unknown> | null
     { label: PORTAL_COMMUNICATION_QUESTIONS.communications_requirement, value: label(preferences.communications_requirement, PORTAL_COMMUNICATION_REQUIREMENT_CHOICES) },
     { label: PORTAL_COMMUNICATION_DETAILS_LABEL, value: preferences.communications_details || "Not answered" },
     { label: PORTAL_COMMUNICATION_QUESTIONS.private_briefings, value: label(preferences.private_briefings, PORTAL_PRIVATE_BRIEFING_CHOICES) },
-    { label: "Publication approval", value: "Internal preferences only — no permission to publish" },
+    { label: "Where this appears", value: "Leadership Team panel inside the portal, for NDA-bound portal members only. Never shown outside the portal." },
     ...legacyCommunicationRows(record, true),
   ];
 }
