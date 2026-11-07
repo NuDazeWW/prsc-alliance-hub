@@ -26,6 +26,12 @@ export function isOutdatedSavedInvite(key: string | null | undefined, body: stri
   return !/\[steps\]/i.test(body) && /next phase of our work|been a while since we spoke|Hello \{\{first_name\}\}|Here['’]s how to begin/i.test(body);
 }
 
+/** Saved copies of automatic emails that predate their next-steps wording are replaced by the current default. */
+export function isOutdatedSavedSystemCopy(key: string, body: string | null | undefined) {
+  if (key === "profile_submitted_admin_alert") return Boolean(body) && !/What to do next/i.test(body as string);
+  return false;
+}
+
 export const SYSTEM_EMAIL_DEFAULTS: Record<string, SystemEmailCopy> = {
   invite: {
     name: "Email 1 · Private invitation and orientation (sent automatically)",
@@ -101,13 +107,13 @@ export const SYSTEM_EMAIL_DEFAULTS: Record<string, SystemEmailCopy> = {
   },
   profile_submitted_admin_alert: {
     name: "Profile submitted, admin alert (automatic)",
-    description: "Sent to the administrator when a member submits their Executive Profile. Tokens: {{member_name}}, {{submitted_at}}, {{submission_id}}.",
+    description: "Sent to the administrator when a member submits their Executive Profile, with the exact next steps. Tokens: {{member_name}}, {{submitted_at}}, {{submission_id}}.",
     subject: "Executive Profile Submitted | {{member_name}}",
     eyebrow: "Administrative notice",
     heading: "An executive profile submission has been recorded.",
-    body: "Member: {{member_name}}\nRecorded at: {{submitted_at}}\nSubmission reference: {{submission_id}}\n\nReview the member's profile and any applicable administrative next steps in the Admin Center.\n\nThis is an administrative notification, not a request to approve or activate an appointment.",
-    cta_label: "View Member Record",
-    cta_url: "https://access.prscstandards.org/admin",
+    body: "Member: {{member_name}}\nRecorded at: {{submitted_at}}\nSubmission reference: {{submission_id}}\n\nWhat to do next\n1. Review the profile. In the Admin Center, open Members, find {{member_name}} and choose View profile.\n2. Release their Forum documents. Open Documents & releases > Member documents, choose {{member_name}}, then press Release documents & email member. Their status in Members changes from \"Profile submitted, ready for documents\" to \"Documents open\", and they are emailed that their documents are ready.\n3. Watch their progress. When they finish their acknowledgements and signatures, their status shows Complete. Record their Forum clearance in the same Member documents panel; once cleared, they receive the agenda and the strategy brief automatically.\n\nOptional: the Leadership Team panel. A submitted profile is private and does not appear in the Leadership Team panel by itself. To show {{member_name}} there, open People > Leadership team > Add person, link them to this member and tick the approval to display to portal members. Their photo and bio fill in only if their profile permissions allow it.\n\nThis is an administrative notification, not a request to approve or activate an appointment.",
+    cta_label: "Release Their Documents",
+    cta_url: "https://access.prscstandards.org/admin#documents",
     cta_subtext: "",
     signatures: "",
   },

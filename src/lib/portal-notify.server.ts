@@ -1,5 +1,5 @@
 import { applyTokens, parseSignatures, renderBrandedEmail, renderBrandedEmailText } from "@/lib/branded-email";
-import { SYSTEM_EMAIL_DEFAULTS } from "@/lib/system-email-defaults";
+import { SYSTEM_EMAIL_DEFAULTS, isOutdatedSavedSystemCopy } from "@/lib/system-email-defaults";
 import { emailLogName } from "@/lib/email-log-name";
 
 type BrandedEmail = Parameters<typeof renderBrandedEmail>[0];
@@ -71,7 +71,7 @@ export async function loadSystemEmail(key: string) {
   } catch (err) {
     console.error(`Could not load template ${key}`, err);
   }
-  const copy = row?.body?.trim() ? row : fallback;
+  const copy = row?.body?.trim() && !isOutdatedSavedSystemCopy(key, row.body) ? row : fallback;
   return (tokens: Record<string, string | undefined>): BrandedEmail => {
     const fill = (v?: string | null) => applyTokens(v ?? "", tokens);
     return {
