@@ -66,6 +66,7 @@ function ErrorComponent({ error: rawError, reset }: ErrorComponentProps) {
       <div className="max-w-md text-center text-ivory">
         <h1 className="font-display text-2xl">This page didn't load</h1>
         <p className="mt-2 text-sm text-ivory/60">Something went wrong. Please try again.</p>
+        {error?.message && <p className="mt-3 break-words text-xs text-ivory/35">Reference: {String(error.message).slice(0, 160)}</p>}
         <div className="mt-6 flex flex-wrap justify-center gap-2">
           <button
             onClick={() => { router.invalidate(); reset(); }}
