@@ -117,6 +117,18 @@ export const SYSTEM_EMAIL_DEFAULTS: Record<string, SystemEmailCopy> = {
     cta_subtext: "",
     signatures: "",
   },
+  orientation_completed_admin_alert: {
+    name: "Orientation completed, admin alert (automatic)",
+    description: "Sent to the administrator when a member finishes the portal orientation, with the next step. Tokens: {{member_name}}, {{completed_at}}.",
+    subject: "Orientation Completed | {{member_name}}",
+    eyebrow: "Administrative notice",
+    heading: "A member has finished the portal orientation.",
+    body: "Member: {{member_name}}\nCompleted at: {{completed_at}}\n\nWhat to do next\nTheir Forum documents are still locked until you release them. Open the Admin Center: a pop-up shows a Release documents button for {{member_name}}. Press it and they are emailed that their documents are ready.\n\nIf you pause the pop-up, a reminder bar stays at the top of the page until you are ready.\n\nThis is an administrative notification, not a request to approve or activate an appointment.",
+    cta_label: "Release Their Documents",
+    cta_url: "https://access.prscstandards.org/admin",
+    cta_subtext: "",
+    signatures: "",
+  },
   documents_ready: {
     name: "Forum documents ready (forum_documents_ready, automatic)",
     description: "Sent once when you release a member's initial Forum Protocol, Pre-Read and Conflict/Recusal documents. PRSC/DIS Stage 2 uses Entity onboarding instead. Tokens: {{first_name}}, {{document_summary}}.",

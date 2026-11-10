@@ -24,9 +24,10 @@ export function AdminReleasePrompt({ members, profiles, preview, onReleased }: {
   useEffect(() => { setPaused(readPaused()); setReady(true); }, []);
 
   const waiting: Waiting[] = useMemo(() => {
+    // Ready for documents once they have finished orientation or submitted their profile. A profile is never required.
     const submitted = new Set(profiles.filter((p) => p.submitted_at).map((p) => p.member_id));
     return members
-      .filter((m) => m.status !== "revoked" && submitted.has(m.id) && !m.documents_released_at)
+      .filter((m) => m.status !== "revoked" && !m.is_admin && (submitted.has(m.id) || m.orientation_acknowledged_at) && !m.documents_released_at)
       .map((m) => ({ id: m.id, name: `${m.first_name} ${m.last_name}`.trim(), org: m.organization ?? "" }));
   }, [members, profiles]);
 
@@ -55,7 +56,7 @@ export function AdminReleasePrompt({ members, profiles, preview, onReleased }: {
     <>
       {snoozed.length > 0 && active.length === 0 && (
         <div role="status" className="mb-4 flex flex-wrap items-center justify-between gap-3 border border-gold/40 bg-gold/10 px-4 py-3 text-sm text-ivory">
-          <span>{snoozed.length} {snoozed.length === 1 ? "profile is" : "profiles are"} in and waiting for documents to be released ({snoozed.map((w) => w.name).join(", ")}).</span>
+          <span>{snoozed.length} {snoozed.length === 1 ? "member is" : "members are"} ready and waiting for documents to be released ({snoozed.map((w) => w.name).join(", ")}).</span>
           <Button size="sm" onClick={resume} className="bg-gold text-navy hover:bg-gold/90">Review now</Button>
         </div>
       )}
@@ -63,7 +64,7 @@ export function AdminReleasePrompt({ members, profiles, preview, onReleased }: {
         <DialogContent onInteractOutside={(e) => e.preventDefault()} onEscapeKeyDown={(e) => e.preventDefault()} className="max-w-xl border-gold/40 bg-navy-deep text-ivory">
           <DialogHeader>
             <p className="text-xs uppercase tracking-[0.22em] text-gold">Next step</p>
-            <DialogTitle className="font-display text-3xl">{active.length === 1 ? `${active[0].name}'s profile is in.` : `${active.length} profiles are in.`}</DialogTitle>
+            <DialogTitle className="font-display text-3xl">{active.length === 1 ? `${active[0].name} is ready for documents.` : `${active.length} members are ready for documents.`}</DialogTitle>
             <DialogDescription className="text-ivory/70">
               Release the Forum documents so {active.length === 1 ? "they" : "these members"} can continue. Each person is emailed that their documents are ready.
             </DialogDescription>

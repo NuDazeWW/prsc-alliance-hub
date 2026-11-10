@@ -122,5 +122,14 @@ export const acknowledgeOrientation = createServerFn({ method: "POST" })
     const { error } = await supabaseAdmin.from("portal_members").update({ orientation_acknowledged_at: now }).eq("id", m.id).is("orientation_acknowledged_at", null);
     if (error) throw error;
     await supabaseAdmin.from("portal_activity").insert({ member_id: m.id, actor_user_id: context.userId, event_type: "orientation_reviewed", metadata: {} });
+    // Tell the administrator, with the next step. A failed email never undoes the member's progress.
+    try {
+      const { data: who } = await supabaseAdmin.from("portal_members").select("first_name, last_name, documents_released_at").eq("id", m.id).maybeSingle();
+      if (who && !who.documents_released_at) {
+        const { sendPortalEmail, loadSystemEmail } = await import("@/lib/portal-notify.server");
+        const build = await loadSystemEmail("orientation_completed_admin_alert");
+        await sendPortalEmail("admin@readinessterminal.com", build({ member_name: `${who.first_name ?? ""} ${who.last_name ?? ""}`.trim() || "A member", completed_at: new Date(now).toUTCString() }), "orientation-completed-admin-alert", `orientation-completed-admin-${m.id}`);
+      }
+    } catch (error) { console.error("Orientation admin alert failed", error); }
     return { acknowledged_at: now };
   });
