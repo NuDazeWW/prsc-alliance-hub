@@ -6,6 +6,7 @@ import { usePrivateMedia } from "@/hooks/use-private-media";
 import { afterOrientation } from "@/lib/first-login";
 import { clearOrientationProgress, markOrientationDismissed, orientationDismissed, readOrientationStep, shouldAutoOpenOrientation } from "@/lib/orientation-progress";
 import { nextIncompleteStep } from "@/lib/next-step";
+import { NextStepPopup } from "@/components/portal/NextStepPopup";
 import { panelFromHash } from "@/lib/portal-panel-hash";
 import { DOCUMENTS_NOT_RELEASED_BODY, DOCUMENTS_NOT_RELEASED_TITLE, PROFILE_ENCOURAGEMENT, profileLinkLabel } from "@/lib/profile-encouragement";
 import { shouldLoadMemberDocuments } from "@/lib/member-documents-access";
@@ -292,6 +293,7 @@ function PortalHome() {
   return (
     <>
     {viewingBanner}
+    <NextStepPopup step={nextStep} memberKey={memberKey} suppressed={Boolean(data?.viewingAs || data?.isAdmin || isDemo || needsOrientation || panel !== null || (typeof window !== "undefined" && window.location.hash === "#executive-questions"))} onRun={runNextStep} />
     <PortalShell
       memberName={name}
       memberProgress={
