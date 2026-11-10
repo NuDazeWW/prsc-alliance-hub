@@ -482,6 +482,14 @@ export function AdminCenter({ page }: { page: "overview" | "send" }) {
     }
   }
   /** One-checkbox path for an existing member: records the administrator's verification with sensible defaults. */
+  // Forum invitees arrive already NDA-verified, so the confirmation is recorded for the admin when they are chosen.
+  const autoNdaFor = useRef<string>("");
+  useEffect(() => {
+    if (!inviteCandidateId || !inviteNda || inviteNdaSaving || inviteNdaLoading) return;
+    if (!(inviteNda.member as any)?.is_candidate || inviteGov.nda_confirmed || autoNdaFor.current === inviteCandidateId) return;
+    autoNdaFor.current = inviteCandidateId;
+    void quickConfirmNda(true);
+  });
   async function quickConfirmNda(checked: boolean) {
     if (!checked) { setInviteGov((current) => clearInvitationNdaConfirmation(current)); setInviteNdaReviewId(""); setInviteNdaMessage(""); return; }
     if (!inviteNda) return;

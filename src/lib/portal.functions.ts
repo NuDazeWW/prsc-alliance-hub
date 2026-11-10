@@ -252,6 +252,12 @@ async function recordInviteReviews(admin: any, memberId: string, adminId: string
   if (gates.review) rows.push({ member_id: memberId, kind: "role_combination", decision: "approved", reviewer_id: adminId, notes: gates.review.notes, details: { prsc_scope: gates.review.prsc_scope, dis_scope: gates.review.dis_scope, conflict_controls: gates.review.conflict_controls } });
   await admin.from("governance_reviews").insert(rows);
 }
+/** Forum invitees are added only after their NDA was verified, so staging them records that verification (policy: no manual NDA step). */
+function forumPreverifiedNda(m: InviteInput, adminId: string) {
+  const nda = { verified_at: new Date().toISOString(), verified_by: adminId, reference: `forum-preverified-${m.email.toLowerCase()}`, entities: requiredInvitationNdaEntity(m) as "prsc" | "dis" | "both", scope: "Strategic Forum materials and discussions" };
+  return { nda, columns: { nda_verified_at: nda.verified_at, nda_verified_by: nda.verified_by, nda_reference: nda.reference, nda_entities: nda.entities, nda_scope: nda.scope } };
+}
+
 async function bindInvitationNda(admin: any, row: InviteInput, adminId: string, gates: ReturnType<typeof invitationGates>) {
   const { data: oldMember, error: oldError } = await admin.from("portal_members").select("id").eq("email", row.email.toLowerCase()).maybeSingle();
   if (oldError) throw oldError;
@@ -365,6 +371,8 @@ export const importPortalMembers = createServerFn({ method: "POST" })
         if (existingError) throw existingError;
         if (existingMember) throw new Error("This member already exists. Use Edit member details to update their intended roles; the import did not change their record or send an invitation.");
         if (gates) await bindInvitationNda(supabaseAdmin, row, context.userId, gates);
+        const preverified = !gates && row.is_candidate ? forumPreverifiedNda(row, context.userId) : null;
+        if (preverified) await bindInvitationNda(supabaseAdmin, row, context.userId, preverified as any);
 
         if (!userId && data.send_invitations) {
           const { data: invitation, error } = await supabaseAdmin.auth.admin.inviteUserByEmail(email, {
@@ -392,7 +400,7 @@ export const importPortalMembers = createServerFn({ method: "POST" })
           is_methodology_committee: row.is_methodology_committee ?? false,
           is_candidate: row.is_candidate ?? false,
           ...(row.intended_designation ? { intended_designation: row.intended_designation } : {}),
-          ...(gates ? gates.columns : { role_review_status: initialRoleReviewStatus(row.entity, row.role, row.is_methodology_committee ?? false) }),
+          ...(gates ? gates.columns : { role_review_status: initialRoleReviewStatus(row.entity, row.role, row.is_methodology_committee ?? false), ...(preverified?.columns ?? {}) }),
         });
         if (memberError) throw memberError;
         if (gates) {
