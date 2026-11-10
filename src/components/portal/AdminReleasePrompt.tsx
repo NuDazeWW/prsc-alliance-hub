@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { releaseMemberDocuments } from "@/lib/portal.functions";
 import { userFacingError } from "@/lib/user-facing-error";
 
-type Waiting = { id: string; name: string; org: string };
+type Waiting = { id: string; name: string; org: string; ndaMissing: boolean };
 const KEY = "admin.releasePrompt.paused";
 
 function readPaused(): string[] {
@@ -28,7 +28,7 @@ export function AdminReleasePrompt({ members, profiles, preview, onReleased }: {
     const submitted = new Set(profiles.filter((p) => p.submitted_at).map((p) => p.member_id));
     return members
       .filter((m) => m.status !== "revoked" && !m.is_admin && (submitted.has(m.id) || m.orientation_acknowledged_at) && !m.documents_released_at)
-      .map((m) => ({ id: m.id, name: `${m.first_name} ${m.last_name}`.trim(), org: m.organization ?? "" }));
+      .map((m) => ({ id: m.id, name: `${m.first_name} ${m.last_name}`.trim(), org: m.organization ?? "", ndaMissing: !m.nda_verified_at }));
   }, [members, profiles]);
 
   if (!ready || preview || !waiting.length) return null;
@@ -76,6 +76,7 @@ export function AdminReleasePrompt({ members, profiles, preview, onReleased }: {
                   <div className="min-w-0"><p className="text-base text-ivory">{w.name}</p>{w.org && <p className="text-sm text-ivory/55">{w.org}</p>}</div>
                   <Button disabled={busy !== null} onClick={() => void release(w)} className="bg-gold text-navy hover:bg-gold/90">{busy === w.id ? "Releasing…" : "Release documents"}</Button>
                 </div>
+                {w.ndaMissing && <p className="mt-3 text-sm text-gold">NDA not verified yet. Their Forum documents stay hidden until you tick the NDA box for them in Invite a member.</p>}
                 {errors[w.id] && <p role="alert" className="mt-3 text-sm text-rose-200">{errors[w.id]}</p>}
               </li>
             ))}
