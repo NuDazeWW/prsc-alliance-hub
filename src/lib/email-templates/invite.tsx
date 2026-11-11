@@ -166,7 +166,7 @@ function InviteLayout({ inviteeName, short, forumOnly, disOnly, confirmationUrl,
                     </table>}
                     <div style={{ marginTop: '22px' }}><MeetingSection block={meetingBlock} /></div>
                     <table role="presentation" cellPadding={0} cellSpacing={0} border={0} align="center" style={{ margin: '28px auto 10px' }}>
-                      <tbody><tr><td align="center" bgcolor="#D9AE45" style={goldButtonCell}>
+                      <tbody><tr><td align="center" style={goldButtonCell}>
                         <a href={confirmationUrl} style={ctaLink}>{ctaLabel} &nbsp;→</a>
                       </td></tr></tbody>
                     </table>
@@ -232,7 +232,7 @@ export const InviteEmail = ({
     const footers = allBlocks.filter(isFooter).map((b) => [b[0].replace(/^\[footer\]\s*/i, ''), ...b.slice(1)].filter(Boolean))
     const sigName = (copy.signatures?.trim() || 'Shirley Johnson').split('|')[0].split(',')[0]
     // The letter below the button already carries the "Why You're Here" note when the saved copy uses that token.
-    const renderBlocks = (list: string[][], first = true) => list.map((lines, bi) => {
+    const renderBlocks = (blockList: string[][], first = true) => blockList.map((lines, bi) => {
       const isList = lines.every((l) => /^[•\-*]\s/.test(l))
       if (isList) return <Section key={bi} style={list}>{lines.map((l, li) => <Text key={li} style={listItem}>• {renderInline(l.replace(/^[•\-*]\s+/, ''))}</Text>)}</Section>
       return <Text key={bi} style={first && bi === 0 ? lead : text}>{lines.map((l, li) => <React.Fragment key={li}>{li > 0 && <br />}{renderInline(l)}</React.Fragment>)}</Text>

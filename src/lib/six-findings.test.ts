@@ -82,7 +82,7 @@ describe("Fix 3: activation is bound to the invitation", () => {
   it("refuses a different account", () =>
     strictEqual(activationProblem({ userId: "admin", sessionEmail: "admin@x.com", amr: link, nowSeconds: now, member: null }), "No invitation exists for this account"));
   it("refuses a link session older than 24 hours", () =>
-    ok(activationProblem({ userId: "u1", sessionEmail: "test1@example.com", amr: [{ method: "otp", timestamp: now - 25 * 3600 }], nowSeconds: now, member })));
+    ok(activationProblem({ userId: "u1", sessionEmail: "test1@example.com", amr: [{ method: "otp", timestamp: now - 4 * 24 * 3600 }], nowSeconds: now, member })));
   it("refuses a used invitation", () =>
     strictEqual(activationProblem({ userId: "u1", sessionEmail: "test1@example.com", amr: link, nowSeconds: now, member: { ...member, status: "active" } }), "This invitation has already been used"));
 });

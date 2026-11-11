@@ -1261,7 +1261,7 @@ export function AdminCenter({ page }: { page: "overview" | "send" }) {
     <PortalShell
       admin
       notifications={notifications}
-      stats={statCards.map(({ label, value, icon, to, hash }) => ({ label, value, icon, to, hash }))}
+      stats={statCards.map(({ label, value, icon, to, hash }) => ({ label, value, icon, to: to as "/admin" | "/admin/send", hash }))}
       sidebar={<AdminSidebar page={page} />}
     >
       <main className="px-4 py-10 sm:px-6 lg:px-8">

@@ -1156,6 +1156,7 @@ export type Database = {
       }
       portal_members: {
         Row: {
+          board_seat: string | null
           created_at: string
           dis_activated_at: string | null
           dis_appointment_ref: string | null
@@ -1200,6 +1201,7 @@ export type Database = {
           why_you: string
         }
         Insert: {
+          board_seat?: string | null
           created_at?: string
           dis_activated_at?: string | null
           dis_appointment_ref?: string | null
@@ -1244,6 +1246,7 @@ export type Database = {
           why_you: string
         }
         Update: {
+          board_seat?: string | null
           created_at?: string
           dis_activated_at?: string | null
           dis_appointment_ref?: string | null
