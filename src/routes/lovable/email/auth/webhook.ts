@@ -1,6 +1,7 @@
 import * as React from 'react'
 import { createAuthEmailHandler } from '@lovable.dev/email-js'
 import { createFileRoute } from '@tanstack/react-router'
+import { wrapAuthLink } from '@/lib/auth-link'
 import { InviteEmail } from '@/lib/email-templates/invite'
 import { PortalSignupEmail } from '@/emails/PortalSignupEmail'
 import { PortalMagicLinkEmail } from '@/emails/PortalMagicLinkEmail'
@@ -67,7 +68,7 @@ export const Route = createFileRoute("/lovable/email/auth/webhook")({
                   meetingBlock = (await loadOpenPoll(pollId))?.block ?? null
                 }
                 return React.createElement(InviteEmail, {
-                  confirmationUrl: data.url,
+                  confirmationUrl: wrapAuthLink(data.url),
                   recipientEmail: data.email,
                   firstName: member?.first_name ?? callback.searchParams.get('first_name') ?? 'there',
                   entity,

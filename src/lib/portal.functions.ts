@@ -499,7 +499,7 @@ export const nudgeMember = createServerFn({ method: "POST" })
         subject: "A reminder: your private Welcome Center is waiting", eyebrow: "Gentle reminder",
         heading: `${first}, your Welcome Center is ready for you.`,
         body: "We invited you into the private Board & Advisor Welcome Center and wanted to make sure the note reached you.\n\nIt only takes a few minutes: create your password, get reacquainted with where we are today, and share the few details we need to prepare your individualized package.",
-        ctaLabel: "Access Your Private Welcome Center →", ctaUrl: link.properties.action_link,
+        ctaLabel: "Access Your Private Welcome Center →", ctaUrl: (await import("@/lib/auth-link")).wrapAuthLink(link.properties.action_link),
         ctaSubtext: "This secure link lets you create your own password. No password is emailed.",
         signatures: teamSignature(),
       }, "nudge-invite");

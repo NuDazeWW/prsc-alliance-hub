@@ -6,6 +6,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { PrscMark } from "@/components/site/PrscMark";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { unwrapAuthLink } from "@/lib/auth-link";
 import { activateInvitation, verifyInvitationSession } from "@/lib/invitation-activation.functions";
 
 export const Route = createFileRoute("/accept-invitation")({
@@ -32,11 +33,23 @@ function AcceptInvitationPage() {
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState("Verifying your private invitation…");
   const [invitationEmail, setInvitationEmail] = useState("");
+  const [gateUrl, setGateUrl] = useState<string | null>(null);
 
   useEffect(() => {
     let active = true;
     let timeout: number | undefined;
     let checking = false;
+    const go = new URLSearchParams(window.location.search).get("go");
+    const target = unwrapAuthLink(go);
+    if (go) {
+      if (target) {
+        setGateUrl(target);
+        setMessage("Your private invitation is ready.");
+        return () => { active = false; };
+      }
+      setMessage("This invitation link is not valid. Please contact info@readinessterminal.com for a new invitation.");
+      return () => { active = false; };
+    }
     const confirmInvitation = async () => {
       if (!active || checking) return;
       checking = true;
@@ -147,6 +160,11 @@ function AcceptInvitationPage() {
                   {message && <p role="status" className="border-l-2 border-gold pl-3 text-sm text-ivory/75">{message}</p>}
                   <Button disabled={busy} className="h-12 w-full rounded-none bg-gold text-navy hover:bg-gold-light hover:text-navy">{busy ? "Creating your password…" : "Create password & continue to sign in"}</Button>
                 </form>
+              ) : gateUrl ? (
+                <div className="mt-9 space-y-5">
+                  <p role="status" className="border-l-2 border-gold pl-3 text-sm leading-6 text-ivory/75">{message}</p>
+                  <Button onClick={() => window.location.assign(gateUrl)} className="h-12 w-full rounded-none bg-gold text-navy hover:bg-gold-light hover:text-navy">Continue to create your password</Button>
+                </div>
               ) : (
                 <p role="status" className="mt-9 border-l-2 border-gold pl-3 text-sm leading-6 text-ivory/75">{message}</p>
               )}
