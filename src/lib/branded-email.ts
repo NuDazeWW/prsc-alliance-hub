@@ -222,7 +222,8 @@ export function renderBrandedEmail(input: BrandedEmailInput) {
       )}</p>`
     : "";
   const secondary = input.secondaryCtaLabel && input.secondaryCtaUrl ? goldButtonHtml(input.secondaryCtaLabel, input.secondaryCtaUrl) : "";
-  const cta = input.ctaLabel && input.ctaUrl ? `${goldButtonHtml(input.ctaLabel, input.ctaUrl)}${secondary}${ctaSubtext}` : "";
+  const help = `<p style="margin:10px 0 0 0;font-family:Arial,Helvetica,sans-serif;font-size:12px;line-height:19px;text-align:center;color:#4B4D4E;">Having trouble with the button or this link? <a href="mailto:info@readinessterminal.com?subject=Help%20with%20my%20private%20access%20link" style="color:#123D64;text-decoration:underline;">Contact the administrator</a>.</p>`;
+  const cta = input.ctaLabel && input.ctaUrl ? `${goldButtonHtml(input.ctaLabel, input.ctaUrl)}${secondary}${ctaSubtext}${help}` : "";
 
   return `<!doctype html>
 <html lang="en">
@@ -267,7 +268,7 @@ export function renderBrandedEmail(input: BrandedEmailInput) {
 
 export function renderBrandedEmailText(input: BrandedEmailInput) {
   const cta = (input.ctaLabel && input.ctaUrl ? `\n\n${input.ctaLabel}: ${input.ctaUrl}` : "") + (input.secondaryCtaLabel && input.secondaryCtaUrl ? `\n${input.secondaryCtaLabel}: ${input.secondaryCtaUrl}` : "");
-  const subtext = input.ctaSubtext?.trim() ? `\n${input.ctaSubtext.trim()}` : "";
+  const subtext = (input.ctaSubtext?.trim() ? `\n${input.ctaSubtext.trim()}` : "") + (input.ctaLabel && input.ctaUrl ? "\nHaving trouble with this link? Contact the administrator: info@readinessterminal.com" : "");
   const signatures = (input.signatures ?? [])
     .map((s) => (s.title ? `${s.name}, ${s.title}` : s.name))
     .join("\n");

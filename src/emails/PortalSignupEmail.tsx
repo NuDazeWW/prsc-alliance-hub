@@ -12,6 +12,9 @@ export function PortalSignupEmail({ confirmationUrl }: { confirmationUrl: string
         Thank you for registering for the PRSC private center. Please confirm your email to complete the setup of your account. The link works once and expires 24 hours after this email was sent.
       </Text>
       <Cta href={confirmationUrl}>Confirm email</Cta>
+      <Text style={{ color: "#3A4050", fontSize: 12, lineHeight: 1.5, margin: "16px 0 0" }}>
+        Having trouble with this link? <a href="mailto:info@readinessterminal.com?subject=Help%20with%20my%20private%20access%20link" style={{ color: "#123D64", textDecoration: "underline" }}>Contact the administrator</a>.
+      </Text>
       <Text style={{ color: "#8A8F99", fontSize: 12, lineHeight: 1.5, margin: "24px 0 0" }}>
         If you did not request access, you can safely ignore this message.
       </Text>
