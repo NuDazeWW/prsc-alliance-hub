@@ -12,3 +12,6 @@ export const INVITE_ROLE_LABELS = {
   prsc_advisor_dis_board: "PRSC Advisor / DIS Board",
   methodology_committee: "Methodology Committee Candidate",
 } as const;
+
+// Sign-in links are single-use and the backend caps their lifetime at 24 hours. Say so wherever one is emailed.
+export const AUTH_LINK_EXPIRY_NOTE = "For your security, this link works once and expires 24 hours after this email was sent. If it has expired, contact info@readinessterminal.com and we will send you a new one.";
