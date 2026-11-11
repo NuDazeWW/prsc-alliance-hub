@@ -284,6 +284,8 @@ async function logInvitationEmail(admin: any, memberId: string, email: string, a
       subject: "Invitation to the private portal", recipient_email: email, status: "sent", sent_by: adminId,
     });
   } catch { /* the invitation itself was already requested */ }
+  const { sendInvitationAdminCopy } = await import("@/lib/invitation-admin-copy.server");
+  await sendInvitationAdminCopy(admin, memberId);
 }
 
 export const invitePortalMember = createServerFn({ method: "POST" })
