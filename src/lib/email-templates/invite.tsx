@@ -1,4 +1,4 @@
-import { AUTH_LINK_EXPIRY_NOTE } from '@/lib/invite-email-config'
+import { INVITE_LINK_NOTE } from '@/lib/invite-email-config'
 import * as React from 'react'
 import { Body, Head, Html, Img, Link, Preview, Section, Text } from '@react-email/components'
 import disLogo from '@/assets/dis-lockup-site.png.asset.json'
@@ -172,7 +172,7 @@ function InviteLayout({ inviteeName, short, forumOnly, disOnly, confirmationUrl,
                       </td></tr></tbody>
                     </table>
                     {ctaSubtext?.trim() && <div style={{ fontFamily: 'Arial, Helvetica, sans-serif', fontSize: '12px', lineHeight: '19px', color: '#4B4D4E', textAlign: 'center', margin: '12px 0 0' }}>{ctaSubtext.trim()}</div>}
-                    <div style={{ fontFamily: 'Arial, Helvetica, sans-serif', fontSize: '12px', lineHeight: '19px', color: '#4B4D4E', textAlign: 'center', margin: '8px 0 0' }}>{AUTH_LINK_EXPIRY_NOTE}</div>
+                    <div style={{ fontFamily: 'Arial, Helvetica, sans-serif', fontSize: '12px', lineHeight: '19px', color: '#4B4D4E', textAlign: 'center', margin: '8px 0 0' }}>{INVITE_LINK_NOTE}</div>
                     <div style={{ fontFamily: 'Arial, Helvetica, sans-serif', fontSize: '14px', lineHeight: '20px', color: '#123D64', textAlign: 'center', marginTop: '14px' }}>Having trouble with the button or your link? <Link href="mailto:info@readinessterminal.com?subject=Help%20with%20my%20private%20access%20link" style={{ color: '#123D64', textDecoration: 'underline' }}>Contact the administrator</Link></div>
                     {letterAfter && <div style={{ marginTop: '30px', paddingTop: '26px', borderTop: '1px solid #C9A24A' }}>{letterAfter}</div>}
                     {footnote && <div style={{ marginTop: '26px', paddingTop: '18px', borderTop: '1px solid #C9A24A' }}>{footnote}</div>}

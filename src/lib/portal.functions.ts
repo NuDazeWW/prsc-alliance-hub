@@ -489,18 +489,13 @@ export const nudgeMember = createServerFn({ method: "POST" })
     const first = m.first_name?.trim() || "there";
     let kind: string;
     if (!m.first_access_at) {
-      const redirectTo = new URL("https://access.prscstandards.org/accept-invitation");
-      redirectTo.searchParams.set("first_name", m.first_name ?? "");
-      redirectTo.searchParams.set("entity", m.entity);
-      redirectTo.searchParams.set("role", m.role);
-      const { data: link, error } = await supabaseAdmin.auth.admin.generateLink({ type: "magiclink", email: m.email, options: { redirectTo: redirectTo.toString() } });
-      if (error || !link?.properties?.action_link) throw new Error("Could not create a fresh invitation link");
+      const { renewableInvitationUrl } = await import("@/lib/renewable-link.server");
       await sendPortalEmail(m.email, {
         subject: "A reminder: your private Welcome Center is waiting", eyebrow: "Gentle reminder",
         heading: `${first}, your Welcome Center is ready for you.`,
         body: "We invited you into the private Board & Advisor Welcome Center and wanted to make sure the note reached you.\n\nIt only takes a few minutes: create your password, get reacquainted with where we are today, and share the few details we need to prepare your individualized package.",
-        ctaLabel: "Access Your Private Welcome Center →", ctaUrl: (await import("@/lib/auth-link")).wrapAuthLink(link.properties.action_link),
-        ctaSubtext: `This secure link lets you create your own password. No password is emailed. ${(await import("@/lib/invite-email-config")).AUTH_LINK_EXPIRY_NOTE}`,
+        ctaLabel: "Access Your Private Welcome Center →", ctaUrl: renewableInvitationUrl(m.email),
+        ctaSubtext: "This link is personal to you and stays valid for 30 days. No password is emailed.",
         signatures: teamSignature(),
       }, "nudge-invite");
       kind = "invitation";

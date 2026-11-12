@@ -7,6 +7,7 @@ import { PrscMark } from "@/components/site/PrscMark";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { unwrapAuthLink } from "@/lib/auth-link";
+import { startInvitationFromLink, requestFreshInvitation } from "@/lib/invitation-link.functions";
 import { activateInvitation, verifyInvitationSession } from "@/lib/invitation-activation.functions";
 
 export const Route = createFileRoute("/accept-invitation")({
@@ -34,11 +35,22 @@ function AcceptInvitationPage() {
   const [message, setMessage] = useState("Verifying your private invitation…");
   const [invitationEmail, setInvitationEmail] = useState("");
   const [gateUrl, setGateUrl] = useState<string | null>(null);
+  const [renewToken, setRenewToken] = useState<string | null>(null);
+  const [starting, setStarting] = useState(false);
+  const [deadLink, setDeadLink] = useState(false);
+  const [resendEmail, setResendEmail] = useState("");
+  const [resendState, setResendState] = useState<"idle" | "sending" | "sent">("idle");
 
   useEffect(() => {
     let active = true;
     let timeout: number | undefined;
     let checking = false;
+    const renew = new URLSearchParams(window.location.search).get("r");
+    if (renew) {
+      setRenewToken(renew);
+      setMessage("Your private invitation is ready.");
+      return () => { active = false; };
+    }
     const go = new URLSearchParams(window.location.search).get("go");
     const target = unwrapAuthLink(go);
     if (go) {
@@ -88,7 +100,8 @@ function AcceptInvitationPage() {
     });
     timeout = window.setTimeout(() => {
       if (!active) return;
-      setMessage("This invitation link has expired or has already been used. Please contact info@readinessterminal.com for a new invitation.");
+      setMessage("This invitation link has expired or has already been used.");
+      setDeadLink(true);
     }, 4000);
     return () => {
       active = false;
@@ -96,6 +109,34 @@ function AcceptInvitationPage() {
       listener.subscription.unsubscribe();
     };
   }, []);
+
+  async function startFromLink() {
+    if (!renewToken) return;
+    setStarting(true);
+    try {
+      const result = await startInvitationFromLink({ data: { token: renewToken } });
+      if (!result.ok) {
+        setRenewToken(null);
+        setMessage("This invitation link is not valid. Please contact info@readinessterminal.com for a new invitation.");
+        setDeadLink(true);
+      } else if (result.kind === "signin") {
+        await navigate({ to: "/auth", search: { email: result.email, passwordCreated: undefined, redirect: "/portal", mode: undefined }, replace: true });
+      } else {
+        window.location.assign(result.url);
+      }
+    } catch {
+      setMessage("We could not open your invitation just now. Please press the button again, or contact info@readinessterminal.com.");
+    } finally {
+      setStarting(false);
+    }
+  }
+
+  async function sendNewLink(event: React.FormEvent) {
+    event.preventDefault();
+    setResendState("sending");
+    try { await requestFreshInvitation({ data: { email: resendEmail } }); } catch { /* same neutral answer */ }
+    setResendState("sent");
+  }
 
   async function submit(event: React.FormEvent) {
     event.preventDefault();
@@ -160,13 +201,32 @@ function AcceptInvitationPage() {
                   {message && <p role="status" className="border-l-2 border-gold pl-3 text-sm text-ivory/75">{message}</p>}
                   <Button disabled={busy} className="h-12 w-full rounded-none bg-gold text-navy hover:bg-gold-light hover:text-navy">{busy ? "Creating your password…" : "Create password & continue to sign in"}</Button>
                 </form>
+              ) : renewToken ? (
+                <div className="mt-9 space-y-5">
+                  <p role="status" className="border-l-2 border-gold pl-3 text-sm leading-6 text-ivory/75">{message}</p>
+                  <Button onClick={startFromLink} disabled={starting} className="h-12 w-full rounded-none bg-gold text-navy hover:bg-gold-light hover:text-navy">{starting ? "Opening…" : "Continue to create your password"}</Button>
+                </div>
               ) : gateUrl ? (
                 <div className="mt-9 space-y-5">
                   <p role="status" className="border-l-2 border-gold pl-3 text-sm leading-6 text-ivory/75">{message}</p>
                   <Button onClick={() => window.location.assign(gateUrl)} className="h-12 w-full rounded-none bg-gold text-navy hover:bg-gold-light hover:text-navy">Continue to create your password</Button>
                 </div>
               ) : (
-                <p role="status" className="mt-9 border-l-2 border-gold pl-3 text-sm leading-6 text-ivory/75">{message}</p>
+                <div className="mt-9 space-y-5">
+                  <p role="status" className="border-l-2 border-gold pl-3 text-sm leading-6 text-ivory/75">{message}</p>
+                  {deadLink && (resendState === "sent" ? (
+                    <p role="status" className="border-l-2 border-gold pl-3 text-sm leading-6 text-ivory/75">If that address has an open invitation, a fresh link is on its way now. Check your inbox in a minute or two.</p>
+                  ) : (
+                    <form onSubmit={sendNewLink} className="space-y-3">
+                      <label className="block text-xs uppercase text-ivory/60">
+                        Your invitation email
+                        <span className="mt-2 block"><Input type="email" required value={resendEmail} onChange={(e) => setResendEmail(e.target.value)} autoComplete="email" className="h-12 border-ivory/20 bg-transparent text-ivory" /></span>
+                      </label>
+                      <Button disabled={resendState === "sending"} className="h-12 w-full rounded-none bg-gold text-navy hover:bg-gold-light hover:text-navy">{resendState === "sending" ? "Sending…" : "Email me a new link"}</Button>
+                      <p className="text-xs text-ivory/50">Still stuck? Contact <a className="underline" href="mailto:info@readinessterminal.com?subject=Help%20with%20my%20private%20access%20link">the administrator</a>.</p>
+                    </form>
+                  ))}
+                </div>
               )}
             </div>
           </div>

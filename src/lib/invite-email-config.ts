@@ -15,3 +15,6 @@ export const INVITE_ROLE_LABELS = {
 
 // Sign-in links are single-use and the backend caps their lifetime at 24 hours. Say so wherever one is emailed.
 export const AUTH_LINK_EXPIRY_NOTE = "For your security, this link works once and expires 24 hours after this email was sent. If it has expired, contact info@readinessterminal.com and we will send you a new one.";
+
+// Invitation and reminder buttons open a page that creates a fresh sign-in link when pressed, so they stay usable for 30 days.
+export const INVITE_LINK_NOTE = "This link is personal to you and stays valid for 30 days. If it ever stops working, use the contact link below and we will send a new one right away.";

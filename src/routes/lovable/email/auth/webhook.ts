@@ -68,7 +68,7 @@ export const Route = createFileRoute("/lovable/email/auth/webhook")({
                   meetingBlock = (await loadOpenPoll(pollId))?.block ?? null
                 }
                 return React.createElement(InviteEmail, {
-                  confirmationUrl: wrapAuthLink(data.url),
+                  confirmationUrl: await (async () => { try { return (await import('@/lib/renewable-link.server')).renewableInvitationUrl(data.email) } catch { return wrapAuthLink(data.url) } })(),
                   recipientEmail: data.email,
                   firstName: member?.first_name ?? callback.searchParams.get('first_name') ?? 'there',
                   entity,
