@@ -35,6 +35,7 @@ function AcceptInvitationPage() {
   const [message, setMessage] = useState("Verifying your private invitation…");
   const [invitationEmail, setInvitationEmail] = useState("");
   const [gateUrl, setGateUrl] = useState<string | null>(null);
+  const [gateLabel, setGateLabel] = useState("Continue to create your password");
   const [renewToken, setRenewToken] = useState<string | null>(null);
   const [starting, setStarting] = useState(false);
   const [deadLink, setDeadLink] = useState(false);
@@ -56,7 +57,9 @@ function AcceptInvitationPage() {
     if (go) {
       if (target) {
         setGateUrl(target);
-        setMessage("Your private invitation is ready.");
+        const kind = new URL(target).searchParams.get("type");
+        setGateLabel(kind === "recovery" ? "Continue to reset your password" : kind === "magiclink" ? "Continue to sign in" : kind === "email_change" || kind === "signup" ? "Continue to confirm" : "Continue to create your password");
+        setMessage(kind === "recovery" ? "Your password reset is ready." : kind === "magiclink" ? "Your sign-in link is ready." : kind === "email_change" || kind === "signup" ? "Your confirmation is ready." : "Your private invitation is ready.");
         return () => { active = false; };
       }
       setMessage("This invitation link is not valid. Please contact info@readinessterminal.com for a new invitation.");
@@ -209,7 +212,7 @@ function AcceptInvitationPage() {
               ) : gateUrl ? (
                 <div className="mt-9 space-y-5">
                   <p role="status" className="border-l-2 border-gold pl-3 text-sm leading-6 text-ivory/75">{message}</p>
-                  <Button onClick={() => window.location.assign(gateUrl)} className="h-12 w-full rounded-none bg-gold text-navy hover:bg-gold-light hover:text-navy">Continue to create your password</Button>
+                  <Button onClick={() => window.location.assign(gateUrl)} className="h-12 w-full rounded-none bg-gold text-navy hover:bg-gold-light hover:text-navy">{gateLabel}</Button>
                 </div>
               ) : (
                 <div className="mt-9 space-y-5">

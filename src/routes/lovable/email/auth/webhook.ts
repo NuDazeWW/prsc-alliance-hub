@@ -37,7 +37,7 @@ export const Route = createFileRoute("/lovable/email/auth/webhook")({
           emails: {
             signup: {
               subject: 'Confirm your PRSC private center email',
-              render: (data) => React.createElement(PortalSignupEmail, { confirmationUrl: data.url }),
+              render: (data) => React.createElement(PortalSignupEmail, { confirmationUrl: wrapAuthLink(data.url) }),
             },
             invite: {
               subject: INVITE_EMAIL_SUBJECT,
@@ -81,15 +81,15 @@ export const Route = createFileRoute("/lovable/email/auth/webhook")({
             },
             magiclink: {
               subject: 'Sign in to the PRSC private center',
-              render: (data) => React.createElement(PortalMagicLinkEmail, { confirmationUrl: data.url }),
+              render: (data) => React.createElement(PortalMagicLinkEmail, { confirmationUrl: wrapAuthLink(data.url) }),
             },
             recovery: {
               subject: 'Reset your PRSC private center password',
-              render: (data) => React.createElement(PortalRecoveryEmail, { confirmationUrl: data.url }),
+              render: (data) => React.createElement(PortalRecoveryEmail, { confirmationUrl: wrapAuthLink(data.url) }),
             },
             email_change: {
               subject: 'Confirm your new PRSC private center email',
-              render: (data) => React.createElement(PortalEmailChangeEmail, { confirmationUrl: data.url }),
+              render: (data) => React.createElement(PortalEmailChangeEmail, { confirmationUrl: wrapAuthLink(data.url) }),
             },
             reauthentication: {
               subject: 'Your PRSC private center verification code',
