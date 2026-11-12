@@ -41,6 +41,7 @@ import {
   FileText,
   History,
   Info,
+  Link2,
   MailPlus,
   MessageSquare,
   Plus,
@@ -60,6 +61,7 @@ import {
   deletePortalMember,
   purgePortalMember,
   nudgeMember,
+  getMemberInviteLink,
   setMemberAccess,
   setMemberPackageStatus,
   updateInquiry,
@@ -1189,6 +1191,17 @@ export function AdminCenter({ page }: { page: "overview" | "send" }) {
       setMemberBusy(userFacingError(err, "The reminder could not be sent."));
     } finally { setNudging(""); }
   };
+  const copyInviteLink = async (m: any) => {
+    if (preview) { setMemberBusy("Preview mode: the link is created from the live admin page."); return; }
+    try {
+      const { url } = await getMemberInviteLink({ data: { member_id: m.id } });
+      let copied = false;
+      try { await navigator.clipboard.writeText(url); copied = true; } catch { /* shown below instead */ }
+      setMemberBusy(copied ? `Link for ${m.first_name} copied. Send it to them directly. It stays valid for 30 days.` : `Link for ${m.first_name} (copy it now): ${url}`);
+    } catch (err) {
+      setMemberBusy(userFacingError(err, "The link could not be created."));
+    }
+  };
   const exportCsv = () => {
     const esc = csvCell;
     const date = (v: string | null | undefined) => (v ? new Date(v).toISOString().slice(0, 10) : "");
@@ -2098,7 +2111,25 @@ export function AdminCenter({ page }: { page: "overview" | "send" }) {
                             >
                               <Eye className="h-3.5 w-3.5" /> View profile
                             </button>
-                            {st.nudge && !revoked && (
+                            {!revoked && !m.first_access_at && (
+                              <button
+                                type="button"
+                                onClick={() => void copyInviteLink(m)}
+                                className="flex items-center gap-1.5 border border-gold/40 px-2 py-1 text-xs text-gold transition-colors hover:bg-gold/10"
+                              >
+                                <Link2 className="h-3.5 w-3.5" /> Copy link
+                              </button>
+                            )}
+                            {!revoked && !m.first_access_at && (
+                          <button
+                            type="button"
+                            onClick={() => void copyInviteLink(m)}
+                            className="flex items-center justify-center gap-1.5 border border-gold/40 px-2.5 py-2 text-sm text-gold transition-colors hover:bg-gold/10"
+                          >
+                            <Link2 className="h-3.5 w-3.5" /> Copy link
+                          </button>
+                        )}
+                        {st.nudge && !revoked && (
                               <button
                                 type="button"
                                 disabled={nudging === m.id}

@@ -474,6 +474,22 @@ export const getAdminOverview = createServerFn({ method: "GET" })
     return { members: withInvitation as typeof list, inquiries: inquiries ?? [], activity: activity ?? [], profiles: profiles ?? [], docProgress, journeys };
   });
 
+/** Admin: the member's personal invitation link, for sharing by text or phone when email is not an option. */
+export const getMemberInviteLink = createServerFn({ method: "POST" })
+  .middleware([requirePortalAccess])
+  .inputValidator((input) => z.object({ member_id: z.string().uuid() }).parse(input))
+  .handler(async ({ context, data }) => {
+    await assertAdmin(context);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { data: m } = await supabaseAdmin.from("portal_members").select("id, email, status, first_access_at").eq("id", data.member_id).single();
+    if (!m) throw new Error("Member not found");
+    if (m.status === "revoked") throw new Error("This member's access is revoked");
+    if (m.first_access_at) throw new Error("This member has already created their password. They can sign in at access.prscstandards.org");
+    const { renewableInvitationUrl } = await import("@/lib/renewable-link.server");
+    await supabaseAdmin.from("portal_activity").insert({ member_id: m.id, actor_user_id: context.userId, event_type: "invite_link_copied", metadata: {} });
+    return { url: renewableInvitationUrl(m.email) };
+  });
+
 export const nudgeMember = createServerFn({ method: "POST" })
   .middleware([requirePortalAccess])
   .inputValidator((input) => z.object({ member_id: z.string().uuid() }).parse(input))
