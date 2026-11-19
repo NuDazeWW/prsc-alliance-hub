@@ -60,6 +60,18 @@ function ErrorComponent({ error: rawError, reset }: ErrorComponentProps) {
   useEffect(() => {
     reportLovableError(error, { boundary: "tanstack_root_error_component" });
   }, [error]);
+  // First failure after opening a link: try once more on our own, so a cold start never reaches the reader.
+  useEffect(() => {
+    let timer: number | undefined;
+    try {
+      const last = Number(window.sessionStorage.getItem("prsc.autoRetryAt") ?? "0");
+      if (Date.now() - last > 15000) {
+        window.sessionStorage.setItem("prsc.autoRetryAt", String(Date.now()));
+        timer = window.setTimeout(() => { router.invalidate(); reset(); }, 700);
+      }
+    } catch { /* storage unavailable: the Try again button remains */ }
+    return () => { if (timer !== undefined) window.clearTimeout(timer); };
+  }, [error, reset, router]);
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-navy px-4">
@@ -85,7 +97,14 @@ function ErrorComponent({ error: rawError, reset }: ErrorComponentProps) {
 
 export const Route = createRootRouteWithContext<{ queryClient: QueryClient; host: string }>()({
   beforeLoad: async ({ location }) => {
-    const { host } = await getRequestHost();
+    let host = "";
+    try {
+      host = (await getRequestHost()).host;
+    } catch (err) {
+      // A failed first call must not break the page: the browser already knows which address it is on.
+      if (typeof window === "undefined") throw err;
+      host = window.location.host;
+    }
     const h = host.split(":")[0].toLowerCase();
     const path = location.pathname;
     const qs = location.searchStr ?? "";

@@ -105,6 +105,10 @@ const demoMember = {
   updated_at: "",
 };
 
+// A first visit from an email link can hit a cold server or a session that is still being restored. Retry quietly
+// instead of showing an error or an empty documents list.
+const transientRetry = { retry: 3, retryDelay: (attempt: number) => Math.min(600 * 2 ** attempt, 3000) } as const;
+
 function PortalHome() {
   const { asMember } = Route.useSearch();
   const { data, isLoading, error } = useQuery({
@@ -116,7 +120,7 @@ function PortalHome() {
       }
       return getPortalSession({ data: { asMemberId: asMember } });
     },
-    retry: false,
+    ...transientRetry,
   });
 
   const headshot = useQuery({
@@ -128,14 +132,14 @@ function PortalHome() {
   const headshotSrc = usePrivateMedia(headshot.data?.url);
   const documents = useQuery({
     queryKey: ["my-documents", asMember ?? null],
-    queryFn: () => getMyDocuments({ data: { asMemberId: asMember } }).catch(() => null),
-    retry: false,
+    queryFn: () => getMyDocuments({ data: { asMemberId: asMember } }),
+    ...transientRetry,
     enabled: shouldLoadMemberDocuments(data),
   });
   const meetings = useQuery({
     queryKey: ["my-meetings", asMember ?? null],
-    queryFn: () => getMyMeetings({ data: { asMemberId: asMember } }).catch(() => null),
-    retry: false,
+    queryFn: () => getMyMeetings({ data: { asMemberId: asMember } }),
+    ...transientRetry,
     enabled: Boolean(data?.member),
   });
   const queryClient = useQueryClient();
