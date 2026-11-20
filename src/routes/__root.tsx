@@ -13,6 +13,7 @@ import {
 import { useEffect, type ReactNode } from "react";
 
 import appCss from "../styles.css?url";
+import { reportClientError } from "@/lib/client-error-report";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 import { SiteNav } from "@/components/site/SiteNav";
 import { SiteFooter } from "@/components/site/SiteFooter";
@@ -59,6 +60,7 @@ function ErrorComponent({ error: rawError, reset }: ErrorComponentProps) {
   const router = useRouter();
   useEffect(() => {
     reportLovableError(error, { boundary: "tanstack_root_error_component" });
+    reportClientError(error, "error-page");
   }, [error]);
   // First failure after opening a link: try once more on our own, so a cold start never reaches the reader.
   useEffect(() => {

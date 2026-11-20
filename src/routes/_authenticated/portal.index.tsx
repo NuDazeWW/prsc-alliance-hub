@@ -1,4 +1,5 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { reportClientError } from "@/lib/client-error-report";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useRef, useState } from "react";
 import { Pencil, LogOut } from "lucide-react";
@@ -107,7 +108,10 @@ const demoMember = {
 
 // A first visit from an email link can hit a cold server or a session that is still being restored. Retry quietly
 // instead of showing an error or an empty documents list.
-const transientRetry = { retry: 3, retryDelay: (attempt: number) => Math.min(600 * 2 ** attempt, 3000) } as const;
+const transientRetry = {
+  retry: (failureCount: number, err: unknown) => { reportClientError(err, "portal-query-retry", failureCount); return failureCount < 3; },
+  retryDelay: (attempt: number) => Math.min(600 * 2 ** attempt, 3000),
+} as const;
 
 function PortalHome() {
   const { asMember } = Route.useSearch();
