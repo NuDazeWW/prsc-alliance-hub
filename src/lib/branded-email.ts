@@ -231,6 +231,8 @@ export function renderBrandedEmail(input: BrandedEmailInput) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="x-apple-disable-message-reformatting">
+    <meta name="color-scheme" content="light only">
+    <meta name="supported-color-schemes" content="light only">
     <title>${escapeHtml(input.subject)}</title>
     <style type="text/css">${EMAIL_RESPONSIVE_CSS}</style>
   </head>
@@ -245,7 +247,7 @@ export function renderBrandedEmail(input: BrandedEmailInput) {
             <tr><td align="center" class="mobile-pad" ${bgAttrs("bg-navy", NAVY)} style="padding:0 34px 26px;${bgStyle("bg-navy", NAVY)}">
               <div style="font-family:Arial,Helvetica,sans-serif;font-size:11px;font-weight:600;letter-spacing:3px;line-height:18px;color:${GOLD};">PRIVATE BOARD &amp; ADVISOR CENTER</div>
             </td></tr>
-            <tr><td ${bgAttrs("bg-cream", IVORY)} class="mobile-pad" style="padding:34px 30px 34px;${bgStyle("bg-cream", IVORY)}">
+            <tr><td bgcolor="${IVORY}" class="mobile-pad" style="padding:34px 30px 34px;background-color:${IVORY};">
               <div style="font-family:Georgia,'Times New Roman',serif;font-size:11px;letter-spacing:4px;line-height:18px;text-transform:uppercase;color:${BRONZE};text-align:center;margin-bottom:12px;">${escapeHtml(
                 eyebrow,
               )}</div>

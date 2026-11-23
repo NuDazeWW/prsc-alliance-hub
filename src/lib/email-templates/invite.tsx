@@ -111,7 +111,7 @@ function InviteLayout({ inviteeName, short, forumOnly, disOnly, confirmationUrl,
         { icon: 'icon-calendar.png', title: ['Review your', 'onboarding materials'], text: 'See what the administrator has released for you.' },
       ]
   return <Html lang="en" dir="ltr">
-    <Head><style dangerouslySetInnerHTML={{ __html: EMAIL_RESPONSIVE_CSS }} /></Head>
+    <Head><meta name="color-scheme" content="light only" /><meta name="supported-color-schemes" content="light only" /><style dangerouslySetInnerHTML={{ __html: EMAIL_RESPONSIVE_CSS }} /></Head>
     <Preview>A private invitation to the {short} Board &amp; Advisor Center.</Preview>
     <Body {...bg('bg-outer', '#071221')} style={{ ...main, ...bgCss('bg-outer', '#071221') }}>
       <table role="presentation" cellPadding={0} cellSpacing={0} border={0} width="100%" {...bg('bg-outer', '#071221')} style={{ width: '100%', ...bgCss('bg-outer', '#071221') }}>
@@ -128,7 +128,7 @@ function InviteLayout({ inviteeName, short, forumOnly, disOnly, confirmationUrl,
                 <div style={{ margin: '20px auto 0', width: '72px', borderTop: '2px solid #D4AF37', lineHeight: '1px', fontSize: '1px' }}>&nbsp;</div>
               </td></tr>
               <tr><td className="mobile-pad" {...bg('bg-navy', '#0A1322')} style={{ padding: '0 14px 22px', ...bgCss('bg-navy', '#0A1322') }}>
-                <table role="presentation" cellPadding={0} cellSpacing={0} border={0} width="100%" {...({ background: `${EMAIL_ASSET_BASE}/parchment-cream.jpg` } as Record<string, string>)} bgcolor="#F2EFE6" style={{ width: '100%', backgroundColor: '#F2EFE6', backgroundImage: `url(${EMAIL_ASSET_BASE}/parchment-cream.jpg)`, border: '1px solid #C9A24A', borderRadius: '6px' }}>
+                <table role="presentation" cellPadding={0} cellSpacing={0} border={0} width="100%" bgcolor="#F2EFE6" style={{ width: '100%', backgroundColor: '#F2EFE6', border: '1px solid #C9A24A', borderRadius: '6px' }}>
                   <tbody><tr><td className="mobile-pad" style={{ padding: '30px 14px 32px' }}>
                     <div>{letter}</div>
                     <div style={{ marginTop: '30px', paddingTop: '26px', borderTop: '1px solid #C9A24A' }} />
