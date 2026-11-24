@@ -12,6 +12,9 @@ import { useStoredFlag } from "@/hooks/use-stored-flag";
 import { openAdminCard, useAccordion, useAdminTarget } from "@/lib/admin-nav";
 import { AdminReleasePrompt } from "@/components/portal/AdminReleasePrompt";
 import { AdminClearancePrompt } from "@/components/portal/AdminClearancePrompt";
+import { AdminStalledMembers } from "@/components/portal/AdminStalledMembers";
+import { MemberDocumentChecklist } from "@/components/portal/MemberDocumentChecklist";
+import { forumStepText } from "@/lib/forum-step";
 import { SYSTEM_EMAIL_DEFAULTS } from "@/lib/system-email-defaults";
 import { isInvitationEmailName } from "@/lib/email-log-name";
 import { AdminSentLog } from "@/components/portal/AdminSentLog";
@@ -1642,6 +1645,9 @@ export function AdminCenter({ page }: { page: "overview" | "send" }) {
           <div className="contents">
             <div className={`${S("overview",5)}`}><AdminLeadership /></div>
             {page === "overview" && !preview && (
+              <CollapseCard id="needs-attention" title="Needs attention: documents" className="order-last col-span-full admin-card p-6 sm:p-8"><AdminStalledMembers onOpenRecord={(id) => setDetailId(id)} /></CollapseCard>
+            )}
+            {page === "overview" && !preview && (
               <CollapseCard id="release-review" title="Release review" className="order-last col-span-full admin-card p-6 sm:p-8"><AdminReleaseReview /></CollapseCard>
             )}
             {page === "send" && !preview && (
@@ -2075,7 +2081,7 @@ export function AdminCenter({ page }: { page: "overview" | "send" }) {
                           <span className={`inline-block border px-2 py-1 text-xs uppercase tracking-[0.12em] ${st.tone}`}>{st.label}</span>
                           {journey && (
                             <span className="ml-1.5 inline-block border border-gold/30 px-2 py-1 text-xs text-gold" aria-label="Recipient journey stage">
-                              Stage {journey.currentStage - (forum ? 0 : 1)} of {forum ? 5 : 4}
+                              {(m as any).is_candidate ? forumStepText(m as any) : `Stage ${journey.currentStage - (forum ? 0 : 1)} of ${forum ? 5 : 4}`}
                             </span>
                           )}
                         </td>
@@ -2176,7 +2182,7 @@ export function AdminCenter({ page }: { page: "overview" | "send" }) {
                             <div className="grid gap-4 text-sm text-ivory/65 md:grid-cols-2">
                               <div className="space-y-1">
                                 <p className="text-xs uppercase tracking-[0.14em] text-ivory/40">Where they are</p>
-                                {journey && <p>Stage {journey.currentStage - (forum ? 0 : 1)} of {forum ? 5 : 4} · {STAGES[journey.currentStage - 1]?.label} — {journey.label}</p>}
+                                {journey && ((m as any).is_candidate ? <p>{forumStepText(m as any)} — {journey.label}</p> : <p>Stage {journey.currentStage - (forum ? 0 : 1)} of {forum ? 5 : 4} · {STAGES[journey.currentStage - 1]?.label} — {journey.label}</p>)}
                                 {st.detail && <p>{st.detail}</p>}
                                 <p className="text-xs text-ivory/45">Access: {st.key === "not_invited" ? "added, not invited yet" : m.status} · Orientation reviewed: {(m as { orientation_acknowledged_at?: string | null }).orientation_acknowledged_at ? new Date((m as { orientation_acknowledged_at: string }).orientation_acknowledged_at).toLocaleDateString() : "Not yet"}</p>
                                 {m.intended_designation && <p className="text-xs text-ivory/55">{intendedDesignationLabel(m as any)}</p>}
@@ -2556,6 +2562,7 @@ export function AdminCenter({ page }: { page: "overview" | "send" }) {
                           <Field label="Profile last saved" value={profile?.updated_at ? new Date(profile.updated_at).toLocaleString() : "Not started"} />
                           <Field label="Profile submitted" value={profile?.submitted_at ? new Date(profile.submitted_at).toLocaleString() : "Not submitted"} />
                         </dl>
+                        <MemberDocumentChecklist memberId={member.id} />
                       </section>
 
                       <Block label="Recent journey activity">

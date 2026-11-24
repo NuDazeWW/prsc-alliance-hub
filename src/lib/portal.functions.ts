@@ -432,6 +432,7 @@ export const getAdminOverview = createServerFn({ method: "GET" })
   .middleware([requirePortalAccess])
   .handler(async ({ context }) => {
     await assertAdmin(context);
+    try { await sendStalledDigest(); } catch (err) { console.error("Stalled-documents digest failed", err); }
     const [{ data: members }, { data: inquiries }, { data: activity }, { data: profiles }, { data: acks }] = await Promise.all([
       context.supabase.from("portal_members").select("*").order("invited_at", { ascending: false }),
       context.supabase.from("portal_inquiries").select("*").order("created_at", { ascending: false }),
@@ -1286,6 +1287,147 @@ export const releaseMemberDocuments = createServerFn({ method: "POST" })
     return { ok: true, count: docs.length };
   });
 
+function heldReasonFor(d: any, member: any, flags: { addendum_complete: boolean }) {
+  if (["agenda", "restricted_brief"].includes(d.forum_role ?? "") || d.classification === "restricted_opportunity") return "After you clear them for the Forum";
+  if (["confidential_forum", "restricted_opportunity"].includes(d.classification ?? "") && !flags.addendum_complete && d.forum_role !== "addendum") return "After they sign the Confidentiality Addendum";
+  if (!member.nda_verified_at && d.classification === "confidential_forum") return "Until their NDA is verified";
+  return "Not part of their current stage";
+}
+
+export type ChecklistRow = { id: string; title: string; version: string | null; action: "sign" | "read"; state: "done" | "awaiting_signature" | "not_started" | "locked"; doneAt: string | null; note: string | null };
+
+/** Every active document for a member, in order, with what they have done, what is awaiting a signature, and what is still locked. */
+async function documentChecklist(member: any) {
+  const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+  const all = (await applicableDocuments(supabaseAdmin, member as DocMember)).filter(isActive);
+  const [{ data: acks }, { data: assigns }] = await Promise.all([
+    supabaseAdmin.from("portal_document_acknowledgements").select("document_id, acknowledged_at").eq("member_id", member.id),
+    supabaseAdmin.from("boldsign_assignments").select("document_id, status").eq("member_id", member.id),
+  ]);
+  const ackAt = new Map<string, string>((acks ?? []).map((a: any) => [a.document_id as string, a.acknowledged_at as string]));
+  const assignment = new Map<string, string>((assigns ?? []).map((a: any) => [a.document_id as string, String(a.status)]));
+  const flags = await memberVisibilityFlags(member.id as string);
+  const visible = await memberVisible(all, member as DocMember, new Set(ackAt.keys()), flags);
+  const visibleIds = new Set(visible.map((d: any) => d.id));
+  const rows: ChecklistRow[] = all.map((d: any) => {
+    const sign = d.category === "sign";
+    const base = { id: d.id as string, title: String(d.title ?? "Document"), version: (d.version_label as string | null) ?? null, action: sign ? "sign" as const : "read" as const };
+    if (ackAt.has(d.id)) return { ...base, state: "done" as const, doneAt: ackAt.get(d.id) ?? null, note: null };
+    if (!visibleIds.has(d.id)) return { ...base, state: "locked" as const, doneAt: null, note: heldReasonFor(d, member, flags) };
+    const st = assignment.get(d.id);
+    if (sign && st && st !== "completed") return { ...base, state: "awaiting_signature" as const, doneAt: null, note: "Signature request sent. Waiting for them to sign." };
+    return { ...base, state: "not_started" as const, doneAt: null, note: null };
+  });
+  const next = rows.find((r) => r.state === "awaiting_signature" || r.state === "not_started") ?? null;
+  const lastProgress = [...ackAt.values()].sort().pop() ?? null;
+  return { rows, done: rows.filter((r) => r.state === "done").length, total: rows.length, next, lastProgress };
+}
+
+export const getMemberDocumentChecklist = createServerFn({ method: "GET" })
+  .middleware([requirePortalAccess])
+  .inputValidator((input) => z.object({ member_id: z.string().uuid() }).parse(input))
+  .handler(async ({ context, data }) => {
+    await assertAdmin(context);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { data: member } = await supabaseAdmin.from("portal_members").select("*").eq("id", data.member_id).single();
+    if (!member) throw new Error("Member not found");
+    const c = await documentChecklist(member);
+    return { ...c, releasedAt: (member as any).documents_released_at as string | null, completedAt: (member as any).documents_completed_at as string | null };
+  });
+
+const STALL_DAYS = 3;
+const DAY = 86400000;
+
+/** Members whose documents are released but not finished, with where each one is stuck. */
+export async function documentProgressReport() {
+  const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+  const { data: members } = await supabaseAdmin.from("portal_members").select("*")
+    .not("documents_released_at", "is", null).is("documents_completed_at", null).neq("status", "revoked").limit(200);
+  const open = (members ?? []).filter((m: any) => !m.is_admin);
+  const ids = open.map((m: any) => m.id as string);
+  const { data: nudges } = ids.length
+    ? await supabaseAdmin.from("portal_activity").select("member_id, created_at").eq("event_type", "documents_nudge_sent").in("member_id", ids).order("created_at", { ascending: false })
+    : { data: [] as any[] };
+  const lastNudge = new Map<string, string>();
+  for (const n of nudges ?? []) if (!lastNudge.has((n as any).member_id)) lastNudge.set((n as any).member_id, (n as any).created_at);
+  const out: any[] = [];
+  for (const m of open as any[]) {
+    try {
+      const c = await documentChecklist(m);
+      const since = new Date(c.lastProgress ?? m.documents_released_at).getTime();
+      const daysQuiet = Math.max(0, Math.floor((Date.now() - since) / DAY));
+      out.push({
+        id: m.id as string, name: `${m.first_name ?? ""} ${m.last_name ?? ""}`.trim(), org: (m.organization as string | null) ?? "",
+        done: c.done, total: c.total, daysQuiet, stalled: daysQuiet >= STALL_DAYS,
+        next: c.next ? { title: c.next.title, state: c.next.state, action: c.next.action } : null,
+        lastNudgeAt: lastNudge.get(m.id) ?? null,
+      });
+    } catch { /* one unreadable record must not hide the others */ }
+  }
+  out.sort((a, b) => Number(b.stalled) - Number(a.stalled) || b.daysQuiet - a.daysQuiet);
+  return out;
+}
+
+export const listDocumentProgress = createServerFn({ method: "GET" })
+  .middleware([requirePortalAccess])
+  .handler(async ({ context }) => {
+    await assertAdmin(context);
+    return { members: await documentProgressReport() };
+  });
+
+async function nudgeDocumentsFor(memberId: string, actorId: string | null) {
+  const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+  const { data: m } = await supabaseAdmin.from("portal_members").select("*").eq("id", memberId).single();
+  if (!m) throw new Error("Member not found");
+  if ((m as any).status === "revoked") throw new Error("This member's access is revoked");
+  if (!(m as any).documents_released_at || (m as any).documents_completed_at) throw new Error("This member has no open documents");
+  const since = new Date(Date.now() - 20 * 3600000).toISOString();
+  const { data: recent } = await supabaseAdmin.from("portal_activity").select("id").eq("member_id", memberId).eq("event_type", "documents_nudge_sent").gte("created_at", since).limit(1);
+  if (recent && recent.length > 0) throw new Error("They were already reminded in the last day");
+  const c = await documentChecklist(m);
+  const first = (m as any).first_name?.trim() || "There";
+  const nextLine = c.next ? `\n\nNext up: ${c.next.title}${c.next.state === "awaiting_signature" ? ". Your signature request is waiting in your portal." : "."}` : "";
+  const { sendPortalEmail, teamSignature } = await import("@/lib/portal-notify.server");
+  await sendPortalEmail((m as any).email, {
+    subject: "A reminder: your documents are waiting", eyebrow: "Gentle reminder",
+    heading: `${first}, your documents are still waiting.`,
+    body: `We released your individualized documents in your private Welcome Center. You have completed ${c.done} of ${c.total}.${nextLine}\n\nSign in and open Your Documents. Each one takes only a few minutes.`,
+    ctaLabel: "Review & Sign Your Documents", ctaUrl: "https://access.prscstandards.org/portal", signatures: teamSignature(),
+  }, "documents-nudge-member");
+  await supabaseAdmin.from("portal_activity").insert({ member_id: memberId, actor_user_id: actorId, event_type: "documents_nudge_sent", metadata: { done: c.done, total: c.total, next: c.next?.title ?? null } });
+  return { ok: true as const };
+}
+
+export const nudgeMemberDocuments = createServerFn({ method: "POST" })
+  .middleware([requirePortalAccess])
+  .inputValidator((input) => z.object({ member_id: z.string().uuid() }).parse(input))
+  .handler(async ({ context, data }) => {
+    await assertAdmin(context);
+    return nudgeDocumentsFor(data.member_id, context.userId);
+  });
+
+/** Emails the administrator one summary of members stalled on their documents. At most once a day; silent when nobody is stalled. */
+export async function sendStalledDigest(opts: { force?: boolean } = {}) {
+  const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+  if (!opts.force) {
+    const since = new Date(Date.now() - 20 * 3600000).toISOString();
+    const { data: recent } = await supabaseAdmin.from("portal_activity").select("id").eq("event_type", "stalled_digest_sent").gte("created_at", since).limit(1);
+    if (recent && recent.length > 0) return { sent: false as const, reason: "already-sent" as const };
+  }
+  const stalled = (await documentProgressReport()).filter((r) => r.stalled);
+  if (!stalled.length) return { sent: false as const, reason: "nobody-stalled" as const };
+  const lines = stalled.map((r) => `${r.name}: ${r.done} of ${r.total} done, quiet for ${r.daysQuiet} days${r.next ? `. Next: ${r.next.title}${r.next.state === "awaiting_signature" ? " (awaiting signature)" : ""}` : ""}`);
+  const { sendPortalEmail, teamSignature } = await import("@/lib/portal-notify.server");
+  await sendPortalEmail("admin@readinessterminal.com", {
+    subject: `${stalled.length} ${stalled.length === 1 ? "member needs" : "members need"} a nudge on their documents`, eyebrow: "Administrator summary",
+    heading: `${stalled.length} ${stalled.length === 1 ? "member has" : "members have"} not moved on their documents`,
+    body: `These members have had documents open for ${STALL_DAYS} or more days without finishing one:\n\n${lines.join("\n")}\n\nOpen the administrator center and use "Needs attention: documents" to send each of them a reminder in one click.`,
+    ctaLabel: "Open the Administrator Center", ctaUrl: "https://access.prscstandards.org/admin", signatures: teamSignature(),
+  }, "stalled-documents-digest");
+  await supabaseAdmin.from("portal_activity").insert({ event_type: "stalled_digest_sent", metadata: { count: stalled.length } });
+  return { sent: true as const, count: stalled.length };
+}
+
 /** Admin: exactly what a release opens for this member, and what stays held back until a later step. */
 export const getReleasePreview = createServerFn({ method: "GET" })
   .middleware([requirePortalAccess])
@@ -1300,12 +1442,7 @@ export const getReleasePreview = createServerFn({ method: "GET" })
     const visible = await memberVisible(all, member as DocMember, new Set<string>(), flags);
     const visibleIds = new Set(visible.map((d: any) => d.id));
     const row = (d: any) => ({ title: String(d.title ?? "Document"), version: (d.version_label as string | null) ?? null, action: d.category === "sign" ? "sign" as const : "read" as const });
-    const heldReason = (d: any) => {
-      if (["agenda", "restricted_brief"].includes(d.forum_role ?? "") || d.classification === "restricted_opportunity") return "After you clear them for the Forum";
-      if (["confidential_forum", "restricted_opportunity"].includes(d.classification ?? "") && !flags.addendum_complete && d.forum_role !== "addendum") return "After they sign the Confidentiality Addendum";
-      if (!member.nda_verified_at && d.classification === "confidential_forum") return "Until their NDA is verified";
-      return "Not part of their current stage";
-    };
+    const heldReason = (d: any) => heldReasonFor(d, member, flags);
     return {
       ndaVerified: !!member.nda_verified_at,
       opens: visible.map(row),

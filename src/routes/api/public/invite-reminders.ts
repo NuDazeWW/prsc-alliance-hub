@@ -1,5 +1,17 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { timingSafeEqual } from "node:crypto";
 import { authorizeInvitationRequest } from "@/lib/portal-access";
+
+// A scheduled job has no administrator login. It may instead present a shared secret kept in the PORTAL_CRON_SECRET
+// server setting; with no secret configured this path is closed and only an administrator's bearer token works.
+function cronSecretOk(request: Request) {
+  const expected = process.env.PORTAL_CRON_SECRET;
+  const given = request.headers.get("x-cron-secret");
+  if (!expected || expected.length < 24 || !given) return false;
+  const a = Buffer.from(expected);
+  const b = Buffer.from(given);
+  return a.length === b.length && timingSafeEqual(a, b);
+}
 
 const REMINDER_AFTER_DAYS = 3;
 
@@ -7,7 +19,7 @@ export const Route = createFileRoute("/api/public/invite-reminders")({
   server: {
     handlers: {
       POST: async ({ request }) => {
-        if (!(await authorizeInvitationRequest(request))) {
+        if (!cronSecretOk(request) && !(await authorizeInvitationRequest(request))) {
           return new Response("Unauthorized", { status: 401 });
         }
         const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
@@ -24,19 +36,7 @@ export const Route = createFileRoute("/api/public/invite-reminders")({
         if (error) return new Response("Reminder lookup failed", { status: 500 });
         let sent = 0;
         for (const m of pending ?? []) {
-          const redirectTo = new URL("https://access.prscstandards.org/accept-invitation");
-          redirectTo.searchParams.set("first_name", m.first_name ?? "");
-          redirectTo.searchParams.set("entity", m.entity);
-          redirectTo.searchParams.set("role", m.role);
-          const { data: link, error: linkError } = await supabaseAdmin.auth.admin.generateLink({
-            type: "magiclink",
-            email: m.email,
-            options: { redirectTo: redirectTo.toString() },
-          });
-          if (linkError || !link?.properties?.action_link) {
-            console.error("Reminder link generation failed");
-            continue;
-          }
+          const { renewableInvitationUrl } = await import("@/lib/renewable-link.server");
           const firstName = m.first_name?.trim() || "there";
           const entityShort = m.entity === "both" ? "PRSC and DIS" : String(m.entity).toUpperCase();
           await sendPortalEmail(
@@ -47,8 +47,8 @@ export const Route = createFileRoute("/api/public/invite-reminders")({
               heading: `${firstName}, your Welcome Center is ready for you.`,
               body: `A few days ago we invited you into the private ${entityShort} Board & Advisor Welcome Center. We noticed you haven't had a chance to enter yet.\n\nIt only takes a few minutes: create your password, get reacquainted with where we are today, and share the few details we need to prepare your individualized package.`,
               ctaLabel: "Access Your Private Welcome Center →",
-              ctaUrl: link.properties.action_link,
-              ctaSubtext: "This secure link lets you create your own password. No password is emailed.",
+              ctaUrl: renewableInvitationUrl(m.email),
+              ctaSubtext: "This link is personal to you and stays valid for 30 days. No password is emailed.",
               signatures: teamSignature(),
             },
             "invite-reminder",
@@ -113,7 +113,9 @@ export const Route = createFileRoute("/api/public/invite-reminders")({
           }
           await supabaseAdmin.from("meeting_polls").update({ auto_nudge_sent_at: new Date().toISOString() }).eq("id", poll.id);
         }
-        return Response.json({ ok: true, sent });
+        let digest: unknown = null;
+        try { digest = await (await import("@/lib/portal.functions")).sendStalledDigest(); } catch (err) { console.error("Stalled-documents digest failed", err); }
+        return Response.json({ ok: true, sent, digest });
       },
     },
   },
