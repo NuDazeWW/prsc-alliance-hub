@@ -11,6 +11,7 @@ import { IntendedDesignationFields } from "@/components/portal/IntendedDesignati
 import { useStoredFlag } from "@/hooks/use-stored-flag";
 import { openAdminCard, useAccordion, useAdminTarget } from "@/lib/admin-nav";
 import { AdminReleasePrompt } from "@/components/portal/AdminReleasePrompt";
+import { AdminClearancePrompt } from "@/components/portal/AdminClearancePrompt";
 import { SYSTEM_EMAIL_DEFAULTS } from "@/lib/system-email-defaults";
 import { isInvitationEmailName } from "@/lib/email-log-name";
 import { AdminSentLog } from "@/components/portal/AdminSentLog";
@@ -1278,6 +1279,7 @@ export function AdminCenter({ page }: { page: "overview" | "send" }) {
       sidebar={<AdminSidebar page={page} />}
     >
       <main className="px-4 py-10 sm:px-6 lg:px-8">
+        <AdminClearancePrompt preview={preview} onCleared={() => { void overview.refetch(); }} onOpenRecord={(id) => setDetailId(id)} />
         <AdminReleasePrompt members={d.members} profiles={(d as any).profiles ?? []} preview={preview} onReleased={() => { void overview.refetch(); }} />
         <div className="relative -mx-4 -mt-10 overflow-hidden border-b border-gold/20 px-4 pb-6 pt-8 sm:-mx-6 sm:px-6 lg:-mx-8 lg:px-8">
           <img src={heroRoad} alt="" aria-hidden="true" className="pointer-events-none absolute inset-y-0 right-0 hidden h-full w-[60%] object-cover opacity-80 md:block [mask-image:linear-gradient(90deg,transparent,black_35%)]" />

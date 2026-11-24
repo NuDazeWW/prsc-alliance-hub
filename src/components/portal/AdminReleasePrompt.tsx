@@ -1,7 +1,8 @@
 import { useEffect, useMemo, useState } from "react";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { releaseMemberDocuments } from "@/lib/portal.functions";
+import { useQuery } from "@tanstack/react-query";
+import { getReleasePreview, releaseMemberDocuments } from "@/lib/portal.functions";
 import { userFacingError } from "@/lib/user-facing-error";
 
 type Waiting = { id: string; name: string; org: string; ndaMissing: boolean };
@@ -11,6 +12,30 @@ function readPaused(): string[] {
   try { const v = JSON.parse(window.localStorage.getItem(KEY) ?? "[]"); return Array.isArray(v) ? v.filter((x) => typeof x === "string") : []; } catch { return []; }
 }
 function writePaused(ids: string[]) { try { window.localStorage.setItem(KEY, JSON.stringify(ids)); } catch { /* storage unavailable; the prompt simply returns next visit */ } }
+
+function ReleaseContents({ memberId }: { memberId: string }) {
+  const [open, setOpen] = useState(false);
+  const q = useQuery({ queryKey: ["release-preview", memberId], enabled: open, retry: 1, queryFn: () => getReleasePreview({ data: { member_id: memberId } }) });
+  return (
+    <div className="mt-3">
+      <button type="button" onClick={() => setOpen((v) => !v)} className="text-sm text-gold underline underline-offset-2">{open ? "Hide what this releases" : "See what this releases"}</button>
+      {open && (q.isPending ? <p className="mt-2 text-sm text-ivory/55">Loading…</p> : q.data ? (
+        <div className="mt-2 space-y-3 text-sm">
+          <div>
+            <p className="text-ivory/80">Opens for them now ({q.data.opens.length}):</p>
+            <ul className="mt-1 list-disc pl-5 text-ivory/70">{q.data.opens.map((d: any, i: number) => <li key={i}>{d.title}{d.version ? ` (${d.version})` : ""} · {d.action === "sign" ? "to sign" : "to read"}</li>)}</ul>
+          </div>
+          {q.data.heldBack.length > 0 && (
+            <div>
+              <p className="text-ivory/80">Held back for later ({q.data.heldBack.length}):</p>
+              <ul className="mt-1 list-disc pl-5 text-ivory/55">{q.data.heldBack.map((d: any, i: number) => <li key={i}>{d.title}: {d.reason}</li>)}</ul>
+            </div>
+          )}
+        </div>
+      ) : <p className="mt-2 text-sm text-rose-200">The list could not be loaded.</p>)}
+    </div>
+  );
+}
 
 /**
  * Pops up in the admin portal when members have submitted their profile and their documents have not been released.
@@ -76,6 +101,7 @@ export function AdminReleasePrompt({ members, profiles, preview, onReleased }: {
                   <div className="min-w-0"><p className="text-base text-ivory">{w.name}</p>{w.org && <p className="text-sm text-ivory/55">{w.org}</p>}</div>
                   <Button disabled={busy !== null} onClick={() => void release(w)} className="bg-gold text-navy hover:bg-gold/90">{busy === w.id ? "Releasing…" : "Release documents"}</Button>
                 </div>
+                <ReleaseContents memberId={w.id} />
                 {w.ndaMissing && <p className="mt-3 text-sm text-gold">NDA not verified yet. Their Forum documents stay hidden until you tick the NDA box for them in Invite a member.</p>}
                 {errors[w.id] && <p role="alert" className="mt-3 text-sm text-rose-200">{errors[w.id]}</p>}
               </li>

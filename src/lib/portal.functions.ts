@@ -1286,6 +1286,33 @@ export const releaseMemberDocuments = createServerFn({ method: "POST" })
     return { ok: true, count: docs.length };
   });
 
+/** Admin: exactly what a release opens for this member, and what stays held back until a later step. */
+export const getReleasePreview = createServerFn({ method: "GET" })
+  .middleware([requirePortalAccess])
+  .inputValidator((input) => z.object({ member_id: z.string().uuid() }).parse(input))
+  .handler(async ({ context, data }) => {
+    await assertAdmin(context);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { data: member } = await supabaseAdmin.from("portal_members").select("*").eq("id", data.member_id).single();
+    if (!member) throw new Error("Member not found");
+    const all = (await applicableDocuments(supabaseAdmin, member as DocMember)).filter(isActive);
+    const flags = await memberVisibilityFlags(member.id as string);
+    const visible = await memberVisible(all, member as DocMember, new Set<string>(), flags);
+    const visibleIds = new Set(visible.map((d: any) => d.id));
+    const row = (d: any) => ({ title: String(d.title ?? "Document"), version: (d.version_label as string | null) ?? null, action: d.category === "sign" ? "sign" as const : "read" as const });
+    const heldReason = (d: any) => {
+      if (["agenda", "restricted_brief"].includes(d.forum_role ?? "") || d.classification === "restricted_opportunity") return "After you clear them for the Forum";
+      if (["confidential_forum", "restricted_opportunity"].includes(d.classification ?? "") && !flags.addendum_complete && d.forum_role !== "addendum") return "After they sign the Confidentiality Addendum";
+      if (!member.nda_verified_at && d.classification === "confidential_forum") return "Until their NDA is verified";
+      return "Not part of their current stage";
+    };
+    return {
+      ndaVerified: !!member.nda_verified_at,
+      opens: visible.map(row),
+      heldBack: all.filter((d: any) => !visibleIds.has(d.id)).map((d: any) => ({ ...row(d), reason: heldReason(d) })),
+    };
+  });
+
 export const deleteMemberDocument = createServerFn({ method: "POST" })
   .middleware([requirePortalAccess])
   .inputValidator((input) => z.object({ id: z.string().uuid() }).parse(input))

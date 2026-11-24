@@ -263,6 +263,39 @@ export async function clearanceChecklistFor(memberId: string) {
   });
 }
 
+/** Admin: Forum members whose documents are released, who have finished every prerequisite and are waiting only for the clearance decision. */
+export const listReadyForClearance = createServerFn({ method: "GET" })
+  .middleware([requirePortalAccess])
+  .handler(async ({ context }) => {
+    await assertAdmin(context);
+    const { supabaseAdmin: sb } = await import("@/integrations/supabase/client.server");
+    const { data: members } = await sb.from("portal_members")
+      .select("id, first_name, last_name, organization, status, participates_in_forum, forum_clearance_status, documents_released_at, nda_verified_at, is_admin")
+      .not("documents_released_at", "is", null).neq("status", "revoked").limit(200);
+    const candidates = (members ?? []).filter((m: any) => !m.is_admin && m.participates_in_forum !== false && (!m.forum_clearance_status || m.forum_clearance_status === "not_reviewed"));
+    const ready: any[] = [];
+    const waiting: { id: string; name: string; outstanding: string[] }[] = [];
+    for (const m of candidates) {
+      try {
+        const problems = await clearanceProblemsFor(m.id);
+        const rest = problems.filter((p) => !/conflict review not approved/i.test(p));
+        const name = `${m.first_name ?? ""} ${m.last_name ?? ""}`.trim();
+        if (rest.length === 0) ready.push({ id: m.id, name, org: m.organization ?? "" });
+        else waiting.push({ id: m.id, name, outstanding: rest });
+      } catch { /* one unreadable record must not hide the others */ }
+    }
+    if (ready.length) {
+      const { data: acks } = await sb.from("portal_document_acknowledgements").select("member_id, conflict_answer, conflict_details, acknowledged_at")
+        .in("member_id", ready.map((r) => r.id)).not("conflict_answer", "is", null).order("acknowledged_at", { ascending: false });
+      for (const r of ready) {
+        const a = (acks ?? []).find((x: any) => x.member_id === r.id);
+        r.conflictAnswer = a?.conflict_answer ?? null;
+        r.conflictDetails = a?.conflict_details ?? "";
+      }
+    }
+    return { ready, waiting };
+  });
+
 export const getClearancePrerequisites = createServerFn({ method: "GET" })
   .middleware([requirePortalAccess])
   .inputValidator((i) => memberId.parse(i))

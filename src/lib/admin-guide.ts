@@ -122,9 +122,10 @@ export const ADMIN_GUIDE: GuideEntry[] = [
   },
   {
     id: "clear-member", group: "Documents & releases", title: "Clear a member for the Forum",
-    summary: "The last step before a member sees the agenda and the strategy brief.",
+    summary: "The last step before a member sees the agenda and the strategy brief. A pop-up tells you when someone is ready.",
     steps: [
-      "Left bar: People > Members, then open the person.",
+      "When a member has finished everything, a pop-up on the admin page says they are ready to be cleared. Tick the review box and press Approve and clear for the Forum. Pause keeps a reminder bar until you are ready.",
+      "If they reported a conflict, or you want the full picture, open the person instead: People > Members, then View profile.",
       "Confirm they signed the Confidentiality Addendum and verify the NDA.",
       "Review their conflict / recusal answer.",
       "Record the clearance decision (cleared, cleared with restrictions, escalated or declined). Restrictions need a written note.",
